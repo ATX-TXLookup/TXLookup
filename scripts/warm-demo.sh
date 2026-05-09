@@ -23,12 +23,16 @@ if [ -n "${TXLOOKUP_BASIC_AUTH:-}" ]; then
 fi
 
 # Marquee questions — keep in sync with app/page.tsx `sampleQuestions[]`.
-# These are the 4 the demo script and home-page chips both reference.
+# Each one exercises a DIFFERENT agent flow shape so the demo isn't monotonous:
+#   1. Cross-dataset correlation (permits + code violations)
+#   2. Temporal trend (year-over-year breakdown)
+#   3. Self-correction visible (column-name failure → replan → recover)
+#   4. Agent-to-agent handoff (data step + Miro render)
 QUERIES=(
+  "Where do permits and code violations both spike together this year by zip?"
+  "How has Austin's permit mix shifted from residential to commercial since 2024?"
   "Restaurants near 78704 with failing inspections this year"
-  "Food truck permits issued in 78702 in the last six months"
-  "311 response times across all 10 council districts"
-  "Where are construction permits growing fastest by zip?"
+  "Build a Miro board mapping 311 hotspots by council district"
 )
 
 echo "Pre-warming ${#QUERIES[@]} marquee questions against ${BASE_URL}"

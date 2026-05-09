@@ -72,6 +72,15 @@ const REQUESTS_311_CITATION = {
   api_url: "https://datahub.austintexas.gov/resource/xwdj-i9he.json",
 };
 
+const VIOLATIONS_CITATION = {
+  portal: "City of Austin",
+  portal_host: "data.austintexas.gov",
+  dataset_name: "Code Violation Cases",
+  dataset_id: "6wtj-zbtb",
+  url: "https://data.austintexas.gov/d/6wtj-zbtb",
+  api_url: "https://data.austintexas.gov/resource/6wtj-zbtb.json",
+};
+
 export const DEMO_FIXTURES: DemoFixture[] = [
   // Marquee #1 — food truck permits
   {
@@ -265,6 +274,142 @@ export const DEMO_FIXTURES: DemoFixture[] = [
     citation: REQUESTS_311_CITATION,
     artifacts: [
       "https://datahub.austintexas.gov/resource/xwdj-i9he.json?$select=sr_council_district,count(*)&$group=sr_council_district&$where=sr_created_date+%3E%3D+'2026-01-01'",
+    ],
+  },
+
+  // Marquee #4 — cross-dataset correlation (permits + code violations by zip)
+  // Distinct shape: 2 summarize_data calls on different datasets + cross-join in synth.
+  {
+    match: (q) =>
+      /(permit.*code|code.*permit|permit.*violation|violation.*permit|spike.*together|both.*spike)/i.test(
+        q,
+      ),
+    intent: {
+      data_domain: "construction permits + code violations",
+      geography: "all Austin zips",
+      time_range: "this year",
+      analysis_type: "cross-dataset correlation",
+      thinking:
+        "The user wants zips where BOTH permit volume AND code violations are spiking. This needs two summarize_data calls — one on 3syk-w9eu by zip, one on 6wtj-zbtb by zip — then cross-reference in the synthesizer to find zips that appear high in both.",
+    },
+    steps: [
+      {
+        tool: "discover_datasets",
+        args: { query: "construction permits and code violations", city: "Austin" },
+        rationale: "Confirm both dataset ids before correlating.",
+        status: "completed",
+        resultPreview:
+          '[{"id":"3syk-w9eu","title":"Issued Construction Permits"},{"id":"6wtj-zbtb","title":"Code Violation Cases"}]',
+        delay_ms: 700,
+      },
+      {
+        tool: "summarize_data",
+        args: {
+          datasetId: "3syk-w9eu",
+          where: "issue_date >= '2026-01-01'",
+          dimensions: ["original_zip"],
+        },
+        rationale: "Top zips by permit volume this year.",
+        status: "completed",
+        resultPreview:
+          '{"rows":[{"original_zip":"78744","count":1104},{"original_zip":"78704","count":987},{"original_zip":"78745","count":812},{"original_zip":"78757","count":631},{"original_zip":"78731","count":598}]}',
+        delay_ms: 1100,
+      },
+      {
+        tool: "summarize_data",
+        args: {
+          datasetId: "6wtj-zbtb",
+          where: "opened_date >= '2026-01-01'",
+          dimensions: ["zip_code"],
+        },
+        rationale: "Top zips by code violation volume — same period.",
+        status: "completed",
+        resultPreview:
+          '{"rows":[{"zip_code":"78744","count":412},{"zip_code":"78745","count":389},{"zip_code":"78704","count":278},{"zip_code":"78753","count":221},{"zip_code":"78758","count":174}]}',
+        delay_ms: 1000,
+      },
+      {
+        tool: "cite_dataset",
+        args: { datasetId: "3syk-w9eu" },
+        rationale: "Attribution — primary dataset.",
+        status: "completed",
+        resultPreview: JSON.stringify(PERMITS_CITATION),
+        delay_ms: 200,
+      },
+    ],
+    answer:
+      "Three zips appear in the top 5 for BOTH permits and code violations in 2026: 78744 (1,104 permits / 412 violations), 78745 (812 / 389), and 78704 (987 / 278). 78744 leads both lists — a signal of dense redevelopment activity outpacing code-compliance capacity. The other 7 high-permit zips have noticeably lower violation rates.",
+    citation: PERMITS_CITATION,
+    artifacts: [
+      "https://data.austintexas.gov/resource/3syk-w9eu.json?$select=original_zip,count(*)&$group=original_zip&$where=issue_date+%3E%3D+'2026-01-01'",
+      "https://data.austintexas.gov/resource/6wtj-zbtb.json?$select=zip_code,count(*)&$group=zip_code&$where=opened_date+%3E%3D+'2026-01-01'",
+    ],
+  },
+
+  // Marquee #5 — A2A handoff to Miro
+  // Distinct shape: data step + render_to_miro returns an artifact link.
+  {
+    match: (q) => /miro|board|map.*hotspot|render.*board/i.test(q),
+    intent: {
+      data_domain: "311 service requests",
+      geography: "all 10 council districts",
+      time_range: "this year",
+      analysis_type: "visualization handoff",
+      thinking:
+        "The user wants a visual artifact, not just an answer. I'll summarize 311 by district then call render_to_miro to hand the result off to the Miro agent and return the board URL.",
+    },
+    steps: [
+      {
+        tool: "discover_datasets",
+        args: { query: "311 service requests", city: "Austin" },
+        rationale: "Confirm the 311 dataset before rendering.",
+        status: "completed",
+        resultPreview:
+          '[{"id":"xwdj-i9he","title":"Austin 311 Public Data"}]',
+        delay_ms: 600,
+      },
+      {
+        tool: "summarize_data",
+        args: {
+          datasetId: "xwdj-i9he",
+          where: "sr_created_date >= '2026-01-01'",
+          dimensions: ["sr_council_district", "sr_type_desc"],
+        },
+        rationale:
+          "Hotspot grid: count by district AND request type so the Miro board can show both axes.",
+        status: "completed",
+        resultPreview:
+          '{"rows":[{"sr_council_district":"3","sr_type_desc":"Loose Dog","count":418},{"sr_council_district":"4","sr_type_desc":"Loud Music","count":397}]}',
+        delay_ms: 1300,
+      },
+      {
+        tool: "render_to_miro",
+        args: {
+          board_template: "hotspot_by_district",
+          dataset_id: "xwdj-i9he",
+        },
+        rationale:
+          "A2A handoff to the Miro agent — pass the aggregated rows + citation, receive a board URL.",
+        status: "completed",
+        resultPreview:
+          '{"board_url":"https://miro.com/app/board/uXjVHWYFIqE=/","frame_id":"3458764630219567010","items_created":13}',
+        delay_ms: 1800,
+      },
+      {
+        tool: "cite_dataset",
+        args: { datasetId: "xwdj-i9he" },
+        rationale: "Attribution.",
+        status: "completed",
+        resultPreview: JSON.stringify(REQUESTS_311_CITATION),
+        delay_ms: 200,
+      },
+    ],
+    answer:
+      "Posted 13 items to the TXLookup brainstorming board: a 3-color heatmap (district × top complaint type), a top-5 leaderboard, and per-district response-time bars. District 3 is the dominant hotspot for Loose Dog reports; District 4 leads Loud Music. Open the board to drill in.",
+    citation: REQUESTS_311_CITATION,
+    artifacts: [
+      "https://miro.com/app/board/uXjVHWYFIqE=/",
+      "https://datahub.austintexas.gov/resource/xwdj-i9he.json?$select=sr_council_district,sr_type_desc,count(*)&$group=sr_council_district,sr_type_desc&$where=sr_created_date+%3E%3D+'2026-01-01'",
     ],
   },
 ];

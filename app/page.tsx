@@ -72,11 +72,16 @@ const datasetSeed = [
   },
 ];
 
+// Four marquee questions, each forcing a DIFFERENT agent flow shape:
+//   1. Cross-dataset correlation (joins permits + code violations by zip)
+//   2. Temporal trend (3 time-bucketed summarize_data calls, year-over-year)
+//   3. Self-correction visible (column-name failure → replan → recover)
+//   4. Agent-to-agent handoff (query 311 → render_to_miro returns board URL)
 const sampleQuestions = [
+  "Where do permits and code violations both spike together this year by zip?",
+  "How has Austin's permit mix shifted from residential to commercial since 2024?",
   "Restaurants near 78704 with failing inspections this year",
-  "Food truck permits issued in 78702 in the last six months",
-  "311 response times across all 10 council districts",
-  "Where are construction permits growing fastest by zip?",
+  "Build a Miro board mapping 311 hotspots by council district",
 ];
 
 const topics = [
@@ -184,7 +189,7 @@ export default async function HomePage() {
               name="q"
               type="text"
               required
-              placeholder="e.g. restaurants near 78704 with failing inspections this year"
+              placeholder="e.g. where do permits and code violations both spike together this year"
               className="flex-1 rounded-sm bg-white px-4 py-3 text-base text-[#1A1F2A] placeholder:text-[#1A1F2A]/45 focus:outline-none md:text-lg"
             />
             <button
