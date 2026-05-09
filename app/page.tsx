@@ -1,11 +1,21 @@
 import Link from "next/link";
 
-const datasets = [
+import {
+  austin311Last30d,
+  austinInspections30dByZip,
+  austinOpenCodeViolations,
+  austinPermits7dTotal,
+  austinPermitsLast7Days,
+  datasetMetadata,
+} from "./lib/homepage-data";
+
+const datasetSeed = [
   {
     id: "3syk-w9eu",
     title: "Issued Construction Permits",
     agency: "Development Services Department",
-    rows: "2,354,632",
+    portal: "data.austintexas.gov",
+    rowsLabel: "2.3M+",
     cadence: "Daily",
     blurb:
       "Every construction permit issued by the City of Austin since the 1980s — type, address, contractor, status, value.",
@@ -14,7 +24,8 @@ const datasets = [
     id: "ecmv-9xxi",
     title: "Food Establishment Inspections",
     agency: "Austin Public Health",
-    rows: "120,000+",
+    portal: "data.austintexas.gov",
+    rowsLabel: "120K+",
     cadence: "Weekly",
     blurb:
       "Health-inspection scores and violations for Austin restaurants, food trucks, and grocery stores.",
@@ -23,7 +34,8 @@ const datasets = [
     id: "i26j-ai4z",
     title: "311 Service Requests",
     agency: "Communications & Public Information",
-    rows: "1,500,000+",
+    portal: "data.austintexas.gov",
+    rowsLabel: "1.5M+",
     cadence: "Daily",
     blurb:
       "Every non-emergency 311 call logged in Austin — pothole, graffiti, animal services, code complaints.",
@@ -32,7 +44,8 @@ const datasets = [
     id: "6wtj-zbtb",
     title: "Code Violation Cases",
     agency: "Code Department",
-    rows: "300,000+",
+    portal: "data.austintexas.gov",
+    rowsLabel: "300K+",
     cadence: "Daily",
     blurb:
       "Open and closed building, zoning, and short-term-rental violations across Austin.",
@@ -41,7 +54,8 @@ const datasets = [
     id: "fdj4-gpfu",
     title: "Crime Reports",
     agency: "Austin Police Department",
-    rows: "2,000,000+",
+    portal: "data.austintexas.gov",
+    rowsLabel: "2M+",
     cadence: "Weekly",
     blurb:
       "Reported crimes by type, location, and time. Case-level data published by APD.",
@@ -50,7 +64,8 @@ const datasets = [
     id: "y2wy-tgr5",
     title: "Traffic Fatalities",
     agency: "Austin Transportation",
-    rows: "1,000+",
+    portal: "data.austintexas.gov",
+    rowsLabel: "1K+",
     cadence: "Monthly",
     blurb:
       "Fatal traffic crashes by location, mode, and year. Vision Zero source data.",
@@ -73,16 +88,63 @@ const topics = [
   { name: "Demographics & Housing", count: 4 },
 ];
 
-export default function HomePage() {
+export const revalidate = 300;
+
+export default async function HomePage() {
+  // Live homepage data — all server-rendered from real Socrata queries at request time.
+  const [permitsSpark, permits7d, inspectionsByZip, requests30d, openViolations, datasetMeta] =
+    await Promise.all([
+      austinPermitsLast7Days(),
+      austinPermits7dTotal(),
+      austinInspections30dByZip(),
+      austin311Last30d(),
+      austinOpenCodeViolations(),
+      Promise.all(
+        datasetSeed.map(async (d) => ({
+          id: d.id,
+          ...(await datasetMetadata(d.portal, d.id)),
+        })),
+      ),
+    ]);
+
+  const sparkValues = permitsSpark.map((d) => d.count);
+  const maxSpark = Math.max(1, ...sparkValues);
+
+  const tickers = [
+    {
+      label: "Austin permits, 7d",
+      value: permits7d > 0 ? `+${permits7d.toLocaleString()}` : "—",
+      sub: "live · 3syk-w9eu",
+      tone: "navy" as const,
+    },
+    {
+      label: "Top inspection zip, 30d",
+      value: inspectionsByZip[0]
+        ? `${inspectionsByZip[0].zip} (${inspectionsByZip[0].count})`
+        : "—",
+      sub: "live · ecmv-9xxi",
+      tone: "navy" as const,
+    },
+    {
+      label: "311 requests, 30d",
+      value: requests30d > 0 ? requests30d.toLocaleString() : "—",
+      sub: "live · i26j-ai4z",
+      tone: "navy" as const,
+    },
+    {
+      label: "Open code violations",
+      value: openViolations > 0 ? openViolations.toLocaleString() : "—",
+      sub: "live · 6wtj-zbtb",
+      tone: "warn" as const,
+    },
+  ];
+
   return (
     <main className="min-h-screen bg-white text-[#1A1F2A] font-body">
-      {/* Top utility bar — civic-portal disclaimer */}
+      {/* Top utility bar */}
       <div className="bg-[#0B2545] text-white">
         <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-6 py-2 text-[13px] md:px-10">
-          <span>
-            An open-source agent for Texas public data. Built on the Socrata
-            SODA API.
-          </span>
+          <span>An open-source agent for Texas public data. Live counts on this page are computed from Socrata at request time.</span>
           <span className="hidden font-mono text-[11px] uppercase tracking-wider text-white/70 md:inline">
             v0.1 · alpha
           </span>
@@ -129,7 +191,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* HERO — the search-first surface */}
+      {/* HERO */}
       <section
         id="search"
         className="border-b border-[#1A1F2A]/10 bg-gradient-to-b from-[#F4F6FB] to-white"
@@ -190,8 +252,77 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* TOPICS — quick browse */}
-      <section id="topics" className="border-b border-[#1A1F2A]/10 bg-white">
+      {/* LIVE TICKER + SPARKLINE — server-rendered from real Socrata */}
+      <section className="border-b border-[#1A1F2A]/10 bg-white">
+        <div className="mx-auto max-w-[1320px] px-6 py-10 md:px-10">
+          <div className="flex items-baseline justify-between">
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+              Live · Austin civic data
+            </p>
+            <p className="font-mono text-[11px] uppercase tracking-wider text-[#1A1F2A]/55">
+              recomputed every 5 minutes
+            </p>
+          </div>
+          <div className="mt-5 grid gap-px border border-[#1A1F2A]/10 bg-[#1A1F2A]/10 md:grid-cols-4">
+            {tickers.map((t) => (
+              <div key={t.label} className="bg-white px-5 py-4">
+                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#1A1F2A]/55">
+                  {t.label}
+                </div>
+                <div className="mt-2 font-display text-2xl font-extrabold tabular-nums text-[#0B2545]">
+                  {t.value}
+                </div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-[#1A1F2A]/55">
+                  {t.sub}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Sparkline */}
+          <div className="mt-6 flex items-end justify-between gap-3">
+            <div className="flex-1">
+              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#1A1F2A]/55">
+                Austin permits issued — last 7 days
+              </p>
+              <div className="mt-3 flex h-[80px] items-end gap-2 border-b border-[#1A1F2A]/15">
+                {permitsSpark.length > 0 ? (
+                  permitsSpark.map((d) => (
+                    <div key={d.day} className="flex flex-1 flex-col items-center justify-end">
+                      <div
+                        className="w-full bg-[#0B5FFF]"
+                        style={{ height: `${(d.count / maxSpark) * 70}px` }}
+                        title={`${d.day}: ${d.count} permits`}
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <p className="font-mono text-[11px] text-[#1A1F2A]/55">
+                    Live data temporarily unavailable. Source remains queryable on the dataset page.
+                  </p>
+                )}
+              </div>
+              <div className="mt-2 flex justify-between font-mono text-[10px] uppercase tracking-wider text-[#1A1F2A]/55">
+                {permitsSpark.length > 0 && (
+                  <>
+                    <span>{permitsSpark[0]?.day}</span>
+                    <span>{permitsSpark[permitsSpark.length - 1]?.day}</span>
+                  </>
+                )}
+              </div>
+            </div>
+            <Link
+              href="/datasets/3syk-w9eu"
+              className="rounded-sm border border-[#0B5FFF]/30 px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#0B5FFF] hover:border-[#0B5FFF]"
+            >
+              Browse permits →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* TOPICS */}
+      <section id="topics" className="border-b border-[#1A1F2A]/10 bg-[#F4F6FB]">
         <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
           <div className="flex items-end justify-between">
             <div>
@@ -214,7 +345,7 @@ export default function HomePage() {
               <a
                 key={t.name}
                 href={`/q?q=${encodeURIComponent(t.name + " in Austin")}`}
-                className="group flex flex-col rounded-md border border-[#1A1F2A]/10 bg-white px-4 py-4 transition-colors hover:border-[#0B5FFF] hover:bg-[#F4F6FB]"
+                className="group flex flex-col rounded-md border border-[#1A1F2A]/10 bg-white px-4 py-4 transition-colors hover:border-[#0B5FFF] hover:bg-white"
               >
                 <span className="font-display text-base font-semibold text-[#0B2545] group-hover:text-[#0B5FFF]">
                   {t.name}
@@ -228,10 +359,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* DATASETS — popular, full grid */}
+      {/* DATASETS — popular grid, with live last-refresh timestamp */}
       <section
         id="datasets"
-        className="scroll-mt-24 border-b border-[#1A1F2A]/10 bg-[#F4F6FB]"
+        className="scroll-mt-24 border-b border-[#1A1F2A]/10 bg-white"
       >
         <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
           <div className="flex items-end justify-between">
@@ -252,37 +383,42 @@ export default function HomePage() {
           </div>
 
           <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {datasets.map((d) => (
-              <Link
-                key={d.id}
-                href={`/datasets/${d.id}`}
-                className="group flex flex-col rounded-md border border-[#1A1F2A]/10 bg-white p-6 transition-all hover:border-[#0B5FFF] hover:shadow-[0_8px_24px_-12px_rgba(11,37,69,0.18)]"
-              >
-                <div className="flex items-baseline justify-between">
-                  <span className="rounded-sm bg-[#0B2545] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-white">
-                    Austin
-                  </span>
-                  <span className="font-mono text-[11px] uppercase tracking-wider text-[#1A1F2A]/55">
-                    Updated {d.cadence.toLowerCase()}
-                  </span>
-                </div>
-                <h3 className="mt-4 font-display text-xl font-bold leading-tight text-[#0B2545] group-hover:text-[#0B5FFF]">
-                  {d.title}
-                </h3>
-                <p className="mt-1 text-sm text-[#1A1F2A]/65">{d.agency}</p>
-                <p className="mt-4 flex-1 text-sm leading-relaxed text-[#1A1F2A]/80">
-                  {d.blurb}
-                </p>
-                <div className="mt-5 flex items-baseline justify-between border-t border-[#1A1F2A]/10 pt-3">
-                  <span className="font-mono text-xs text-[#1A1F2A]/55">
-                    {d.id}
-                  </span>
-                  <span className="font-display text-xs font-semibold text-[#0B5FFF]">
-                    {d.rows} rows →
-                  </span>
-                </div>
-              </Link>
-            ))}
+            {datasetSeed.map((d, i) => {
+              const meta = datasetMeta[i];
+              return (
+                <Link
+                  key={d.id}
+                  href={`/datasets/${d.id}`}
+                  className="group flex flex-col rounded-md border border-[#1A1F2A]/10 bg-white p-6 transition-all hover:border-[#0B5FFF] hover:shadow-[0_8px_24px_-12px_rgba(11,37,69,0.18)]"
+                >
+                  <div className="flex items-baseline justify-between">
+                    <span className="rounded-sm bg-[#0B2545] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-white">
+                      Austin
+                    </span>
+                    <span className="font-mono text-[11px] uppercase tracking-wider text-[#1A1F2A]/55">
+                      {meta.lastRefreshed
+                        ? `Refreshed ${meta.lastRefreshed}`
+                        : `Updated ${d.cadence.toLowerCase()}`}
+                    </span>
+                  </div>
+                  <h3 className="mt-4 font-display text-xl font-bold leading-tight text-[#0B2545] group-hover:text-[#0B5FFF]">
+                    {d.title}
+                  </h3>
+                  <p className="mt-1 text-sm text-[#1A1F2A]/65">{d.agency}</p>
+                  <p className="mt-4 flex-1 text-sm leading-relaxed text-[#1A1F2A]/80">
+                    {d.blurb}
+                  </p>
+                  <div className="mt-5 flex items-baseline justify-between border-t border-[#1A1F2A]/10 pt-3">
+                    <span className="font-mono text-xs text-[#1A1F2A]/55">
+                      {d.id}
+                    </span>
+                    <span className="font-display text-xs font-semibold text-[#0B5FFF]">
+                      {d.rowsLabel} rows →
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
 
           <p className="mt-6 text-sm text-[#1A1F2A]/60">
@@ -292,7 +428,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* HOW IT WORKS — short, clean, numbered */}
+      {/* HOW IT WORKS */}
       <section className="border-b border-[#1A1F2A]/10 bg-white">
         <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
           <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
@@ -322,7 +458,7 @@ export default function HomePage() {
               {
                 n: "04",
                 title: "Complete",
-                body: "Codex synthesizes the records into a plain-English answer with mandatory citation.",
+                body: "Codex synthesizes the records into a plain-English answer with mandatory citation. Replans if a step fails.",
               },
             ].map((s) => (
               <div key={s.n}>
