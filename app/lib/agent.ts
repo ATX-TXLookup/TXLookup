@@ -85,17 +85,47 @@ The "thinking" field in intent is YOUR plain-English read of what the user is re
 `;
 }
 
+function summarizePriorStep(step: PlanStep, env: ToolEnvelope): string {
+  const args = JSON.stringify(step.args).slice(0, 240);
+  // get_dataset_schema returns the load-bearing thing (real column list).
+  // Surface it as a flat field-name list so the LLM doesn't miss it inside
+  // a deeply-nested envelope.
+  if (step.tool === "get_dataset_schema" && env.result) {
+    const r = env.result as { columns?: Array<{ field_name?: string; name?: string; data_type?: string; type?: string }> };
+    const cols = (r.columns ?? [])
+      .map((c) => `${c.field_name ?? c.name ?? "?"}:${c.data_type ?? c.type ?? "?"}`)
+      .join(", ");
+    return `  ${step.tool}(${args}) → columns: ${cols.slice(0, 1200)}`;
+  }
+  // Generic fallback — truncated JSON preview.
+  const preview = JSON.stringify(env.result).slice(0, 600);
+  return `  ${step.tool}(${args}) → ${preview}`;
+}
+
 function buildReplanPrompt(
   originalIntent: unknown,
   originalSteps: PlanStep[],
   failedIndex: number,
   failure: ToolEnvelope,
+  priorResults: ToolEnvelope[] = [],
 ): string {
   const today = new Date().toISOString().slice(0, 10);
   const catalogTable = CATALOG.map(
     (d) => `- ${d.id} · ${d.title} (${d.city}) — key columns: ${d.keyColumns.join(", ")}`,
   ).join("\n");
   const failedStep = originalSteps[failedIndex];
+
+  // Successful prior steps are the agent's runtime knowledge — schema lookups
+  // especially. Without surfacing them here, the replanner has no way to act
+  // on what was learned mid-run and tends to repeat the same mistake.
+  const priorBlock = (() => {
+    const successful = priorResults
+      .map((env, i) => ({ env, step: originalSteps[i] }))
+      .filter((x) => x.env && x.step && x.env.status === "completed");
+    if (successful.length === 0) return "";
+    const lines = successful.map((x) => summarizePriorStep(x.step, x.env)).join("\n");
+    return `\nWhat you've already learned from successful prior steps in THIS run (use this — don't ask for it again):\n${lines}\n`;
+  })();
 
   return `You are TXLookup's REPLANNER. The original plan failed at step ${failedIndex + 1}.
 TODAY is ${today}.
@@ -109,7 +139,7 @@ ${JSON.stringify(originalIntent, null, 2)}
 
 Original plan:
 ${originalSteps.map((s, i) => `  ${i + 1}. ${s.tool}(${JSON.stringify(s.args)}) — ${s.rationale ?? ""}${i === failedIndex ? "  ← FAILED" : ""}`).join("\n")}
-
+${priorBlock}
 Failure at step ${failedIndex + 1} (${failedStep.tool}):
 - error: ${failure.error}
 - result: ${JSON.stringify(failure.result).slice(0, 400)}
@@ -206,13 +236,20 @@ export async function replan(
   originalPlan: Plan,
   failedIndex: number,
   failure: ToolEnvelope,
+  priorResults: ToolEnvelope[] = [],
   model = "gpt-4o-2024-11-20",
   correctiveSystem?: string,
 ): Promise<Planned> {
   const messages: { role: "system" | "user"; content: string }[] = [
     {
       role: "system",
-      content: buildReplanPrompt(originalPlan.intent, originalPlan.steps, failedIndex, failure),
+      content: buildReplanPrompt(
+        originalPlan.intent,
+        originalPlan.steps,
+        failedIndex,
+        failure,
+        priorResults,
+      ),
     },
   ];
   if (correctiveSystem) messages.push({ role: "system", content: correctiveSystem });
