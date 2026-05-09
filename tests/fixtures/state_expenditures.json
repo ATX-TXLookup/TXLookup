@@ -1,6 +1,6 @@
 {
   "dataset": "state_expenditures",
-  "generated": "2026-05-09T15:22:33.401176",
+  "generated": "2026-05-09T16:25:12.476265",
   "passed": 10,
   "total": 10,
   "results": [
@@ -16,7 +16,7 @@
       "order": "total DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.33,
+      "elapsed_s": 0.36,
       "row_count": 10,
       "rows": [
         {
@@ -75,7 +75,7 @@
       "order": "total DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.36,
+      "elapsed_s": 0.44,
       "row_count": 10,
       "rows": [
         {
@@ -131,7 +131,7 @@
       "select": "sum(amount) AS total",
       "where": "fiscal_year='2024'",
       "status": "PASS",
-      "elapsed_s": 0.35,
+      "elapsed_s": 0.41,
       "row_count": 1,
       "rows": [
         {
@@ -152,7 +152,7 @@
       "order": "fiscal_year DESC",
       "limit": 5,
       "status": "PASS",
-      "elapsed_s": 0.33,
+      "elapsed_s": 0.31,
       "row_count": 2,
       "rows": [
         {
@@ -214,7 +214,7 @@
       "order": "total DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.32,
+      "elapsed_s": 0.36,
       "row_count": 10,
       "rows": [
         {
@@ -279,7 +279,7 @@
       "select": "avg(amount) AS avg_amount",
       "where": "fiscal_year='2024'",
       "status": "PASS",
-      "elapsed_s": 0.37,
+      "elapsed_s": 0.38,
       "row_count": 1,
       "rows": [
         {
@@ -301,7 +301,7 @@
       "order": "total DESC",
       "limit": 20,
       "status": "PASS",
-      "elapsed_s": 0.29,
+      "elapsed_s": 0.31,
       "row_count": 20,
       "rows": [
         {
@@ -419,7 +419,7 @@
       "order": "total DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.32,
+      "elapsed_s": 0.36,
       "row_count": 10,
       "rows": [
         {
@@ -485,7 +485,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.3,
+      "elapsed_s": 0.51,
       "row_count": 10,
       "rows": [
         {

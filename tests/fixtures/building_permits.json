@@ -1,6 +1,6 @@
 {
   "dataset": "building_permits",
-  "generated": "2026-05-09T15:22:33.395371",
+  "generated": "2026-05-09T16:25:12.468552",
   "passed": 10,
   "total": 10,
   "results": [
@@ -16,7 +16,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.73,
+      "elapsed_s": 0.33,
       "row_count": 10,
       "rows": [
         {
@@ -75,7 +75,7 @@
       "order": "month ASC",
       "limit": 13,
       "status": "PASS",
-      "elapsed_s": 0.91,
+      "elapsed_s": 0.3,
       "row_count": 5,
       "rows": [
         {
@@ -173,7 +173,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.48,
+      "elapsed_s": 0.41,
       "row_count": 5,
       "rows": [
         {
@@ -212,7 +212,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.34,
+      "elapsed_s": 0.33,
       "row_count": 2,
       "rows": [
         {
@@ -239,7 +239,7 @@
       "order": "total_val DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.33,
+      "elapsed_s": 0.34,
       "row_count": 10,
       "rows": [
         {
@@ -294,7 +294,7 @@
       "order": "avg_val DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.31,
+      "elapsed_s": 0.34,
       "row_count": 5,
       "rows": [
         {
@@ -335,7 +335,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.32,
+      "elapsed_s": 0.36,
       "row_count": 10,
       "rows": [
         {
@@ -450,7 +450,7 @@
       "select": "count(*) AS cnt",
       "where": "permit_class_mapped='Commercial' AND issue_date>'2026-02-08T00:00:00.000'",
       "status": "PASS",
-      "elapsed_s": 0.32,
+      "elapsed_s": 0.33,
       "row_count": 1,
       "rows": [
         {

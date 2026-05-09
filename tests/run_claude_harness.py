@@ -128,23 +128,23 @@ QUERIES: list[dict] = [
     # ═══════════════════════════════════════════════════════════════════
     # 4. CODE VIOLATIONS  (6wtj-zbtb)
     # Story 4.1  Property Risk Assessment
-    {"ds":"code","story":"code_violations","story_n":1,"q":1,"note":"open violations by zip",
-     "select":"zip_code,count(*) AS cnt","where":"status='Open'","group":"zip_code","order":"cnt DESC","limit":10},
-    {"ds":"code","story":"code_violations","story_n":1,"q":2,"note":"case types for open violations",
-     "select":"case_type,count(*) AS cnt","where":"status='Open'","group":"case_type","order":"cnt DESC","limit":10},
+    {"ds":"code","story":"code_violations","story_n":1,"q":1,"note":"active violations by zip",
+     "select":"zip_code,count(*) AS cnt","where":"status='Active'","group":"zip_code","order":"cnt DESC","limit":10},
+    {"ds":"code","story":"code_violations","story_n":1,"q":2,"note":"case types for active violations",
+     "select":"case_type,count(*) AS cnt","where":"status='Active'","group":"case_type","order":"cnt DESC","limit":10},
     # Story 4.2  Enforcement Priority
-    {"ds":"code","story":"code_violations","story_n":2,"q":3,"note":"violations open over 90 days",
-     "select":"case_id,case_type,address,opened_date","where":f"status='Open' AND opened_date<'{M3}'","order":"opened_date ASC","limit":15},
-    {"ds":"code","story":"code_violations","story_n":2,"q":4,"note":"oldest open violations",
-     "select":"case_id,case_type,address,opened_date","where":"status='Open'","order":"opened_date ASC","limit":10},
+    {"ds":"code","story":"code_violations","story_n":2,"q":3,"note":"violations active over 90 days",
+     "select":"case_id,case_type,address,opened_date","where":f"status='Active' AND opened_date<'{M3}'","order":"opened_date ASC","limit":15},
+    {"ds":"code","story":"code_violations","story_n":2,"q":4,"note":"oldest active violations",
+     "select":"case_id,case_type,address,opened_date","where":"status='Active'","order":"opened_date ASC","limit":10},
     # Story 4.3  Neighborhood Code Health
     {"ds":"code","story":"code_violations","story_n":3,"q":5,"note":"violations opened YTD by zip",
      "select":"zip_code,count(*) AS cnt","where":f"opened_date>'{Y}'","group":"zip_code","order":"cnt DESC","limit":10},
     {"ds":"code","story":"code_violations","story_n":3,"q":6,"note":"case types opened YTD",
      "select":"case_type,count(*) AS cnt","where":f"opened_date>'{Y}'","group":"case_type","order":"cnt DESC","limit":10},
     # Story 4.4  Landlord Accountability
-    {"ds":"code","story":"code_violations","story_n":4,"q":7,"note":"addresses with most open violations",
-     "select":"address,count(*) AS cnt","where":"status='Open'","group":"address","order":"cnt DESC","limit":10},
+    {"ds":"code","story":"code_violations","story_n":4,"q":7,"note":"addresses with most active violations",
+     "select":"address,count(*) AS cnt","where":"status='Active'","group":"address","order":"cnt DESC","limit":10},
     {"ds":"code","story":"code_violations","story_n":4,"q":8,"note":"violations by priority level",
      "select":"priority,count(*) AS cnt","where":f"opened_date>'{Y}'","group":"priority","order":"cnt DESC","limit":10},
     # Story 4.5  Remediation Guide
@@ -172,7 +172,7 @@ QUERIES: list[dict] = [
      "select":"date_trunc_ym(occ_date) AS month,count(*) AS cnt","where":f"occ_date>'{Y1}'","group":"date_trunc_ym(occ_date)","order":"month ASC","limit":13},
     # Story 5.4  Business Owner Risk
     {"ds":"crime","story":"crime_reports","story_n":4,"q":7,"note":"theft/burglary counts by district",
-     "select":"council_district,count(*) AS cnt","where":f"(ucr_category='Theft' OR ucr_category='Burglary') AND occ_date>'{Y}'","group":"council_district","order":"cnt DESC","limit":10},
+     "select":"council_district,count(*) AS cnt","where":f"(category_description='Theft' OR category_description='Burglary') AND occ_date>'{Y}'","group":"council_district","order":"cnt DESC","limit":10},
     {"ds":"crime","story":"crime_reports","story_n":4,"q":8,"note":"family violence incidents YTD",
      "select":"count(*) AS cnt","where":f"family_violence='Y' AND occ_date>'{Y}'"},
     # Story 5.5  Clearance / Investigation

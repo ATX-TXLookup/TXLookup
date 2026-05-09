@@ -2,8 +2,8 @@
 # Agents can discover more via the Socrata catalog API.
 #
 # IMPORTANT: keep in sync with app/lib/catalog.ts (the frontend's source of truth).
-# Field names must be valid Socrata field names — verify with:
-#   curl https://<portal>/api/views/<id>.json | jq '.columns[].fieldName'
+# Field names must be valid Socrata field names — verified 2026-05-09 against live APIs.
+# Verify with: curl https://<portal>/api/views/<id>.json | jq '.columns[].fieldName'
 
 austin:
   portal: data.austintexas.gov
@@ -11,38 +11,42 @@ austin:
     building_permits:
       id: 3syk-w9eu
       name: "Issued Construction Permits"
-      key_columns: [permittype, status_current, original_address1, original_zip, issue_date]
+      key_columns: [permittype, status_current, original_address1, original_zip, issue_date, work_class, permit_class_mapped, contractor_company_name, total_job_valuation]
       updated: daily
 
     food_inspections:
       id: ecmv-9xxi
       name: "Food Establishment Inspection Scores"
-      key_columns: [restaurant_name, score, inspection_date, address, zip_code]
+      key_columns: [restaurant_name, score, inspection_date, address, zip_code, process_description]
       updated: weekly
 
     service_requests_311:
       id: xwdj-i9he
       portal: datahub.austintexas.gov
       name: "Austin 311 Public Data"
-      key_columns: [sr_type_desc, sr_status_desc, sr_location_zip_code, sr_created_date, sr_department_desc]
+      key_columns: [sr_type_desc, sr_status_desc, sr_location_zip_code, sr_created_date, sr_department_desc, sr_location]
       updated: daily
 
     code_violations:
       id: 6wtj-zbtb
-      name: "Code Violation Cases"
-      key_columns: [case_type, case_status, location, opened_date]
+      name: "Austin Code Complaint Cases"
+      # status values: Active | Closed | Pending  (NOT 'Open')
+      key_columns: [case_type, status, address, zip_code, opened_date, priority, department]
       updated: daily
 
     crime_reports:
       id: fdj4-gpfu
       name: "Crime Reports"
-      key_columns: [crime_type, location_type, occurred_date, zip_code]
+      # Use category_description for text labels (Theft, Burglary, etc.)
+      # occ_date is the correct date field (NOT occurred_date)
+      key_columns: [crime_type, category_description, location_type, occ_date, council_district, clearance_status, family_violence]
       updated: weekly
 
-    traffic_fatalities:
+    traffic_crashes:
       id: y2wy-tgr5
-      name: "Austin Traffic Fatalities"
-      key_columns: [case_status, location, date, mode]
+      name: "Austin Crash Report Data"
+      # crash_fatal_fl = 'true'/'false' string; death_cnt for fatality count
+      key_columns: [crash_fatal_fl, death_cnt, tot_injry_cnt, rpt_street_name, crash_speed_limit, crash_timestamp, pedestrian_death_count, bicycle_death_count, collsn_desc]
       updated: monthly
 
 texas:
@@ -51,17 +55,19 @@ texas:
     active_businesses:
       id: 9cir-efmm
       name: "Active Franchise Tax Permit Holders"
-      key_columns: [taxpayer_name, taxpayer_city, taxpayer_state, taxpayer_organizational_type]
+      key_columns: [taxpayer_name, taxpayer_city, taxpayer_state, taxpayer_zip, taxpayer_organizational_type, taxpayer_county_code, responsibility_beginning_date]
       updated: quarterly
 
     state_expenditures:
       id: 2zpi-yjjs
       name: "Texas State Expenditures By County 2024"
-      key_columns: [fiscal_year, agency_name, county, major_spending_category, amount]
+      # county field does not exist — use agency_name + major_spending_category + amount
+      key_columns: [fiscal_year, agency_name, major_spending_category, amount]
       updated: monthly
 
     mixed_beverage:
       id: naix-2893
       name: "Mixed Beverage Gross Receipts"
-      key_columns: [location_name, location_city, total_receipts, obligation_end_date_yyyymmdd]
+      # location_city does not exist — use taxpayer_city
+      key_columns: [location_name, taxpayer_city, total_receipts, liquor_receipts, beer_receipts, wine_receipts, obligation_end_date_yyyymmdd]
       updated: monthly

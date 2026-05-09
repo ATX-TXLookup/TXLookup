@@ -1,7 +1,7 @@
 {
   "dataset": "crime_reports",
-  "generated": "2026-05-09T15:22:33.398020",
-  "passed": 9,
+  "generated": "2026-05-09T16:25:12.472584",
+  "passed": 10,
   "total": 10,
   "results": [
     {
@@ -16,7 +16,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.75,
+      "elapsed_s": 0.39,
       "row_count": 10,
       "rows": [
         {
@@ -74,7 +74,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.27,
+      "elapsed_s": 0.98,
       "row_count": 10,
       "rows": [
         {
@@ -133,7 +133,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.76,
+      "elapsed_s": 0.82,
       "row_count": 10,
       "rows": [
         {
@@ -192,7 +192,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.29,
+      "elapsed_s": 0.36,
       "row_count": 10,
       "rows": [
         {
@@ -251,7 +251,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.36,
+      "elapsed_s": 0.27,
       "row_count": 10,
       "rows": [
         {
@@ -310,7 +310,7 @@
       "order": "month ASC",
       "limit": 13,
       "status": "PASS",
-      "elapsed_s": 0.78,
+      "elapsed_s": 0.7,
       "row_count": 13,
       "rows": [
         {
@@ -376,16 +376,57 @@
       "q": 7,
       "note": "theft/burglary counts by district",
       "select": "council_district,count(*) AS cnt",
-      "where": "(ucr_category='Theft' OR ucr_category='Burglary') AND occ_date>'2026-01-01T00:00:00.000'",
+      "where": "(category_description='Theft' OR category_description='Burglary') AND occ_date>'2026-01-01T00:00:00.000'",
       "group": "council_district",
       "order": "cnt DESC",
       "limit": 10,
-      "status": "EMPTY",
-      "elapsed_s": 0.36,
-      "row_count": 0,
-      "rows": [],
+      "status": "PASS",
+      "elapsed_s": 0.29,
+      "row_count": 10,
+      "rows": [
+        {
+          "council_district": "9",
+          "cnt": "1464"
+        },
+        {
+          "council_district": "3",
+          "cnt": "1203"
+        },
+        {
+          "council_district": "7",
+          "cnt": "902"
+        },
+        {
+          "council_district": "4",
+          "cnt": "789"
+        },
+        {
+          "council_district": "1",
+          "cnt": "636"
+        },
+        {
+          "council_district": "2",
+          "cnt": "587"
+        },
+        {
+          "council_district": "5",
+          "cnt": "513"
+        },
+        {
+          "council_district": "10",
+          "cnt": "440"
+        },
+        {
+          "council_district": "6",
+          "cnt": "414"
+        },
+        {
+          "council_district": "8",
+          "cnt": "403"
+        }
+      ],
       "error": null,
-      "url": "https://data.austintexas.gov/resource/fdj4-gpfu.json?%24select=council_district%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=%28ucr_category%3D%27Theft%27+OR+ucr_category%3D%27Burglary%27%29+AND+occ_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=council_district&%24order=cnt+DESC"
+      "url": "https://data.austintexas.gov/resource/fdj4-gpfu.json?%24select=council_district%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=%28category_description%3D%27Theft%27+OR+category_description%3D%27Burglary%27%29+AND+occ_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=council_district&%24order=cnt+DESC"
     },
     {
       "ds": "crime",
@@ -396,7 +437,7 @@
       "select": "count(*) AS cnt",
       "where": "family_violence='Y' AND occ_date>'2026-01-01T00:00:00.000'",
       "status": "PASS",
-      "elapsed_s": 0.31,
+      "elapsed_s": 0.44,
       "row_count": 1,
       "rows": [
         {
@@ -418,7 +459,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.35,
+      "elapsed_s": 0.3,
       "row_count": 4,
       "rows": [
         {
@@ -452,7 +493,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.62,
+      "elapsed_s": 0.31,
       "row_count": 10,
       "rows": [
         {

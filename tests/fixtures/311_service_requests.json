@@ -1,7 +1,7 @@
 {
   "dataset": "311_service_requests",
-  "generated": "2026-05-09T15:22:33.396351",
-  "passed": 9,
+  "generated": "2026-05-09T16:25:12.469743",
+  "passed": 10,
   "total": 10,
   "results": [
     {
@@ -16,7 +16,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 7.7,
+      "elapsed_s": 2.41,
       "row_count": 10,
       "rows": [
         {
@@ -134,7 +134,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.66,
+      "elapsed_s": 0.36,
       "row_count": 10,
       "rows": [
         {
@@ -193,7 +193,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.59,
+      "elapsed_s": 0.53,
       "row_count": 7,
       "rows": [
         {
@@ -240,7 +240,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 1.21,
+      "elapsed_s": 0.42,
       "row_count": 10,
       "rows": [
         {
@@ -297,11 +297,62 @@
       "where": "sr_status_desc='Open'",
       "order": "sr_created_date ASC",
       "limit": 10,
-      "status": "FAIL",
-      "elapsed_s": 25.53,
-      "row_count": 0,
-      "rows": [],
-      "error": "The read operation timed out",
+      "status": "PASS",
+      "elapsed_s": 11.02,
+      "row_count": 10,
+      "rows": [
+        {
+          "sr_type_desc": "Found Animal - Pick Up",
+          "sr_created_date": "2014-07-14T15:55:19.000",
+          "sr_location": "301 W RIVERSIDE DR, AUSTIN, TX"
+        },
+        {
+          "sr_type_desc": "Found Animal - Pick Up",
+          "sr_created_date": "2014-07-14T15:55:21.000",
+          "sr_location": "W PARMER LN, AUSTIN, TX"
+        },
+        {
+          "sr_type_desc": "Found Animal - Pick Up",
+          "sr_created_date": "2014-07-14T15:55:24.000",
+          "sr_location": "12212 W US 290 HWY, AUSTIN 5 ETJ, TX"
+        },
+        {
+          "sr_type_desc": "Found Animal - Pick Up",
+          "sr_created_date": "2014-07-14T15:55:26.000",
+          "sr_location": "1920 S CONGRESS AVE, AUSTIN, TX"
+        },
+        {
+          "sr_type_desc": "Found Animal - Pick Up",
+          "sr_created_date": "2014-07-14T15:55:31.000",
+          "sr_location": "312 BARTON SPRINGS RD, AUSTIN, TX"
+        },
+        {
+          "sr_type_desc": "Found Animal - Pick Up",
+          "sr_created_date": "2014-07-14T15:55:34.000",
+          "sr_location": "1209 BARTON SPRINGS RD, AUSTIN, TX"
+        },
+        {
+          "sr_type_desc": "Found Animal - Pick Up",
+          "sr_created_date": "2014-07-14T15:55:37.000",
+          "sr_location": "1403 S CONGRESS AVE, AUSTIN, TX"
+        },
+        {
+          "sr_type_desc": "Sign - New",
+          "sr_created_date": "2014-07-21T12:35:35.000",
+          "sr_location": "716 SAN JACINTO BLVD, AUSTIN, TX"
+        },
+        {
+          "sr_type_desc": "Sign - New",
+          "sr_created_date": "2014-07-21T13:36:11.000",
+          "sr_location": "716 SAN JACINTO BLVD, AUSTIN, TX 78701"
+        },
+        {
+          "sr_type_desc": "Tree Issue ROW/Emergency (PW)",
+          "sr_created_date": "2016-08-14T12:23:12.000",
+          "sr_location": "8000 DENALI PKWY, AUSTIN, TX 78726"
+        }
+      ],
+      "error": null,
       "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=sr_type_desc%2Csr_created_date%2Csr_location&%24limit=10&%24where=sr_status_desc%3D%27Open%27&%24order=sr_created_date+ASC"
     },
     {
@@ -313,7 +364,7 @@
       "select": "count(*) AS cnt",
       "where": "upper(sr_type_desc) LIKE '%POTHOLE%' AND sr_created_date>'2026-02-08T00:00:00.000'",
       "status": "PASS",
-      "elapsed_s": 0.37,
+      "elapsed_s": 0.89,
       "row_count": 1,
       "rows": [
         {
@@ -335,7 +386,7 @@
       "order": "cnt DESC",
       "limit": 5,
       "status": "PASS",
-      "elapsed_s": 0.36,
+      "elapsed_s": 0.54,
       "row_count": 5,
       "rows": [
         {
@@ -374,7 +425,7 @@
       "order": "month ASC",
       "limit": 13,
       "status": "PASS",
-      "elapsed_s": 0.71,
+      "elapsed_s": 2.76,
       "row_count": 13,
       "rows": [
         {
@@ -445,7 +496,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.7,
+      "elapsed_s": 0.92,
       "row_count": 10,
       "rows": [
         {

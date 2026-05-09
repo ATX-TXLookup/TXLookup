@@ -1,6 +1,6 @@
 {
   "dataset": "active_businesses",
-  "generated": "2026-05-09T15:22:33.400242",
+  "generated": "2026-05-09T16:25:12.475199",
   "passed": 10,
   "total": 10,
   "results": [
@@ -16,7 +16,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.96,
+      "elapsed_s": 2.21,
       "row_count": 10,
       "rows": [
         {
@@ -74,7 +74,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.92,
+      "elapsed_s": 2.1,
       "row_count": 10,
       "rows": [
         {
@@ -133,7 +133,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.72,
+      "elapsed_s": 1.17,
       "row_count": 10,
       "rows": [
         {
@@ -191,7 +191,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.49,
+      "elapsed_s": 0.57,
       "row_count": 6,
       "rows": [
         {
@@ -233,7 +233,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.53,
+      "elapsed_s": 0.47,
       "row_count": 10,
       "rows": [
         {
@@ -292,7 +292,7 @@
       "order": "cnt DESC",
       "limit": 5,
       "status": "PASS",
-      "elapsed_s": 0.72,
+      "elapsed_s": 0.66,
       "row_count": 4,
       "rows": [
         {
@@ -327,7 +327,7 @@
       "order": "year DESC",
       "limit": 5,
       "status": "PASS",
-      "elapsed_s": 1.23,
+      "elapsed_s": 0.62,
       "row_count": 5,
       "rows": [
         {
@@ -362,7 +362,7 @@
       "note": "total active businesses in TX",
       "select": "count(*) AS cnt",
       "status": "PASS",
-      "elapsed_s": 1.39,
+      "elapsed_s": 1.43,
       "row_count": 1,
       "rows": [
         {
@@ -384,7 +384,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 1.22,
+      "elapsed_s": 0.92,
       "row_count": 10,
       "rows": [
         {
@@ -443,7 +443,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 1.39,
+      "elapsed_s": 1.02,
       "row_count": 10,
       "rows": [
         {
