@@ -21,6 +21,10 @@ import { findFixture } from "@/app/lib/demo-fixtures";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// Vercel Hobby tier defaults to 10s function timeout — extend to the Hobby max
+// (60s) so long agent runs with replans don't get killed mid-stream.
+// On Pro this can be raised to 300s if/when we upgrade.
+export const maxDuration = 60;
 
 const MAX_REPLANS = 2;
 
