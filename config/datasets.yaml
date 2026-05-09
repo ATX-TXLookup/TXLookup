@@ -17,9 +17,10 @@ austin:
       updated: weekly
 
     service_requests_311:
-      id: i26j-ai4z
-      name: "Austin 311 Service Requests"
-      key_columns: [description, sr_status_desc, sr_location, created_date]
+      id: xwdj-i9he
+      portal: datahub.austintexas.gov
+      name: "Austin 311 Public Data"
+      key_columns: [sr_type_desc, sr_status_desc, sr_location_zip_code, sr_created_date, sr_department_desc]
       updated: daily
 
     code_violations:

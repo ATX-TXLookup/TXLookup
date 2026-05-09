@@ -20,7 +20,7 @@ export const CATALOG: CatalogDataset[] = [
     cadence: "daily",
     blurb:
       "Every construction permit issued by the City of Austin since the 1980s — type, address, contractor, status, value.",
-    keyColumns: ["permittype", "status_current", "original_address1", "original_zip", "issued_date"],
+    keyColumns: ["permittype", "status_current", "original_address1", "original_zip", "issue_date"],
   },
   {
     id: "ecmv-9xxi",
@@ -33,14 +33,14 @@ export const CATALOG: CatalogDataset[] = [
     keyColumns: ["restaurant_name", "score", "inspection_date", "address", "zip_code"],
   },
   {
-    id: "i26j-ai4z",
-    title: "311 Service Requests",
+    id: "xwdj-i9he",
+    title: "Austin 311 Public Data",
     city: "Austin",
-    portal: "data.austintexas.gov",
+    portal: "datahub.austintexas.gov",
     cadence: "daily",
     blurb:
-      "Every non-emergency 311 call logged in Austin — pothole, graffiti, animal services, code complaints, by zip and district.",
-    keyColumns: ["sr_type_desc", "sr_status_desc", "sr_location", "created_date", "council_district"],
+      "Every non-emergency 311 call logged in Austin — pothole, graffiti, animal services, code complaints, by zip and department.",
+    keyColumns: ["sr_type_desc", "sr_status_desc", "sr_location_zip_code", "sr_created_date", "sr_department_desc"],
   },
   {
     id: "6wtj-zbtb",
