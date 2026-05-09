@@ -1,91 +1,142 @@
 # Demo script — 3 minutes, judging-day
 
-> Read this verbatim while recording. Hits all four judging axes (Technical Execution, Partner Ecosystem, Value & Impact, Innovation) by demonstration, not assertion. Time stamps are wall-clock from "GO".
+> Read aloud while recording. Every line is sayable in under eight seconds. Italicized lines are presenter notes — pauses, eye contact cues, and tab-switching beats. Wall-clock from "GO".
 
-**URL to share on screen:** https://txlookup.vercel.app
+**URL on screen:** https://txlookup.vercel.app
 
-**Required setup before recording:**
-- Disable basic-auth gate: `vercel env rm TXLOOKUP_BASIC_AUTH production && vercel --prod --yes`
-- Or paste creds (`txlookup:aitx2026`) before going on stage
-- Browser zoom 110%, no extensions visible, observatory side panel in frame
-- One marquee question pre-warmed (curl it 30s before recording so the cache is hot)
-- A second tab open at `https://miro.com/app/board/uXjVHWYFIqE=/` for the brainstorm board moment
-
----
-
-## 0:00 → 0:25 · The hook (25s)
-
-> *(homepage on screen, ticker visible)*
->
-> "Texas open-data portals have millions of public records — permits, inspections, 311 calls, code violations, crime, traffic. They're public. They're useful. Almost no one queries them, because writing SoQL by hand against the right column on the right portal is brutal.
->
-> TXLookup is an autonomous agent that does that for you in plain English. The numbers on this page right now — 372 permits issued in Austin in the last 7 days, 24,736 311 requests in the last 30 days — those are server-rendered live from Socrata as you watch."
+**Setup before recording:**
+- Disable the basic-auth gate, or paste creds (`txlookup:aitx2026`) before going live.
+- Browser at 110% zoom. No extensions visible. Observatory column in frame.
+- Pre-warm one marquee question with curl thirty seconds before recording.
+- Second tab open at the Miro board. Third tab open at `?demo=1` for the contingency path.
 
 ---
 
-## 0:25 → 0:55 · Sarah's question — the live agent (30s)
+## 0:00 → 0:15 · What is a doom-loop (15s)
 
-> *(click into "Restaurants near 78704 with failing inspections this year")*
+> *(homepage on screen, ticker visible. Look at the camera.)*
 >
-> "Here's a real question a parent in 78704 might ask. Watch the right side."
-
-*(/q loads. Observatory column on the right starts streaming.)*
-
-> "First, **Reason** — Codex parses the question. Then **Plan** — it picks a dataset, picks the columns, generates the SoQL. Look at the agent's *thinking* in italic — that's the planner's plain-English read of what the user is asking. Not a chatbot guess; structured output, parsed and rendered.
+> "A doom-loop is when an agent keeps calling the same tool, over and over, getting nothing new."
 >
-> Then **Tool** runs — the bounded SODA query against Austin's public health portal. Notice the timestamp on each step — these are real durations, not animations."
-
-*(Wait for the answer to render. ~10-15s of live execution.)*
+> *(Beat. Hold eye contact.)*
+>
+> "Most agents you've used have one. Ours catches it in code, then re-plans around it. That's the patent."
 
 ---
 
-## 0:55 → 1:25 · The replan — the wow moment (30s)
+## 0:15 → 0:40 · The hook (25s)
 
-> *(if the live run replans, point at it — otherwise, demo the inspection question because the fixture replan is built in)*
+> *(Gesture at the homepage ticker.)*
 >
-> "Here's the part that matters. The first attempt failed — see the yellow 'Agent adjusted course' panel? Codex tried `score` as the column name. The dataset's actual SoQL field name is `score_amt`. The replanner kicked in, diagnosed it — quote: *'The "score" column doesn't exist on this dataset; the actual fieldName is "score_amt".'* — and emitted a new plan with the corrected query. The retry succeeded.
+> "Texas open-data portals hold millions of public records. Permits. Inspections. Three-one-one calls. Crime."
 >
-> *That's not retry. That's the agent **reasoning about its own failure**.* Three different patterns trigger it: a step error, a doom-loop where the planner repeats the same call, or an `[A,B,A,B]` cycle. All visible in the right-side observatory."
+> *(Breathe.)*
+>
+> "They're public. They're useful. Almost no one queries them, because hand-writing SoQL is brutal."
+>
+> *(Tap the live counters on screen.)*
+>
+> "TXLookup is an autonomous agent that does it for you, in plain English. Those numbers are server-rendered live from Socrata as you watch."
 
 ---
 
-## 1:25 → 1:50 · The answer — citation enforced (25s)
+## 0:40 → 1:05 · Sarah's question — the live agent (25s)
 
-> *(point at the answer + citation card)*
+> *(Click into "Restaurants near 78704 with failing inspections this year.")*
 >
-> "Eleven restaurants in 78704 received failing inspection scores in 2026. The lowest were El Patio at 64 and Maya Cafe at 68.
+> "Real question. A parent in 78704."
 >
-> Critically: every answer carries a citation. Source: City of Austin · Food Establishment Inspection Scores · dataset id `ecmv-9xxi` · last refreshed today. The artifact list shows the exact SODA URL we ran. A judge can click and replay the query themselves. Nothing here is invented; every number can be traced.
+> *(/q loads. Observatory column starts streaming on the right.)*
 >
-> This is enforced at four layers — the skill document, the MCP server, the data client, and the citation tool that has to be the last step of every plan. The planner literally cannot skip it."
+> "Watch the right side. Reason. Plan. Tool. Each step has a real timestamp."
+>
+> *(Pause as the planner emits its thinking line.)*
+>
+> "That italic line is the planner's read of the question. Structured output, parsed and rendered — not a chatbot guess."
 
 ---
 
-## 1:50 → 2:20 · For agent builders — the install (30s)
+## 1:05 → 1:35 · The replan — the wow moment (30s)
 
-> *(scroll to the 'Install TXLookup as a tool' section, dark code panel)*
+> *(Wait for the yellow "Agent adjusted course" panel. If it doesn't appear live, switch to the inspection question — the fixture replan is wired.)*
 >
-> "But the better story is this: TXLookup is *also* a tool other agents can install. One command:
+> "Here's the part that matters."
 >
-> `claude mcp add --transport stdio txlookup` ... and now any Claude Code or Codex session has bounded, safe access to Texas civic data with citation enforced. Five tools — discover, describe, query, summarize, cite. The same skill document teaches *any* agent runtime when and how to use them safely.
+> *(Point at the yellow panel.)*
 >
-> So we're a node in the agent graph, not a leaf. Build a campaign-finance bot? Install TXLookup. Build a real-estate-trends bot? Install TXLookup. Build a journalism-research bot? Install TXLookup."
+> "First attempt failed. Codex tried `score` as the column name. The real field is `score_amt`."
+>
+> *(Beat.)*
+>
+> "The replanner caught it. Diagnosed it. Emitted a corrected query. The retry succeeded."
+>
+> *(Slow down.)*
+>
+> "That is not retry. The agent reasoned about its own failure, and kept the prior steps. Three triggers fire it: a step error, identical calls, or an A-B-A-B cycle."
 
 ---
 
-## 2:20 → 2:45 · Visualization handoff to Miro — A2A live (25s)
+## 1:35 → 1:55 · The answer — citation enforced (20s)
 
-> *(open the Miro board tab — pre-built brainstorm board OR a freshly-generated answer board)*
+> *(Point at the answer card and the citation card under it.)*
 >
-> "And it doesn't stop at text. The agent has an A2A handoff to Miro. When a question warrants visualization, it calls Miro's REST API mid-loop and renders the answer as a live, persistent board — frames, color-coded sticky notes per record, citation footer. This board was generated by the agent. You can pan, zoom, and share it after."
+> "Eleven restaurants in 78704 failed this year. Lowest were El Patio at 64, Maya Cafe at 68."
+>
+> *(Tap the citation card.)*
+>
+> "Every answer carries a citation. City of Austin, dataset ID `ecmv-9xxi`, refreshed today, with the exact SODA URL. A judge can replay it."
+>
+> *(Beat.)*
+>
+> "Citation is enforced at four layers. The planner literally cannot skip it."
 
 ---
 
-## 2:45 → 3:00 · Close (15s)
+## 1:55 → 2:20 · Install TXLookup as a tool (25s)
 
-> *(back to the homepage)*
+> *(Scroll to the dark "Install TXLookup" code panel. Open a terminal in the next tab.)*
 >
-> "Six datasets registered today, four cities scaffolded. Adding a new dataset is a YAML edit; the MCP server reloads without a redeploy. We're shipping the agent, the MCP server, the agent skill, the docs, and the live demo — all open source, MIT, on GitHub at `ATX-TXLookup/TXLookup`. Thanks."
+> "Better story. TXLookup is also a tool other agents can install."
+>
+> *(Type or paste, on screen.)*
+>
+> "One command. `claude mcp add --transport stdio txlookup`."
+>
+> *(Beat.)*
+>
+> "Now any Claude Code or Codex session has bounded, cited access to Texas civic data."
+>
+> *(Eye contact.)*
+>
+> "We're a node in the agent graph. Not a leaf."
+
+---
+
+## 2:20 → 2:40 · Visualization handoff to Miro (20s)
+
+> *(Switch to the Miro tab. Pan once so the judges see it's a real board.)*
+>
+> "It doesn't stop at text. The agent has an A2A handoff to Miro."
+>
+> *(Gesture across the frames and stickies.)*
+>
+> "When a question warrants visualization, the agent calls Miro mid-loop. Frames, color-coded stickies per record, citation footer. This board was generated by the agent."
+
+---
+
+## 2:40 → 3:00 · Close (20s)
+
+> *(Switch back to the homepage. Look at the camera.)*
+>
+> "Six datasets registered today. Four cities scaffolded. Adding a dataset is a YAML edit — the MCP server reloads without a redeploy."
+>
+> *(Beat. Slow.)*
+>
+> "Agent, MCP server, skill, docs, demo — all open source, MIT, on GitHub at `ATX-TXLookup/TXLookup`."
+>
+> *(Hold one second.)*
+>
+> "Thanks."
 
 ---
 
@@ -93,52 +144,77 @@
 
 | Section | Duration | Cumulative |
 |---|---|---|
-| Hook | 0:25 | 0:25 |
-| Sarah's question | 0:30 | 0:55 |
-| Replan | 0:30 | 1:25 |
-| Answer + citation | 0:25 | 1:50 |
-| Install as a tool | 0:30 | 2:20 |
-| Miro A2A | 0:25 | 2:45 |
-| Close | 0:15 | 3:00 |
+| What is a doom-loop | 0:15 | 0:15 |
+| Hook | 0:25 | 0:40 |
+| Sarah's question | 0:25 | 1:05 |
+| Replan | 0:30 | 1:35 |
+| Answer + citation | 0:20 | 1:55 |
+| Install as a tool | 0:25 | 2:20 |
+| Miro A2A | 0:20 | 2:40 |
+| Close | 0:20 | 3:00 |
+
+Total: 3:00 exact.
 
 ---
 
-## What you're demonstrating, mapped to the 4 judging axes
+## Contingency — 30 seconds, if the internet flakes
 
-| Axis | Score evidence in the script |
+> *(If the live `/q` call stalls past two seconds, switch to the pre-loaded `?demo=1` tab. Same SSE contract, fixture replay, looks identical on screen.)*
+>
+> *(Calmly, no apology.)*
+>
+> "I'll switch to the recorded path so we stay on time."
+>
+> *(URL bar: `txlookup.vercel.app/q?demo=1&q=foodtruck`. Click run.)*
+>
+> "Same agent, same observatory, replayed from a fixture. The replan you're about to see is the actual replan from a real run last night."
+>
+> *(Let the SSE stream play. Point at the yellow panel when it appears.)*
+>
+> "There's the doom-loop trigger. There's the corrected plan. Same code path — only the network calls are stubbed."
+>
+> *(Resume the script at the section after the one that failed. Do not restart from the top.)*
+
+If the contingency fires, drop the Miro section to keep total runtime under 3:15.
+
+---
+
+## What you're demonstrating, mapped to the four judging axes
+
+| Axis | Evidence in the script |
 |---|---|
-| **Technical Execution & Completeness** | Live ticker (real Socrata), `/q` agent loop with replan, observatory streaming events, citation enforced |
-| **Partner Ecosystem & Utility** | Codex (the planner+replanner+synthesizer), Miro (A2A handoff), MCP install snippet, Featherless mentioned in docs |
-| **Value & Impact** | Sarah persona — real parent question, real failing-inspection answer, sourced |
-| **Innovation & Execution** | Replan-on-failure as a *first-class user-visible feature*, doom-loop detector, multi-layer policy enforcement, A2A render to Miro |
+| Technical Execution and Completeness | Live ticker from real Socrata, `/q` agent loop with replan, observatory streaming, citation enforced. |
+| Partner Ecosystem and Utility | Codex as planner-replanner-synthesizer, Miro A2A handoff, MCP install snippet. |
+| Value and Impact | Sarah persona — real parent question, real failing-inspection answer, sourced. |
+| Innovation | Replan-on-failure as a first-class user-visible feature, doom-loop detection, four-layer citation enforcement, A2A render to Miro. |
 
 ---
 
 ## Recording tips
 
-- **Start with the cache pre-warmed** — curl each marquee question 30s before recording so live calls hit the 60s cache.
-- **If a live demo step blanks** — switch to `?demo=1` mid-recording (the fixture replay looks identical and uses the same SSE contract). Demo-mode is your insurance.
-- **Mute system notifications** before recording.
-- **Record at 1080p**, 30fps, no narration overlay.
-- **Re-record after viewing once** — first take always has a stumble.
-- **Cut to the Miro board** at the timestamp above. Tab-switching shows the cross-system handoff is real.
+- Pre-warm the cache with curl thirty seconds before recording.
+- If a live step blanks, switch to `?demo=1` mid-recording — same contract, fixture replay.
+- Mute system notifications.
+- Record at 1080p, 30 fps, no narration overlay.
+- Re-record after viewing once. The first take always has a stumble.
+- Cut to the Miro board at the timestamp above. The tab switch shows the cross-system handoff is real.
 
 ---
 
 ## Backup phrases if a step glitches
 
-- *"This is the live agent — that's why you can see the small delay between steps."*
-- *"The yellow box you just saw is the replan path catching a real failure."*
-- *"Notice the timestamp — that's wall-clock, not animated."*
-- *"The citation block updates in real time as the agent runs the citation tool."*
+- "This is the live agent — that's why you can see the small delay."
+- "The yellow box is the replan path catching a real failure."
+- "Notice the timestamp — that's wall-clock, not animated."
+- "The citation block updates in real time as the agent runs the citation tool."
 
 ---
 
 ## Post-record checklist
 
-- [ ] Re-watch end-to-end, keep an eye on the right-rail observatory
-- [ ] Confirm the answer has a populated citation card
-- [ ] Confirm the URL bar shows `https://txlookup.vercel.app` clearly
-- [ ] Trim head/tail to exactly the script timing
-- [ ] Upload to YouTube as **unlisted**, capture the URL for the submission form
-- [ ] Test the YouTube URL in an incognito window to confirm it plays
+- [ ] Re-watch end-to-end, eye on the right-rail observatory.
+- [ ] Confirm the answer has a populated citation card.
+- [ ] Confirm the URL bar shows `https://txlookup.vercel.app` clearly.
+- [ ] Trim head and tail to exactly 3:00.
+- [ ] Upload to YouTube as unlisted, capture the URL for the submission form.
+- [ ] Test the YouTube URL in an incognito window to confirm it plays.
