@@ -17,25 +17,50 @@ function client() {
   return _client;
 }
 
-const PLANNER_PROMPT = `You are TXLookup's planner. The user asks a question about Texas public data.
+function buildPlannerPrompt(): string {
+  const today = new Date().toISOString().slice(0, 10);
+  const sixMonthsAgo = new Date(Date.now() - 183 * 86400_000)
+    .toISOString()
+    .slice(0, 10);
+  const oneYearAgo = new Date(Date.now() - 365 * 86400_000)
+    .toISOString()
+    .slice(0, 10);
+
+  const catalogTable = CATALOG.map(
+    (d) =>
+      `- ${d.id} · ${d.title} (${d.city}) — key columns: ${d.keyColumns.join(", ")}`,
+  ).join("\n");
+
+  return `You are TXLookup's planner. The user asks a question about Texas public data.
+TODAY is ${today}. Compute time ranges from TODAY (e.g. "last six months" = >= ${sixMonthsAgo}, "this year" = >= ${oneYearAgo}).
+
 You have these tools to call (in order):
 
 1. discover_datasets({query: string, city?: string}) — returns top candidate datasets
 2. get_dataset_schema({datasetId: string}) — returns column names + types + last_updated
 3. summarize_data({datasetId: string, where: string, dimensions: string[]}) — group + count, returns rows {col, count}
-4. fetch_data({datasetId: string, where: string, select?: string, order?: string, limit?: number}) — returns rows
+4. fetch_data({datasetId: string, where: string, order?: string, limit?: number}) — returns rows. DO NOT pass a "select" arg — that's not supported.
 5. cite_dataset({datasetId: string}) — returns the citation block for the answer
 
-Available datasets (id · title · city):
-${CATALOG.map((d) => `${d.id} · ${d.title} · ${d.city}`).join("\n")}
+Available datasets (use these EXACTLY — pick the most appropriate by KEY COLUMNS, not just by keyword match):
+${catalogTable}
 
-Rules:
+Disambiguation rules (apply BEFORE picking a dataset):
+- "permits" / "permit" / "construction" / "building" → 3syk-w9eu (Issued Construction Permits). Even "food truck permits" → 3syk-w9eu, NOT food inspections.
+- "inspections" / "inspection" / "restaurant scores" → ecmv-9xxi (Food Establishment Inspection Scores)
+- "311" / "complaints" / "service requests" → i26j-ai4z
+- "code violations" / "zoning" → 6wtj-zbtb
+- "crime" / "incidents" → fdj4-gpfu
+- "traffic fatalities" / "vision zero" → y2wy-tgr5
+
+Hard rules:
 - ALWAYS end with cite_dataset.
-- For questions like "top X by Y" or "what are the most common", use summarize_data — cheaper than fetch_data.
-- For questions about specific records ("show me the permits in 78702"), use fetch_data with a where clause.
-- Use SoQL syntax in 'where': e.g. "original_zip='78702' AND issued_date > '2025-11-01'".
+- For questions like "top X by Y" / "what are the most common", use summarize_data — cheaper than fetch_data.
+- For specific records ("show me the permits in 78702"), use fetch_data with a where clause.
+- Use SoQL syntax in 'where'. Example for permits: "original_zip='78702' AND issued_date >= '${sixMonthsAgo}'". Example for inspections: "zip_code='78704' AND inspection_date >= '${sixMonthsAgo}' AND score < 70".
+- The KEY COLUMNS shown above are the only valid SoQL field names per dataset. Don't guess.
 - limit ≤ 100 by default.
-- If you don't know the column names yet, call get_dataset_schema first.
+- DO NOT pass "select" to fetch_data — Socrata rejects $select=*. Just omit it.
 
 Return a JSON object with this exact shape:
 {
@@ -47,6 +72,9 @@ Return a JSON object with this exact shape:
   ]
 }
 `;
+}
+
+const PLANNER_PROMPT_NOTE = "Built dynamically per request to inject TODAY.";
 
 const SYNTH_PROMPT = `You are TXLookup's synthesizer. Given the user's question and the tool results,
 write a tight 2-4 sentence answer in plain English with concrete numbers.
@@ -74,7 +102,7 @@ export async function reasonAndPlan(
   const completion = await client().chat.completions.create({
     model,
     messages: [
-      { role: "system", content: PLANNER_PROMPT },
+      { role: "system", content: buildPlannerPrompt() },
       { role: "user", content: query },
     ],
     response_format: { type: "json_object" },
@@ -146,9 +174,12 @@ export async function executeStep(step: PlanStep): Promise<ToolEnvelope> {
         };
         const ds = findById(args.datasetId);
         if (!ds) return { status: "failed", result: null, error: `unknown dataset_id ${args.datasetId}` };
+        // Strip select="*" — invalid SoQL ($select expects a column list).
+        const select =
+          args.select && args.select.trim() !== "*" ? args.select : undefined;
         const r = await sodaQuery(ds.portal, ds.id, {
           where: args.where,
-          select: args.select,
+          select,
           order: args.order,
           limit: args.limit ?? 100,
         });
