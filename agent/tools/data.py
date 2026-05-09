@@ -174,7 +174,7 @@ def _load_catalog() -> list[Dataset]:
     for city, block in raw.items():
         if not isinstance(block, dict):
             continue
-        portal = block.get("portal", "")
+        default_portal = block.get("portal", "")
         for slug, entry in (block.get("datasets") or {}).items():
             if not isinstance(entry, dict):
                 continue
@@ -182,7 +182,7 @@ def _load_catalog() -> list[Dataset]:
                 Dataset(
                     id=str(entry.get("id", "")),
                     name=str(entry.get("name", slug)),
-                    portal=portal,
+                    portal=str(entry.get("portal") or default_portal),
                     key_columns=list(entry.get("key_columns") or []),
                     updated=str(entry.get("updated", "")),
                     city=city,
