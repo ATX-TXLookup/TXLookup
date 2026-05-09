@@ -58,12 +58,31 @@ test("support specialist — vague geography returns needs_input + clarifier chi
   assert.equal(env.agent, "support");
   assert.equal(env.status, "needs_input");
   assert.ok(Array.isArray(env.next_actions) && env.next_actions.length >= 3);
-  // Each chip should rewrite "south austin" to a real zip while keeping the rest of the query.
   for (const chip of env.next_actions) {
-    assert.ok(/^\d{5}$/.test(chip.label), `chip label should be a zip: ${chip.label}`);
+    assert.ok(/^\d{5}$/.test(chip.label), `chip label should be a bare zip: ${chip.label}`);
     assert.match(chip.query, /\d{5}/, "chip query should contain the substituted zip");
     assert.ok(!/south austin/i.test(chip.query), "chip query should have replaced 'south austin'");
+    // Reject the regression where the rewrite produced "in in 78704" / "to to 78704" / etc.
+    assert.ok(
+      !/\b(in|to|at|for|near|of|on|by|from)\s+\1\b/i.test(chip.query),
+      `chip query has duplicated preposition (rewrite bug): ${chip.query}`,
+    );
+    // The substituted query should still scan as a normal sentence — no double spaces.
+    assert.ok(!/  +/.test(chip.query), `chip query has double-space: ${chip.query}`);
   }
+  // First chip's full text — concrete sanity that the rewrite is clean.
+  assert.equal(
+    env.next_actions[0].query,
+    "show me permits in 78704 last six months",
+    "first chip query should read as a clean sentence",
+  );
+});
+
+test("support specialist — bare 'south austin' query returns a chip query that is just the zip", async () => {
+  _resetSpecialistsForTest();
+  const env = await callSpecialist("support", { query: "south austin" });
+  assert.equal(env.status, "needs_input");
+  assert.equal(env.next_actions[0].query, "78704");
 });
 
 test("support specialist — failure-explanation mode returns plain English", async () => {

@@ -70,34 +70,17 @@ function supportClient() {
   return _supportClient;
 }
 
-// Curated geographic shorthands → real zips. Each maps to a list of clarifier
-// chips the UI can render. Quick-and-dirty pragmatic list — Austin is the
-// only city in the catalog today, so all entries are Austin neighborhoods.
-const VAGUE_GEO: Record<string, Array<{ label: string; query: string }>> = {
-  "south austin": [
-    { label: "78704", query: "in 78704" },
-    { label: "78745", query: "in 78745" },
-    { label: "78748", query: "in 78748" },
-  ],
-  "north austin": [
-    { label: "78751", query: "in 78751" },
-    { label: "78759", query: "in 78759" },
-    { label: "78727", query: "in 78727" },
-  ],
-  "east austin": [
-    { label: "78702", query: "in 78702" },
-    { label: "78721", query: "in 78721" },
-    { label: "78723", query: "in 78723" },
-  ],
-  "west austin": [
-    { label: "78703", query: "in 78703" },
-    { label: "78731", query: "in 78731" },
-    { label: "78746", query: "in 78746" },
-  ],
-  downtown: [
-    { label: "78701 (downtown)", query: "in 78701" },
-    { label: "78702 (east downtown)", query: "in 78702" },
-  ],
+// Curated geographic shorthands → candidate zip codes. The chip's `query`
+// field is built per-call by substituting the phrase with the bare zip in
+// the user's original sentence — that keeps prepositions/articles correct
+// (e.g. "permits in south austin" → "permits in 78704", not the broken
+// "permits in in 78704" the earlier in-the-chip prefix produced).
+const VAGUE_GEO: Record<string, string[]> = {
+  "south austin": ["78704", "78745", "78748"],
+  "north austin": ["78751", "78759", "78727"],
+  "east austin": ["78702", "78721", "78723"],
+  "west austin": ["78703", "78731", "78746"],
+  downtown: ["78701", "78702"],
 };
 
 // True if the query is asking *about* TXLookup itself rather than for data.
@@ -110,7 +93,7 @@ function isCatalogMetaQuery(q: string): boolean {
   );
 }
 
-function findVagueGeo(q: string): { phrase: string; zips: typeof VAGUE_GEO[string] } | null {
+function findVagueGeo(q: string): { phrase: string; zips: string[] } | null {
   const lower = q.toLowerCase();
   for (const [phrase, zips] of Object.entries(VAGUE_GEO)) {
     // Match as a phrase, not a substring of a zip etc.
@@ -118,6 +101,17 @@ function findVagueGeo(q: string): { phrase: string; zips: typeof VAGUE_GEO[strin
     if (re.test(lower)) return { phrase, zips };
   }
   return null;
+}
+
+// Build the chip's rewrite of the user's original query. If the query is
+// just the bare phrase (e.g. "south austin" with nothing else), the chip
+// query becomes a useful sentence stub instead of just a zip number.
+function chipQueryFor(originalQuery: string, phrase: string, zip: string): string {
+  const trimmed = originalQuery.trim();
+  if (trimmed.toLowerCase() === phrase.toLowerCase()) {
+    return zip; // bare phrase — let the planner default to "what's in <zip>"
+  }
+  return trimmed.replace(new RegExp(`\\b${phrase}\\b`, "i"), zip);
 }
 
 function catalogSummary(): {
@@ -197,9 +191,9 @@ const support: Specialist = async (input) => {
         message: `"${vague.phrase}" can mean a few different zip codes in Austin. Which one are you asking about?`,
       },
       error: null,
-      next_actions: vague.zips.map((z) => ({
-        label: z.label,
-        query: query.replace(new RegExp(`\\b${vague.phrase}\\b`, "i"), z.query),
+      next_actions: vague.zips.map((zip) => ({
+        label: zip,
+        query: chipQueryFor(query, vague.phrase, zip),
       })),
     };
   }
@@ -239,15 +233,13 @@ const support: Specialist = async (input) => {
       max_tokens: 250,
     });
     const message = (completion.choices[0]?.message?.content ?? "").trim();
-    const usage = completion.usage;
     return {
       agent: "support",
       status: "completed",
       result: { message },
       error: null,
       confidence: 0.7,
-      tokens: usage?.total_tokens,
-    } as SpecialistEnvelope & { tokens?: number };
+    };
   } catch (e: unknown) {
     return {
       agent: "support",
