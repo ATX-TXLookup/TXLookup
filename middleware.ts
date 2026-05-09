@@ -4,9 +4,16 @@
  * Set TXLOOKUP_BASIC_AUTH="user:password" in env to enable.
  * If unset, the gate is a no-op (open access).
  *
+ * Gated:
+ * - everything by default (when TXLOOKUP_BASIC_AUTH is set)
+ * - /admin/*       — admin console
+ * - /api/admin/*   — admin API (run archive list/mark)
+ *
  * Bypassed:
- * - /api/*    — agent endpoint must remain accessible programmatically
- * - /_next/*  — Next.js assets
+ * - /api/agent    — programmatic agent endpoint (called from /admin form posts;
+ *                   the browser already authenticated for the page itself)
+ * - other /api/*  — public/programmatic endpoints
+ * - /_next/*      — Next.js assets
  * - /favicon* / robots / sitemap — standard
  */
 import { NextRequest, NextResponse } from "next/server";
@@ -18,12 +25,14 @@ export function middleware(req: NextRequest) {
   if (!expected) return NextResponse.next();
 
   const { pathname } = req.nextUrl;
+  const isAdminApi = pathname.startsWith("/api/admin/") || pathname === "/api/admin";
   if (
-    pathname.startsWith("/api/") ||
-    pathname.startsWith("/_next/") ||
-    pathname === "/favicon.ico" ||
-    pathname === "/robots.txt" ||
-    pathname === "/sitemap.xml"
+    !isAdminApi &&
+    (pathname.startsWith("/api/") ||
+      pathname.startsWith("/_next/") ||
+      pathname === "/favicon.ico" ||
+      pathname === "/robots.txt" ||
+      pathname === "/sitemap.xml")
   ) {
     return NextResponse.next();
   }
@@ -41,5 +50,7 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next|favicon.ico|robots.txt|sitemap.xml).*)"],
+  // Match everything except Next.js internals and static assets — admin paths
+  // (both /admin/* and /api/admin/*) need to flow through this middleware.
+  matcher: ["/((?!_next|favicon.ico|robots.txt|sitemap.xml).*)"],
 };
