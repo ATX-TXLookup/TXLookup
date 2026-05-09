@@ -1,0 +1,536 @@
+{
+  "dataset": "state_expenditures",
+  "generated": "2026-05-09T15:22:33.401176",
+  "passed": 10,
+  "total": 10,
+  "results": [
+    {
+      "ds": "expenditures",
+      "story": "state_expenditures",
+      "story_n": 1,
+      "q": 1,
+      "note": "spending by agency 2024",
+      "select": "agency_name,sum(amount) AS total",
+      "where": "fiscal_year='2024'",
+      "group": "agency_name",
+      "order": "total DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.33,
+      "row_count": 10,
+      "rows": [
+        {
+          "agency_name": "HEALTH AND HUMAN SERVICES COMMISSION",
+          "total": "62659367692.84"
+        },
+        {
+          "agency_name": "TEXAS EDUCATION AGENCY",
+          "total": "42382151853.00"
+        },
+        {
+          "agency_name": "TEXAS DEPARTMENT OF TRANSPORTATION",
+          "total": "19320213944.19"
+        },
+        {
+          "agency_name": "TEACHER RETIREMENT SYSTEM OF TEXAS",
+          "total": "14249264062.24"
+        },
+        {
+          "agency_name": "TEXAS WORKFORCE COMMISSION",
+          "total": "5693720294.73"
+        },
+        {
+          "agency_name": "OFFICE OF THE ATTORNEY GENERAL",
+          "total": "5489191972.87"
+        },
+        {
+          "agency_name": "TEXAS DEPARTMENT OF CRIMINAL JUSTICE",
+          "total": "4770368194.28"
+        },
+        {
+          "agency_name": "EMPLOYEES RETIREMENT SYSTEM OF TEXAS",
+          "total": "2634265055.17"
+        },
+        {
+          "agency_name": "DEPT OF FAMILY & PROTECTIVE SERVICES",
+          "total": "2482388146.39"
+        },
+        {
+          "agency_name": "GENERAL LAND OFFICE",
+          "total": "2126549413.58"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/2zpi-yjjs.json?%24select=agency_name%2Csum%28amount%29+AS+total&%24limit=10&%24where=fiscal_year%3D%272024%27&%24group=agency_name&%24order=total+DESC"
+    },
+    {
+      "ds": "expenditures",
+      "story": "state_expenditures",
+      "story_n": 1,
+      "q": 2,
+      "note": "spending by category 2024",
+      "select": "major_spending_category,sum(amount) AS total",
+      "where": "fiscal_year='2024'",
+      "group": "major_spending_category",
+      "order": "total DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.36,
+      "row_count": 10,
+      "rows": [
+        {
+          "major_spending_category": "PUBLIC ASSISTANCE PAYMENTS",
+          "total": "71723198096.54"
+        },
+        {
+          "major_spending_category": "INTERGOVERNMENTAL PAYMENTS",
+          "total": "48199172063.77"
+        },
+        {
+          "major_spending_category": "EMPLOYEE BENEFITS",
+          "total": "19701742562.13"
+        },
+        {
+          "major_spending_category": "SALARIES AND WAGES",
+          "total": "16812232776.88"
+        },
+        {
+          "major_spending_category": "HIGHWAY CONSTRUCTION-CAPITAL OUTLAY",
+          "total": "12272020291.94"
+        },
+        {
+          "major_spending_category": "PROFESSIONAL SERVICE AND FEES",
+          "total": "6062606304.82"
+        },
+        {
+          "major_spending_category": "OTHER EXPENDITURES",
+          "total": "5348891271.87"
+        },
+        {
+          "major_spending_category": "CAPITAL OUTLAY",
+          "total": "2389006426.90"
+        },
+        {
+          "major_spending_category": "REPAIRS AND MAINTENANCE",
+          "total": "1677310420.86"
+        },
+        {
+          "major_spending_category": "SUPPLIES AND MATERIALS",
+          "total": "1253648119.66"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/2zpi-yjjs.json?%24select=major_spending_category%2Csum%28amount%29+AS+total&%24limit=10&%24where=fiscal_year%3D%272024%27&%24group=major_spending_category&%24order=total+DESC"
+    },
+    {
+      "ds": "expenditures",
+      "story": "state_expenditures",
+      "story_n": 2,
+      "q": 3,
+      "note": "total expenditure 2024",
+      "select": "sum(amount) AS total",
+      "where": "fiscal_year='2024'",
+      "status": "PASS",
+      "elapsed_s": 0.35,
+      "row_count": 1,
+      "rows": [
+        {
+          "total": "189933825064.91"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/2zpi-yjjs.json?%24select=sum%28amount%29+AS+total&%24limit=100&%24where=fiscal_year%3D%272024%27"
+    },
+    {
+      "ds": "expenditures",
+      "story": "state_expenditures",
+      "story_n": 2,
+      "q": 4,
+      "note": "spending trend by fiscal year",
+      "select": "fiscal_year,sum(amount) AS total",
+      "group": "fiscal_year",
+      "order": "fiscal_year DESC",
+      "limit": 5,
+      "status": "PASS",
+      "elapsed_s": 0.33,
+      "row_count": 2,
+      "rows": [
+        {
+          "total": "189933825064.91"
+        },
+        {
+          "fiscal_year": "2024",
+          "total": "189933825064.91"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/2zpi-yjjs.json?%24select=fiscal_year%2Csum%28amount%29+AS+total&%24limit=5&%24group=fiscal_year&%24order=fiscal_year+DESC"
+    },
+    {
+      "ds": "expenditures",
+      "story": "state_expenditures",
+      "story_n": 3,
+      "q": 5,
+      "note": "top 5 agencies by spend all years",
+      "select": "agency_name,sum(amount) AS total",
+      "group": "agency_name",
+      "order": "total DESC",
+      "limit": 5,
+      "status": "PASS",
+      "elapsed_s": 0.31,
+      "row_count": 5,
+      "rows": [
+        {
+          "total": "189933825064.91"
+        },
+        {
+          "agency_name": "HEALTH AND HUMAN SERVICES COMMISSION",
+          "total": "62659367692.84"
+        },
+        {
+          "agency_name": "TEXAS EDUCATION AGENCY",
+          "total": "42382151853.00"
+        },
+        {
+          "agency_name": "TEXAS DEPARTMENT OF TRANSPORTATION",
+          "total": "19320213944.19"
+        },
+        {
+          "agency_name": "TEACHER RETIREMENT SYSTEM OF TEXAS",
+          "total": "14249264062.24"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/2zpi-yjjs.json?%24select=agency_name%2Csum%28amount%29+AS+total&%24limit=5&%24group=agency_name&%24order=total+DESC"
+    },
+    {
+      "ds": "expenditures",
+      "story": "state_expenditures",
+      "story_n": 3,
+      "q": 6,
+      "note": "spending category breakdown all years",
+      "select": "major_spending_category,count(*) AS records,sum(amount) AS total",
+      "group": "major_spending_category",
+      "order": "total DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.32,
+      "row_count": 10,
+      "rows": [
+        {
+          "records": "1",
+          "total": "189933825064.91"
+        },
+        {
+          "major_spending_category": "PUBLIC ASSISTANCE PAYMENTS",
+          "records": "3281",
+          "total": "71723198096.54"
+        },
+        {
+          "major_spending_category": "INTERGOVERNMENTAL PAYMENTS",
+          "records": "3669",
+          "total": "48199172063.77"
+        },
+        {
+          "major_spending_category": "EMPLOYEE BENEFITS",
+          "records": "5811",
+          "total": "19701742562.13"
+        },
+        {
+          "major_spending_category": "SALARIES AND WAGES",
+          "records": "7685",
+          "total": "16812232776.88"
+        },
+        {
+          "major_spending_category": "HIGHWAY CONSTRUCTION-CAPITAL OUTLAY",
+          "records": "146",
+          "total": "12272020291.94"
+        },
+        {
+          "major_spending_category": "PROFESSIONAL SERVICE AND FEES",
+          "records": "1922",
+          "total": "6062606304.82"
+        },
+        {
+          "major_spending_category": "OTHER EXPENDITURES",
+          "records": "5566",
+          "total": "5348891271.87"
+        },
+        {
+          "major_spending_category": "CAPITAL OUTLAY",
+          "records": "935",
+          "total": "2389006426.90"
+        },
+        {
+          "major_spending_category": "REPAIRS AND MAINTENANCE",
+          "records": "2004",
+          "total": "1677310420.86"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/2zpi-yjjs.json?%24select=major_spending_category%2Ccount%28%2A%29+AS+records%2Csum%28amount%29+AS+total&%24limit=10&%24group=major_spending_category&%24order=total+DESC"
+    },
+    {
+      "ds": "expenditures",
+      "story": "state_expenditures",
+      "story_n": 4,
+      "q": 7,
+      "note": "avg spending per agency 2024",
+      "select": "avg(amount) AS avg_amount",
+      "where": "fiscal_year='2024'",
+      "status": "PASS",
+      "elapsed_s": 0.37,
+      "row_count": 1,
+      "rows": [
+        {
+          "avg_amount": "4277403.501146518332"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/2zpi-yjjs.json?%24select=avg%28amount%29+AS+avg_amount&%24limit=100&%24where=fiscal_year%3D%272024%27"
+    },
+    {
+      "ds": "expenditures",
+      "story": "state_expenditures",
+      "story_n": 4,
+      "q": 8,
+      "note": "YoY spend comparison top agencies",
+      "select": "agency_name,fiscal_year,sum(amount) AS total",
+      "where": "fiscal_year IN('2023','2024')",
+      "group": "agency_name,fiscal_year",
+      "order": "total DESC",
+      "limit": 20,
+      "status": "PASS",
+      "elapsed_s": 0.29,
+      "row_count": 20,
+      "rows": [
+        {
+          "agency_name": "HEALTH AND HUMAN SERVICES COMMISSION",
+          "fiscal_year": "2024",
+          "total": "62659367692.84"
+        },
+        {
+          "agency_name": "TEXAS EDUCATION AGENCY",
+          "fiscal_year": "2024",
+          "total": "42382151853.00"
+        },
+        {
+          "agency_name": "TEXAS DEPARTMENT OF TRANSPORTATION",
+          "fiscal_year": "2024",
+          "total": "19320213944.19"
+        },
+        {
+          "agency_name": "TEACHER RETIREMENT SYSTEM OF TEXAS",
+          "fiscal_year": "2024",
+          "total": "14249264062.24"
+        },
+        {
+          "agency_name": "TEXAS WORKFORCE COMMISSION",
+          "fiscal_year": "2024",
+          "total": "5693720294.73"
+        },
+        {
+          "agency_name": "OFFICE OF THE ATTORNEY GENERAL",
+          "fiscal_year": "2024",
+          "total": "5489191972.87"
+        },
+        {
+          "agency_name": "TEXAS DEPARTMENT OF CRIMINAL JUSTICE",
+          "fiscal_year": "2024",
+          "total": "4770368194.28"
+        },
+        {
+          "agency_name": "EMPLOYEES RETIREMENT SYSTEM OF TEXAS",
+          "fiscal_year": "2024",
+          "total": "2634265055.17"
+        },
+        {
+          "agency_name": "DEPT OF FAMILY & PROTECTIVE SERVICES",
+          "fiscal_year": "2024",
+          "total": "2482388146.39"
+        },
+        {
+          "agency_name": "GENERAL LAND OFFICE",
+          "fiscal_year": "2024",
+          "total": "2126549413.58"
+        },
+        {
+          "agency_name": "TEXAS DEPARTMENT OF PUBLIC SAFETY",
+          "fiscal_year": "2024",
+          "total": "1761395982.05"
+        },
+        {
+          "agency_name": "COMPTROLLER - STATE FISCAL",
+          "fiscal_year": "2024",
+          "total": "1235130391.11"
+        },
+        {
+          "agency_name": "TEXAS MILITARY DEPARTMENT",
+          "fiscal_year": "2024",
+          "total": "1181522063.37"
+        },
+        {
+          "agency_name": "PUBLIC COMMUNITY / JR COLLEGES",
+          "fiscal_year": "2024",
+          "total": "1154065755.64"
+        },
+        {
+          "agency_name": "TEXAS LOTTERY COMMISSION",
+          "fiscal_year": "2024",
+          "total": "1144648094.73"
+        },
+        {
+          "agency_name": "UNIVERSITY OF TEXAS AT AUSTIN",
+          "fiscal_year": "2024",
+          "total": "1109696724.64"
+        },
+        {
+          "agency_name": "TEXAS FACILITIES COMMISSION",
+          "fiscal_year": "2024",
+          "total": "1063614242.83"
+        },
+        {
+          "agency_name": "DEPARTMENT OF AGRICULTURE",
+          "fiscal_year": "2024",
+          "total": "1023207192.52"
+        },
+        {
+          "agency_name": "DEPARTMENT OF STATE HEALTH SERVICES",
+          "fiscal_year": "2024",
+          "total": "993392672.17"
+        },
+        {
+          "agency_name": "TEXAS DIVISION OF EMERGENCY MANAGEMENT",
+          "fiscal_year": "2024",
+          "total": "949346376.92"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/2zpi-yjjs.json?%24select=agency_name%2Cfiscal_year%2Csum%28amount%29+AS+total&%24limit=20&%24where=fiscal_year+IN%28%272023%27%2C%272024%27%29&%24group=agency_name%2Cfiscal_year&%24order=total+DESC"
+    },
+    {
+      "ds": "expenditures",
+      "story": "state_expenditures",
+      "story_n": 5,
+      "q": 9,
+      "note": "agencies with highest single-year spend spike",
+      "select": "agency_name,fiscal_year,sum(amount) AS total",
+      "group": "agency_name,fiscal_year",
+      "order": "total DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.32,
+      "row_count": 10,
+      "rows": [
+        {
+          "total": "189933825064.91"
+        },
+        {
+          "agency_name": "HEALTH AND HUMAN SERVICES COMMISSION",
+          "fiscal_year": "2024",
+          "total": "62659367692.84"
+        },
+        {
+          "agency_name": "TEXAS EDUCATION AGENCY",
+          "fiscal_year": "2024",
+          "total": "42382151853.00"
+        },
+        {
+          "agency_name": "TEXAS DEPARTMENT OF TRANSPORTATION",
+          "fiscal_year": "2024",
+          "total": "19320213944.19"
+        },
+        {
+          "agency_name": "TEACHER RETIREMENT SYSTEM OF TEXAS",
+          "fiscal_year": "2024",
+          "total": "14249264062.24"
+        },
+        {
+          "agency_name": "TEXAS WORKFORCE COMMISSION",
+          "fiscal_year": "2024",
+          "total": "5693720294.73"
+        },
+        {
+          "agency_name": "OFFICE OF THE ATTORNEY GENERAL",
+          "fiscal_year": "2024",
+          "total": "5489191972.87"
+        },
+        {
+          "agency_name": "TEXAS DEPARTMENT OF CRIMINAL JUSTICE",
+          "fiscal_year": "2024",
+          "total": "4770368194.28"
+        },
+        {
+          "agency_name": "EMPLOYEES RETIREMENT SYSTEM OF TEXAS",
+          "fiscal_year": "2024",
+          "total": "2634265055.17"
+        },
+        {
+          "agency_name": "DEPT OF FAMILY & PROTECTIVE SERVICES",
+          "fiscal_year": "2024",
+          "total": "2482388146.39"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/2zpi-yjjs.json?%24select=agency_name%2Cfiscal_year%2Csum%28amount%29+AS+total&%24limit=10&%24group=agency_name%2Cfiscal_year&%24order=total+DESC"
+    },
+    {
+      "ds": "expenditures",
+      "story": "state_expenditures",
+      "story_n": 5,
+      "q": 10,
+      "note": "count of spending records by category",
+      "select": "major_spending_category,count(*) AS cnt",
+      "group": "major_spending_category",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.3,
+      "row_count": 10,
+      "rows": [
+        {
+          "major_spending_category": "SALARIES AND WAGES",
+          "cnt": "7685"
+        },
+        {
+          "major_spending_category": "EMPLOYEE BENEFITS",
+          "cnt": "5811"
+        },
+        {
+          "major_spending_category": "OTHER EXPENDITURES",
+          "cnt": "5566"
+        },
+        {
+          "major_spending_category": "TRAVEL",
+          "cnt": "5084"
+        },
+        {
+          "major_spending_category": "INTERGOVERNMENTAL PAYMENTS",
+          "cnt": "3669"
+        },
+        {
+          "major_spending_category": "PUBLIC ASSISTANCE PAYMENTS",
+          "cnt": "3281"
+        },
+        {
+          "major_spending_category": "SUPPLIES AND MATERIALS",
+          "cnt": "2924"
+        },
+        {
+          "major_spending_category": "REPAIRS AND MAINTENANCE",
+          "cnt": "2004"
+        },
+        {
+          "major_spending_category": "PROFESSIONAL SERVICE AND FEES",
+          "cnt": "1922"
+        },
+        {
+          "major_spending_category": "COMMUNICATIONS AND UTILITIES",
+          "cnt": "1826"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/2zpi-yjjs.json?%24select=major_spending_category%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24group=major_spending_category&%24order=cnt+DESC"
+    }
+  ]
+}

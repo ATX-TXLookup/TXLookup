@@ -50,7 +50,7 @@ ${catalogTable}
 Disambiguation rules (apply BEFORE picking a dataset):
 - "permits" / "permit" / "construction" / "building" → 3syk-w9eu (Issued Construction Permits). Even "food truck permits" → 3syk-w9eu, NOT food inspections.
 - "inspections" / "inspection" / "restaurant scores" → ecmv-9xxi (Food Establishment Inspection Scores)
-- "311" / "complaints" / "service requests" → i26j-ai4z
+- "311" / "complaints" / "service requests" → xwdj-i9he
 - "code violations" / "zoning" → 6wtj-zbtb
 - "crime" / "incidents" → fdj4-gpfu
 - "traffic fatalities" / "vision zero" → y2wy-tgr5
@@ -143,16 +143,42 @@ export type Plan = {
   diagnosis?: string; // present on replans
 };
 
+export type TokenUsage = {
+  prompt: number;
+  completion: number;
+  total: number;
+};
+
+export type Planned = { plan: Plan; usage: TokenUsage };
+export type Synthesized = { answer: string; usage: TokenUsage };
+
+function readUsage(u: unknown): TokenUsage {
+  const o = (u ?? {}) as {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  };
+  return {
+    prompt: o.prompt_tokens ?? 0,
+    completion: o.completion_tokens ?? 0,
+    total: o.total_tokens ?? 0,
+  };
+}
+
 export async function reasonAndPlan(
   query: string,
   model = "gpt-4o-2024-11-20",
-): Promise<Plan> {
+  correctiveSystem?: string,
+): Promise<Planned> {
+  const messages: { role: "system" | "user"; content: string }[] = [
+    { role: "system", content: buildPlannerPrompt() },
+  ];
+  if (correctiveSystem) messages.push({ role: "system", content: correctiveSystem });
+  messages.push({ role: "user", content: query });
+
   const completion = await client().chat.completions.create({
     model,
-    messages: [
-      { role: "system", content: buildPlannerPrompt() },
-      { role: "user", content: query },
-    ],
+    messages,
     response_format: { type: "json_object" },
     temperature: 0,
   });
@@ -161,7 +187,7 @@ export async function reasonAndPlan(
   if (!Array.isArray(parsed.steps)) {
     throw new Error("planner returned invalid shape");
   }
-  return parsed;
+  return { plan: parsed, usage: readUsage(completion.usage) };
 }
 
 export async function replan(
@@ -170,16 +196,20 @@ export async function replan(
   failedIndex: number,
   failure: ToolEnvelope,
   model = "gpt-4o-2024-11-20",
-): Promise<Plan> {
+  correctiveSystem?: string,
+): Promise<Planned> {
+  const messages: { role: "system" | "user"; content: string }[] = [
+    {
+      role: "system",
+      content: buildReplanPrompt(originalPlan.intent, originalPlan.steps, failedIndex, failure),
+    },
+  ];
+  if (correctiveSystem) messages.push({ role: "system", content: correctiveSystem });
+  messages.push({ role: "user", content: query });
+
   const completion = await client().chat.completions.create({
     model,
-    messages: [
-      {
-        role: "system",
-        content: buildReplanPrompt(originalPlan.intent, originalPlan.steps, failedIndex, failure),
-      },
-      { role: "user", content: query },
-    ],
+    messages,
     response_format: { type: "json_object" },
     temperature: 0.1,
   });
@@ -188,7 +218,7 @@ export async function replan(
   if (!Array.isArray(parsed.steps)) {
     throw new Error("replanner returned invalid shape");
   }
-  return parsed;
+  return { plan: parsed, usage: readUsage(completion.usage) };
 }
 
 // ---------------------------------------------------------------------------
@@ -358,7 +388,7 @@ export async function synthesize(
   plan: Plan,
   results: ToolEnvelope[],
   model = "gpt-4o-2024-11-20",
-): Promise<string> {
+): Promise<Synthesized> {
   const summary = plan.steps
     .map((s, i) => {
       const r = results[i];
@@ -378,5 +408,8 @@ export async function synthesize(
     ],
     temperature: 0.2,
   });
-  return completion.choices[0]?.message?.content ?? "";
+  return {
+    answer: completion.choices[0]?.message?.content ?? "",
+    usage: readUsage(completion.usage),
+  };
 }

@@ -1,5 +1,4 @@
 import Link from "next/link";
-
 import {
   austin311Last30d,
   austinInspections30dByZip,
@@ -31,10 +30,10 @@ const datasetSeed = [
       "Health-inspection scores and violations for Austin restaurants, food trucks, and grocery stores.",
   },
   {
-    id: "i26j-ai4z",
+    id: "xwdj-i9he",
     title: "311 Service Requests",
     agency: "Communications & Public Information",
-    portal: "data.austintexas.gov",
+    portal: "datahub.austintexas.gov",
     rowsLabel: "1.5M+",
     cadence: "Daily",
     blurb:
@@ -131,7 +130,7 @@ export default async function HomePage() {
     {
       label: "311 requests, 30d",
       value: requests30d > 0 ? requests30d.toLocaleString() : "—",
-      sub: "live · i26j-ai4z",
+      sub: "live · xwdj-i9he",
       tone: "navy" as const,
     },
     {

@@ -1,0 +1,464 @@
+{
+  "dataset": "building_permits",
+  "generated": "2026-05-09T15:22:33.395371",
+  "passed": 10,
+  "total": 10,
+  "results": [
+    {
+      "ds": "permits",
+      "story": "building_permits",
+      "story_n": 1,
+      "q": 1,
+      "note": "top zip codes by permit count YTD",
+      "select": "original_zip,count(*) AS cnt",
+      "where": "issue_date>'2026-01-01T00:00:00.000'",
+      "group": "original_zip",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.73,
+      "row_count": 10,
+      "rows": [
+        {
+          "original_zip": "78744",
+          "cnt": "1466"
+        },
+        {
+          "original_zip": "78704",
+          "cnt": "1325"
+        },
+        {
+          "original_zip": "78745",
+          "cnt": "1230"
+        },
+        {
+          "original_zip": "78757",
+          "cnt": "891"
+        },
+        {
+          "original_zip": "78731",
+          "cnt": "856"
+        },
+        {
+          "original_zip": "78747",
+          "cnt": "835"
+        },
+        {
+          "original_zip": "78723",
+          "cnt": "804"
+        },
+        {
+          "original_zip": "78703",
+          "cnt": "791"
+        },
+        {
+          "original_zip": "78702",
+          "cnt": "769"
+        },
+        {
+          "original_zip": "78759",
+          "cnt": "761"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=original_zip%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=issue_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=original_zip&%24order=cnt+DESC"
+    },
+    {
+      "ds": "permits",
+      "story": "building_permits",
+      "story_n": 1,
+      "q": 2,
+      "note": "monthly permit volume YTD",
+      "select": "date_trunc_ym(issue_date) AS month,count(*) AS cnt",
+      "where": "issue_date>'2026-01-01T00:00:00.000'",
+      "group": "date_trunc_ym(issue_date)",
+      "order": "month ASC",
+      "limit": 13,
+      "status": "PASS",
+      "elapsed_s": 0.91,
+      "row_count": 5,
+      "rows": [
+        {
+          "month": "2026-01-01T00:00:00.000",
+          "cnt": "4205"
+        },
+        {
+          "month": "2026-02-01T00:00:00.000",
+          "cnt": "4181"
+        },
+        {
+          "month": "2026-03-01T00:00:00.000",
+          "cnt": "4854"
+        },
+        {
+          "month": "2026-04-01T00:00:00.000",
+          "cnt": "4942"
+        },
+        {
+          "month": "2026-05-01T00:00:00.000",
+          "cnt": "1417"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=date_trunc_ym%28issue_date%29+AS+month%2Ccount%28%2A%29+AS+cnt&%24limit=13&%24where=issue_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=date_trunc_ym%28issue_date%29&%24order=month+ASC"
+    },
+    {
+      "ds": "permits",
+      "story": "building_permits",
+      "story_n": 2,
+      "q": 3,
+      "note": "permits by status current",
+      "select": "status_current,count(*) AS cnt",
+      "where": "issue_date>'2026-01-01T00:00:00.000'",
+      "group": "status_current",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.35,
+      "row_count": 10,
+      "rows": [
+        {
+          "status_current": "Active",
+          "cnt": "12515"
+        },
+        {
+          "status_current": "Final",
+          "cnt": "6899"
+        },
+        {
+          "status_current": "Inactive Pending Revision",
+          "cnt": "59"
+        },
+        {
+          "status_current": "Withdrawn",
+          "cnt": "51"
+        },
+        {
+          "status_current": "VOID",
+          "cnt": "26"
+        },
+        {
+          "status_current": "Cancelled - Contractor Required",
+          "cnt": "18"
+        },
+        {
+          "status_current": "On Hold",
+          "cnt": "16"
+        },
+        {
+          "status_current": "Expired",
+          "cnt": "8"
+        },
+        {
+          "status_current": "Expired - License",
+          "cnt": "4"
+        },
+        {
+          "status_current": "Pending",
+          "cnt": "2"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=status_current%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=issue_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=status_current&%24order=cnt+DESC"
+    },
+    {
+      "ds": "permits",
+      "story": "building_permits",
+      "story_n": 2,
+      "q": 4,
+      "note": "most common permit types in 78704",
+      "select": "permittype,count(*) AS cnt",
+      "where": "original_zip='78704' AND issue_date>'2026-01-01T00:00:00.000'",
+      "group": "permittype",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.48,
+      "row_count": 5,
+      "rows": [
+        {
+          "permittype": "EP",
+          "cnt": "370"
+        },
+        {
+          "permittype": "PP",
+          "cnt": "363"
+        },
+        {
+          "permittype": "MP",
+          "cnt": "281"
+        },
+        {
+          "permittype": "BP",
+          "cnt": "277"
+        },
+        {
+          "permittype": "DS",
+          "cnt": "34"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=permittype%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=original_zip%3D%2778704%27+AND+issue_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=permittype&%24order=cnt+DESC"
+    },
+    {
+      "ds": "permits",
+      "story": "building_permits",
+      "story_n": 3,
+      "q": 5,
+      "note": "residential vs commercial YTD",
+      "select": "permit_class_mapped,count(*) AS cnt",
+      "where": "issue_date>'2026-01-01T00:00:00.000'",
+      "group": "permit_class_mapped",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.34,
+      "row_count": 2,
+      "rows": [
+        {
+          "permit_class_mapped": "Residential",
+          "cnt": "14271"
+        },
+        {
+          "permit_class_mapped": "Commercial",
+          "cnt": "5328"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=permit_class_mapped%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=issue_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=permit_class_mapped&%24order=cnt+DESC"
+    },
+    {
+      "ds": "permits",
+      "story": "building_permits",
+      "story_n": 4,
+      "q": 6,
+      "note": "top zip by total job valuation YTD",
+      "select": "original_zip,sum(total_job_valuation) AS total_val",
+      "where": "issue_date>'2026-01-01T00:00:00.000'",
+      "group": "original_zip",
+      "order": "total_val DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.33,
+      "row_count": 10,
+      "rows": [
+        {
+          "original_zip": "78712"
+        },
+        {
+          "original_zip": "78737"
+        },
+        {
+          "original_zip": "78610"
+        },
+        {
+          "original_zip": "78738"
+        },
+        {
+          "original_zip": "78660",
+          "total_val": "635670353"
+        },
+        {
+          "original_zip": "78701",
+          "total_val": "310520004"
+        },
+        {
+          "original_zip": "78744",
+          "total_val": "118835225"
+        },
+        {
+          "original_zip": "78745",
+          "total_val": "52203116"
+        },
+        {
+          "original_zip": "78756",
+          "total_val": "36107049"
+        },
+        {
+          "original_zip": "78726",
+          "total_val": "35460044"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=original_zip%2Csum%28total_job_valuation%29+AS+total_val&%24limit=10&%24where=issue_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=original_zip&%24order=total_val+DESC"
+    },
+    {
+      "ds": "permits",
+      "story": "building_permits",
+      "story_n": 4,
+      "q": 7,
+      "note": "avg job valuation by permit type",
+      "select": "permittype,avg(total_job_valuation) AS avg_val,count(*) AS cnt",
+      "where": "issue_date>'2026-01-01T00:00:00.000'",
+      "group": "permittype",
+      "order": "avg_val DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.31,
+      "row_count": 5,
+      "rows": [
+        {
+          "permittype": "MP",
+          "cnt": "3509"
+        },
+        {
+          "permittype": "EP",
+          "cnt": "5751"
+        },
+        {
+          "permittype": "DS",
+          "cnt": "345"
+        },
+        {
+          "permittype": "BP",
+          "avg_val": "394193.190306274160",
+          "cnt": "4375"
+        },
+        {
+          "permittype": "PP",
+          "avg_val": "95000.000000000000",
+          "cnt": "5619"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=permittype%2Cavg%28total_job_valuation%29+AS+avg_val%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=issue_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=permittype&%24order=avg_val+DESC"
+    },
+    {
+      "ds": "permits",
+      "story": "building_permits",
+      "story_n": 5,
+      "q": 8,
+      "note": "top contractors by permit count",
+      "select": "contractor_company_name,count(*) AS cnt",
+      "where": "issue_date>'2026-01-01T00:00:00.000' AND contractor_company_name IS NOT NULL",
+      "group": "contractor_company_name",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.32,
+      "row_count": 10,
+      "rows": [
+        {
+          "contractor_company_name": "IES Residential, Inc.",
+          "cnt": "452"
+        },
+        {
+          "contractor_company_name": "Victory Plumbing Company",
+          "cnt": "310"
+        },
+        {
+          "contractor_company_name": "Radiant Plumbing & AC",
+          "cnt": "269"
+        },
+        {
+          "contractor_company_name": "In Charge Electrical Services",
+          "cnt": "266"
+        },
+        {
+          "contractor_company_name": "Landmark Electric",
+          "cnt": "250"
+        },
+        {
+          "contractor_company_name": "IES Residential Inc",
+          "cnt": "217"
+        },
+        {
+          "contractor_company_name": "Stan's Heating, Air, Plumbing, & Electrical",
+          "cnt": "190"
+        },
+        {
+          "contractor_company_name": "AEI Electric LLC",
+          "cnt": "175"
+        },
+        {
+          "contractor_company_name": "Texas Multifamily Solution, LLC",
+          "cnt": "160"
+        },
+        {
+          "contractor_company_name": "McCullough Heating & Air",
+          "cnt": "156"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=contractor_company_name%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=issue_date%3E%272026-01-01T00%3A00%3A00.000%27+AND+contractor_company_name+IS+NOT+NULL&%24group=contractor_company_name&%24order=cnt+DESC"
+    },
+    {
+      "ds": "permits",
+      "story": "building_permits",
+      "story_n": 5,
+      "q": 9,
+      "note": "new construction starts last quarter by zip",
+      "select": "original_zip,count(*) AS cnt",
+      "where": "work_class='New' AND issue_date>'2026-02-08T00:00:00.000'",
+      "group": "original_zip",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.3,
+      "row_count": 10,
+      "rows": [
+        {
+          "original_zip": "78744",
+          "cnt": "526"
+        },
+        {
+          "original_zip": "78747",
+          "cnt": "409"
+        },
+        {
+          "original_zip": "78745",
+          "cnt": "307"
+        },
+        {
+          "original_zip": "78704",
+          "cnt": "269"
+        },
+        {
+          "original_zip": "78702",
+          "cnt": "229"
+        },
+        {
+          "original_zip": "78617",
+          "cnt": "220"
+        },
+        {
+          "original_zip": "78757",
+          "cnt": "209"
+        },
+        {
+          "original_zip": "78731",
+          "cnt": "171"
+        },
+        {
+          "original_zip": "78724",
+          "cnt": "164"
+        },
+        {
+          "original_zip": "78703",
+          "cnt": "130"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=original_zip%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=work_class%3D%27New%27+AND+issue_date%3E%272026-02-08T00%3A00%3A00.000%27&%24group=original_zip&%24order=cnt+DESC"
+    },
+    {
+      "ds": "permits",
+      "story": "building_permits",
+      "story_n": 5,
+      "q": 10,
+      "note": "commercial permits last 3mo",
+      "select": "count(*) AS cnt",
+      "where": "permit_class_mapped='Commercial' AND issue_date>'2026-02-08T00:00:00.000'",
+      "status": "PASS",
+      "elapsed_s": 0.32,
+      "row_count": 1,
+      "rows": [
+        {
+          "cnt": "3817"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=count%28%2A%29+AS+cnt&%24limit=100&%24where=permit_class_mapped%3D%27Commercial%27+AND+issue_date%3E%272026-02-08T00%3A00%3A00.000%27"
+    }
+  ]
+}

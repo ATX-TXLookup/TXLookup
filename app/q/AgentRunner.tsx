@@ -23,6 +23,7 @@ type StepLog = {
   preview?: string;
   error?: string | null;
   fromReplan?: boolean;
+  durationMs?: number;
 };
 
 type ReplanLog = {
@@ -31,6 +32,7 @@ type ReplanLog = {
   error: string | null;
   diagnosis?: string;
   thinking?: string;
+  reason?: "step_failed" | "doom_loop";
 };
 
 type AgentState = {
@@ -54,6 +56,8 @@ type AgentState = {
   error: string | null;
   events: ObsEvent[];
   startedAt: number | null;
+  usageTotal: TokenUsage | null;
+  durationMs: number | null;
 };
 
 const initial: AgentState = {
@@ -69,6 +73,8 @@ const initial: AgentState = {
   error: null,
   events: [],
   startedAt: null,
+  usageTotal: null,
+  durationMs: null,
 };
 
 function parseSseLine(line: string): unknown | null {
@@ -80,12 +86,15 @@ function parseSseLine(line: string): unknown | null {
   }
 }
 
+type TokenUsage = { prompt: number; completion: number; total: number };
+
 type SseEvent = {
   phase:
     | "reasoning"
     | "planning"
     | "executing"
     | "step_done"
+    | "doom_loop"
     | "replanning"
     | "replanned"
     | "completing"
@@ -112,6 +121,12 @@ type SseEvent = {
   answer?: string;
   citation?: Citation | null;
   artifacts?: string[];
+  duration_ms?: number;
+  usage?: TokenUsage;
+  usage_total?: TokenUsage;
+  kind?: "identical" | "sequence";
+  detail?: string;
+  reason?: "step_failed" | "doom_loop";
 };
 
 function eventForObservatory(ev: SseEvent): ObsEvent | null {
@@ -130,7 +145,9 @@ function eventForObservatory(ev: SseEvent): ObsEvent | null {
         ts,
         phase: "planning",
         level: "info",
-        message: `Codex returned plan with ${ev.plan?.steps?.length ?? 0} step(s)`,
+        message: `Codex returned plan with ${ev.plan?.steps?.length ?? 0} step(s)${
+          ev.usage ? ` · ${ev.usage.total} tok` : ""
+        }`,
         detail: ev.plan?.intent?.thinking
           ? `intent.thinking: ${ev.plan.intent.thinking}`
           : undefined,
@@ -150,12 +167,22 @@ function eventForObservatory(ev: SseEvent): ObsEvent | null {
         ts,
         phase: "step_done",
         level: ev.status === "completed" ? "ok" : "error",
-        message: `Step ${ev.step} ${ev.status}`,
+        message: `Step ${ev.step} ${ev.status}${
+          typeof ev.duration_ms === "number" ? ` · ${ev.duration_ms}ms` : ""
+        }`,
         detail: ev.error
           ? `error: ${ev.error}`
           : ev.preview
             ? `preview: ${ev.preview}`
             : undefined,
+      };
+    case "doom_loop":
+      return {
+        ts,
+        phase: "doom_loop",
+        level: "warn",
+        message: `Doom-loop caught — ${ev.kind} pattern at step ${ev.step}`,
+        detail: ev.detail,
       };
     case "replanning":
       return {
@@ -170,7 +197,9 @@ function eventForObservatory(ev: SseEvent): ObsEvent | null {
         ts,
         phase: "replanned",
         level: "warn",
-        message: `New plan after diagnosis (${ev.plan?.steps?.length ?? 0} step(s))`,
+        message: `New plan after diagnosis (${ev.plan?.steps?.length ?? 0} step(s))${
+          ev.usage ? ` · ${ev.usage.total} tok` : ""
+        }`,
         detail:
           (ev.diagnosis ? `diagnosis: ${ev.diagnosis}\n` : "") +
           (ev.plan?.intent?.thinking
@@ -184,14 +213,23 @@ function eventForObservatory(ev: SseEvent): ObsEvent | null {
         level: "info",
         message: "Codex synthesizing the answer",
       };
-    case "done":
+    case "done": {
+      const tot = ev.usage_total;
+      const dur = typeof ev.duration_ms === "number" ? ev.duration_ms : null;
+      const summary = [
+        dur !== null ? `${(dur / 1000).toFixed(1)}s` : null,
+        tot ? `${tot.total} tok` : null,
+      ]
+        .filter(Boolean)
+        .join(" · ");
       return {
         ts,
         phase: "done",
         level: "ok",
-        message: "Answer ready",
+        message: summary ? `Answer ready · ${summary}` : "Answer ready",
         detail: ev.answer ? `answer: ${ev.answer.slice(0, 200)}` : undefined,
       };
+    }
     case "error":
       return {
         ts,
@@ -306,10 +344,14 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
                         status: ev.status === "completed" ? "completed" : "failed",
                         preview: ev.preview,
                         error: ev.error,
+                        durationMs: ev.duration_ms,
                       };
                     }
                     return { ...s, steps: next, events: eventsNext };
                   }
+                  case "doom_loop":
+                    // The corrective replan event will follow; just log here.
+                    return { ...s, events: eventsNext };
                   case "replanning":
                     return {
                       ...s,
@@ -320,6 +362,7 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
                           failedStep: ev.failedStep ?? s.currentStep,
                           failedTool: ev.failedTool ?? "",
                           error: ev.error ?? null,
+                          reason: ev.reason,
                         },
                       ],
                       events: eventsNext,
@@ -360,6 +403,8 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
                       answer: ev.answer ?? null,
                       citation: ev.citation ?? null,
                       artifacts: ev.artifacts ?? [],
+                      usageTotal: ev.usage_total ?? null,
+                      durationMs: ev.duration_ms ?? null,
                       events: eventsNext,
                     };
                   case "error":
@@ -549,6 +594,11 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
                             }`}
                           >
                             {s.status}
+                            {typeof s.durationMs === "number" && s.status !== "pending" && (
+                              <span className="ml-2 text-[#1A1F2A]/55 normal-case tracking-normal">
+                                {s.durationMs}ms
+                              </span>
+                            )}
                           </span>
                         </div>
                         {s.rationale && (
@@ -586,9 +636,21 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
                 {state.replans.map((rp, i) => (
                   <li key={i}>
                     <p className="text-sm text-[#0B2545]">
-                      Step {rp.failedStep}{" "}
-                      <span className="font-mono text-xs">{rp.failedTool}</span>{" "}
-                      failed:
+                      {rp.reason === "doom_loop" ? (
+                        <>
+                          <span className="mr-2 rounded-sm bg-[#A0231C] px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-white">
+                            Doom-loop
+                          </span>
+                          Caught looping at step {rp.failedStep}{" "}
+                          <span className="font-mono text-xs">{rp.failedTool}</span>:
+                        </>
+                      ) : (
+                        <>
+                          Step {rp.failedStep}{" "}
+                          <span className="font-mono text-xs">{rp.failedTool}</span>{" "}
+                          failed:
+                        </>
+                      )}
                       <span className="ml-1 font-mono text-xs text-[#A0231C]">
                         {rp.error}
                       </span>
@@ -622,6 +684,15 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
                   <p className="mt-3 max-w-[64ch] text-xl font-medium leading-relaxed text-[#0B2545] md:text-2xl">
                     {state.answer}
                   </p>
+                  {(state.durationMs !== null || state.usageTotal) && (
+                    <p className="mt-4 font-mono text-[11px] uppercase tracking-wider text-[#1A1F2A]/55">
+                      {state.durationMs !== null &&
+                        `${(state.durationMs / 1000).toFixed(1)}s end-to-end`}
+                      {state.usageTotal && state.durationMs !== null && " · "}
+                      {state.usageTotal &&
+                        `${state.usageTotal.total.toLocaleString()} tokens (${state.usageTotal.prompt.toLocaleString()} in / ${state.usageTotal.completion.toLocaleString()} out)`}
+                    </p>
+                  )}
                 </div>
 
                 <aside className="md:col-span-4">

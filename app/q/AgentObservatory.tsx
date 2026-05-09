@@ -16,6 +16,7 @@ const phaseColor: Record<string, string> = {
   executing: "#0B5FFF",
   step_done: "#1E7A47",
   failed: "#A0231C",
+  doom_loop: "#A0231C",
   replanning: "#A06200",
   replanned: "#A06200",
   completing: "#0B5FFF",

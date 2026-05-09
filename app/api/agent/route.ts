@@ -2,10 +2,21 @@
 // POST { query: string } → stream of phase / step / result events.
 //
 // Loop: Reason → Plan → Tool* → (Replan if any step failed, ≤2 attempts) → Complete.
+// Adds a doom-loop guard around the executing-loop so a stuck agent gets a
+// corrective system prompt + replan instead of endlessly repeating itself.
 
 import { NextRequest } from "next/server";
 
-import { executeStep, reasonAndPlan, replan, synthesize, Plan, ToolEnvelope } from "@/app/lib/agent";
+import {
+  executeStep,
+  reasonAndPlan,
+  replan,
+  synthesize,
+  Plan,
+  ToolEnvelope,
+  TokenUsage,
+} from "@/app/lib/agent";
+import { DoomLoopGuard, type DoomLoopHit } from "@/app/lib/doomLoop";
 import { findFixture } from "@/app/lib/demo-fixtures";
 
 export const runtime = "nodejs";
@@ -15,22 +26,73 @@ const MAX_REPLANS = 2;
 
 type Event =
   | { phase: "reasoning"; message: string }
-  | { phase: "planning"; plan: unknown; thinking?: string }
-  | { phase: "executing"; step: number; total: number; tool: string; args: unknown; rationale?: string }
-  | { phase: "step_done"; step: number; status: string; preview: string; error: string | null }
-  | { phase: "replanning"; failedStep: number; failedTool: string; error: string | null }
-  | { phase: "replanned"; plan: unknown; diagnosis?: string; thinking?: string }
+  | { phase: "planning"; plan: unknown; thinking?: string; usage?: TokenUsage }
+  | {
+      phase: "executing";
+      step: number;
+      total: number;
+      tool: string;
+      args: unknown;
+      rationale?: string;
+    }
+  | {
+      phase: "step_done";
+      step: number;
+      status: string;
+      preview: string;
+      error: string | null;
+      duration_ms: number;
+    }
+  | {
+      phase: "doom_loop";
+      step: number;
+      kind: DoomLoopHit["kind"];
+      detail: string;
+    }
+  | {
+      phase: "replanning";
+      failedStep: number;
+      failedTool: string;
+      error: string | null;
+      reason?: "step_failed" | "doom_loop";
+    }
+  | {
+      phase: "replanned";
+      plan: unknown;
+      diagnosis?: string;
+      thinking?: string;
+      usage?: TokenUsage;
+    }
   | { phase: "completing"; message: string }
-  | { phase: "done"; answer: string; citation: unknown; artifacts: string[] }
+  | {
+      phase: "done";
+      answer: string;
+      citation: unknown;
+      artifacts: string[];
+      usage_total: TokenUsage;
+      duration_ms: number;
+    }
   | { phase: "error"; error: string };
 
 function sse(ev: Event): string {
   return `data: ${JSON.stringify(ev)}\n\n`;
 }
 
+function addUsage(a: TokenUsage, b: TokenUsage): TokenUsage {
+  return {
+    prompt: a.prompt + b.prompt,
+    completion: a.completion + b.completion,
+    total: a.total + b.total,
+  };
+}
+
+// Demo-mode fixture replayer. When ?demo=1 (or { demo: true }) and the query
+// matches a fixture in app/lib/demo-fixtures.ts, /api/agent serves a recorded
+// SSE flow (with realistic step timings) instead of calling Codex + Socrata.
+// Insurance against API blips during the 3-min stage demo.
 function replayFixture(
   query: string,
-  fx: ReturnType<typeof findFixture> & object,
+  fx: NonNullable<ReturnType<typeof findFixture>>,
 ): ReadableStream {
   return new ReadableStream({
     async start(controller) {
@@ -68,6 +130,7 @@ function replayFixture(
           status: s.status,
           preview: s.resultPreview.slice(0, 240),
           error: s.error ?? null,
+          duration_ms: s.delay_ms ?? 600,
         });
 
         // Inject a replan after the configured failAt step
@@ -84,9 +147,9 @@ function replayFixture(
             failedStep: i + 1,
             failedTool: s.tool,
             error: fx.failError ?? s.error ?? null,
+            reason: "step_failed",
           });
           await wait(800);
-          // The "replanned" plan replaces the remaining steps with the rest of the fixture.
           send({
             phase: "replanned",
             plan: {
@@ -108,6 +171,8 @@ function replayFixture(
         answer: fx.answer,
         citation: fx.citation,
         artifacts: fx.artifacts,
+        usage_total: { prompt: 0, completion: 0, total: 0 },
+        duration_ms: 0,
       });
       controller.close();
     },
@@ -150,14 +215,22 @@ export async function POST(req: NextRequest) {
     async start(controller) {
       const send = (ev: Event) =>
         controller.enqueue(new TextEncoder().encode(sse(ev)));
+
+      const startedAt = Date.now();
+      const guard = new DoomLoopGuard();
+      let usageTotal: TokenUsage = { prompt: 0, completion: 0, total: 0 };
+
       try {
         send({ phase: "reasoning", message: query });
 
-        let currentPlan: Plan = await reasonAndPlan(query);
+        const planned = await reasonAndPlan(query);
+        let currentPlan: Plan = planned.plan;
+        usageTotal = addUsage(usageTotal, planned.usage);
         send({
           phase: "planning",
           plan: currentPlan,
           thinking: (currentPlan.intent as { thinking?: string })?.thinking,
+          usage: planned.usage,
         });
 
         const results: ToolEnvelope[] = [];
@@ -168,6 +241,68 @@ export async function POST(req: NextRequest) {
 
         while (i < currentPlan.steps.length) {
           const step = currentPlan.steps[i];
+
+          // Doom-loop check BEFORE executing — if the planner just emitted
+          // a step we've already run twice, short-circuit into a replan.
+          const hit = guard.observe(step.tool, step.args);
+          if (hit && replanCount < MAX_REPLANS) {
+            replanCount += 1;
+            send({
+              phase: "doom_loop",
+              step: i + 1,
+              kind: hit.kind,
+              detail: hit.detail,
+            });
+            send({
+              phase: "replanning",
+              failedStep: i + 1,
+              failedTool: step.tool,
+              error: hit.detail,
+              reason: "doom_loop",
+            });
+            try {
+              // Build a synthetic failure envelope so replan() has context.
+              const syntheticFailure: ToolEnvelope = {
+                status: "failed",
+                result: null,
+                error: `doom-loop: ${hit.detail}`,
+              };
+              const re = await replan(
+                query,
+                currentPlan,
+                i,
+                syntheticFailure,
+                undefined,
+                hit.message,
+              );
+              usageTotal = addUsage(usageTotal, re.usage);
+              send({
+                phase: "replanned",
+                plan: re.plan,
+                diagnosis: re.plan.diagnosis,
+                thinking: (re.plan.intent as { thinking?: string })?.thinking,
+                usage: re.usage,
+              });
+              currentPlan = {
+                ...re.plan,
+                steps: [...currentPlan.steps.slice(0, i), ...re.plan.steps],
+              };
+              guard.reset();
+              continue;
+            } catch (e) {
+              send({
+                phase: "step_done",
+                step: i + 1,
+                status: "failed",
+                preview: "",
+                error: `doom-loop replan failed: ${e instanceof Error ? e.message : String(e)}`,
+                duration_ms: 0,
+              });
+              i += 1;
+              continue;
+            }
+          }
+
           send({
             phase: "executing",
             step: i + 1,
@@ -176,7 +311,10 @@ export async function POST(req: NextRequest) {
             args: step.args,
             rationale: step.rationale,
           });
+
+          const stepStart = Date.now();
           const r = await executeStep(step);
+          const duration_ms = Date.now() - stepStart;
           results.push(r);
           if (step.tool === "cite_dataset" && r.status === "completed") {
             citation = r.result;
@@ -188,6 +326,7 @@ export async function POST(req: NextRequest) {
             status: r.status,
             preview: JSON.stringify(r.result).slice(0, 240),
             error: r.error,
+            duration_ms,
           });
 
           // Replan on a failure if we have budget left.
@@ -198,30 +337,32 @@ export async function POST(req: NextRequest) {
               failedStep: i + 1,
               failedTool: step.tool,
               error: r.error,
+              reason: "step_failed",
             });
             try {
-              const newPlan = await replan(query, currentPlan, i, r);
+              const re = await replan(query, currentPlan, i, r);
+              usageTotal = addUsage(usageTotal, re.usage);
               send({
                 phase: "replanned",
-                plan: newPlan,
-                diagnosis: newPlan.diagnosis,
-                thinking: (newPlan.intent as { thinking?: string })?.thinking,
+                plan: re.plan,
+                diagnosis: re.plan.diagnosis,
+                thinking: (re.plan.intent as { thinking?: string })?.thinking,
+                usage: re.usage,
               });
-              // Replace remaining steps from the failed one onward with the new plan's steps.
               currentPlan = {
-                ...newPlan,
-                steps: [...currentPlan.steps.slice(0, i), ...newPlan.steps],
+                ...re.plan,
+                steps: [...currentPlan.steps.slice(0, i), ...re.plan.steps],
               };
-              // Re-run starting at the failed-step index.
+              guard.reset();
               continue;
             } catch (e) {
-              // Replan itself failed — give up gracefully and continue.
               send({
                 phase: "step_done",
                 step: i + 1,
                 status: "failed",
                 preview: "",
                 error: `replan failed: ${e instanceof Error ? e.message : String(e)}`,
+                duration_ms: 0,
               });
             }
           }
@@ -230,9 +371,17 @@ export async function POST(req: NextRequest) {
         }
 
         send({ phase: "completing", message: "Synthesizing answer..." });
-        const answer = await synthesize(query, currentPlan, results);
+        const synth = await synthesize(query, currentPlan, results);
+        usageTotal = addUsage(usageTotal, synth.usage);
 
-        send({ phase: "done", answer, citation, artifacts });
+        send({
+          phase: "done",
+          answer: synth.answer,
+          citation,
+          artifacts,
+          usage_total: usageTotal,
+          duration_ms: Date.now() - startedAt,
+        });
         controller.close();
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : String(e);

@@ -1,78 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { findById, type CatalogDataset } from "../../lib/catalog";
 
-type Dataset = {
-  id: string;
-  title: string;
-  agency: string;
-  city: string;
-  portal: string;
-  cadence: string;
-  blurb: string;
-};
+type Dataset = CatalogDataset;
 
-const CATALOG: Record<string, Dataset> = {
-  "3syk-w9eu": {
-    id: "3syk-w9eu",
-    title: "Issued Construction Permits",
-    agency: "Development Services Department",
-    city: "Austin",
-    portal: "data.austintexas.gov",
-    cadence: "Daily",
-    blurb:
-      "Every construction permit issued by the City of Austin since the 1980s — type, address, contractor, status, value.",
-  },
-  "ecmv-9xxi": {
-    id: "ecmv-9xxi",
-    title: "Food Establishment Inspection Scores",
-    agency: "Austin Public Health",
-    city: "Austin",
-    portal: "data.austintexas.gov",
-    cadence: "Weekly",
-    blurb:
-      "Health-inspection scores and violations for Austin restaurants, food trucks, and grocery stores.",
-  },
-  "i26j-ai4z": {
-    id: "i26j-ai4z",
-    title: "311 Service Requests",
-    agency: "Communications & Public Information",
-    city: "Austin",
-    portal: "data.austintexas.gov",
-    cadence: "Daily",
-    blurb:
-      "Every non-emergency 311 call logged in Austin — pothole, graffiti, animal services, code complaints.",
-  },
-  "6wtj-zbtb": {
-    id: "6wtj-zbtb",
-    title: "Code Violation Cases",
-    agency: "Code Department",
-    city: "Austin",
-    portal: "data.austintexas.gov",
-    cadence: "Daily",
-    blurb:
-      "Open and closed building, zoning, and short-term-rental violations.",
-  },
-  "fdj4-gpfu": {
-    id: "fdj4-gpfu",
-    title: "Crime Reports",
-    agency: "Austin Police Department",
-    city: "Austin",
-    portal: "data.austintexas.gov",
-    cadence: "Weekly",
-    blurb:
-      "Reported crimes by type, location, and time. APD case-level data.",
-  },
-  "y2wy-tgr5": {
-    id: "y2wy-tgr5",
-    title: "Traffic Fatalities",
-    agency: "Austin Transportation",
-    city: "Austin",
-    portal: "data.austintexas.gov",
-    cadence: "Monthly",
-    blurb:
-      "Fatal traffic crashes by location, mode, and year. Vision Zero data.",
-  },
-};
+function capitalize(s: string): string {
+  return s.length === 0 ? s : s[0].toUpperCase() + s.slice(1);
+}
 
 type Column = {
   fieldName: string;
@@ -168,7 +102,7 @@ export default async function DatasetPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const ds = CATALOG[id];
+  const ds = findById(id);
   if (!ds) notFound();
 
   const [meta, sample] = await Promise.all([
@@ -195,7 +129,7 @@ export default async function DatasetPage({
               {ds.city}
             </span>
             <span className="font-mono text-[11px] uppercase tracking-wider text-[#1A1F2A]/55">
-              {ds.cadence} · {ds.id}
+              {capitalize(ds.cadence)} · {ds.id}
             </span>
           </div>
           <h1 className="mt-4 font-display text-3xl font-extrabold leading-tight tracking-tight text-[#0B2545] md:text-5xl">
@@ -243,7 +177,7 @@ export default async function DatasetPage({
             <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#1A1F2A]/55">
               Refresh cadence
             </p>
-            <p className="mt-2 font-display text-sm font-semibold text-[#0B2545]">{ds.cadence}</p>
+            <p className="mt-2 font-display text-sm font-semibold text-[#0B2545]">{capitalize(ds.cadence)}</p>
           </div>
           <div className="px-6">
             <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#1A1F2A]/55">

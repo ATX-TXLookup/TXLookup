@@ -1,0 +1,570 @@
+{
+  "dataset": "traffic_fatalities",
+  "generated": "2026-05-09T15:22:33.399198",
+  "passed": 10,
+  "total": 10,
+  "results": [
+    {
+      "ds": "traffic",
+      "story": "traffic_fatalities",
+      "story_n": 1,
+      "q": 1,
+      "note": "fatal crashes by street name",
+      "select": "rpt_street_name,count(*) AS crashes,sum(death_cnt) AS deaths",
+      "where": "crash_fatal_fl='true'",
+      "group": "rpt_street_name",
+      "order": "deaths DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 1.23,
+      "row_count": 10,
+      "rows": [
+        {
+          "rpt_street_name": "NOT REPORTED",
+          "crashes": "96",
+          "deaths": "108"
+        },
+        {
+          "rpt_street_name": "LAMAR",
+          "crashes": "38",
+          "deaths": "36"
+        },
+        {
+          "rpt_street_name": "IH 35",
+          "crashes": "31",
+          "deaths": "30"
+        },
+        {
+          "rpt_street_name": "IH 35 NB",
+          "crashes": "25",
+          "deaths": "26"
+        },
+        {
+          "rpt_street_name": "MOPAC",
+          "crashes": "19",
+          "deaths": "22"
+        },
+        {
+          "rpt_street_name": "CONGRESS",
+          "crashes": "22",
+          "deaths": "22"
+        },
+        {
+          "rpt_street_name": "BEN WHITE",
+          "crashes": "19",
+          "deaths": "21"
+        },
+        {
+          "rpt_street_name": "RIVERSIDE",
+          "crashes": "17",
+          "deaths": "17"
+        },
+        {
+          "rpt_street_name": "SLAUGHTER",
+          "crashes": "15",
+          "deaths": "16"
+        },
+        {
+          "rpt_street_name": "IH 35 SB",
+          "crashes": "16",
+          "deaths": "15"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/y2wy-tgr5.json?%24select=rpt_street_name%2Ccount%28%2A%29+AS+crashes%2Csum%28death_cnt%29+AS+deaths&%24limit=10&%24where=crash_fatal_fl%3D%27true%27&%24group=rpt_street_name&%24order=deaths+DESC"
+    },
+    {
+      "ds": "traffic",
+      "story": "traffic_fatalities",
+      "story_n": 1,
+      "q": 2,
+      "note": "total deaths by year",
+      "select": "date_trunc_y(crash_timestamp) AS year,sum(death_cnt) AS deaths,count(*) AS crashes",
+      "where": "crash_fatal_fl='true'",
+      "group": "date_trunc_y(crash_timestamp)",
+      "order": "year DESC",
+      "limit": 5,
+      "status": "PASS",
+      "elapsed_s": 0.67,
+      "row_count": 5,
+      "rows": [
+        {
+          "year": "2026-01-01T00:00:00.000",
+          "deaths": "25",
+          "crashes": "26"
+        },
+        {
+          "year": "2025-01-01T00:00:00.000",
+          "deaths": "99",
+          "crashes": "97"
+        },
+        {
+          "year": "2024-01-01T00:00:00.000",
+          "deaths": "97",
+          "crashes": "92"
+        },
+        {
+          "year": "2023-01-01T00:00:00.000",
+          "deaths": "90",
+          "crashes": "93"
+        },
+        {
+          "year": "2022-01-01T00:00:00.000",
+          "deaths": "117",
+          "crashes": "114"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/y2wy-tgr5.json?%24select=date_trunc_y%28crash_timestamp%29+AS+year%2Csum%28death_cnt%29+AS+deaths%2Ccount%28%2A%29+AS+crashes&%24limit=5&%24where=crash_fatal_fl%3D%27true%27&%24group=date_trunc_y%28crash_timestamp%29&%24order=year+DESC"
+    },
+    {
+      "ds": "traffic",
+      "story": "traffic_fatalities",
+      "story_n": 2,
+      "q": 3,
+      "note": "pedestrian deaths by street",
+      "select": "rpt_street_name,sum(pedestrian_death_count) AS ped_deaths",
+      "where": "pedestrian_death_count>0",
+      "group": "rpt_street_name",
+      "order": "ped_deaths DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 1.14,
+      "row_count": 10,
+      "rows": [
+        {
+          "rpt_street_name": "NOT REPORTED",
+          "ped_deaths": "27"
+        },
+        {
+          "rpt_street_name": "LAMAR",
+          "ped_deaths": "19"
+        },
+        {
+          "rpt_street_name": "IH 35 NB",
+          "ped_deaths": "14"
+        },
+        {
+          "rpt_street_name": "IH 35",
+          "ped_deaths": "12"
+        },
+        {
+          "rpt_street_name": "CONGRESS",
+          "ped_deaths": "11"
+        },
+        {
+          "rpt_street_name": "IH 35 SB",
+          "ped_deaths": "10"
+        },
+        {
+          "rpt_street_name": "IH 35 SVRD NB",
+          "ped_deaths": "9"
+        },
+        {
+          "rpt_street_name": "N IH 35 SB",
+          "ped_deaths": "9"
+        },
+        {
+          "rpt_street_name": "RIVERSIDE",
+          "ped_deaths": "8"
+        },
+        {
+          "rpt_street_name": "N IH 35 NB",
+          "ped_deaths": "8"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/y2wy-tgr5.json?%24select=rpt_street_name%2Csum%28pedestrian_death_count%29+AS+ped_deaths&%24limit=10&%24where=pedestrian_death_count%3E0&%24group=rpt_street_name&%24order=ped_deaths+DESC"
+    },
+    {
+      "ds": "traffic",
+      "story": "traffic_fatalities",
+      "story_n": 2,
+      "q": 4,
+      "note": "bicycle fatalities by street",
+      "select": "rpt_street_name,sum(bicycle_death_count) AS bike_deaths",
+      "where": "bicycle_death_count>0",
+      "group": "rpt_street_name",
+      "order": "bike_deaths DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.38,
+      "row_count": 10,
+      "rows": [
+        {
+          "rpt_street_name": "NOT REPORTED",
+          "bike_deaths": "3"
+        },
+        {
+          "rpt_street_name": "LAMAR",
+          "bike_deaths": "2"
+        },
+        {
+          "rpt_street_name": "E BEN WHITE BLVD SVRD WB",
+          "bike_deaths": "2"
+        },
+        {
+          "rpt_street_name": "MARTIN LUTHER KING JR",
+          "bike_deaths": "2"
+        },
+        {
+          "rpt_street_name": "CAMERON",
+          "bike_deaths": "2"
+        },
+        {
+          "rpt_street_name": "E KOENIG LN SVRD WB",
+          "bike_deaths": "1"
+        },
+        {
+          "rpt_street_name": "BRODIE",
+          "bike_deaths": "1"
+        },
+        {
+          "rpt_street_name": "US HWY 290 SVRD EB",
+          "bike_deaths": "1"
+        },
+        {
+          "rpt_street_name": "S IH 35 SVRD SB",
+          "bike_deaths": "1"
+        },
+        {
+          "rpt_street_name": "EB",
+          "bike_deaths": "1"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/y2wy-tgr5.json?%24select=rpt_street_name%2Csum%28bicycle_death_count%29+AS+bike_deaths&%24limit=10&%24where=bicycle_death_count%3E0&%24group=rpt_street_name&%24order=bike_deaths+DESC"
+    },
+    {
+      "ds": "traffic",
+      "story": "traffic_fatalities",
+      "story_n": 3,
+      "q": 5,
+      "note": "crashes in construction zones",
+      "select": "count(*) AS cnt,sum(death_cnt) AS deaths",
+      "where": "road_constr_zone_fl='true'",
+      "status": "PASS",
+      "elapsed_s": 2.82,
+      "row_count": 1,
+      "rows": [
+        {
+          "cnt": "12037",
+          "deaths": "92"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/y2wy-tgr5.json?%24select=count%28%2A%29+AS+cnt%2Csum%28death_cnt%29+AS+deaths&%24limit=100&%24where=road_constr_zone_fl%3D%27true%27"
+    },
+    {
+      "ds": "traffic",
+      "story": "traffic_fatalities",
+      "story_n": 3,
+      "q": 6,
+      "note": "crashes by speed limit zone",
+      "select": "crash_speed_limit,count(*) AS crashes,sum(death_cnt) AS deaths",
+      "where": "crash_speed_limit IS NOT NULL",
+      "group": "crash_speed_limit",
+      "order": "deaths DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.61,
+      "row_count": 10,
+      "rows": [
+        {
+          "crash_speed_limit": "45",
+          "crashes": "30294",
+          "deaths": "214"
+        },
+        {
+          "crash_speed_limit": "55",
+          "crashes": "21486",
+          "deaths": "173"
+        },
+        {
+          "crash_speed_limit": "35",
+          "crashes": "35461",
+          "deaths": "154"
+        },
+        {
+          "crash_speed_limit": "-1",
+          "crashes": "39553",
+          "deaths": "152"
+        },
+        {
+          "crash_speed_limit": "65",
+          "crashes": "18339",
+          "deaths": "144"
+        },
+        {
+          "crash_speed_limit": "40",
+          "crashes": "15259",
+          "deaths": "110"
+        },
+        {
+          "crash_speed_limit": "60",
+          "crashes": "11440",
+          "deaths": "97"
+        },
+        {
+          "crash_speed_limit": "50",
+          "crashes": "12292",
+          "deaths": "90"
+        },
+        {
+          "crash_speed_limit": "70",
+          "crashes": "7288",
+          "deaths": "84"
+        },
+        {
+          "crash_speed_limit": "30",
+          "crashes": "20036",
+          "deaths": "77"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/y2wy-tgr5.json?%24select=crash_speed_limit%2Ccount%28%2A%29+AS+crashes%2Csum%28death_cnt%29+AS+deaths&%24limit=10&%24where=crash_speed_limit+IS+NOT+NULL&%24group=crash_speed_limit&%24order=deaths+DESC"
+    },
+    {
+      "ds": "traffic",
+      "story": "traffic_fatalities",
+      "story_n": 4,
+      "q": 7,
+      "note": "serious injury count by street",
+      "select": "rpt_street_name,sum(sus_serious_injry_cnt) AS serious_injuries",
+      "where": "sus_serious_injry_cnt>0",
+      "group": "rpt_street_name",
+      "order": "serious_injuries DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.38,
+      "row_count": 10,
+      "rows": [
+        {
+          "rpt_street_name": "NOT REPORTED",
+          "serious_injuries": "490"
+        },
+        {
+          "rpt_street_name": "LAMAR",
+          "serious_injuries": "242"
+        },
+        {
+          "rpt_street_name": "CONGRESS",
+          "serious_injuries": "141"
+        },
+        {
+          "rpt_street_name": "PARMER",
+          "serious_injuries": "135"
+        },
+        {
+          "rpt_street_name": "IH 35",
+          "serious_injuries": "124"
+        },
+        {
+          "rpt_street_name": "MOPAC",
+          "serious_injuries": "98"
+        },
+        {
+          "rpt_street_name": "WILLIAM CANNON",
+          "serious_injuries": "94"
+        },
+        {
+          "rpt_street_name": "RIVERSIDE",
+          "serious_injuries": "86"
+        },
+        {
+          "rpt_street_name": "AIRPORT",
+          "serious_injuries": "78"
+        },
+        {
+          "rpt_street_name": "1ST",
+          "serious_injuries": "78"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/y2wy-tgr5.json?%24select=rpt_street_name%2Csum%28sus_serious_injry_cnt%29+AS+serious_injuries&%24limit=10&%24where=sus_serious_injry_cnt%3E0&%24group=rpt_street_name&%24order=serious_injuries+DESC"
+    },
+    {
+      "ds": "traffic",
+      "story": "traffic_fatalities",
+      "story_n": 4,
+      "q": 8,
+      "note": "crashes by collision type",
+      "select": "collsn_desc,count(*) AS crashes,sum(death_cnt) AS deaths",
+      "where": "collsn_desc IS NOT NULL",
+      "group": "collsn_desc",
+      "order": "deaths DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.85,
+      "row_count": 10,
+      "rows": [
+        {
+          "collsn_desc": "ONE MOTOR VEHICLE - GOING STRAIGHT",
+          "crashes": "48971",
+          "deaths": "843"
+        },
+        {
+          "collsn_desc": "ANGLE - BOTH GOING STRAIGHT",
+          "crashes": "30587",
+          "deaths": "99"
+        },
+        {
+          "collsn_desc": "OPPOSITE DIRECTION - BOTH GOING STRAIGHT",
+          "crashes": "2941",
+          "deaths": "85"
+        },
+        {
+          "collsn_desc": "SAME DIRECTION - BOTH GOING STRAIGHT-REAR END",
+          "crashes": "34089",
+          "deaths": "73"
+        },
+        {
+          "collsn_desc": "OPPOSITE DIRECTION - ONE STRAIGHT-ONE LEFT TURN",
+          "crashes": "21915",
+          "deaths": "69"
+        },
+        {
+          "collsn_desc": "SAME DIRECTION - ONE STRAIGHT-ONE STOPPED",
+          "crashes": "35515",
+          "deaths": "53"
+        },
+        {
+          "collsn_desc": "SAME DIRECTION - BOTH GOING STRAIGHT-SIDESWIPE",
+          "crashes": "16430",
+          "deaths": "36"
+        },
+        {
+          "collsn_desc": "ANGLE - ONE STRAIGHT-ONE LEFT TURN",
+          "crashes": "10721",
+          "deaths": "31"
+        },
+        {
+          "collsn_desc": "ONE MOTOR VEHICLE - TURNING LEFT",
+          "crashes": "4746",
+          "deaths": "18"
+        },
+        {
+          "collsn_desc": "ONE MOTOR VEHICLE - OTHER",
+          "crashes": "1141",
+          "deaths": "14"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/y2wy-tgr5.json?%24select=collsn_desc%2Ccount%28%2A%29+AS+crashes%2Csum%28death_cnt%29+AS+deaths&%24limit=10&%24where=collsn_desc+IS+NOT+NULL&%24group=collsn_desc&%24order=deaths+DESC"
+    },
+    {
+      "ds": "traffic",
+      "story": "traffic_fatalities",
+      "story_n": 5,
+      "q": 9,
+      "note": "motorcycle fatalities by street",
+      "select": "rpt_street_name,sum(motorcycle_death_count) AS moto_deaths",
+      "where": "motorcycle_death_count>0",
+      "group": "rpt_street_name",
+      "order": "moto_deaths DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.38,
+      "row_count": 10,
+      "rows": [
+        {
+          "rpt_street_name": "FM 2222",
+          "moto_deaths": "7"
+        },
+        {
+          "rpt_street_name": "NOT REPORTED",
+          "moto_deaths": "7"
+        },
+        {
+          "rpt_street_name": "RESEARCH BLVD NB",
+          "moto_deaths": "5"
+        },
+        {
+          "rpt_street_name": "CONGRESS",
+          "moto_deaths": "5"
+        },
+        {
+          "rpt_street_name": "LAMAR",
+          "moto_deaths": "5"
+        },
+        {
+          "rpt_street_name": "SLAUGHTER",
+          "moto_deaths": "4"
+        },
+        {
+          "rpt_street_name": "MANCHACA",
+          "moto_deaths": "4"
+        },
+        {
+          "rpt_street_name": "W PARMER LN",
+          "moto_deaths": "3"
+        },
+        {
+          "rpt_street_name": "N MOPAC EXPY SB",
+          "moto_deaths": "3"
+        },
+        {
+          "rpt_street_name": "7TH",
+          "moto_deaths": "3"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/y2wy-tgr5.json?%24select=rpt_street_name%2Csum%28motorcycle_death_count%29+AS+moto_deaths&%24limit=10&%24where=motorcycle_death_count%3E0&%24group=rpt_street_name&%24order=moto_deaths+DESC"
+    },
+    {
+      "ds": "traffic",
+      "story": "traffic_fatalities",
+      "story_n": 5,
+      "q": 10,
+      "note": "total injuries + deaths by crash severity",
+      "select": "crash_sev_id,count(*) AS crashes,sum(tot_injry_cnt) AS injuries,sum(death_cnt) AS deaths",
+      "where": "crash_sev_id IS NOT NULL",
+      "group": "crash_sev_id",
+      "order": "deaths DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.3,
+      "row_count": 6,
+      "rows": [
+        {
+          "crash_sev_id": "4",
+          "crashes": "1335",
+          "injuries": "824",
+          "deaths": "1363"
+        },
+        {
+          "crash_sev_id": "0",
+          "crashes": "16572",
+          "injuries": "0",
+          "deaths": "0"
+        },
+        {
+          "crash_sev_id": "1",
+          "crashes": "6760",
+          "injuries": "10925",
+          "deaths": "0"
+        },
+        {
+          "crash_sev_id": "2",
+          "crashes": "48206",
+          "injuries": "73151",
+          "deaths": "0"
+        },
+        {
+          "crash_sev_id": "3",
+          "crashes": "49039",
+          "injuries": "69802",
+          "deaths": "0"
+        },
+        {
+          "crash_sev_id": "5",
+          "crashes": "107521",
+          "injuries": "0",
+          "deaths": "0"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/y2wy-tgr5.json?%24select=crash_sev_id%2Ccount%28%2A%29+AS+crashes%2Csum%28tot_injry_cnt%29+AS+injuries%2Csum%28death_cnt%29+AS+deaths&%24limit=10&%24where=crash_sev_id+IS+NOT+NULL&%24group=crash_sev_id&%24order=deaths+DESC"
+    }
+  ]
+}

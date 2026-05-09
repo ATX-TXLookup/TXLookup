@@ -1,5 +1,9 @@
-# Known TX/Austin datasets — pre-cataloged for faster lookups
-# Agents can discover more via the Socrata catalog API
+# Known TX/Austin datasets — pre-cataloged for faster lookups.
+# Agents can discover more via the Socrata catalog API.
+#
+# IMPORTANT: keep in sync with app/lib/catalog.ts (the frontend's source of truth).
+# Field names must be valid Socrata field names — verify with:
+#   curl https://<portal>/api/views/<id>.json | jq '.columns[].fieldName'
 
 austin:
   portal: data.austintexas.gov
@@ -7,7 +11,7 @@ austin:
     building_permits:
       id: 3syk-w9eu
       name: "Issued Construction Permits"
-      key_columns: [permit_type, status_current, original_address, original_zip]
+      key_columns: [permittype, status_current, original_address1, original_zip, issue_date]
       updated: daily
 
     food_inspections:
@@ -45,19 +49,19 @@ texas:
   portal: data.texas.gov
   datasets:
     active_businesses:
-      id: 7dv9-jx6p
+      id: 9cir-efmm
       name: "Active Franchise Tax Permit Holders"
-      key_columns: [taxpayer_name, taxpayer_city, taxpayer_state]
+      key_columns: [taxpayer_name, taxpayer_city, taxpayer_state, taxpayer_organizational_type]
       updated: quarterly
 
     state_expenditures:
-      id: mfhq-bx4n
-      name: "State of Texas Expenditures"
-      key_columns: [agency_name, vendor_name, amount, fiscal_year]
+      id: 2zpi-yjjs
+      name: "Texas State Expenditures By County 2024"
+      key_columns: [fiscal_year, agency_name, county, major_spending_category, amount]
       updated: monthly
 
     mixed_beverage:
       id: naix-2893
       name: "Mixed Beverage Gross Receipts"
-      key_columns: [location_name, location_city, total_receipts]
+      key_columns: [location_name, location_city, total_receipts, obligation_end_date_yyyymmdd]
       updated: monthly

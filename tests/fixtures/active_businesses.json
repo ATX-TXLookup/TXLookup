@@ -1,0 +1,494 @@
+{
+  "dataset": "active_businesses",
+  "generated": "2026-05-09T15:22:33.400242",
+  "passed": 10,
+  "total": 10,
+  "results": [
+    {
+      "ds": "businesses",
+      "story": "active_businesses",
+      "story_n": 1,
+      "q": 1,
+      "note": "business count by city in TX",
+      "select": "taxpayer_city,count(*) AS cnt",
+      "where": "taxpayer_state='TX'",
+      "group": "taxpayer_city",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.96,
+      "row_count": 10,
+      "rows": [
+        {
+          "taxpayer_city": "HOUSTON",
+          "cnt": "378606"
+        },
+        {
+          "taxpayer_city": "AUSTIN",
+          "cnt": "291098"
+        },
+        {
+          "taxpayer_city": "DALLAS",
+          "cnt": "232820"
+        },
+        {
+          "taxpayer_city": "SAN ANTONIO",
+          "cnt": "131727"
+        },
+        {
+          "taxpayer_city": "FORT WORTH",
+          "cnt": "78186"
+        },
+        {
+          "taxpayer_city": "FRISCO",
+          "cnt": "48912"
+        },
+        {
+          "taxpayer_city": "PLANO",
+          "cnt": "46492"
+        },
+        {
+          "taxpayer_city": "KATY",
+          "cnt": "42828"
+        },
+        {
+          "taxpayer_city": "EL PASO",
+          "cnt": "41540"
+        },
+        {
+          "taxpayer_city": "SPRING",
+          "cnt": "35692"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/9cir-efmm.json?%24select=taxpayer_city%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=taxpayer_state%3D%27TX%27&%24group=taxpayer_city&%24order=cnt+DESC"
+    },
+    {
+      "ds": "businesses",
+      "story": "active_businesses",
+      "story_n": 1,
+      "q": 2,
+      "note": "org types distribution",
+      "select": "taxpayer_organizational_type,count(*) AS cnt",
+      "group": "taxpayer_organizational_type",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.92,
+      "row_count": 10,
+      "rows": [
+        {
+          "taxpayer_organizational_type": "CL",
+          "cnt": "2105250"
+        },
+        {
+          "taxpayer_organizational_type": "CT",
+          "cnt": "327908"
+        },
+        {
+          "taxpayer_organizational_type": "CI",
+          "cnt": "236345"
+        },
+        {
+          "taxpayer_organizational_type": "CN",
+          "cnt": "197846"
+        },
+        {
+          "taxpayer_organizational_type": "CF",
+          "cnt": "178185"
+        },
+        {
+          "taxpayer_organizational_type": "PL",
+          "cnt": "118880"
+        },
+        {
+          "taxpayer_organizational_type": "PF",
+          "cnt": "22075"
+        },
+        {
+          "taxpayer_organizational_type": "AR",
+          "cnt": "20202"
+        },
+        {
+          "taxpayer_organizational_type": "CM",
+          "cnt": "16918"
+        },
+        {
+          "taxpayer_organizational_type": "CP",
+          "cnt": "15645"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/9cir-efmm.json?%24select=taxpayer_organizational_type%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24group=taxpayer_organizational_type&%24order=cnt+DESC"
+    },
+    {
+      "ds": "businesses",
+      "story": "active_businesses",
+      "story_n": 2,
+      "q": 3,
+      "note": "businesses in Austin by zip",
+      "select": "taxpayer_zip,count(*) AS cnt",
+      "where": "taxpayer_city='AUSTIN'",
+      "group": "taxpayer_zip",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.72,
+      "row_count": 10,
+      "rows": [
+        {
+          "taxpayer_zip": "78731",
+          "cnt": "106646"
+        },
+        {
+          "taxpayer_zip": "78701",
+          "cnt": "30811"
+        },
+        {
+          "taxpayer_zip": "78746",
+          "cnt": "17362"
+        },
+        {
+          "taxpayer_zip": "78704",
+          "cnt": "9663"
+        },
+        {
+          "taxpayer_zip": "78759",
+          "cnt": "8308"
+        },
+        {
+          "taxpayer_zip": "78703",
+          "cnt": "8248"
+        },
+        {
+          "taxpayer_zip": "78735",
+          "cnt": "6353"
+        },
+        {
+          "taxpayer_zip": "78717",
+          "cnt": "6137"
+        },
+        {
+          "taxpayer_zip": "78702",
+          "cnt": "4980"
+        },
+        {
+          "taxpayer_zip": "78745",
+          "cnt": "4876"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/9cir-efmm.json?%24select=taxpayer_zip%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=taxpayer_city%3D%27AUSTIN%27&%24group=taxpayer_zip&%24order=cnt+DESC"
+    },
+    {
+      "ds": "businesses",
+      "story": "active_businesses",
+      "story_n": 2,
+      "q": 4,
+      "note": "record type breakdown",
+      "select": "record_type_code,count(*) AS cnt",
+      "group": "record_type_code",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.49,
+      "row_count": 6,
+      "rows": [
+        {
+          "record_type_code": "U",
+          "cnt": "2779191"
+        },
+        {
+          "record_type_code": "V",
+          "cnt": "265806"
+        },
+        {
+          "record_type_code": "X",
+          "cnt": "234979"
+        },
+        {
+          "record_type_code": "U ",
+          "cnt": "242"
+        },
+        {
+          "record_type_code": "X ",
+          "cnt": "34"
+        },
+        {
+          "record_type_code": "V ",
+          "cnt": "31"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/9cir-efmm.json?%24select=record_type_code%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24group=record_type_code&%24order=cnt+DESC"
+    },
+    {
+      "ds": "businesses",
+      "story": "active_businesses",
+      "story_n": 3,
+      "q": 5,
+      "note": "businesses by county code",
+      "select": "taxpayer_county_code,count(*) AS cnt",
+      "group": "taxpayer_county_code",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.53,
+      "row_count": 10,
+      "rows": [
+        {
+          "taxpayer_county_code": "101",
+          "cnt": "509477"
+        },
+        {
+          "taxpayer_county_code": "0",
+          "cnt": "372033"
+        },
+        {
+          "taxpayer_county_code": "57",
+          "cnt": "345573"
+        },
+        {
+          "taxpayer_county_code": "227",
+          "cnt": "312159"
+        },
+        {
+          "taxpayer_county_code": "220",
+          "cnt": "192036"
+        },
+        {
+          "taxpayer_county_code": "43",
+          "cnt": "166739"
+        },
+        {
+          "taxpayer_county_code": "15",
+          "cnt": "147285"
+        },
+        {
+          "taxpayer_county_code": "79",
+          "cnt": "108658"
+        },
+        {
+          "taxpayer_county_code": "61",
+          "cnt": "99139"
+        },
+        {
+          "taxpayer_county_code": "170",
+          "cnt": "73280"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/9cir-efmm.json?%24select=taxpayer_county_code%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24group=taxpayer_county_code&%24order=cnt+DESC"
+    },
+    {
+      "ds": "businesses",
+      "story": "active_businesses",
+      "story_n": 3,
+      "q": 6,
+      "note": "Austin businesses with right to transact",
+      "select": "right_to_transact_business_code,count(*) AS cnt",
+      "where": "taxpayer_city='AUSTIN'",
+      "group": "right_to_transact_business_code",
+      "order": "cnt DESC",
+      "limit": 5,
+      "status": "PASS",
+      "elapsed_s": 0.72,
+      "row_count": 4,
+      "rows": [
+        {
+          "right_to_transact_business_code": "A",
+          "cnt": "276519"
+        },
+        {
+          "right_to_transact_business_code": "N",
+          "cnt": "11852"
+        },
+        {
+          "right_to_transact_business_code": "U",
+          "cnt": "1879"
+        },
+        {
+          "right_to_transact_business_code": "D",
+          "cnt": "894"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/9cir-efmm.json?%24select=right_to_transact_business_code%2Ccount%28%2A%29+AS+cnt&%24limit=5&%24where=taxpayer_city%3D%27AUSTIN%27&%24group=right_to_transact_business_code&%24order=cnt+DESC"
+    },
+    {
+      "ds": "businesses",
+      "story": "active_businesses",
+      "story_n": 4,
+      "q": 7,
+      "note": "new businesses in Austin by responsibility start year",
+      "select": "date_trunc_y(responsibility_beginning_date) AS year,count(*) AS cnt",
+      "where": "taxpayer_city='AUSTIN'",
+      "group": "date_trunc_y(responsibility_beginning_date)",
+      "order": "year DESC",
+      "limit": 5,
+      "status": "PASS",
+      "elapsed_s": 1.23,
+      "row_count": 5,
+      "rows": [
+        {
+          "year": "2026-01-01T00:00:00.000",
+          "cnt": "24502"
+        },
+        {
+          "year": "2025-01-01T00:00:00.000",
+          "cnt": "55553"
+        },
+        {
+          "year": "2024-01-01T00:00:00.000",
+          "cnt": "32637"
+        },
+        {
+          "year": "2023-01-01T00:00:00.000",
+          "cnt": "26125"
+        },
+        {
+          "year": "2022-01-01T00:00:00.000",
+          "cnt": "21628"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/9cir-efmm.json?%24select=date_trunc_y%28responsibility_beginning_date%29+AS+year%2Ccount%28%2A%29+AS+cnt&%24limit=5&%24where=taxpayer_city%3D%27AUSTIN%27&%24group=date_trunc_y%28responsibility_beginning_date%29&%24order=year+DESC"
+    },
+    {
+      "ds": "businesses",
+      "story": "active_businesses",
+      "story_n": 4,
+      "q": 8,
+      "note": "total active businesses in TX",
+      "select": "count(*) AS cnt",
+      "status": "PASS",
+      "elapsed_s": 1.39,
+      "row_count": 1,
+      "rows": [
+        {
+          "cnt": "3280283"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/9cir-efmm.json?%24select=count%28%2A%29+AS+cnt&%24limit=100"
+    },
+    {
+      "ds": "businesses",
+      "story": "active_businesses",
+      "story_n": 5,
+      "q": 9,
+      "note": "new Austin businesses since 2024",
+      "select": "taxpayer_zip,count(*) AS cnt",
+      "where": "taxpayer_city='AUSTIN' AND responsibility_beginning_date>'2024-01-01T00:00:00.000'",
+      "group": "taxpayer_zip",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 1.22,
+      "row_count": 10,
+      "rows": [
+        {
+          "taxpayer_zip": "78731",
+          "cnt": "62959"
+        },
+        {
+          "taxpayer_zip": "78701",
+          "cnt": "8942"
+        },
+        {
+          "taxpayer_zip": "78746",
+          "cnt": "3632"
+        },
+        {
+          "taxpayer_zip": "78704",
+          "cnt": "2508"
+        },
+        {
+          "taxpayer_zip": "78728",
+          "cnt": "2206"
+        },
+        {
+          "taxpayer_zip": "78703",
+          "cnt": "1728"
+        },
+        {
+          "taxpayer_zip": "78735",
+          "cnt": "1709"
+        },
+        {
+          "taxpayer_zip": "78759",
+          "cnt": "1661"
+        },
+        {
+          "taxpayer_zip": "78745",
+          "cnt": "1551"
+        },
+        {
+          "taxpayer_zip": "78702",
+          "cnt": "1504"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/9cir-efmm.json?%24select=taxpayer_zip%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=taxpayer_city%3D%27AUSTIN%27+AND+responsibility_beginning_date%3E%272024-01-01T00%3A00%3A00.000%27&%24group=taxpayer_zip&%24order=cnt+DESC"
+    },
+    {
+      "ds": "businesses",
+      "story": "active_businesses",
+      "story_n": 5,
+      "q": 10,
+      "note": "org types for new Austin businesses since 2024",
+      "select": "taxpayer_organizational_type,count(*) AS cnt",
+      "where": "taxpayer_city='AUSTIN' AND responsibility_beginning_date>'2024-01-01T00:00:00.000'",
+      "group": "taxpayer_organizational_type",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 1.39,
+      "row_count": 10,
+      "rows": [
+        {
+          "taxpayer_organizational_type": "CL",
+          "cnt": "87699"
+        },
+        {
+          "taxpayer_organizational_type": "CI",
+          "cnt": "10463"
+        },
+        {
+          "taxpayer_organizational_type": "CF",
+          "cnt": "4127"
+        },
+        {
+          "taxpayer_organizational_type": "CT",
+          "cnt": "4025"
+        },
+        {
+          "taxpayer_organizational_type": "CN",
+          "cnt": "3302"
+        },
+        {
+          "taxpayer_organizational_type": "PL",
+          "cnt": "1039"
+        },
+        {
+          "taxpayer_organizational_type": "PF",
+          "cnt": "673"
+        },
+        {
+          "taxpayer_organizational_type": "CM",
+          "cnt": "279"
+        },
+        {
+          "taxpayer_organizational_type": "CU",
+          "cnt": "169"
+        },
+        {
+          "taxpayer_organizational_type": "CP",
+          "cnt": "113"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/9cir-efmm.json?%24select=taxpayer_organizational_type%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=taxpayer_city%3D%27AUSTIN%27+AND+responsibility_beginning_date%3E%272024-01-01T00%3A00%3A00.000%27&%24group=taxpayer_organizational_type&%24order=cnt+DESC"
+    }
+  ]
+}
