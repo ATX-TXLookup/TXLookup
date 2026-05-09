@@ -1,84 +1,103 @@
-# Event — AITX Community x Codex Hackathon
+# Event — AITX Community × Codex Hackathon
 
-> Source of truth for event details. Update this file instead of re-downloading from Notion.
+> Source of truth for event details. Update this file instead of re-checking the event page.
 
 ## Logistics
 
-- **Event:** AITX Community x Codex Hackathon
+- **Event:** AITX Community × Codex Hackathon
 - **Dates:** Friday May 8 – Sunday May 10, 2026
-- **Venue:** Antler VC, Austin TX
+- **Venue:** [Antler VC, Austin TX](https://maps.app.goo.gl/Vn4z8mWcYjdLoLna6)
+- **Format:** In person
+- **WhatsApp (primary comms):** https://chat.whatsapp.com/EcDliphWA7XA4QImK2drhy
+- **Organizer email:** team@aitxcommunity.com
 - **Tracks we're entering:** Agents Track + Brainforge / Vicinity Texas Open Data Track
-- **Bounty we're chasing:** Miro MCP Integration ($500)
+- **Bounties we're chasing:** Miro MCP ($500), DeepInvent Best Patentable Hack ($500 + provisional patent)
+- **Submission form:** TBD — published during the event. **Find it Saturday morning at the latest.**
+- **CODE FREEZE: Sunday May 10, 11:00 AM CT** ← non-negotiable
 
-## Timeline
+## Detailed agenda
 
-| When | What |
+### Day 1 — Friday May 8
+
+| Time | Event |
 |---|---|
-| **Fri May 8, 5:00 PM** | Doors open, kickoff |
-| **Fri May 8, 7:30 PM** | Hacking begins |
-| **Sat May 9 (all day)** | Build day |
-| **Sun May 10 (morning)** | Demos & judging |
-| **Sun May 10 (TBD)** | Submission form due — **find the form by Sat noon** |
+| 5:00 PM – 5:30 PM | Doors open + check-in |
+| 5:30 PM – 7:00 PM | Kickoff: welcome + hackathon intro |
+| 7:00 PM | Dinner served (pizza) |
+| **7:30 PM** | **Hacking begins** |
+| 8:30 PM onward | Overnight hacking |
 
-## Track 1 — Agents Track
+### Day 2 — Saturday May 9
+
+| Time | Event |
+|---|---|
+| 8:30 AM – 9:30 AM | Breakfast |
+| 9:30 AM onward | Continue hacking |
+| 12:30 PM – 2:30 PM | Lunch served |
+| 12:30 PM – 1:30 PM | Lunchtime networking |
+| 6:30 PM – 7:00 PM | **Progress check-in** ← demo what you have |
+| 7:00 PM | Dinner served (Chipotle) |
+| 7:00 PM onward | Overnight hacking |
+
+### Day 3 — Sunday May 10
+
+| Time | Event |
+|---|---|
+| 8:30 AM – 9:30 AM | Breakfast |
+| **11:00 AM** | **Code freeze — submissions due** |
+| 11:00 AM – 2:00 PM | Hack Fair station setup |
+| 11:30 AM – 3:00 PM | Judging |
+| 11:30 AM – 1:00 PM | Developer roundtables |
+| 2:00 PM – 5:00 PM | Hack Fair + public voting |
+| 4:00 PM – 5:00 PM | Finale: awards + winner demos |
+
+### Working backward from 11AM Sunday
+
+- **Sat 7:00 PM (progress check-in):** end-to-end happy path runs — one persona query → live data → cited answer. Demo is rough but real.
+- **Sat midnight:** all five MCP tools land. Skill doc complete. Demo script drafted.
+- **Sun 8:00 AM:** demo video recorded. Submission form filled in draft.
+- **Sun 10:30 AM:** dry run #2. Final polish.
+- **Sun 11:00 AM:** submit.
+
+---
+
+## Tracks
+
+### Track 1 (entering) — Agents Track
 
 > "Build Autonomous AI Agents."
 
-**The ask:** AI systems that can reason, plan, use tools, and complete meaningful tasks with minimal human intervention. Beyond a chatbot or LLM wrapper.
+AI systems that **reason, plan, use tools, and complete meaningful tasks** with minimal human intervention. Beyond a chatbot or LLM wrapper.
 
-**Judging signals:**
-- Take a goal, break it into steps
-- Interact with external systems
-- Make decisions
-- Recover from errors
-- Produce useful outputs
+Strong submissions show: what the agent can do, what tools/data it can access, how it decides actions, how it handles ambiguity, failure, or changing context.
 
-**Strong submissions show:**
-- What the agent can do
-- What tools or data sources it can access
-- How it decides what actions to take
-- How it handles ambiguity, failure, or changing context
+Quote from spec: *"The best projects will feel like a real glimpse into the future of software: systems that do work, not just answer questions."*
 
-**Quote from spec:** *"The best projects will feel like a real glimpse into the future of software: systems that do work, not just answer questions."*
+Spec example we map to: *"A data agent that answers business questions by querying multiple internal tools."*
 
-**Example project ideas (from spec):**
-- Researches companies, finds decision-makers, drafts personalized outreach
-- Coding agent that fixes bugs across a repo and opens a PR
-- Local Austin assistant that plans errands, books reservations, optimizes a schedule
-- Sales ops agent that enriches leads, updates a CRM, summarizes next steps
-- Data agent that answers business questions by querying multiple internal tools ← *this is our lane*
-
-## Track 2 — Brainforge / Vicinity Texas Open Data Track
+### Track 2 (entering) — Brainforge / Vicinity Texas Open Data Track
 
 > "Make Texas Public Data Useful."
 
-**The ask:** Open-source tools that help people explore, understand, and interact with real Texas public data. Visual interface required.
-
-**Judging axes (per kickoff whiteboard distillation):**
-1. **Approachable** — non-technical users can use it
-2. **Visual Interface** — maps, charts, tables, filters, dashboards
-3. **NLI** — natural-language input
-4. **Persona Driven** — built for actual people, not abstract "users"
+Open-source tools that help people **explore, understand, and interact with real Texas public data** through a visual interface (maps, charts, tables, filters, dashboards, NLI, agent workflows).
 
 **Constraints:**
 - Public datasets only, with **clear attribution**
-- Respectful use of terms of service — **no scraping behind authentication**
+- Respectful use of TOS — **no scraping behind authentication**
 - **No PII / sensitive-field misuse**
 
-### Technical requirement (one of)
-
-Teams must deliver at least one of:
+#### Technical requirement (one of)
 
 1. **Custom MCP server** with well-scoped tools for discovery, bounded query, and/or summaries
-2. **Proper agent skill** with a skill document and references explaining how to use the project safely and effectively in an agent workflow
+2. **Proper agent skill** with a skill document and references explaining how to use it safely
 
 > **Teams that ship both an MCP server AND an agent skill will be especially competitive.** ← *we're shipping both*
 
-### Approved data sources
+#### Approved data sources
 
 | City / Source | URL | Notes |
 |---|---|---|
-| Austin | https://data.austintexas.gov/ | Socrata SODA — our primary for Step 0 |
+| Austin | https://data.austintexas.gov/ | Socrata SODA — primary for Step 0 |
 | Dallas | https://www.dallasopendata.com/ | Socrata SODA |
 | San Antonio | https://data.sanantonio.gov/ | Socrata SODA |
 | Houston | https://data.houstontx.gov/ | Socrata SODA |
@@ -86,14 +105,13 @@ Teams must deliver at least one of:
 
 **Step-0 dataset (full breadth validator):** Austin Issued Construction Permits — `3syk-w9eu` on `data.austintexas.gov`. ~2.34M rows, daily refresh. See `docs/plan.md`.
 
-### Example project ideas (from spec)
+### Track 3 (NOT entering, FYI) — AutoHDR Photo-to-Video Track
 
-- Map-based tool for housing, zoning, or permitting data
-- Dashboard comparing economic indicators across counties
-- Visual explorer for education / transportation / energy / infrastructure
-- Civic data assistant that helps users query and summarize ← *this is our lane*
-- County-by-county comparison tool
-- MCP-powered Texas data server that lets agents discover, query, and summarize safely ← *also our lane*
+Photo-to-video generation pipelines. First $5K, second $2.5K, third $500. We're not entering this one — it's a different problem domain.
+
+[AutoHDR challenge rundown (Google Doc)](https://docs.google.com/document/d/1VoEvz5WTxr6Z-W8tBWpi6sAmKtfQP2HdgHPseyy31x8/edit?tab=t.0)
+
+---
 
 ## Judging criteria — 100 points total
 
@@ -106,50 +124,101 @@ Teams must deliver at least one of:
 
 ### How TXLookup hits each axis
 
-**1. Technical Execution & Completeness** — Live working agent loop (Reason → Plan → Tool → Complete) with doom-loop safety. MCP server with 5 well-scoped tools. End-to-end flow from natural-language question → bounded query → cited answer + visual output. No mocked steps.
+**1. Technical Execution & Completeness** — Live working agent loop (Reason → Plan → Tool → Complete) with doom-loop safety. MCP server with 5 well-scoped tools. End-to-end flow: natural-language question → bounded query → cited answer + visual output. No mocked steps.
 
-**2. Partner Ecosystem & Utility** — Codex Pro for the planner. Featherless for cheap iteration. Miro MCP for the visual output (and the $500 bounty). Socrata SODA for every TX city portal. We use what the event provides; we don't reinvent it.
+**2. Partner Ecosystem & Utility** — Codex Pro for the planner. Featherless for cheap iteration. Miro MCP for the visual output (and the $500 bounty). Apify if we need supplementary scraping (we shouldn't — Socrata covers it). We use what the event provides.
 
 **3. Value & Impact** — Three concrete personas (parent / small-business owner / journalist) with hero queries that map to real decisions. Live demo answers a question a real Austinite has on a real day, citing a real city dataset.
 
-**4. Innovation & Execution** — Single agent crossing both tracks. Agent skill document + MCP server (the "especially competitive" combo per Open Data track). One dataset deeply exercised (Step 0 = full feature breadth on Austin permits) so adding a new dataset is config-only — judges see the depth and the multiplier.
+**4. Innovation & Execution** — Single agent crossing both tracks. Agent skill document + MCP server (the "especially competitive" combo per Open Data track). One dataset deeply exercised (Step 0 = full feature breadth on Austin permits) so adding a new dataset is config-only — judges see depth and the multiplier.
 
-## Bounty — Miro MCP Integration ($500)
+---
 
-Use Miro's MCP server to deliver visual output from the agent. Bounty is **separate from track placement** — we can win the bounty without winning the track, and vice versa.
+## Bounties
 
-**Strategy:** Miro is the demo wow-layer for one polished flow (probably Marcus's permit-by-zone or Jordan's district comparison). Not a primary deliverable.
+### Miro — $500 (entering)
 
-## Resources we have access to
+Use Miro's MCP server to deliver visual output from the agent. Bounty separate from track placement — we can win the bounty without placing in the track, and vice versa.
 
-- OpenAI Codex Pro (free at the event)
-- Featherless — unlimited open-source model inference
-- Miro MCP — early access + the $500 bounty
-- Fal.ai API key for image/video if useful
+**Strategy:** Miro is the demo wow-layer for one polished flow (probably Marcus's permit-by-zone or Jordan's district comparison). Not the primary deliverable.
 
-## Win conditions (per `HACKATHON.md`)
+[Miro hackathon board](https://miro.com/app/board/uXjVHdaoUbk=/)
 
-1. Live working demo — real data from a real Texas portal
-2. Agent reasons about which dataset to use (not hardcoded)
-3. Miro board created live during demo (bounty + wow factor)
-4. Shows the value of combining agent intelligence with open data access
-5. Error recovery — agent hits a bad dataset, finds an alternative, completes
-6. **Both** MCP server AND agent skill shipped (per Open Data track requirement)
+### DeepInvent — Best Patentable Hack ($500 + provisional patent filing) (worth submitting)
 
-## Submission checklist (find this on the actual form Saturday)
+Open to any team in any track. Submit through [deepinvent.ai](https://deepinvent.ai/). Their team picks the winner.
+
+**Why we should submit:** the agent-skill + MCP-server combo applied to civic data, with the persona-driven NLI surface, is a defensible methodology. The provisional patent is downside-free. Allocate ~30 min Saturday to the submission.
+
+### DeepInvent — Top Science Project ($250k license, 1 year) (not eligible)
+
+Science-only (cancer, materials science, genetics, peptide discovery, AI research). Civic data doesn't qualify.
+
+### AutoHDR — $5K / $2.5K / $500 (not entering)
+
+AutoHDR Photo-to-Video Track only. Not our domain.
+
+---
+
+## Hacker resources
+
+### Codex (OpenAI) — $50 API credits + Codex coding agent
+
+Redemption code for $50 in OpenAI API credits emailed at kickoff. **Must be present at kickoff** or notify an organizer.
+
+- [Codex use cases](https://developers.openai.com/codex/use-cases)
+- Recommended for our build: [Operations Optimization](https://developers.openai.com/codex/use-cases/verified-operations-workflows), [Idea to POC](https://developers.openai.com/codex/use-cases/idea-to-proof-of-concept), [Updating Documentation](https://developers.openai.com/codex/use-cases/update-documentation)
+
+### Miro — sandbox + early MCP access
+
+Setup steps (do before Friday):
+1. Accept Miro Sandbox invite (separate email, check spam)
+2. Connect OpenAI Codex account
+3. Install [Miro MCP for OpenAI Codex](https://miro.com/marketplace/miro-mcp-for-openai-codex)
+4. Select "AITX Community Hackathon" team
+5. Restart Codex / open new session
+
+**Pro tip:** use the same email for Miro Sandbox and Codex.
+
+Optional prep: [intro video](https://www.youtube.com/watch?v=OYuJY1LW7JA) · [MCP overview](https://miro.com/ai/mcp/) · [developer docs](https://developers.miro.com/docs/mcp-intro)
+
+### Featherless — unlimited free open-source model inference
+
+See setup PDF distributed at the event. Quickstart video on Drive (link in event page).
+
+**Use:** cheap iteration on planner + summarizer prompts; fallback if Codex API hits rate limits.
+
+### Apify — $50 free credits
+
+Cloud platform for web scraping + browser-based automation.
+
+Apply at: Apify.com → Console → Billing → Special Offers → code **`AITX_CODEX_HACK`**
+
+**Use case for us:** if any TX dataset isn't on a Socrata portal but on an HTML page (no auth required), Apify Actors are the cleanest fallback. Avoid otherwise — Socrata covers the primary need.
+
+---
+
+## Submission checklist
+
+To be filled when the form is published:
 
 - [ ] Project name + one-line description
 - [ ] Track selection: Agents + Open Data
 - [ ] Demo video URL (3 min max — record at 80% completion, re-record after polish)
 - [ ] Live demo URL (Vercel)
-- [ ] GitHub repo URL (https://github.com/ATX-TXLookup/TXLookup)
-- [ ] MCP server endpoint or installation instructions
-- [ ] Agent skill document path
+- [ ] GitHub repo URL: https://github.com/ATX-TXLookup/TXLookup
+- [ ] MCP server installation instructions
+- [ ] Agent skill document path: `skills/txlookup/SKILL.md`
 - [ ] Team names + emails
-- [ ] Bounty entry: Miro MCP
+- [ ] Bounty entries: Miro MCP, DeepInvent Best Patentable Hack
 
-## Contact / coordination
+---
 
-- Repo: https://github.com/ATX-TXLookup/TXLookup
-- Pinned tracking issue: TBD (creating shortly)
-- Team chat: TBD
+## Sponsors
+
+- **Codex** (OpenAI) — coding agent, headline sponsor
+- **Antler** — pre-seed VC ($600K first checks), event venue
+- **Miro** — visual workspace, MCP early access, $500 bounty
+- **AutoHDR** — AI for real-estate listings, $8M ARR in <1yr, separate track sponsor
+- **Atlassian for Startups** — collaboration tools
+- **Brainforge** — embedded data + AI team, co-sponsors the Texas Open Data track
