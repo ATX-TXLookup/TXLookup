@@ -248,7 +248,15 @@ function eventForObservatory(ev: SseEvent): ObsEvent | null {
   }
 }
 
-export function AgentRunner({ query, dataset }: { query: string; dataset?: string }) {
+export function AgentRunner({
+  query,
+  dataset,
+  mode,
+}: {
+  query: string;
+  dataset?: string;
+  mode?: "live" | "fallback";
+}) {
   const [state, setState] = useState<AgentState>(initial);
   const cancelled = useRef(false);
 
@@ -279,7 +287,7 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
         const r = await fetch("/api/agent", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query, dataset }),
+          body: JSON.stringify({ query, dataset, fallback: mode === "fallback" }),
           signal: ctrl.signal,
         });
         if (!r.ok || !r.body) {
@@ -476,7 +484,7 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
       cancelled.current = true;
       ctrl.abort();
     };
-  }, [query, dataset]);
+  }, [query, dataset, mode]);
 
   const phaseToActiveStep = (() => {
     if (state.phase === "reasoning") return 0;

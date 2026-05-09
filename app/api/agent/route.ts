@@ -18,6 +18,7 @@ import {
 } from "@/app/lib/agent";
 import { DoomLoopGuard, type DoomLoopHit } from "@/app/lib/doomLoop";
 import { findFixture } from "@/app/lib/demo-fixtures";
+import { findRun, saveRun, type SavedRun } from "@/app/lib/run-archive";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -80,6 +81,28 @@ type Event =
 
 function sse(ev: Event): string {
   return `data: ${JSON.stringify(ev)}\n\n`;
+}
+
+// Replay a previously-saved run (from /api/admin or fallback path) at
+// realistic-ish timing so the SSE consumer animates correctly.
+function replaySavedRun(run: SavedRun): ReadableStream {
+  return new ReadableStream({
+    async start(controller) {
+      const enc = new TextEncoder();
+      const send = (obj: unknown) =>
+        controller.enqueue(enc.encode(`data: ${JSON.stringify(obj)}\n\n`));
+      const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      const events = Array.isArray(run.events) ? run.events : [];
+      for (const ev of events) {
+        send(ev);
+        const phase = (ev as { phase?: string }).phase;
+        // Tighter pacing than fixture replay — these are real events the user
+        // already paid the latency for.
+        await wait(phase === "executing" ? 250 : phase === "step_done" ? 200 : 120);
+      }
+      controller.close();
+    },
+  });
 }
 
 function addUsage(a: TokenUsage, b: TokenUsage): TokenUsage {
@@ -187,6 +210,7 @@ export async function POST(req: NextRequest) {
   const body = (await req.json().catch(() => ({}))) as {
     query?: string;
     demo?: boolean;
+    fallback?: boolean;
   };
   const query = (body.query ?? "").trim();
   if (!query) {
@@ -215,14 +239,40 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  // Fallback mode — replay the last successful saved run for this query.
+  // Used when we know the live agent is down (rate limit, OpenAI outage) and
+  // need to keep the demo flowing. Toggled by ?fallback=1 or { fallback: true }.
+  const fallbackMode =
+    body.fallback === true || url.searchParams.get("fallback") === "1";
+  if (fallbackMode) {
+    const saved = await findRun(query);
+    if (saved) {
+      return new Response(replaySavedRun(saved), {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+          "X-Accel-Buffering": "no",
+          "X-TXLookup-Mode": "fallback",
+          Connection: "keep-alive",
+        },
+      });
+    }
+    // No saved run for this query — fall through to a live run (which will
+    // also persist itself so the next fallback attempt succeeds).
+  }
+
   const stream = new ReadableStream({
     async start(controller) {
-      const send = (ev: Event) =>
+      const captured: Event[] = [];
+      const send = (ev: Event) => {
+        captured.push(ev);
         controller.enqueue(new TextEncoder().encode(sse(ev)));
+      };
 
       const startedAt = Date.now();
       const guard = new DoomLoopGuard();
       let usageTotal: TokenUsage = { prompt: 0, completion: 0, total: 0 };
+      let finalPlan: Plan | null = null;
 
       try {
         send({ phase: "reasoning", message: query });
@@ -385,6 +435,25 @@ export async function POST(req: NextRequest) {
         send({ phase: "completing", message: "Synthesizing answer..." });
         const synth = await synthesize(query, currentPlan, results);
         usageTotal = addUsage(usageTotal, synth.usage);
+        finalPlan = currentPlan;
+
+        const durationMs = Date.now() - startedAt;
+        // Persist the run BEFORE sending the done event so a `done` consumer
+        // immediately seeing /admin will find it. Fire-and-forget on errors —
+        // a save failure should never bubble up and break the stream.
+        try {
+          await saveRun(
+            query,
+            finalPlan,
+            captured,
+            synth.answer,
+            citation,
+            durationMs,
+            usageTotal.total,
+          );
+        } catch (e) {
+          console.warn("[agent] saveRun failed:", e);
+        }
 
         send({
           phase: "done",
@@ -392,7 +461,7 @@ export async function POST(req: NextRequest) {
           citation,
           artifacts,
           usage_total: usageTotal,
-          duration_ms: Date.now() - startedAt,
+          duration_ms: durationMs,
         });
         controller.close();
       } catch (e: unknown) {
