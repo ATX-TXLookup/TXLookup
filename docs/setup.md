@@ -70,7 +70,8 @@ Fill in what applies to your work area. Not every key is needed for every issue:
 | `OPENAI_API_KEY` | Anything that calls the planner / LLM | Event kickoff — $50 credit code emailed to attendees |
 | `MIRO_API_TOKEN` | Miro board operations (mostly via MCP, not REST) | Miro Sandbox dashboard after accepting team invite |
 | `MIRO_BOARD_ID` | If we pre-create a board for the demo | Miro UI — board URL contains the ID |
-| `SOCRATA_APP_TOKEN` | Higher rate limits on open data calls (optional) | https://opendata.socrata.com/profile/edit/developer_settings — free |
+| `SOCRATA_KEY_ID` + `SOCRATA_KEY_SECRET` | Higher rate limits on open data calls (preferred — HTTP Basic auth, used by `app/lib/socrata.ts`) | Sign up at https://evergreen.data.socrata.com/signup, then **Profile → Edit Profile → Developer Settings** → generate API key. Free. Cross-portal. |
+| `SOCRATA_APP_TOKEN` | Same as above, legacy `X-App-Token` header path | Same place, "App Tokens" section. Use only if Basic auth isn't an option. |
 | `FEATHERLESS_API_KEY` | Cheap iteration on prompts | Setup PDF distributed at the event |
 | `SUPABASE_URL` / `SUPABASE_KEY` | Only if your issue touches caching/storage | We'll provision if needed (not v1) |
 | `FAL_API_KEY` | Only if your issue touches image/video gen | Not in scope for v1 |
@@ -159,7 +160,7 @@ Drop a quick "I'm in, working on #N" so the team knows who's covering what.
 
 **`npm install` fails on `tailwindcss`** → make sure node is 20+. `nvm use 20`.
 
-**Socrata returns 403 / 429** → request a free app token at https://opendata.socrata.com/profile/edit/developer_settings and put it in `SOCRATA_APP_TOKEN`.
+**Socrata returns 403 / 429** → sign up at https://evergreen.data.socrata.com/signup, go to **Profile → Edit Profile → Developer Settings**, generate an API key, and set `SOCRATA_KEY_ID` + `SOCRATA_KEY_SECRET` (Basic-auth pair, preferred). Legacy `SOCRATA_APP_TOKEN` still works as a fallback. Docs: https://dev.socrata.com/docs/app-tokens.html.
 
 **Miro `/mcp auth` opens browser but nothing happens** → check you're a member of the AITX Community Hackathon Miro team (separate email invite). If not, ping in WhatsApp.
 
