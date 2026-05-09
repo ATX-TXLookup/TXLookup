@@ -368,8 +368,16 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
                       events: eventsNext,
                     };
                   case "replanned": {
+                    // The route rebuilds currentPlan = [...prefix, ...replanSteps]
+                    // and resumes at the failed-step index. SSE step_done events
+                    // index into THIS rebuilt plan, so the UI must replace the
+                    // tail (not append) — otherwise step_done({step: N}) lands
+                    // on the original step N instead of the new replan step,
+                    // and the displayed tool name no longer matches the running tool.
+                    const lastReplan = s.replans[s.replans.length - 1];
+                    const failedIdx = (lastReplan?.failedStep ?? s.steps.length) - 1;
                     const newSteps = (ev.plan?.steps ?? []).map((p, i) => ({
-                      step: s.steps.length + i + 1,
+                      step: failedIdx + i + 1,
                       tool: p.tool,
                       args: p.args,
                       rationale: p.rationale,
@@ -388,8 +396,8 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
                     return {
                       ...s,
                       phase: "executing",
-                      steps: [...s.steps, ...newSteps],
-                      totalSteps: s.steps.length + newSteps.length,
+                      steps: [...s.steps.slice(0, failedIdx), ...newSteps],
+                      totalSteps: failedIdx + newSteps.length,
                       replans,
                       events: eventsNext,
                     };
