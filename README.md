@@ -16,6 +16,16 @@
 
 **Code freeze: Sunday May 10, 11:00 AM CT.** Working backward from that — see [`docs/plan.md`](docs/plan.md).
 
+## How it works
+
+For a full end-to-end walkthrough of one question (Reason → Plan → Tool → Complete with real artifacts and real Socrata responses) see **[`docs/how-it-works.md`](docs/how-it-works.md)**. That doc also covers why TXLookup is *not* a thin LLM wrapper — the dispatcher is deterministic TypeScript, every answer cites the source, and the agent ships as a tool other agents can install.
+
+Other docs:
+- [`docs/usage.md`](docs/usage.md) — install the MCP server, tool catalog, examples
+- [`docs/agents-strategy.md`](docs/agents-strategy.md) — Codex's role in the loop
+- [`docs/architecture.md`](docs/architecture.md) — layered diagram
+- [`skills/txlookup/SKILL.md`](skills/txlookup/SKILL.md) — the agent skill (deliverable)
+
 ## What It Does
 
 TXLookup connects autonomous agents to Texas and Austin open data portals. Point it at any public dataset — permits, inspections, business filings, census data, 311 calls, transit routes — and the agent ingests, analyzes, and visualizes what it finds on Miro boards.
