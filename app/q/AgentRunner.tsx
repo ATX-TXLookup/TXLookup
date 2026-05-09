@@ -8,7 +8,8 @@ import {
   trackAgentError,
   trackAgentStart,
 } from "../lib/analytics-events";
-import { AgentObservatory, ObsEvent } from "./AgentObservatory";
+import { ObsEvent } from "./AgentObservatory";
+import { AgentSidebar } from "./AgentSidebar";
 
 type Citation = {
   portal: string;
@@ -504,292 +505,185 @@ export function AgentRunner({
           ? "error"
           : "running";
 
+  const phaseDisplayLabel = (() => {
+    if (state.phase === "done") return "Verified";
+    if (state.phase === "error") return "Error";
+    if (state.phase === "idle") return "Awaiting";
+    return "In progress";
+  })();
+  const phaseDot = (() => {
+    if (state.phase === "done") return "#1E7A47";
+    if (state.phase === "error") return "#A0231C";
+    if (state.phase === "idle") return "#1A1F2A";
+    return "#A06200";
+  })();
+  const currentStepObj = state.steps[state.currentStep - 1];
+  const currentTool = currentStepObj?.tool ?? null;
+  const sourcesCount =
+    state.artifacts.length > 0
+      ? new Set(state.artifacts.map((a) => a.split("?")[0])).size
+      : state.citation
+        ? 1
+        : 0;
+
   return (
     <div className="grid md:grid-cols-[1fr_420px]">
-      {/* Left column — user-facing flow */}
+      {/* Left column — answer-first body */}
       <div className="min-w-0">
-        {/* Step trace */}
-        <section className="border-b border-[#1A1F2A]/10 bg-white">
+        {/* Question recap with live status pill */}
+        <section className="border-b border-[#E1E5EE] bg-white">
           <div className="px-6 py-8 md:px-10">
-            <div className="grid grid-cols-4 gap-3">
-              {[
-                { n: "01", title: "Reason" },
-                { n: "02", title: "Plan" },
-                { n: "03", title: "Tool" },
-                { n: "04", title: "Complete" },
-              ].map((s, i) => {
-                const active = i <= phaseToActiveStep && state.phase !== "error";
-                const isComplete = state.phase === "done" && i === 3;
-                const isReplanning = state.phase === "replanning" && i === 2;
-                const status =
-                  state.phase === "error"
-                    ? "Error"
-                    : isReplanning
-                      ? "Replanning…"
-                      : i < phaseToActiveStep
-                        ? "Done"
-                        : i === phaseToActiveStep
-                          ? state.phase === "executing" && i === 2
-                            ? `Step ${state.currentStep}/${state.totalSteps}`
-                            : "In progress"
-                          : "Waiting";
-                return (
-                  <div
-                    key={s.n}
-                    className={`rounded-md border px-4 py-4 transition-colors ${
-                      isReplanning
-                        ? "border-[#A06200]/40 bg-[#FFF3D9]"
-                        : isComplete
-                          ? "border-[#1E7A47]/40 bg-[#E5F5EC]"
-                          : active
-                            ? "border-[#0B5FFF]/30 bg-[#F4F6FB]"
-                            : "border-[#1A1F2A]/10 bg-white"
-                    }`}
-                  >
-                    <p
-                      className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em]"
-                      style={{
-                        color: isReplanning
-                          ? "#A06200"
-                          : isComplete
-                            ? "#1E7A47"
-                            : active
-                              ? "#0B5FFF"
-                              : "#1A1F2A",
-                      }}
-                    >
-                      Step {s.n}
-                    </p>
-                    <h3 className="mt-2 font-display text-lg font-bold tracking-tight text-[#0B2545]">
-                      {s.title}
-                    </h3>
-                    <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-[#1A1F2A]/55">
-                      {status}
-                    </p>
-                  </div>
-                );
-              })}
+            <div className="flex items-baseline justify-between gap-4">
+              <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+                {state.phase === "done" ? "Answered" : "Asked"}
+              </p>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`inline-block h-2 w-2 rounded-full ${
+                    obsStatus === "running" ? "animate-pulse" : ""
+                  }`}
+                  style={{ backgroundColor: phaseDot }}
+                />
+                <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#0B2545]">
+                  {phaseDisplayLabel}
+                </span>
+              </div>
             </div>
+            <h1 className="mt-3 max-w-[58ch] font-display text-2xl font-semibold tracking-tight text-[#0B2545] md:text-[28px]">
+              {query}
+            </h1>
           </div>
         </section>
 
-        {/* Agent thinking */}
-        {state.thinking && (
-          <section className="border-b border-[#1A1F2A]/10 bg-[#F4F6FB]">
-            <div className="px-6 py-6 md:px-10">
-              <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
-                Agent thinking
-              </p>
-              <p className="mt-2 max-w-[68ch] text-base italic text-[#0B2545] md:text-lg">
-                "{state.thinking}"
-              </p>
-            </div>
-          </section>
-        )}
-
-        {/* Plan */}
-        {state.steps.length > 0 && (
-          <section className="border-b border-[#1A1F2A]/10 bg-white">
-            <div className="px-6 py-8 md:px-10">
-              <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
-                Plan
-              </p>
-              <ol className="mt-4 space-y-3">
-                {state.steps.map((s) => (
-                  <li
-                    key={s.step}
-                    className={`rounded-md border px-4 py-3 ${
-                      s.status === "completed"
-                        ? "border-[#1E7A47]/30 bg-[#E5F5EC]"
-                        : s.status === "failed"
-                          ? "border-[#A0231C]/30 bg-[#FBE9E7]"
-                          : s.fromReplan
-                            ? "border-[#A06200]/30 bg-[#FFF3D9]"
-                            : "border-[#1A1F2A]/10 bg-white"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="font-mono text-[11px] font-semibold tabular-nums text-[#1A1F2A]/55">
-                        {String(s.step).padStart(2, "0")}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-baseline justify-between gap-3">
-                          <span className="font-mono text-sm font-semibold text-[#0B2545]">
-                            {s.tool}
-                            {s.fromReplan && (
-                              <span className="ml-2 rounded-sm bg-[#A06200] px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-white">
-                                Replan
-                              </span>
-                            )}
-                          </span>
-                          <span
-                            className={`font-mono text-[11px] uppercase tracking-wider ${
-                              s.status === "completed"
-                                ? "text-[#1E7A47]"
-                                : s.status === "failed"
-                                  ? "text-[#A0231C]"
-                                  : "text-[#1A1F2A]/45"
-                            }`}
-                          >
-                            {s.status}
-                            {typeof s.durationMs === "number" && s.status !== "pending" && (
-                              <span className="ml-2 text-[#1A1F2A]/55 normal-case tracking-normal">
-                                {s.durationMs}ms
-                              </span>
-                            )}
-                          </span>
-                        </div>
-                        {s.rationale && (
-                          <p className="mt-1 text-sm italic text-[#1A1F2A]/75">
-                            {s.rationale}
-                          </p>
-                        )}
-                        <p className="mt-1 truncate font-mono text-[11px] text-[#1A1F2A]/55">
-                          {JSON.stringify(s.args).slice(0, 180)}
-                        </p>
-                        {s.error && (
-                          <p className="mt-2 font-mono text-[11px] text-[#A0231C]">
-                            ↳ {s.error}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </section>
-        )}
-
-        {/* Replan diagnoses */}
-        {state.replans.length > 0 && (
-          <section className="border-b border-[#1A1F2A]/10 bg-[#FFF3D9]">
-            <div className="px-6 py-6 md:px-10">
-              <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#A06200]">
-                {state.replans.length === 1
-                  ? "Agent adjusted course"
-                  : `Agent adjusted course (${state.replans.length}×)`}
-              </p>
-              <ul className="mt-3 space-y-3">
-                {state.replans.map((rp, i) => (
-                  <li key={i}>
-                    <p className="text-sm text-[#0B2545]">
-                      {rp.reason === "doom_loop" ? (
-                        <>
-                          <span className="mr-2 rounded-sm bg-[#A0231C] px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-white">
-                            Doom-loop
-                          </span>
-                          Caught looping at step {rp.failedStep}{" "}
-                          <span className="font-mono text-xs">{rp.failedTool}</span>:
-                        </>
-                      ) : (
-                        <>
-                          Step {rp.failedStep}{" "}
-                          <span className="font-mono text-xs">{rp.failedTool}</span>{" "}
-                          failed:
-                        </>
-                      )}
-                      <span className="ml-1 font-mono text-xs text-[#A0231C]">
-                        {rp.error}
-                      </span>
-                    </p>
-                    {rp.diagnosis && (
-                      <p className="mt-1 text-sm italic text-[#0B2545]">
-                        Diagnosis: "{rp.diagnosis}"
-                      </p>
-                    )}
-                    {rp.thinking && rp.thinking !== state.thinking && (
-                      <p className="mt-1 text-sm italic text-[#A06200]">
-                        New approach: "{rp.thinking}"
-                      </p>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-        )}
-
-        {/* Result */}
-        {state.phase === "done" && state.answer && (
-          <section className="border-b border-[#1A1F2A]/10 bg-white">
+        {/* Answer card — promoted to top */}
+        {state.phase === "done" && state.answer ? (
+          <section className="bg-white">
             <div className="px-6 py-12 md:px-10 md:py-16">
               <div className="grid gap-10 md:grid-cols-12">
                 <div className="md:col-span-8">
-                  <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
-                    Answer
+                  <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+                    Insight
                   </p>
-                  <p className="mt-3 max-w-[64ch] text-xl font-medium leading-relaxed text-[#0B2545] md:text-2xl">
+                  <p className="mt-3 max-w-[58ch] font-display text-2xl font-semibold leading-snug text-[#0B2545] md:text-3xl">
                     {state.answer}
                   </p>
-                  {(state.durationMs !== null || state.usageTotal) && (
-                    <p className="mt-4 font-mono text-[11px] uppercase tracking-wider text-[#1A1F2A]/55">
-                      {state.durationMs !== null &&
-                        `${(state.durationMs / 1000).toFixed(1)}s end-to-end`}
-                      {state.usageTotal && state.durationMs !== null && " · "}
-                      {state.usageTotal &&
-                        `${state.usageTotal.total.toLocaleString()} tokens (${state.usageTotal.prompt.toLocaleString()} in / ${state.usageTotal.completion.toLocaleString()} out)`}
-                    </p>
-                  )}
+                  {/* Action row — sellable */}
+                  <div className="mt-6 flex flex-wrap items-center gap-3">
+                    {state.citation && (
+                      <Link
+                        href={`/datasets/${state.citation.dataset_id}`}
+                        className="inline-flex items-center rounded-md border border-[#0B5FFF] bg-[#0B5FFF] px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-white hover:bg-[#0a52d6]"
+                      >
+                        Open dataset →
+                      </Link>
+                    )}
+                    {state.citation?.api_url && (
+                      <a
+                        href={state.citation.api_url}
+                        target="_blank"
+                        rel="noopener"
+                        className="inline-flex items-center rounded-md border border-[#E1E5EE] bg-white px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#0B2545] hover:bg-[#F4F6FB]"
+                      >
+                        API endpoint →
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof navigator !== "undefined" && navigator.clipboard) {
+                          navigator.clipboard.writeText(state.answer ?? "");
+                        }
+                      }}
+                      className="inline-flex items-center rounded-md border border-[#E1E5EE] bg-white px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#0B2545] hover:bg-[#F4F6FB]"
+                    >
+                      Copy insight
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (
+                          typeof navigator !== "undefined" &&
+                          navigator.clipboard &&
+                          typeof window !== "undefined"
+                        ) {
+                          navigator.clipboard.writeText(window.location.href);
+                        }
+                      }}
+                      className="inline-flex items-center rounded-md border border-[#E1E5EE] bg-white px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#0B2545] hover:bg-[#F4F6FB]"
+                    >
+                      Share
+                    </button>
+                  </div>
+
+                  {/* Meta strip — chip style */}
+                  <div className="mt-6 flex flex-wrap items-center gap-2">
+                    <MetaChip
+                      label="Verified"
+                      value={
+                        state.durationMs !== null
+                          ? `${(state.durationMs / 1000).toFixed(1)}s`
+                          : "—"
+                      }
+                    />
+                    {state.usageTotal && (
+                      <MetaChip label="Tokens" value={state.usageTotal.total.toLocaleString()} />
+                    )}
+                    <MetaChip
+                      label="Sources"
+                      value={`${sourcesCount} cited`}
+                    />
+                    {state.replans.length > 0 && (
+                      <MetaChip
+                        label="Self-corrections"
+                        value={state.replans.length.toString()}
+                      />
+                    )}
+                  </div>
                 </div>
 
                 <aside className="md:col-span-4">
                   {state.citation && (
-                    <div className="rounded-md border border-[#1A1F2A]/10 bg-[#F4F6FB] p-5">
+                    <div className="rounded-md border border-[#E1E5EE] bg-[#F4F6FB] p-5">
                       <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
-                        Citation
+                        Primary source
                       </p>
-                      <p className="mt-3 text-sm">
-                        Source:{" "}
-                        <span className="font-semibold text-[#0B2545]">
-                          {state.citation.portal}
-                        </span>{" "}
-                        · {state.citation.dataset_name}
+                      <p className="mt-3 text-sm font-semibold text-[#0B2545]">
+                        {state.citation.portal}
                       </p>
-                      <p className="mt-1 font-mono text-xs">
-                        ({state.citation.dataset_id})
+                      <p className="mt-1 text-sm text-[#0B2545]">
+                        {state.citation.dataset_name}
                       </p>
-                      <Link
-                        href={`/datasets/${state.citation.dataset_id}`}
-                        className="mt-4 inline-block text-sm font-medium text-[#0B5FFF] hover:underline"
-                      >
-                        Open dataset →
-                      </Link>
-                    </div>
-                  )}
-
-                  {state.artifacts.length > 0 && (
-                    <div className="mt-5 rounded-md border border-[#1A1F2A]/10 bg-white p-5">
-                      <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
-                        Source URLs
+                      <p className="mt-1 font-mono text-[11px] text-[#1A1F2A]/55">
+                        {state.citation.dataset_id}
                       </p>
-                      <ul className="mt-3 space-y-1 font-mono text-[11px]">
-                        {state.artifacts.slice(0, 4).map((a, idx) => (
-                          <li key={`${a}-${idx}`}>
-                            <a
-                              href={a}
-                              target="_blank"
-                              rel="noopener"
-                              className="break-all text-[#0B5FFF] hover:underline"
-                            >
-                              {a.slice(0, 80)}
-                              {a.length > 80 ? "…" : ""}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
+                      <div className="mt-4 flex flex-col gap-1.5">
+                        <Link
+                          href={`/datasets/${state.citation.dataset_id}`}
+                          className="text-sm font-semibold text-[#0B5FFF] hover:underline"
+                        >
+                          Open dataset →
+                        </Link>
+                        {state.citation.api_url && (
+                          <a
+                            href={state.citation.api_url}
+                            target="_blank"
+                            rel="noopener"
+                            className="text-sm font-semibold text-[#0B5FFF] hover:underline"
+                          >
+                            API endpoint →
+                          </a>
+                        )}
+                      </div>
                     </div>
                   )}
                 </aside>
               </div>
             </div>
           </section>
-        )}
-
-        {state.phase === "error" && (
-          <section className="border-b border-[#1A1F2A]/10 bg-white">
+        ) : state.phase === "error" ? (
+          <section className="bg-white">
             <div className="px-6 py-12 md:px-10">
-              <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#A0231C]">
+              <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#A0231C]">
                 Agent error
               </p>
               <p className="mt-3 max-w-[60ch] font-mono text-sm text-[#1A1F2A]/85">
@@ -800,34 +694,59 @@ export function AgentRunner({
                 <Link href="/" className="text-[#0B5FFF] hover:underline">
                   start over
                 </Link>
-                .
+                . Detailed telemetry is in the right panel.
               </p>
             </div>
           </section>
-        )}
-
-        {state.phase !== "done" && state.phase !== "error" && state.phase !== "idle" && (
-          <section className="border-b border-[#1A1F2A]/10 bg-white">
-            <div className="px-6 py-6 md:px-10">
-              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#1A1F2A]/55">
-                {state.phase === "reasoning" && "Reading the question..."}
-                {state.phase === "planning" && "Planning the tool sequence..."}
+        ) : (
+          // Live in-flight body — not "educational", just a confidence-building loading state
+          <section className="bg-white">
+            <div className="px-6 py-12 md:px-10 md:py-16">
+              <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+                Insight
+              </p>
+              <div className="mt-3 max-w-[58ch] space-y-3">
+                <div className="h-7 w-[90%] animate-pulse rounded bg-[#F4F6FB]" />
+                <div className="h-7 w-[78%] animate-pulse rounded bg-[#F4F6FB]" />
+                <div className="h-7 w-[60%] animate-pulse rounded bg-[#F4F6FB]" />
+              </div>
+              <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.16em] text-[#1A1F2A]/55">
+                {state.phase === "reasoning" && "Codex parsing the question…"}
+                {state.phase === "planning" && "Building the tool sequence…"}
                 {state.phase === "executing" &&
-                  `Running step ${state.currentStep} of ${state.totalSteps}...`}
-                {state.phase === "replanning" && "Step failed. Adjusting plan..."}
-                {state.phase === "completing" && "Synthesizing answer..."}
+                  `Step ${state.currentStep}/${state.totalSteps}${currentTool ? ` · ${currentTool}` : ""}…`}
+                {state.phase === "replanning" && "Self-correcting after a failure…"}
+                {state.phase === "completing" && "Synthesizing the answer…"}
               </p>
             </div>
           </section>
         )}
       </div>
 
-      {/* Right column — observatory */}
-      <AgentObservatory
+      {/* Right column — 4-tab agent sidebar */}
+      <AgentSidebar
         events={state.events}
-        startedAt={state.startedAt}
+        steps={state.steps}
+        replans={state.replans}
         status={obsStatus}
+        phase={state.phase}
+        currentStep={state.currentStep}
+        totalSteps={state.totalSteps}
+        currentTool={currentTool}
+        durationMs={state.durationMs}
+        usageTotal={state.usageTotal}
+        citationCount={sourcesCount}
+        startedAt={state.startedAt}
       />
     </div>
+  );
+}
+
+function MetaChip({ label, value }: { label: string; value: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-sm border border-[#E1E5EE] bg-white px-2 py-1 font-mono text-[10px] uppercase tracking-wider">
+      <span className="text-[#1A1F2A]/55">{label}</span>
+      <span className="font-semibold tabular-nums text-[#0B2545]">{value}</span>
+    </span>
   );
 }

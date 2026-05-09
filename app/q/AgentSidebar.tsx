@@ -1,0 +1,501 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
+import type { ObsEvent } from "./AgentObservatory";
+
+type SidebarStep = {
+  step: number;
+  tool: string;
+  args: unknown;
+  rationale?: string;
+  status: "pending" | "completed" | "failed";
+  preview?: string;
+  error?: string | null;
+  fromReplan?: boolean;
+  durationMs?: number;
+};
+
+type SidebarReplan = {
+  failedStep: number;
+  failedTool: string;
+  error: string | null;
+  diagnosis?: string;
+  reason?: "step_failed" | "doom_loop";
+};
+
+type TokenUsage = { prompt: number; completion: number; total: number };
+
+type Phase =
+  | "idle"
+  | "reasoning"
+  | "planning"
+  | "executing"
+  | "replanning"
+  | "completing"
+  | "done"
+  | "error";
+
+type Props = {
+  events: ObsEvent[];
+  steps: SidebarStep[];
+  replans: SidebarReplan[];
+  status: "idle" | "running" | "done" | "error";
+  phase: Phase;
+  currentStep: number;
+  totalSteps: number;
+  currentTool: string | null;
+  durationMs: number | null;
+  usageTotal: TokenUsage | null;
+  citationCount: number;
+  startedAt: number | null;
+};
+
+type Tab = "status" | "flow" | "execution" | "telemetry";
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: "status", label: "Status" },
+  { id: "flow", label: "Flow" },
+  { id: "execution", label: "Execution" },
+  { id: "telemetry", label: "Telemetry" },
+];
+
+const PILL_COLORS: Record<string, { bg: string; fg: string; border: string }> = {
+  completed: { bg: "#E5F5EC", fg: "#1E7A47", border: "#1E7A47" },
+  failed: { bg: "#FBE9E7", fg: "#A0231C", border: "#A0231C" },
+  pending: { bg: "#F4F6FB", fg: "#1A1F2A", border: "#E1E5EE" },
+  replan: { bg: "#FFF3D9", fg: "#A06200", border: "#A06200" },
+};
+
+export function AgentSidebar(props: Props) {
+  const [tab, setTab] = useState<Tab>("status");
+
+  return (
+    <aside className="border-l border-[#E1E5EE] bg-white">
+      <div className="flex h-full flex-col">
+        {/* Tab bar */}
+        <div role="tablist" className="flex border-b border-[#E1E5EE]">
+          {TABS.map((t) => {
+            const active = tab === t.id;
+            return (
+              <button
+                key={t.id}
+                role="tab"
+                aria-selected={active}
+                onClick={() => setTab(t.id)}
+                className={`flex-1 border-b-2 px-3 py-3 font-display text-[12px] font-semibold uppercase tracking-[0.16em] transition-colors ${
+                  active
+                    ? "border-[#0B5FFF] text-[#0B2545]"
+                    : "border-transparent text-[#1A1F2A]/55 hover:text-[#0B2545]"
+                }`}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Tab content */}
+        <div className="flex-1 overflow-y-auto">
+          {tab === "status" && <StatusTab {...props} />}
+          {tab === "flow" && <FlowTab steps={props.steps} replans={props.replans} />}
+          {tab === "execution" && <ExecutionTab steps={props.steps} replans={props.replans} />}
+          {tab === "telemetry" && <TelemetryTab events={props.events} startedAt={props.startedAt} />}
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function StatusTab({
+  status,
+  phase,
+  currentStep,
+  totalSteps,
+  currentTool,
+  durationMs,
+  usageTotal,
+  replans,
+  citationCount,
+  steps,
+}: Props) {
+  const completed = steps.filter((s) => s.status === "completed").length;
+  const failed = steps.filter((s) => s.status === "failed").length;
+
+  const phaseLine = (() => {
+    switch (phase) {
+      case "reasoning":
+        return "Reading the question";
+      case "planning":
+        return "Planning the tool sequence";
+      case "executing":
+        return currentTool
+          ? `Step ${currentStep}/${totalSteps} · ${currentTool}`
+          : `Running step ${currentStep}/${totalSteps}`;
+      case "replanning":
+        return "Self-correcting after a failure";
+      case "completing":
+        return "Synthesizing the answer";
+      case "done":
+        return "All SLOs green";
+      case "error":
+        return "Degraded — review telemetry";
+      default:
+        return "Idle";
+    }
+  })();
+
+  const dot =
+    status === "running"
+      ? "#A06200"
+      : status === "done"
+        ? "#1E7A47"
+        : status === "error"
+          ? "#A0231C"
+          : "#1A1F2A";
+
+  const phaseLabel = (() => {
+    if (status === "running") return "Operational · in flight";
+    if (status === "done") return "Complete";
+    if (status === "error") return "Error";
+    return "Idle";
+  })();
+
+  return (
+    <div className="px-5 py-5">
+      <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+        Agent status
+      </p>
+      <div className="mt-2 flex items-center gap-2">
+        <span
+          className={`inline-block h-2 w-2 rounded-full ${
+            status === "running" ? "animate-pulse" : ""
+          }`}
+          style={{ backgroundColor: dot }}
+        />
+        <p className="text-sm font-medium text-[#0B2545]">{phaseLabel}</p>
+      </div>
+      <p className="mt-1 text-[12px] text-[#1A1F2A]/70">{phaseLine}</p>
+      {status === "running" && totalSteps > 0 && (
+        <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-[#F4F6FB]">
+          <div
+            className="h-full bg-[#0B5FFF] transition-all duration-300"
+            style={{
+              width: `${Math.min(100, Math.round(((currentStep + (phase === "completing" ? 1 : 0)) / Math.max(totalSteps, 1)) * 100))}%`,
+            }}
+          />
+        </div>
+      )}
+
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <Tile
+          label="Latency"
+          value={
+            durationMs !== null
+              ? `${(durationMs / 1000).toFixed(1)}s`
+              : status === "running"
+                ? "—"
+                : "—"
+          }
+        />
+        <Tile
+          label="Tokens"
+          value={usageTotal ? usageTotal.total.toLocaleString() : "—"}
+        />
+        <Tile label="Steps" value={`${completed}${failed ? ` · ${failed} failed` : ""}`} />
+        <Tile label="Self-corrections" value={replans.length.toString()} />
+      </div>
+
+      <div className="mt-5 rounded-md border border-[#E1E5EE] bg-[#F4F6FB] px-4 py-3">
+        <p className="font-mono text-[10px] uppercase tracking-wider text-[#1A1F2A]/55">
+          Service-level
+        </p>
+        <ul className="mt-2 space-y-1 text-[12px] text-[#0B2545]">
+          <li>● Codex reachable</li>
+          <li>● Socrata reachable</li>
+          <li>● {citationCount} primary source{citationCount === 1 ? "" : "s"} cited</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function Tile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-[#E1E5EE] bg-white px-3 py-3">
+      <p className="font-mono text-[10px] uppercase tracking-wider text-[#1A1F2A]/55">
+        {label}
+      </p>
+      <p className="mt-1 font-display text-lg font-semibold tabular-nums text-[#0B2545]">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function FlowTab({
+  steps,
+  replans,
+}: {
+  steps: SidebarStep[];
+  replans: SidebarReplan[];
+}) {
+  if (steps.length === 0) {
+    return (
+      <div className="px-5 py-12 text-center text-sm text-[#1A1F2A]/45">
+        Waiting for plan…
+      </div>
+    );
+  }
+  const replanIndex = new Set(replans.map((r) => r.failedStep));
+  return (
+    <div className="px-5 py-5">
+      <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+        Reasoning trace
+      </p>
+      <ol className="mt-4 space-y-0">
+        {steps.map((s, i) => {
+          const replan = replanIndex.has(s.step);
+          const colors =
+            s.status === "completed"
+              ? PILL_COLORS.completed
+              : s.status === "failed"
+                ? PILL_COLORS.failed
+                : s.fromReplan
+                  ? PILL_COLORS.replan
+                  : PILL_COLORS.pending;
+          const isLast = i === steps.length - 1;
+          return (
+            <li key={s.step} className="relative pl-8 pb-4">
+              {!isLast && (
+                <span
+                  aria-hidden
+                  className="absolute left-[11px] top-5 h-full w-px bg-[#E1E5EE]"
+                />
+              )}
+              <span
+                aria-hidden
+                className="absolute left-[6px] top-1.5 h-3 w-3 rounded-full border-2 bg-white"
+                style={{ borderColor: colors.border }}
+              />
+              <div
+                className="rounded-md border px-3 py-2"
+                style={{ borderColor: colors.border + "55", backgroundColor: colors.bg }}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-[12px] font-semibold text-[#0B2545]">
+                    {s.tool}
+                  </span>
+                  <span
+                    className="font-mono text-[10px] uppercase tracking-wider"
+                    style={{ color: colors.fg }}
+                  >
+                    {s.status}
+                    {typeof s.durationMs === "number" && s.status !== "pending" && (
+                      <span className="ml-1.5 normal-case tracking-normal text-[#1A1F2A]/55">
+                        {s.durationMs}ms
+                      </span>
+                    )}
+                  </span>
+                </div>
+              </div>
+              {replan && (
+                <div className="mt-1 ml-2 rounded-sm border-l-2 border-[#A06200] bg-[#FFF3D9] px-2 py-1 font-mono text-[10px] text-[#A06200]">
+                  ↳ REPLAN · self-correction
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+function ExecutionTab({
+  steps,
+  replans,
+}: {
+  steps: SidebarStep[];
+  replans: SidebarReplan[];
+}) {
+  if (steps.length === 0) {
+    return (
+      <div className="px-5 py-12 text-center text-sm text-[#1A1F2A]/45">
+        No steps yet.
+      </div>
+    );
+  }
+  const replanByStep = new Map(replans.map((r) => [r.failedStep, r]));
+  return (
+    <div className="px-5 py-5 space-y-2">
+      <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+        Execution
+      </p>
+      <ol className="space-y-2">
+        {steps.map((s) => {
+          const colors =
+            s.status === "completed"
+              ? PILL_COLORS.completed
+              : s.status === "failed"
+                ? PILL_COLORS.failed
+                : s.fromReplan
+                  ? PILL_COLORS.replan
+                  : PILL_COLORS.pending;
+          const rp = replanByStep.get(s.step);
+          return (
+            <li key={s.step}>
+              <div className="rounded-md border border-[#E1E5EE] bg-white px-3 py-2">
+                <div className="flex items-baseline gap-2">
+                  <span className="font-mono text-[10px] tabular-nums text-[#1A1F2A]/55">
+                    {String(s.step).padStart(2, "0")}
+                  </span>
+                  <span className="font-mono text-[12px] font-semibold text-[#0B2545]">
+                    {s.tool}
+                  </span>
+                  {s.fromReplan && (
+                    <span
+                      className="rounded-sm px-1 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-white"
+                      style={{ backgroundColor: "#A06200" }}
+                    >
+                      Replan
+                    </span>
+                  )}
+                  <span
+                    className="ml-auto rounded-sm px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider"
+                    style={{
+                      color: colors.fg,
+                      backgroundColor: colors.bg,
+                      border: `1px solid ${colors.border}`,
+                    }}
+                  >
+                    {s.status}
+                  </span>
+                </div>
+                {typeof s.durationMs === "number" && s.status !== "pending" && (
+                  <p className="mt-1 font-mono text-[10px] text-[#1A1F2A]/55">
+                    {s.durationMs}ms
+                  </p>
+                )}
+                {s.error && (
+                  <p className="mt-1 font-mono text-[10px] text-[#A0231C]">↳ {s.error}</p>
+                )}
+              </div>
+              {rp && rp.diagnosis && (
+                <div className="mt-1 ml-3 rounded-sm border-l-2 border-[#A06200] bg-[#FFF3D9] px-2 py-1.5">
+                  <p className="font-mono text-[9px] uppercase tracking-wider text-[#A06200]">
+                    Autonomous replan
+                    {rp.reason === "doom_loop" && " · doom-loop"}
+                  </p>
+                  <p className="mt-0.5 text-[11px] italic text-[#0B2545]">{rp.diagnosis}</p>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+function TelemetryTab({
+  events,
+  startedAt,
+}: {
+  events: ObsEvent[];
+  startedAt: number | null;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [filter, setFilter] = useState<"all" | "codex" | "socrata" | "errors">("all");
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [events.length]);
+
+  const filtered = events.filter((e) => {
+    if (filter === "all") return true;
+    if (filter === "errors") return e.level === "error" || e.level === "warn";
+    if (filter === "codex")
+      return ["reasoning", "planning", "completing", "replanned"].includes(e.phase);
+    if (filter === "socrata")
+      return ["executing", "step_done"].includes(e.phase) && (e.detail?.includes("austintexas") || true);
+    return true;
+  });
+
+  const start = startedAt ?? events[0]?.ts ?? Date.now();
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex items-center gap-1.5 border-b border-[#E1E5EE] px-4 py-2">
+        {(["all", "codex", "socrata", "errors"] as const).map((f) => {
+          const active = filter === f;
+          return (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`rounded-sm px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider transition-colors ${
+                active
+                  ? "bg-[#0B2545] text-white"
+                  : "text-[#1A1F2A]/55 hover:text-[#0B2545]"
+              }`}
+            >
+              {f}
+            </button>
+          );
+        })}
+        <span className="ml-auto font-mono text-[10px] text-[#1A1F2A]/45">
+          {filtered.length} / {events.length}
+        </span>
+      </div>
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto bg-[#F8F9FC] px-4 py-3 font-mono text-[11px] leading-[1.45]"
+      >
+        {filtered.length === 0 ? (
+          <p className="py-8 text-center text-[#1A1F2A]/45">No events yet.</p>
+        ) : (
+          <ol className="space-y-1.5">
+            {filtered.map((e, i) => (
+              <li key={i}>
+                <span className="text-[#1A1F2A]/45">
+                  {fmtClock(e.ts, start)}
+                </span>{" "}
+                <span
+                  className="font-semibold uppercase tracking-wider"
+                  style={{ color: levelHex(e.level) }}
+                >
+                  {e.phase}
+                </span>{" "}
+                <span className="text-[#0B2545]">{e.message}</span>
+                {e.detail && (
+                  <pre className="mt-0.5 max-h-24 overflow-x-auto whitespace-pre-wrap break-all rounded bg-white px-2 py-1 text-[10px] text-[#0B2545]/85 border border-[#E1E5EE]">
+                    {e.detail}
+                  </pre>
+                )}
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function fmtClock(ts: number, start: number): string {
+  const d = new Date(ts);
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  const ss = String(d.getSeconds()).padStart(2, "0");
+  const ms = String(d.getMilliseconds()).padStart(3, "0");
+  const since = ((ts - start) / 1000).toFixed(2);
+  return `${hh}:${mm}:${ss}.${ms} +${since}s`;
+}
+
+function levelHex(level: string): string {
+  if (level === "ok") return "#1E7A47";
+  if (level === "warn") return "#A06200";
+  if (level === "error") return "#A0231C";
+  return "#0B5FFF";
+}
