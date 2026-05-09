@@ -63,8 +63,13 @@ Disambiguation rules (apply BEFORE picking a dataset):
 - "crime" / "incidents" → fdj4-gpfu
 - "traffic fatalities" / "vision zero" → y2wy-tgr5
 
+Specialist routing — these question shapes route to specialists, NOT raw tools:
+- META questions about TXLookup itself ("what data do you have?", "how does this work?", "what does original_zip mean?", "can you query Dallas?", "what cities do you cover?") → emit a 1-step plan: [{tool:"delegate_to", args:{specialist:"support", input:{query:<user's question>}}}]. No cite_dataset needed — support handles its own attribution.
+- VAGUE geographic shorthands the user probably knows the answer to but the agent shouldn't guess ("south austin", "downtown", "north austin", "east austin", "west austin") → emit [{tool:"delegate_to", args:{specialist:"support", input:{query:<user's question>}}}]. Support returns clarifier chips and pauses; the user picks one, then re-asks. Do NOT attempt to disambiguate to a single zip yourself.
+- All other data questions ("permits in 78702", "top zips for 311 complaints") → use raw tools as before (discover_datasets / get_dataset_schema / summarize_data / fetch_data / cite_dataset).
+
 Hard rules:
-- EVERY plan MUST include at least one summarize_data or fetch_data step BEFORE cite_dataset. A plan with only discover_datasets + cite_dataset is FORBIDDEN — the synthesizer will have no real data to cite and will produce an ungrounded answer paraphrased from catalog blurbs. If you can't pick the right column or filter, call get_dataset_schema first, then summarize_data.
+- EVERY data-question plan MUST include at least one summarize_data or fetch_data step BEFORE cite_dataset. A plan with only discover_datasets + cite_dataset is FORBIDDEN — the synthesizer will have no real data to cite and will produce an ungrounded answer paraphrased from catalog blurbs. If you can't pick the right column or filter, call get_dataset_schema first, then summarize_data. EXCEPTION: meta/vague-geography plans that delegate to support don't query data and skip cite_dataset entirely.
 - ALWAYS end with cite_dataset.
 - For ambiguous "easy/best/worst/most/fewest/which" questions, default to summarize_data grouped by a geographic key column (original_zip, council_district, zip_code, etc. — pick from the dataset's KEY COLUMNS). Prefer NO 'where' filter (or only a date filter); over-restrictive value-matching like permittype='Building' often returns zero rows because the dataset's real values don't match your guess. Surface counts; let the user infer the answer from volume.
 - For questions like "top X by Y" / "what are the most common", use summarize_data — cheaper than fetch_data.

@@ -27,12 +27,86 @@ test("isSpecialistName recognizes the three roster names", () => {
   assert.equal(isSpecialistName("nope"), false);
 });
 
-test("stub specialists return failed envelope with not-yet-implemented message", async () => {
+test("stub specialists (data_analyst, reporter) return not-yet-implemented", async () => {
   _resetSpecialistsForTest();
-  const env = await callSpecialist("data_analyst", {});
-  assert.equal(env.agent, "data_analyst");
-  assert.equal(env.status, "failed");
-  assert.match(env.error ?? "", /not yet implemented/i);
+  for (const name of ["data_analyst", "reporter"]) {
+    const env = await callSpecialist(name, {});
+    assert.equal(env.agent, name);
+    assert.equal(env.status, "failed");
+    assert.match(env.error ?? "", /not yet implemented/i);
+  }
+});
+
+test("support specialist — catalog meta query returns pre-canned summary (no LLM)", async () => {
+  _resetSpecialistsForTest();
+  const env = await callSpecialist("support", { query: "what datasets do you have?" });
+  assert.equal(env.agent, "support");
+  assert.equal(env.status, "completed");
+  assert.equal(env.error, null);
+  const r = env.result;
+  assert.ok(typeof r.message === "string" && r.message.length > 30);
+  assert.ok(Array.isArray(r.datasets), "expected datasets[] in catalog summary");
+  assert.ok(r.datasets.length >= 9, "should list all catalog entries");
+  assert.ok(r.datasets[0].id && r.datasets[0].title);
+});
+
+test("support specialist — vague geography returns needs_input + clarifier chips", async () => {
+  _resetSpecialistsForTest();
+  const env = await callSpecialist("support", {
+    query: "show me permits in south austin last six months",
+  });
+  assert.equal(env.agent, "support");
+  assert.equal(env.status, "needs_input");
+  assert.ok(Array.isArray(env.next_actions) && env.next_actions.length >= 3);
+  for (const chip of env.next_actions) {
+    assert.ok(/^\d{5}$/.test(chip.label), `chip label should be a bare zip: ${chip.label}`);
+    assert.match(chip.query, /\d{5}/, "chip query should contain the substituted zip");
+    assert.ok(!/south austin/i.test(chip.query), "chip query should have replaced 'south austin'");
+    // Reject the regression where the rewrite produced "in in 78704" / "to to 78704" / etc.
+    assert.ok(
+      !/\b(in|to|at|for|near|of|on|by|from)\s+\1\b/i.test(chip.query),
+      `chip query has duplicated preposition (rewrite bug): ${chip.query}`,
+    );
+    // The substituted query should still scan as a normal sentence — no double spaces.
+    assert.ok(!/  +/.test(chip.query), `chip query has double-space: ${chip.query}`);
+  }
+  // First chip's full text — concrete sanity that the rewrite is clean.
+  assert.equal(
+    env.next_actions[0].query,
+    "show me permits in 78704 last six months",
+    "first chip query should read as a clean sentence",
+  );
+});
+
+test("support specialist — bare 'south austin' query returns a chip query that is just the zip", async () => {
+  _resetSpecialistsForTest();
+  const env = await callSpecialist("support", { query: "south austin" });
+  assert.equal(env.status, "needs_input");
+  assert.equal(env.next_actions[0].query, "78704");
+});
+
+test("support specialist — failure-explanation mode returns plain English", async () => {
+  _resetSpecialistsForTest();
+  const env = await callSpecialist("support", {
+    query: "",
+    context: {
+      failed: true,
+      failedTool: "summarize_data",
+      error: "HTTP 400 on https://...",
+    },
+  });
+  assert.equal(env.agent, "support");
+  assert.equal(env.status, "completed");
+  const msg = env.result.message;
+  assert.ok(/summarize_data/.test(msg) && /HTTP 400/.test(msg));
+  assert.ok(/try rephrasing/i.test(msg) || /broaden|different/i.test(msg));
+});
+
+test("support specialist — empty query returns a friendly intro (no crash)", async () => {
+  _resetSpecialistsForTest();
+  const env = await callSpecialist("support", { query: "" });
+  assert.equal(env.status, "completed");
+  assert.ok(typeof env.result.message === "string" && env.result.message.length > 10);
 });
 
 test("delegate_to executor case → unknown specialist fails clearly", async () => {
