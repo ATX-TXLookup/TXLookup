@@ -1,0 +1,1251 @@
+{
+  "generated": "2026-05-09T15:00:36.606615",
+  "results": [
+    {
+      "story": "food_inspections",
+      "question_n": 1,
+      "note": "restaurants score<80, last 6mo, worst first",
+      "status": "PASS",
+      "elapsed_s": 0.4,
+      "row_count": 15,
+      "rows": [
+        {
+          "restaurant_name": "K-Bop",
+          "score": "57.000000",
+          "inspection_date": "2025-12-02T00:00:00.000",
+          "zip_code": "78705-6656"
+        },
+        {
+          "restaurant_name": "Musashino Sushi Dokoro",
+          "score": "58.000000",
+          "inspection_date": "2026-01-15T00:00:00.000",
+          "zip_code": "78705-3539"
+        },
+        {
+          "restaurant_name": "WakeSurf Saloon",
+          "score": "60.000000",
+          "inspection_date": "2026-01-08T00:00:00.000",
+          "zip_code": "78734-2112"
+        },
+        {
+          "restaurant_name": "Fresh Bowl",
+          "score": "60.000000",
+          "inspection_date": "2025-12-16T00:00:00.000",
+          "zip_code": "78753-3305"
+        },
+        {
+          "restaurant_name": "Dumpling World",
+          "score": "60.000000",
+          "inspection_date": "2025-12-08T00:00:00.000",
+          "zip_code": "78751-3147"
+        },
+        {
+          "restaurant_name": "BC - Cafe Blue",
+          "score": "61.000000",
+          "inspection_date": "2026-04-09T00:00:00.000",
+          "zip_code": "78738-6897"
+        },
+        {
+          "restaurant_name": "Ho Ho Chinese Restaurant",
+          "score": "62.000000",
+          "inspection_date": "2026-01-21T00:00:00.000",
+          "zip_code": "78753"
+        },
+        {
+          "restaurant_name": "Desilicious Cafe",
+          "score": "62.000000",
+          "inspection_date": "2025-12-17T00:00:00.000",
+          "zip_code": "78727-4167"
+        },
+        {
+          "restaurant_name": "Austin Land and Cattle Co.",
+          "score": "63.000000",
+          "inspection_date": "2025-12-09T00:00:00.000",
+          "zip_code": "78703-4130"
+        },
+        {
+          "restaurant_name": "La Fruta Feliz",
+          "score": "64.000000",
+          "inspection_date": "2025-12-22T00:00:00.000",
+          "zip_code": "78723-5719"
+        },
+        {
+          "restaurant_name": "First Chinese BBQ",
+          "score": "65.000000",
+          "inspection_date": "2026-01-15T00:00:00.000",
+          "zip_code": "78753-3798"
+        },
+        {
+          "restaurant_name": "Star Market",
+          "score": "65.000000",
+          "inspection_date": "2025-12-11T00:00:00.000",
+          "zip_code": "78747-4054"
+        },
+        {
+          "restaurant_name": "OOB - Grand Oriental Express Co. Ltd",
+          "score": "65.000000",
+          "inspection_date": "2025-11-18T00:00:00.000",
+          "zip_code": "78752-2053"
+        },
+        {
+          "restaurant_name": "El Borrego de Oro",
+          "score": "66.000000",
+          "inspection_date": "2026-03-12T00:00:00.000",
+          "zip_code": "78704-7220"
+        },
+        {
+          "restaurant_name": "Step In Grocery",
+          "score": "66.000000",
+          "inspection_date": "2026-03-09T00:00:00.000",
+          "zip_code": "78752-2985"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=restaurant_name%2Cscore%2Cinspection_date%2Czip_code&%24limit=15&%24where=score+%3C+80+AND+inspection_date+%3E+%272025-11-10T00%3A00%3A00.000%27&%24order=score+ASC"
+    },
+    {
+      "story": "food_inspections",
+      "question_n": 2,
+      "note": "most common violation types (via process_description)",
+      "status": "PASS",
+      "elapsed_s": 0.36,
+      "row_count": 2,
+      "rows": [
+        {
+          "process_description": "Routine Inspection",
+          "cnt": "3403"
+        },
+        {
+          "process_description": "Follow-Up Inspection",
+          "cnt": "19"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=process_description%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=inspection_date+%3E+%272025-11-10T00%3A00%3A00.000%27&%24group=process_description&%24order=cnt+DESC"
+    },
+    {
+      "story": "food_inspections",
+      "question_n": 3,
+      "note": "zip codes with highest count of inspections score<80",
+      "status": "PASS",
+      "elapsed_s": 0.35,
+      "row_count": 10,
+      "rows": [
+        {
+          "zip_code": "78753",
+          "cnt": "8"
+        },
+        {
+          "zip_code": "78759",
+          "cnt": "7"
+        },
+        {
+          "zip_code": "78750",
+          "cnt": "5"
+        },
+        {
+          "zip_code": "78653",
+          "cnt": "5"
+        },
+        {
+          "zip_code": "78729",
+          "cnt": "5"
+        },
+        {
+          "zip_code": "78752",
+          "cnt": "4"
+        },
+        {
+          "zip_code": "78758",
+          "cnt": "4"
+        },
+        {
+          "zip_code": "78717",
+          "cnt": "3"
+        },
+        {
+          "zip_code": "78705-5607",
+          "cnt": "3"
+        },
+        {
+          "zip_code": "78717-5912",
+          "cnt": "3"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=zip_code%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=score+%3C+80+AND+inspection_date+%3E+%272025-11-10T00%3A00%3A00.000%27&%24group=zip_code&%24order=cnt+DESC"
+    },
+    {
+      "story": "food_inspections",
+      "question_n": 4,
+      "note": "E 6th St restaurants, low scores",
+      "status": "PASS",
+      "elapsed_s": 0.33,
+      "row_count": 10,
+      "rows": [
+        {
+          "restaurant_name": "Parlor & Yard",
+          "score": "67.000000",
+          "inspection_date": "2026-04-02T00:00:00.000",
+          "address": "601 W 6th St Austin"
+        },
+        {
+          "restaurant_name": "Bar Peached",
+          "score": "70.000000",
+          "inspection_date": "2026-02-12T00:00:00.000",
+          "address": "1315 W 6th St Austin"
+        },
+        {
+          "restaurant_name": "Licha's Cantina",
+          "score": "72.000000",
+          "inspection_date": "2026-02-18T00:00:00.000",
+          "address": "1306 E 6th St Austin"
+        },
+        {
+          "restaurant_name": "Ah Sing Den",
+          "score": "75.000000",
+          "inspection_date": "2026-02-06T00:00:00.000",
+          "address": "1100 E 6th St Austin"
+        },
+        {
+          "restaurant_name": "East Austin Hotel",
+          "score": "75.000000",
+          "inspection_date": "2026-01-28T00:00:00.000",
+          "address": "1108 E 6th St Austin"
+        },
+        {
+          "restaurant_name": "ARRIVE Austin",
+          "score": "78.000000",
+          "inspection_date": "2026-01-22T00:00:00.000",
+          "address": "1813 E 6th St Austin"
+        },
+        {
+          "restaurant_name": "Kitchen Austin, The LLC",
+          "score": "79.000000",
+          "inspection_date": "2026-01-22T00:00:00.000",
+          "address": "400 W 6th St Ste 125 Austin"
+        },
+        {
+          "restaurant_name": "Roppolo's Pizzeria II",
+          "score": "81.000000",
+          "inspection_date": "2025-12-03T00:00:00.000",
+          "address": "316 E 6th St Austin"
+        },
+        {
+          "restaurant_name": "Casino El Camino",
+          "score": "81.000000",
+          "inspection_date": "2025-11-20T00:00:00.000",
+          "address": "517 E 6th St Austin"
+        },
+        {
+          "restaurant_name": "Buenos Aires Cafe",
+          "score": "81.000000",
+          "inspection_date": "2026-02-25T00:00:00.000",
+          "address": "1201 E 6th St Austin"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=restaurant_name%2Cscore%2Cinspection_date%2Caddress&%24limit=10&%24where=upper%28address%29+LIKE+%27%256TH%25%27+AND+score+%3C+85+AND+inspection_date+%3E+%272025-11-10T00%3A00%3A00.000%27&%24order=score+ASC"
+    },
+    {
+      "story": "food_inspections",
+      "question_n": 5,
+      "note": "count of restaurants scored below 70 in last year",
+      "status": "PASS",
+      "elapsed_s": 0.36,
+      "row_count": 1,
+      "rows": [
+        {
+          "cnt": "34"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=count%28%2A%29+AS+cnt&%24limit=100&%24where=score+%3C+70+AND+inspection_date+%3E+%272025-05-09T00%3A00%3A00.000%27"
+    },
+    {
+      "story": "food_inspections",
+      "question_n": 6,
+      "note": "restaurants with repeated failures (multiple rows, low score) in 78704",
+      "status": "PASS",
+      "elapsed_s": 0.32,
+      "row_count": 2,
+      "rows": [
+        {
+          "restaurant_name": "Whip In",
+          "inspections": "2",
+          "worst": "62.000000"
+        },
+        {
+          "restaurant_name": "Hunan Lion Restaurant",
+          "inspections": "1",
+          "worst": "74.000000"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=restaurant_name%2Ccount%28%2A%29+AS+inspections%2Cmin%28score%29+AS+worst&%24limit=10&%24where=zip_code%3D%2778704%27+AND+score+%3C+80+AND+inspection_date+%3E+%272025-05-09T00%3A00%3A00.000%27&%24group=restaurant_name&%24order=inspections+DESC"
+    },
+    {
+      "story": "food_inspections",
+      "question_n": 7,
+      "note": "average food inspection score in zip 78701 (downtown)",
+      "status": "PASS",
+      "elapsed_s": 0.33,
+      "row_count": 1,
+      "rows": [
+        {
+          "avg_score": "85.0000000000000000",
+          "cnt": "1"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=avg%28score%29+AS+avg_score%2Ccount%28%2A%29+AS+cnt&%24limit=100&%24where=zip_code%3D%2778701%27+AND+inspection_date+%3E+%272025-11-10T00%3A00%3A00.000%27"
+    },
+    {
+      "story": "food_inspections",
+      "question_n": 8,
+      "note": "average score by month over last 12 months (trend)",
+      "status": "PASS",
+      "elapsed_s": 0.4,
+      "row_count": 12,
+      "rows": [
+        {
+          "month": "2025-05-01T00:00:00.000",
+          "avg_score": "91.0850515463917526",
+          "cnt": "388"
+        },
+        {
+          "month": "2025-06-01T00:00:00.000",
+          "avg_score": "90.1141618497109827",
+          "cnt": "692"
+        },
+        {
+          "month": "2025-07-01T00:00:00.000",
+          "avg_score": "89.5506849315068493",
+          "cnt": "730"
+        },
+        {
+          "month": "2025-08-01T00:00:00.000",
+          "avg_score": "89.5772946859903382",
+          "cnt": "414"
+        },
+        {
+          "month": "2025-09-01T00:00:00.000",
+          "avg_score": "91.4329113924050633",
+          "cnt": "395"
+        },
+        {
+          "month": "2025-10-01T00:00:00.000",
+          "avg_score": "91.5000000000000000",
+          "cnt": "224"
+        },
+        {
+          "month": "2025-11-01T00:00:00.000",
+          "avg_score": "91.7926829268292683",
+          "cnt": "656"
+        },
+        {
+          "month": "2025-12-01T00:00:00.000",
+          "avg_score": "91.0875179340028694",
+          "cnt": "697"
+        },
+        {
+          "month": "2026-01-01T00:00:00.000",
+          "avg_score": "89.8685446009389671",
+          "cnt": "639"
+        },
+        {
+          "month": "2026-02-01T00:00:00.000",
+          "avg_score": "91.0418353576248313",
+          "cnt": "741"
+        },
+        {
+          "month": "2026-03-01T00:00:00.000",
+          "avg_score": "91.4201438848920863",
+          "cnt": "695"
+        },
+        {
+          "month": "2026-04-01T00:00:00.000",
+          "avg_score": "91.0458333333333333",
+          "cnt": "240"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=date_trunc_ym%28inspection_date%29+AS+month%2Cavg%28score%29+AS+avg_score%2Ccount%28%2A%29+AS+cnt&%24limit=13&%24where=inspection_date+%3E+%272025-05-09T00%3A00%3A00.000%27&%24group=date_trunc_ym%28inspection_date%29&%24order=month+ASC"
+    },
+    {
+      "story": "food_inspections",
+      "question_n": 9,
+      "note": "process_description (type) count for inspections score<80",
+      "status": "PASS",
+      "elapsed_s": 0.28,
+      "row_count": 2,
+      "rows": [
+        {
+          "process_description": "Routine Inspection",
+          "cnt": "301"
+        },
+        {
+          "process_description": "Follow-Up Inspection",
+          "cnt": "11"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=process_description%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=score+%3C+80+AND+inspection_date+%3E+%272025-11-10T00%3A00%3A00.000%27&%24group=process_description&%24order=cnt+DESC"
+    },
+    {
+      "story": "food_inspections",
+      "question_n": 10,
+      "note": "top 10 worst scoring restaurants, latest inspections",
+      "status": "PASS",
+      "elapsed_s": 0.28,
+      "row_count": 10,
+      "rows": [
+        {
+          "restaurant_name": "K-Bop",
+          "score": "57.000000",
+          "inspection_date": "2025-12-02T00:00:00.000",
+          "zip_code": "78705-6656"
+        },
+        {
+          "restaurant_name": "Musashino Sushi Dokoro",
+          "score": "58.000000",
+          "inspection_date": "2026-01-15T00:00:00.000",
+          "zip_code": "78705-3539"
+        },
+        {
+          "restaurant_name": "WakeSurf Saloon",
+          "score": "60.000000",
+          "inspection_date": "2026-01-08T00:00:00.000",
+          "zip_code": "78734-2112"
+        },
+        {
+          "restaurant_name": "Fresh Bowl",
+          "score": "60.000000",
+          "inspection_date": "2025-12-16T00:00:00.000",
+          "zip_code": "78753-3305"
+        },
+        {
+          "restaurant_name": "Dumpling World",
+          "score": "60.000000",
+          "inspection_date": "2025-12-08T00:00:00.000",
+          "zip_code": "78751-3147"
+        },
+        {
+          "restaurant_name": "BC - Cafe Blue",
+          "score": "61.000000",
+          "inspection_date": "2026-04-09T00:00:00.000",
+          "zip_code": "78738-6897"
+        },
+        {
+          "restaurant_name": "Ho Ho Chinese Restaurant",
+          "score": "62.000000",
+          "inspection_date": "2026-01-21T00:00:00.000",
+          "zip_code": "78753"
+        },
+        {
+          "restaurant_name": "Desilicious Cafe",
+          "score": "62.000000",
+          "inspection_date": "2025-12-17T00:00:00.000",
+          "zip_code": "78727-4167"
+        },
+        {
+          "restaurant_name": "Austin Land and Cattle Co.",
+          "score": "63.000000",
+          "inspection_date": "2025-12-09T00:00:00.000",
+          "zip_code": "78703-4130"
+        },
+        {
+          "restaurant_name": "La Fruta Feliz",
+          "score": "64.000000",
+          "inspection_date": "2025-12-22T00:00:00.000",
+          "zip_code": "78723-5719"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=restaurant_name%2Cscore%2Cinspection_date%2Czip_code&%24limit=10&%24where=inspection_date+%3E+%272025-11-10T00%3A00%3A00.000%27&%24order=score+ASC"
+    },
+    {
+      "story": "building_permits",
+      "question_n": 1,
+      "note": "top zip codes by permit count YTD",
+      "status": "PASS",
+      "elapsed_s": 0.37,
+      "row_count": 10,
+      "rows": [
+        {
+          "original_zip": "78744",
+          "cnt": "1466"
+        },
+        {
+          "original_zip": "78704",
+          "cnt": "1325"
+        },
+        {
+          "original_zip": "78745",
+          "cnt": "1230"
+        },
+        {
+          "original_zip": "78757",
+          "cnt": "891"
+        },
+        {
+          "original_zip": "78731",
+          "cnt": "856"
+        },
+        {
+          "original_zip": "78747",
+          "cnt": "835"
+        },
+        {
+          "original_zip": "78723",
+          "cnt": "804"
+        },
+        {
+          "original_zip": "78703",
+          "cnt": "791"
+        },
+        {
+          "original_zip": "78702",
+          "cnt": "769"
+        },
+        {
+          "original_zip": "78759",
+          "cnt": "761"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=original_zip%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=issue_date+%3E+%272026-01-01T00%3A00%3A00.000%27&%24group=original_zip&%24order=cnt+DESC"
+    },
+    {
+      "story": "building_permits",
+      "question_n": 2,
+      "note": "most common permit types in 78704",
+      "status": "PASS",
+      "elapsed_s": 0.42,
+      "row_count": 5,
+      "rows": [
+        {
+          "permittype": "EP",
+          "cnt": "370"
+        },
+        {
+          "permittype": "PP",
+          "cnt": "363"
+        },
+        {
+          "permittype": "MP",
+          "cnt": "281"
+        },
+        {
+          "permittype": "BP",
+          "cnt": "277"
+        },
+        {
+          "permittype": "DS",
+          "cnt": "34"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=permittype%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=original_zip%3D%2778704%27+AND+issue_date+%3E+%272026-01-01T00%3A00%3A00.000%27&%24group=permittype&%24order=cnt+DESC"
+    },
+    {
+      "story": "building_permits",
+      "question_n": 3,
+      "note": "top neighborhoods (zip) by residential permits YTD",
+      "status": "PASS",
+      "elapsed_s": 0.36,
+      "row_count": 5,
+      "rows": [
+        {
+          "original_zip": "78744",
+          "cnt": "1084"
+        },
+        {
+          "original_zip": "78745",
+          "cnt": "1065"
+        },
+        {
+          "original_zip": "78704",
+          "cnt": "892"
+        },
+        {
+          "original_zip": "78747",
+          "cnt": "808"
+        },
+        {
+          "original_zip": "78757",
+          "cnt": "774"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=original_zip%2Ccount%28%2A%29+AS+cnt&%24limit=5&%24where=permit_class_mapped%3D%27Residential%27+AND+issue_date+%3E+%272026-01-01T00%3A00%3A00.000%27&%24group=original_zip&%24order=cnt+DESC"
+    },
+    {
+      "story": "building_permits",
+      "question_n": 4,
+      "note": "commercial permit count in last 3 months",
+      "status": "PASS",
+      "elapsed_s": 0.37,
+      "row_count": 1,
+      "rows": [
+        {
+          "cnt": "3817"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=count%28%2A%29+AS+cnt&%24limit=100&%24where=permit_class_mapped%3D%27Commercial%27+AND+issue_date+%3E+%272026-02-08T00%3A00%3A00.000%27"
+    },
+    {
+      "story": "building_permits",
+      "question_n": 5,
+      "note": "permit types growing fastest \u2014 compare last 3mo vs prior 3mo",
+      "status": "PASS",
+      "elapsed_s": 0.44,
+      "row_count": 5,
+      "rows": [
+        {
+          "permittype": "EP",
+          "cnt": "4127"
+        },
+        {
+          "permittype": "PP",
+          "cnt": "4103"
+        },
+        {
+          "permittype": "BP",
+          "cnt": "3206"
+        },
+        {
+          "permittype": "MP",
+          "cnt": "2614"
+        },
+        {
+          "permittype": "DS",
+          "cnt": "241"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=permittype%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=issue_date+%3E+%272026-02-08T00%3A00%3A00.000%27&%24group=permittype&%24order=cnt+DESC"
+    },
+    {
+      "story": "building_permits",
+      "question_n": 6,
+      "note": "permit activity in 78702, last 6mo",
+      "status": "PASS",
+      "elapsed_s": 0.35,
+      "row_count": 5,
+      "rows": [
+        {
+          "permittype": "EP",
+          "cnt": "300"
+        },
+        {
+          "permittype": "BP",
+          "cnt": "280"
+        },
+        {
+          "permittype": "PP",
+          "cnt": "272"
+        },
+        {
+          "permittype": "MP",
+          "cnt": "191"
+        },
+        {
+          "permittype": "DS",
+          "cnt": "36"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=permittype%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=original_zip%3D%2778702%27+AND+issue_date+%3E+%272025-11-10T00%3A00%3A00.000%27&%24group=permittype&%24order=cnt+DESC"
+    },
+    {
+      "story": "building_permits",
+      "question_n": 7,
+      "note": "average monthly permit volume YTD",
+      "status": "PASS",
+      "elapsed_s": 0.38,
+      "row_count": 5,
+      "rows": [
+        {
+          "month": "2026-01-01T00:00:00.000",
+          "cnt": "4205"
+        },
+        {
+          "month": "2026-02-01T00:00:00.000",
+          "cnt": "4181"
+        },
+        {
+          "month": "2026-03-01T00:00:00.000",
+          "cnt": "4854"
+        },
+        {
+          "month": "2026-04-01T00:00:00.000",
+          "cnt": "4942"
+        },
+        {
+          "month": "2026-05-01T00:00:00.000",
+          "cnt": "1417"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=date_trunc_ym%28issue_date%29+AS+month%2Ccount%28%2A%29+AS+cnt&%24limit=13&%24where=issue_date+%3E+%272026-01-01T00%3A00%3A00.000%27&%24group=date_trunc_ym%28issue_date%29&%24order=month+ASC"
+    },
+    {
+      "story": "building_permits",
+      "question_n": 8,
+      "note": "top zip by new construction starts (work_class=New) last quarter",
+      "status": "PASS",
+      "elapsed_s": 0.29,
+      "row_count": 10,
+      "rows": [
+        {
+          "original_zip": "78744",
+          "cnt": "526"
+        },
+        {
+          "original_zip": "78747",
+          "cnt": "409"
+        },
+        {
+          "original_zip": "78745",
+          "cnt": "307"
+        },
+        {
+          "original_zip": "78704",
+          "cnt": "269"
+        },
+        {
+          "original_zip": "78702",
+          "cnt": "229"
+        },
+        {
+          "original_zip": "78617",
+          "cnt": "220"
+        },
+        {
+          "original_zip": "78757",
+          "cnt": "209"
+        },
+        {
+          "original_zip": "78731",
+          "cnt": "171"
+        },
+        {
+          "original_zip": "78724",
+          "cnt": "164"
+        },
+        {
+          "original_zip": "78703",
+          "cnt": "130"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=original_zip%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=work_class%3D%27New%27+AND+issue_date+%3E+%272026-02-08T00%3A00%3A00.000%27&%24group=original_zip&%24order=cnt+DESC"
+    },
+    {
+      "story": "building_permits",
+      "question_n": 9,
+      "note": "residential vs commercial permit counts YTD",
+      "status": "PASS",
+      "elapsed_s": 0.36,
+      "row_count": 2,
+      "rows": [
+        {
+          "permit_class_mapped": "Residential",
+          "cnt": "14271"
+        },
+        {
+          "permit_class_mapped": "Commercial",
+          "cnt": "5328"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=permit_class_mapped%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=issue_date+%3E+%272026-01-01T00%3A00%3A00.000%27&%24group=permit_class_mapped&%24order=cnt+DESC"
+    },
+    {
+      "story": "building_permits",
+      "question_n": 10,
+      "note": "top zips for mixed-use (permit_class_mapped) YTD",
+      "status": "EMPTY",
+      "elapsed_s": 0.34,
+      "row_count": 0,
+      "rows": [],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/3syk-w9eu.json?%24select=original_zip%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=permit_class_mapped%3D%27Mixed+Use%27+AND+issue_date+%3E+%272026-01-01T00%3A00%3A00.000%27&%24group=original_zip&%24order=cnt+DESC"
+    },
+    {
+      "story": "311",
+      "question_n": 1,
+      "note": "top 311 issue types YTD",
+      "status": "PASS",
+      "elapsed_s": 0.9,
+      "row_count": 10,
+      "rows": [
+        {
+          "sr_type_desc": "ARR - Garbage",
+          "cnt": "8286"
+        },
+        {
+          "sr_type_desc": "TPW - Parking Violation Enforcement",
+          "cnt": "7868"
+        },
+        {
+          "sr_type_desc": "DSD - Request Code Officer",
+          "cnt": "7742"
+        },
+        {
+          "sr_type_desc": "TPW - Traffic Signal - Maintenance",
+          "cnt": "5757"
+        },
+        {
+          "sr_type_desc": "ARR - Compost",
+          "cnt": "5642"
+        },
+        {
+          "sr_type_desc": "ARR - Bulk",
+          "cnt": "4398"
+        },
+        {
+          "sr_type_desc": "ARR - Recycling",
+          "cnt": "4038"
+        },
+        {
+          "sr_type_desc": "Animal Protection - Loose Dog",
+          "cnt": "3562"
+        },
+        {
+          "sr_type_desc": "311 CC - Other",
+          "cnt": "3494"
+        },
+        {
+          "sr_type_desc": "APD - Vehicle Abatement Report",
+          "cnt": "3231"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=sr_type_desc%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=sr_created_date+%3E+%272026-01-01T00%3A00%3A00.000%27&%24group=sr_type_desc&%24order=cnt+DESC"
+    },
+    {
+      "story": "311",
+      "question_n": 2,
+      "note": "zip code with most 311 complaints YTD",
+      "status": "PASS",
+      "elapsed_s": 2.97,
+      "row_count": 10,
+      "rows": [
+        {
+          "sr_location_zip_code": "78704",
+          "cnt": "7279"
+        },
+        {
+          "sr_location_zip_code": "78745",
+          "cnt": "6366"
+        },
+        {
+          "sr_location_zip_code": "78702",
+          "cnt": "6188"
+        },
+        {
+          "sr_location_zip_code": "78744",
+          "cnt": "5744"
+        },
+        {
+          "sr_location_zip_code": "78701",
+          "cnt": "4323"
+        },
+        {
+          "sr_location_zip_code": "78723",
+          "cnt": "4038"
+        },
+        {
+          "sr_location_zip_code": "78753",
+          "cnt": "3988"
+        },
+        {
+          "sr_location_zip_code": "78758",
+          "cnt": "3929"
+        },
+        {
+          "sr_location_zip_code": "78748",
+          "cnt": "3696"
+        },
+        {
+          "sr_location_zip_code": "78741",
+          "cnt": "3559"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=sr_location_zip_code%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=sr_created_date+%3E+%272026-01-01T00%3A00%3A00.000%27&%24group=sr_location_zip_code&%24order=cnt+DESC"
+    },
+    {
+      "story": "311",
+      "question_n": 3,
+      "note": "unresolved 311 requests in 78704",
+      "status": "PASS",
+      "elapsed_s": 0.51,
+      "row_count": 15,
+      "rows": [
+        {
+          "sr_type_desc": "Found Animal - Pick Up",
+          "sr_created_date": "2014-07-14T15:55:19.000",
+          "sr_location": "301 W RIVERSIDE DR, AUSTIN, TX"
+        },
+        {
+          "sr_type_desc": "Found Animal - Pick Up",
+          "sr_created_date": "2014-07-14T15:55:26.000",
+          "sr_location": "1920 S CONGRESS AVE, AUSTIN, TX"
+        },
+        {
+          "sr_type_desc": "Found Animal - Pick Up",
+          "sr_created_date": "2014-07-14T15:55:31.000",
+          "sr_location": "312 BARTON SPRINGS RD, AUSTIN, TX"
+        },
+        {
+          "sr_type_desc": "Found Animal - Pick Up",
+          "sr_created_date": "2014-07-14T15:55:34.000",
+          "sr_location": "1209 BARTON SPRINGS RD, AUSTIN, TX"
+        },
+        {
+          "sr_type_desc": "Found Animal - Pick Up",
+          "sr_created_date": "2014-07-14T15:55:37.000",
+          "sr_location": "1403 S CONGRESS AVE, AUSTIN, TX"
+        },
+        {
+          "sr_type_desc": "ARR Missed Recycling",
+          "sr_created_date": "2017-03-07T07:39:42.000",
+          "sr_location": "1006 S 5TH ST, AUSTIN, TX 78704"
+        },
+        {
+          "sr_type_desc": "ARR Missed Recycling",
+          "sr_created_date": "2017-03-07T10:07:03.000",
+          "sr_location": "2408 HAVENSIDE DR, AUSTIN, TX 78704"
+        },
+        {
+          "sr_type_desc": "ARR Missed Recycling",
+          "sr_created_date": "2017-03-07T12:36:30.000",
+          "sr_location": "1105 CUMBERLAND RD A, AUSTIN, TX 78704"
+        },
+        {
+          "sr_type_desc": "ARR Missed Recycling",
+          "sr_created_date": "2017-03-07T16:58:55.000",
+          "sr_location": "2406 S 2ND ST, AUSTIN, TX 78704"
+        },
+        {
+          "sr_type_desc": "ARR Missed Recycling",
+          "sr_created_date": "2017-03-07T17:15:03.000",
+          "sr_location": "2410 S 2ND ST, AUSTIN, TX 78704"
+        },
+        {
+          "sr_type_desc": "ARR Missed Recycling",
+          "sr_created_date": "2017-03-07T17:59:38.000",
+          "sr_location": "3209 GARDEN VILLA LN, AUSTIN, TX 78704"
+        },
+        {
+          "sr_type_desc": "Concerns in the ROW",
+          "sr_created_date": "2017-03-09T13:19:40.000",
+          "sr_location": "1011 AVONDALE RD, AUSTIN, TX 78704"
+        },
+        {
+          "sr_type_desc": "Public Health - Graffiti Abatement",
+          "sr_created_date": "2017-03-09T16:36:30.000",
+          "sr_location": "3906 VICTORY DR, AUSTIN, 78704"
+        },
+        {
+          "sr_type_desc": "Tree Issue ROW/Maintenance (PW)",
+          "sr_created_date": "2017-03-09T18:13:34.000",
+          "sr_location": "4124 VALLEY VIEW RD, AUSTIN, TX 78704"
+        },
+        {
+          "sr_type_desc": "Alley & Unpaved Street Maintenance",
+          "sr_created_date": "2017-03-09T18:42:51.000",
+          "sr_location": "1709 BAUERLE AVE, AUSTIN, TX 78704"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=sr_type_desc%2Csr_created_date%2Csr_location&%24limit=15&%24where=sr_location_zip_code%3D%2778704%27+AND+sr_status_desc%3D%27Open%27&%24order=sr_created_date+ASC"
+    },
+    {
+      "story": "311",
+      "question_n": 4,
+      "note": "pothole complaints last 90 days",
+      "status": "PASS",
+      "elapsed_s": 0.51,
+      "row_count": 1,
+      "rows": [
+        {
+          "cnt": "1094"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=count%28%2A%29+AS+cnt&%24limit=100&%24where=upper%28sr_type_desc%29+LIKE+%27%25POTHOLE%25%27+AND+sr_created_date+%3E+%272026-02-08T00%3A00%3A00.000%27"
+    },
+    {
+      "story": "311",
+      "question_n": 5,
+      "note": "most common 311 issue in 78702",
+      "status": "PASS",
+      "elapsed_s": 0.72,
+      "row_count": 5,
+      "rows": [
+        {
+          "sr_type_desc": "TPW - Parking Violation Enforcement",
+          "cnt": "916"
+        },
+        {
+          "sr_type_desc": "ARR - Garbage",
+          "cnt": "534"
+        },
+        {
+          "sr_type_desc": "DSD - Request Code Officer",
+          "cnt": "419"
+        },
+        {
+          "sr_type_desc": "ARR - Compost",
+          "cnt": "357"
+        },
+        {
+          "sr_type_desc": "311 CC - Other",
+          "cnt": "241"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=sr_type_desc%2Ccount%28%2A%29+AS+cnt&%24limit=5&%24where=sr_location_zip_code%3D%2778702%27+AND+sr_created_date+%3E+%272026-01-01T00%3A00%3A00.000%27&%24group=sr_type_desc&%24order=cnt+DESC"
+    },
+    {
+      "story": "311",
+      "question_n": 6,
+      "note": "311 categories by department (proxy for resolution domain)",
+      "status": "PASS",
+      "elapsed_s": 0.4,
+      "row_count": 10,
+      "rows": [
+        {
+          "sr_department_desc": "Austin Resource Recovery",
+          "cnt": "29299"
+        },
+        {
+          "sr_department_desc": "Austin Transportation and Public Works",
+          "cnt": "27993"
+        },
+        {
+          "sr_department_desc": "Austin Animal Services",
+          "cnt": "11437"
+        },
+        {
+          "sr_department_desc": "Austin Development Services",
+          "cnt": "11219"
+        },
+        {
+          "sr_department_desc": "311-Command Center",
+          "cnt": "3494"
+        },
+        {
+          "sr_department_desc": "Austin Police",
+          "cnt": "3481"
+        },
+        {
+          "sr_department_desc": "Austin Parks and Recreation",
+          "cnt": "2616"
+        },
+        {
+          "sr_department_desc": "Austin Watershed Protection",
+          "cnt": "1846"
+        },
+        {
+          "sr_department_desc": "Austin Energy",
+          "cnt": "1711"
+        },
+        {
+          "sr_department_desc": "Austin Public Health",
+          "cnt": "941"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=sr_department_desc%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=sr_created_date+%3E+%272026-01-01T00%3A00%3A00.000%27&%24group=sr_department_desc&%24order=cnt+DESC"
+    },
+    {
+      "story": "311",
+      "question_n": 7,
+      "note": "graffiti 311 trend by month",
+      "status": "PASS",
+      "elapsed_s": 0.63,
+      "row_count": 13,
+      "rows": [
+        {
+          "month": "2025-05-01T00:00:00.000",
+          "cnt": "91"
+        },
+        {
+          "month": "2025-06-01T00:00:00.000",
+          "cnt": "130"
+        },
+        {
+          "month": "2025-07-01T00:00:00.000",
+          "cnt": "113"
+        },
+        {
+          "month": "2025-08-01T00:00:00.000",
+          "cnt": "77"
+        },
+        {
+          "month": "2025-09-01T00:00:00.000",
+          "cnt": "115"
+        },
+        {
+          "month": "2025-10-01T00:00:00.000",
+          "cnt": "183"
+        },
+        {
+          "month": "2025-11-01T00:00:00.000",
+          "cnt": "118"
+        },
+        {
+          "month": "2025-12-01T00:00:00.000",
+          "cnt": "88"
+        },
+        {
+          "month": "2026-01-01T00:00:00.000",
+          "cnt": "248"
+        },
+        {
+          "month": "2026-02-01T00:00:00.000",
+          "cnt": "139"
+        },
+        {
+          "month": "2026-03-01T00:00:00.000",
+          "cnt": "128"
+        },
+        {
+          "month": "2026-04-01T00:00:00.000",
+          "cnt": "132"
+        },
+        {
+          "month": "2026-05-01T00:00:00.000",
+          "cnt": "35"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=date_trunc_ym%28sr_created_date%29+AS+month%2Ccount%28%2A%29+AS+cnt&%24limit=13&%24where=upper%28sr_type_desc%29+LIKE+%27%25GRAFFITI%25%27+AND+sr_created_date+%3E+%272025-05-09T00%3A00%3A00.000%27&%24group=date_trunc_ym%28sr_created_date%29&%24order=month+ASC"
+    },
+    {
+      "story": "311",
+      "question_n": 8,
+      "note": "top 10 unresolved 311 issues (open status)",
+      "status": "PASS",
+      "elapsed_s": 4.92,
+      "row_count": 10,
+      "rows": [
+        {
+          "sr_type_desc": "DSD - Request Code Officer",
+          "cnt": "2931"
+        },
+        {
+          "sr_type_desc": "APD - Vehicle Abatement Report",
+          "cnt": "992"
+        },
+        {
+          "sr_type_desc": "ARR - Bulk",
+          "cnt": "734"
+        },
+        {
+          "sr_type_desc": "ARR - Garbage",
+          "cnt": "679"
+        },
+        {
+          "sr_type_desc": "ARR - Storm Debris Collection",
+          "cnt": "582"
+        },
+        {
+          "sr_type_desc": "Park Maintenance - Grounds",
+          "cnt": "450"
+        },
+        {
+          "sr_type_desc": "APH - Graffiti Abatement - Public Property",
+          "cnt": "378"
+        },
+        {
+          "sr_type_desc": "APH - Environmental Health Services - City",
+          "cnt": "335"
+        },
+        {
+          "sr_type_desc": "ARR - Recycling",
+          "cnt": "303"
+        },
+        {
+          "sr_type_desc": "ARR - Compost",
+          "cnt": "290"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=sr_type_desc%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=sr_status_desc%3D%27Open%27&%24group=sr_type_desc&%24order=cnt+DESC"
+    },
+    {
+      "story": "311",
+      "question_n": 9,
+      "note": "streetlight outage reports last month",
+      "status": "PASS",
+      "elapsed_s": 0.34,
+      "row_count": 1,
+      "rows": [
+        {
+          "cnt": "0"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=count%28%2A%29+AS+cnt&%24limit=100&%24where=upper%28sr_type_desc%29+LIKE+%27%25STREETLIGHT%25%27+AND+sr_created_date+%3E+%272026-04-09T00%3A00%3A00.000%27"
+    },
+    {
+      "story": "311",
+      "question_n": 10,
+      "note": "zip with most trash/debris 311 complaints YTD",
+      "status": "PASS",
+      "elapsed_s": 0.48,
+      "row_count": 10,
+      "rows": [
+        {
+          "sr_location_zip_code": "78704",
+          "cnt": "117"
+        },
+        {
+          "sr_location_zip_code": "78702",
+          "cnt": "85"
+        },
+        {
+          "sr_location_zip_code": "78745",
+          "cnt": "71"
+        },
+        {
+          "sr_location_zip_code": "78744",
+          "cnt": "60"
+        },
+        {
+          "sr_location_zip_code": "78753",
+          "cnt": "47"
+        },
+        {
+          "sr_location_zip_code": "78741",
+          "cnt": "44"
+        },
+        {
+          "sr_location_zip_code": "78752",
+          "cnt": "43"
+        },
+        {
+          "sr_location_zip_code": "78758",
+          "cnt": "42"
+        },
+        {
+          "sr_location_zip_code": "78701",
+          "cnt": "39"
+        },
+        {
+          "sr_location_zip_code": "78723",
+          "cnt": "38"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=sr_location_zip_code%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=%28upper%28sr_type_desc%29+LIKE+%27%25TRASH%25%27+OR+upper%28sr_type_desc%29+LIKE+%27%25DEBRIS%25%27+OR+upper%28sr_type_desc%29+LIKE+%27%25LITTER%25%27%29+AND+sr_created_date+%3E+%272026-01-01T00%3A00%3A00.000%27&%24group=sr_location_zip_code&%24order=cnt+DESC"
+    }
+  ]
+}

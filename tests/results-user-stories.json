@@ -1,0 +1,36 @@
+{
+  "passed": 0,
+  "total": 3,
+  "results": [
+    {
+      "story": "food_inspections",
+      "question_n": 1,
+      "question": "Show me restaurants in 78701 with inspection scores below 80 in the last 6 months.",
+      "ok": false,
+      "reason": "agent error: OPENAI_API_KEY missing",
+      "elapsed_s": 0.44,
+      "answer": null,
+      "citation": null
+    },
+    {
+      "story": "building_permits",
+      "question_n": 1,
+      "question": "Which Austin zip codes have the most building permits issued this year?",
+      "ok": false,
+      "reason": "agent error: OPENAI_API_KEY missing",
+      "elapsed_s": 0.0,
+      "answer": null,
+      "citation": null
+    },
+    {
+      "story": "311_service_requests",
+      "question_n": 1,
+      "question": "What are the top 311 issue types reported in Austin this year?",
+      "ok": false,
+      "reason": "agent error: OPENAI_API_KEY missing",
+      "elapsed_s": 0.0,
+      "answer": null,
+      "citation": null
+    }
+  ]
+}
