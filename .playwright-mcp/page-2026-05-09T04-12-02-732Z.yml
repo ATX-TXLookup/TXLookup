@@ -1,0 +1,35 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e4]:
+      - link "TXLookup" [ref=e5] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e6]:
+        - link "Datasets" [ref=e7] [cursor=pointer]:
+          - /url: /datasets
+        - link "About" [ref=e8] [cursor=pointer]:
+          - /url: /about
+    - generic [ref=e10]:
+      - generic [ref=e11]:
+        - heading "Texas public data, in plain English." [level=1] [ref=e12]:
+          - text: Texas public data,
+          - text: in plain English.
+        - paragraph [ref=e13]: Ask about permits, inspections, 311 calls, code violations. The agent finds the right dataset, runs the query, and shows you the answer with the source cited.
+      - generic [ref=e15]:
+        - generic [ref=e17]:
+          - textbox "Ask a question about Texas public data" [ref=e18]:
+            - /placeholder: Which restaurants near 78704 failed inspection this year?
+          - button "Ask" [disabled] [ref=e19]:
+            - img [ref=e20]
+        - generic [ref=e22]:
+          - button "Restaurant inspections near 78704" [ref=e23] [cursor=pointer]:
+            - generic [ref=e24]: Restaurant inspections near 78704
+          - button "Food truck permits in East Austin this year" [ref=e25] [cursor=pointer]:
+            - generic [ref=e26]: Food truck permits in East Austin this year
+          - button "311 response times by council district" [ref=e27] [cursor=pointer]:
+            - generic [ref=e29]: 311 response times by council district
+      - paragraph [ref=e30]: Tap a question to try it, or type your own. Every answer cites the dataset and the time it was last refreshed.
+    - generic [ref=e32]:
+      - generic [ref=e33]: Built at the AITX Community × Codex Hackathon, May 2026.
+      - link "github.com/ATX-TXLookup/TXLookup" [ref=e34] [cursor=pointer]:
+        - /url: https://github.com/ATX-TXLookup/TXLookup
+  - alert [ref=e35]

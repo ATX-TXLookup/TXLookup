@@ -1,0 +1,37 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: TXLookup
+      - generic [ref=e6]: BUILDING — AITX × CODEX HACKATHON
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - heading "Texas public data, in plain English." [level=1] [ref=e10]:
+          - text: Texas public data,
+          - text: in plain English.
+        - paragraph [ref=e11]: An autonomous data agent for Austin / Dallas / San Antonio / Houston / state portals. The agent finds the right dataset, runs the query, and shows you the answer with the source cited.
+        - paragraph [ref=e12]: Built live during the AITX Community × Codex Hackathon, May 8-10, 2026. Code freeze Sun May 10 11:00 AM CT.
+        - generic [ref=e13]:
+          - link "See components storybook" [ref=e14] [cursor=pointer]:
+            - /url: /components
+          - link "Repository" [ref=e15] [cursor=pointer]:
+            - /url: https://github.com/ATX-TXLookup/TXLookup
+      - generic [ref=e16]:
+        - generic [ref=e17]:
+          - generic [ref=e18]: Tracks
+          - list [ref=e19]:
+            - listitem [ref=e20]: Agents — autonomous reason → plan → tool → complete
+            - listitem [ref=e21]: Brainforge / Vicinity Texas Open Data
+        - generic [ref=e22]:
+          - generic [ref=e23]: Bounties
+          - list [ref=e24]:
+            - listitem [ref=e25]: Miro MCP — $500
+            - listitem [ref=e26]: DeepInvent best patentable hack — $500 + provisional
+        - generic [ref=e27]:
+          - generic [ref=e28]: Sample question
+          - paragraph [ref=e29]: "\"Food truck permits issued in 78702 in the last 6 months.\""
+          - paragraph [ref=e30]: "source: 3syk-w9eu (data.austintexas.gov)"
+    - generic [ref=e32]:
+      - generic [ref=e33]: Built at the AITX Community × Codex Hackathon, May 2026.
+      - link "github.com/ATX-TXLookup/TXLookup" [ref=e34] [cursor=pointer]:
+        - /url: https://github.com/ATX-TXLookup/TXLookup
+  - alert [ref=e35]

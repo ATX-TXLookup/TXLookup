@@ -10,3 +10,4 @@ dist/
 
 # Per-worktree agent log (see AGENTS.md "Logging convention")
 log.md
+.vercel
