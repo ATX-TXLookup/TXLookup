@@ -48,6 +48,10 @@ type Event =
       preview: string;
       error: string | null;
       duration_ms: number;
+      // Multi-agent attribution (issue #67). "orchestrator" for raw tool
+      // calls; specialist name for delegate_to results. UI Flow tab will
+      // color-code by this in a follow-up PR.
+      agent?: string;
     }
   | {
       phase: "doom_loop";
@@ -384,6 +388,7 @@ export async function POST(req: NextRequest) {
                 preview: "",
                 error: `doom-loop replan failed: ${e instanceof Error ? e.message : String(e)}`,
                 duration_ms: 0,
+                agent: "orchestrator",
               });
               i += 1;
               continue;
@@ -407,6 +412,15 @@ export async function POST(req: NextRequest) {
             citation = r.result;
           }
           if (Array.isArray(r.artifacts)) artifacts.push(...r.artifacts);
+          // Multi-agent attribution: delegate_to steps surface the specialist
+          // name from the result envelope; everything else is the orchestrator.
+          const stepAgent =
+            step.tool === "delegate_to" &&
+            typeof r.result === "object" &&
+            r.result !== null &&
+            "agent" in (r.result as Record<string, unknown>)
+              ? String((r.result as { agent: unknown }).agent)
+              : "orchestrator";
           send({
             phase: "step_done",
             step: i + 1,
@@ -414,6 +428,7 @@ export async function POST(req: NextRequest) {
             preview: JSON.stringify(r.result).slice(0, 240),
             error: r.error,
             duration_ms,
+            agent: stepAgent,
           });
 
           // Replan on a failure if we have budget left.
@@ -457,6 +472,7 @@ export async function POST(req: NextRequest) {
                 preview: "",
                 error: `replan failed: ${e instanceof Error ? e.message : String(e)}`,
                 duration_ms: 0,
+                agent: "orchestrator",
               });
             }
           }
