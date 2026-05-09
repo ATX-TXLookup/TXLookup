@@ -14,6 +14,7 @@ Reference: prompts/data.md for full SODA query patterns
 from __future__ import annotations
 
 import asyncio
+import base64
 import os
 import re
 from datetime import datetime, timezone
@@ -39,8 +40,10 @@ PORTAL_LABELS = {
     "data.census.gov": "US Census Bureau",
 }
 
-# Socrata app token for higher rate limits (optional)
-SOCRATA_APP_TOKEN = os.getenv("SOCRATA_APP_TOKEN", "")
+# Socrata API credentials — HTTP Basic auth (preferred, highest rate limit).
+# Generate at https://evergreen.data.socrata.com → Profile → Developer Settings.
+SOCRATA_KEY_ID = os.getenv("SOCRATA_KEY_ID", "")
+SOCRATA_KEY_SECRET = os.getenv("SOCRATA_KEY_SECRET", "")
 
 # Hard caps for the bounded SODA wrapper — see skills/txlookup/SKILL.md.
 MAX_LIMIT = 5000
@@ -64,10 +67,13 @@ _TOKEN_RE = re.compile(r"[a-z0-9]+")
 
 
 def _socrata_headers() -> dict:
-    """Get Socrata API headers."""
+    """Get Socrata API headers (HTTP Basic auth when credentials are set)."""
     headers = {"Accept": "application/json"}
-    if SOCRATA_APP_TOKEN:
-        headers["X-App-Token"] = SOCRATA_APP_TOKEN
+    if SOCRATA_KEY_ID and SOCRATA_KEY_SECRET:
+        token = base64.b64encode(
+            f"{SOCRATA_KEY_ID}:{SOCRATA_KEY_SECRET}".encode("utf-8")
+        ).decode("ascii")
+        headers["Authorization"] = f"Basic {token}"
     return headers
 
 

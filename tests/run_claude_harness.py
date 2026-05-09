@@ -12,10 +12,11 @@ Writes: tests/fixtures/<dataset>.json  (one per dataset)
 """
 
 from __future__ import annotations
-import argparse, json, os, time, urllib.parse, urllib.request
+import argparse, base64, json, os, time, urllib.parse, urllib.request
 from datetime import datetime, timedelta
 
-SOCRATA_APP_TOKEN = os.environ.get("SOCRATA_APP_TOKEN", "")
+SOCRATA_KEY_ID = os.environ.get("SOCRATA_KEY_ID", "")
+SOCRATA_KEY_SECRET = os.environ.get("SOCRATA_KEY_SECRET", "")
 
 DATASETS = {
     "food":        {"portal": "data.austintexas.gov",  "id": "ecmv-9xxi"},
@@ -303,8 +304,11 @@ def socrata_fetch(ds_key: str, select: str, where: str = "",
     if order:  params["$order"] = order
     url = f"https://{ds['portal']}/resource/{ds['id']}.json?" + urllib.parse.urlencode(params)
     headers = {"Accept": "application/json"}
-    if SOCRATA_APP_TOKEN:
-        headers["X-App-Token"] = SOCRATA_APP_TOKEN
+    if SOCRATA_KEY_ID and SOCRATA_KEY_SECRET:
+        token = base64.b64encode(
+            f"{SOCRATA_KEY_ID}:{SOCRATA_KEY_SECRET}".encode("utf-8")
+        ).decode("ascii")
+        headers["Authorization"] = f"Basic {token}"
     try:
         with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=25) as r:
             data = json.loads(r.read())
