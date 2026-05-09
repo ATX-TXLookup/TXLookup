@@ -10,6 +10,7 @@ Issue #10. See `docs/agents-strategy.md` for the five Codex roles.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any, Optional
 
@@ -277,6 +278,87 @@ async def replan(
     return await _call_codex(messages, model=model)
 
 
+# --------------------------------------------------------------------------- #
+# Scope validation                                                             #
+# --------------------------------------------------------------------------- #
+
+# Mirrors `validatePlanScope` in app/lib/agent.ts. Catches ungrounded plans —
+# the LLM occasionally emits a 1-step `summarize_data` with no `where` for a
+# scoped question ("Restaurants in 78704 this year"). We surface that here
+# so callers can re-prompt instead of letting it through.
+_SCOPED_TOOLS = frozenset({"summarize_data", "fetch_data", "render_to_miro"})
+
+_DATE_PHRASES: tuple[tuple[str, str], ...] = (
+    (r"\bthis year\b", "this year"),
+    (r"\blast (six|6) months\b", "last six months"),
+    (r"\blast 30 days\b", "last 30 days"),
+    (r"\blast (twelve|12) months\b", "last twelve months"),
+    (r"\bytd\b", "year to date"),
+)
+
+_DATE_COLUMNS: tuple[str, ...] = (
+    "issue_date",
+    "issued_date",
+    "inspection_date",
+    "sr_created_date",
+    "opened_date",
+    "occ_date",
+    "crash_timestamp",
+    "obligation_end_date_yyyymmdd",
+    "responsibility_beginning_date",
+)
+
+
+def validate_plan_scope(query: str, plan: Plan) -> list[dict[str, Any]]:
+    """Return a list of scope-violation issues. Empty list = plan looks scoped."""
+    issues: list[dict[str, Any]] = []
+    zip_match = re.search(r"\b(\d{5})\b", query)
+    date_hit: Optional[str] = None
+    for pat, label in _DATE_PHRASES:
+        if re.search(pat, query, re.IGNORECASE):
+            date_hit = label
+            break
+
+    if (zip_match or date_hit) and len(plan.steps) == 1:
+        only = plan.steps[0]
+        if only.tool in _SCOPED_TOOLS:
+            issues.append(
+                {
+                    "step": 1,
+                    "tool": only.tool,
+                    "reason": "1-step plan for a scoped query (zip or date range present in question)",
+                }
+            )
+
+    for i, step in enumerate(plan.steps):
+        if step.tool not in _SCOPED_TOOLS:
+            continue
+        where = str(step.args.get("where", "")).lower()
+        if zip_match and zip_match.group(1) not in where:
+            issues.append(
+                {
+                    "step": i + 1,
+                    "tool": step.tool,
+                    "reason": (
+                        f"user mentioned zip {zip_match.group(1)} but "
+                        "step.where does not contain it"
+                    ),
+                }
+            )
+        if date_hit and not any(c in where for c in _DATE_COLUMNS):
+            issues.append(
+                {
+                    "step": i + 1,
+                    "tool": step.tool,
+                    "reason": (
+                        f'user mentioned "{date_hit}" but step.where has no '
+                        "date-column constraint"
+                    ),
+                }
+            )
+    return issues
+
+
 __all__ = [
     "Intent",
     "Step",
@@ -284,4 +366,5 @@ __all__ = [
     "ALLOWED_TOOLS",
     "reason_and_plan",
     "replan",
+    "validate_plan_scope",
 ]

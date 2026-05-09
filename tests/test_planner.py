@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from agent.planner import Plan, Step, reason_and_plan, replan
+from agent.planner import Plan, Step, reason_and_plan, replan, validate_plan_scope
 
 
 # --------------------------------------------------------------------------- #
@@ -140,6 +140,80 @@ async def test_replan_preserves_structure():
     assert not any(
         s.tool == failed.tool and s.args == failed.args for s in new_plan.steps
     )
+
+
+# --------------------------------------------------------------------------- #
+# Scope-validation tests (issue #58)                                           #
+# --------------------------------------------------------------------------- #
+
+
+_SCOPED_QUERY = "Restaurants near 78704 with failing inspections this year"
+
+
+def _unscoped_one_step_payload() -> dict:
+    """Payload mimicking the bug: 1-step summarize_data, no where clause."""
+    return {
+        "intent": {
+            "intent": "data_analysis",
+            "data_domain": "health_inspections",
+            "geography": "78704",
+            "time_range": "this year",
+            "analysis_type": "ranking",
+        },
+        "steps": [
+            {
+                "tool": "summarize_data",
+                "args": {"dataset_id": "ecmv-9xxi", "dimensions": ["restaurant_name"]},
+            },
+        ],
+    }
+
+
+def test_validate_plan_scope_flags_unscoped_one_step_plan():
+    """Mocked Codex returns a 1-step plan; validator catches the missing scope."""
+    plan = Plan.model_validate(_unscoped_one_step_payload())
+    issues = validate_plan_scope(_SCOPED_QUERY, plan)
+
+    # Expect at least: (a) 1-step shortcut, (b) missing zip in where,
+    # (c) missing date-column constraint in where.
+    reasons = [i["reason"] for i in issues]
+    assert any("1-step plan" in r for r in reasons)
+    assert any("78704" in r for r in reasons)
+    assert any("date-column" in r for r in reasons)
+
+
+def test_validate_plan_scope_passes_for_well_scoped_plan():
+    """A plan with discover + schema + scoped fetch + cite passes cleanly."""
+    payload = {
+        "intent": {
+            "intent": "data_analysis",
+            "data_domain": "health_inspections",
+            "geography": "78704",
+            "time_range": "this year",
+            "analysis_type": "ranking",
+        },
+        "steps": [
+            {"tool": "discover_datasets", "args": {"query": "food inspections"}},
+            {"tool": "get_dataset_schema", "args": {"dataset_id": "ecmv-9xxi"}},
+            {
+                "tool": "fetch_data",
+                "args": {
+                    "dataset_id": "ecmv-9xxi",
+                    "where": "zip_code='78704' AND inspection_date >= '2025-05-09' AND score < 70",
+                    "limit": 100,
+                },
+            },
+            {"tool": "cite_dataset", "args": {"dataset_id": "ecmv-9xxi"}},
+        ],
+    }
+    plan = Plan.model_validate(payload)
+    assert validate_plan_scope(_SCOPED_QUERY, plan) == []
+
+
+def test_validate_plan_scope_ignores_unscoped_questions():
+    """No zip / date phrase → validator should pass even simple plans."""
+    plan = Plan.model_validate(_unscoped_one_step_payload())
+    assert validate_plan_scope("Top food inspection violations in Austin", plan) == []
 
 
 # --------------------------------------------------------------------------- #

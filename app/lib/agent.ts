@@ -71,6 +71,12 @@ Hard rules:
 - limit ≤ 100 by default.
 - DO NOT pass "select" to fetch_data — Socrata rejects $select=*. Just omit it.
 
+SCOPING RULES (load-bearing — ungrounded answers will be rejected):
+- Every summarize_data, fetch_data, and render_to_miro step MUST include an args.where that scopes to whatever the user mentioned (zip, date range, keyword, status). render_to_miro should reference filtered records only.
+- If the user mentions a 5-digit zip code (e.g. "78704"), the where clause MUST contain that zip on the dataset's zip column (original_zip for permits, zip_code for inspections / code complaints, sr_location_zip_code for 311, taxpayer_zip for franchise / mixed beverage).
+- If the user mentions a date range ("this year" → >= ${oneYearAgo}; "last six months" → >= ${sixMonthsAgo}; "last 30 days" → >= ${new Date(Date.now() - 30 * 86400_000).toISOString().slice(0, 10)}), the where clause MUST include the dataset's date column constraint (issue_date for permits, inspection_date for inspections, sr_created_date for 311, opened_date for code complaints, occ_date for crime, crash_timestamp for crashes).
+- DO NOT emit a 1-step plan that just calls summarize_data for a scoped query. Scoped queries MUST start with discover_datasets followed by get_dataset_schema, then summarize_data or fetch_data with the proper where clause, then cite_dataset.
+
 Return a JSON object with this exact shape:
 {
   "intent": {"data_domain": string, "geography": string|null, "time_range": string|null, "analysis_type": string, "thinking": string},
@@ -193,6 +199,103 @@ export type TokenUsage = {
 export type Planned = { plan: Plan; usage: TokenUsage };
 export type Synthesized = { answer: string; usage: TokenUsage };
 
+// ---------------------------------------------------------------------------
+// Scope validation — catch ungrounded plans BEFORE we waste tool calls on them.
+// The planner periodically emits a 1-step `summarize_data` with no `where`
+// when the user's question is scoped (zip / date / keyword). We re-prompt
+// once with a corrective system message instead of letting it through.
+// ---------------------------------------------------------------------------
+
+const SCOPED_TOOLS = new Set(["summarize_data", "fetch_data", "render_to_miro"]);
+
+const DATE_PHRASES: Array<{ pattern: RegExp; label: string }> = [
+  { pattern: /\bthis year\b/i, label: "this year" },
+  { pattern: /\blast (six|6) months\b/i, label: "last six months" },
+  { pattern: /\blast 30 days\b/i, label: "last 30 days" },
+  { pattern: /\blast (twelve|12) months\b/i, label: "last twelve months" },
+  { pattern: /\bytd\b/i, label: "year to date" },
+];
+
+const DATE_COLUMN_HINTS = [
+  "issue_date",
+  "issued_date",
+  "inspection_date",
+  "sr_created_date",
+  "opened_date",
+  "occ_date",
+  "crash_timestamp",
+  "obligation_end_date_yyyymmdd",
+  "responsibility_beginning_date",
+];
+
+export type ScopeIssue = {
+  step: number;
+  tool: string;
+  reason: string;
+};
+
+export function validatePlanScope(query: string, plan: Plan): ScopeIssue[] {
+  const issues: ScopeIssue[] = [];
+  const zipMatch = query.match(/\b(\d{5})\b/);
+  const dateHit = DATE_PHRASES.find((d) => d.pattern.test(query));
+
+  // 1-step "summarize_data" plans for scoped queries are the canonical bug:
+  // the LLM short-circuits past discover_datasets when it thinks it knows
+  // the dataset, but then forgets the where clause and yields ungrounded counts.
+  if ((zipMatch || dateHit) && plan.steps.length === 1) {
+    const only = plan.steps[0];
+    if (SCOPED_TOOLS.has(only.tool)) {
+      issues.push({
+        step: 1,
+        tool: only.tool,
+        reason: "1-step plan for a scoped query (zip or date range present in question)",
+      });
+    }
+  }
+
+  plan.steps.forEach((step, i) => {
+    if (!SCOPED_TOOLS.has(step.tool)) return;
+    const where = String(
+      (step.args as { where?: unknown }).where ?? "",
+    ).toLowerCase();
+
+    if (zipMatch) {
+      const zip = zipMatch[1];
+      if (!where.includes(zip)) {
+        issues.push({
+          step: i + 1,
+          tool: step.tool,
+          reason: `user mentioned zip ${zip} but step.where does not contain it`,
+        });
+      }
+    }
+
+    if (dateHit) {
+      const hasDateColumn = DATE_COLUMN_HINTS.some((c) => where.includes(c));
+      if (!hasDateColumn) {
+        issues.push({
+          step: i + 1,
+          tool: step.tool,
+          reason: `user mentioned "${dateHit.label}" but step.where has no date-column constraint`,
+        });
+      }
+    }
+  });
+
+  return issues;
+}
+
+function buildScopeCorrectivePrompt(issues: ScopeIssue[], query: string): string {
+  const zip = query.match(/\b(\d{5})\b/)?.[1];
+  const lines = issues.map(
+    (x) => `- step ${x.step} (${x.tool}): ${x.reason}`,
+  );
+  return `Your previous plan was rejected because it ignored explicit scoping in the user's question. Issues:
+${lines.join("\n")}
+
+Re-emit the plan with a correctly-scoped where clause on EVERY summarize_data / fetch_data / render_to_miro step. ${zip ? `Use the dataset's zip column = '${zip}' (original_zip for permits, zip_code for inspections / code complaints, sr_location_zip_code for 311, taxpayer_zip for franchise / mixed beverage).` : ""} If the question implies a date range, include the dataset's date-column constraint. Do NOT emit a 1-step plan — scoped queries start with discover_datasets + get_dataset_schema.`;
+}
+
 function readUsage(u: unknown): TokenUsage {
   const o = (u ?? {}) as {
     prompt_tokens?: number;
@@ -228,7 +331,30 @@ export async function reasonAndPlan(
   if (!Array.isArray(parsed.steps)) {
     throw new Error("planner returned invalid shape");
   }
-  return { plan: parsed, usage: readUsage(completion.usage) };
+
+  // Post-validation: if the LLM ignored scoping in the user's query
+  // (zip / date / 1-step short-circuit), replan ONCE with a corrective
+  // system message. Skip on the corrective pass itself to bound retries.
+  let usage = readUsage(completion.usage);
+  if (!correctiveSystem) {
+    const issues = validatePlanScope(query, parsed);
+    if (issues.length > 0) {
+      const corrected = await reasonAndPlan(
+        query,
+        model,
+        buildScopeCorrectivePrompt(issues, query),
+      );
+      return {
+        plan: corrected.plan,
+        usage: {
+          prompt: usage.prompt + corrected.usage.prompt,
+          completion: usage.completion + corrected.usage.completion,
+          total: usage.total + corrected.usage.total,
+        },
+      };
+    }
+  }
+  return { plan: parsed, usage };
 }
 
 export async function replan(
