@@ -7,12 +7,9 @@ const TIMEOUT_MS = 30_000;
 /**
  * Build auth headers for Socrata.
  *
- * Two supported auth modes (in priority order):
- *   1. SOCRATA_KEY_ID + SOCRATA_KEY_SECRET → HTTP Basic auth (preferred,
- *      gets the highest rate limit and works on every Socrata-hosted portal)
- *   2. SOCRATA_APP_TOKEN → X-App-Token header (legacy, lower rate limit)
- *
- * Unset → unauthenticated (shared public rate limit).
+ * SOCRATA_KEY_ID + SOCRATA_KEY_SECRET → HTTP Basic auth. Gets the highest
+ * rate limit and works on every Socrata-hosted portal. Unset → unauthenticated
+ * (shared public rate limit, only useful for one-off probes).
  */
 function socrataHeaders(): Record<string, string> {
   const headers: Record<string, string> = {};
@@ -21,8 +18,6 @@ function socrataHeaders(): Record<string, string> {
   if (id && secret) {
     const b = typeof Buffer !== "undefined" ? Buffer.from(`${id}:${secret}`).toString("base64") : btoa(`${id}:${secret}`);
     headers["Authorization"] = `Basic ${b}`;
-  } else if (process.env.SOCRATA_APP_TOKEN) {
-    headers["X-App-Token"] = process.env.SOCRATA_APP_TOKEN;
   }
   return headers;
 }

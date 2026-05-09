@@ -1,6 +1,6 @@
 {
   "dataset": "traffic_fatalities",
-  "generated": "2026-05-09T15:22:33.399198",
+  "generated": "2026-05-09T16:25:12.473900",
   "passed": 10,
   "total": 10,
   "results": [
@@ -16,7 +16,7 @@
       "order": "deaths DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 1.23,
+      "elapsed_s": 2.86,
       "row_count": 10,
       "rows": [
         {
@@ -85,7 +85,7 @@
       "order": "year DESC",
       "limit": 5,
       "status": "PASS",
-      "elapsed_s": 0.67,
+      "elapsed_s": 1.23,
       "row_count": 5,
       "rows": [
         {
@@ -129,7 +129,7 @@
       "order": "ped_deaths DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 1.14,
+      "elapsed_s": 0.3,
       "row_count": 10,
       "rows": [
         {
@@ -157,19 +157,19 @@
           "ped_deaths": "10"
         },
         {
-          "rpt_street_name": "IH 35 SVRD NB",
-          "ped_deaths": "9"
-        },
-        {
           "rpt_street_name": "N IH 35 SB",
           "ped_deaths": "9"
         },
         {
-          "rpt_street_name": "RIVERSIDE",
-          "ped_deaths": "8"
+          "rpt_street_name": "IH 35 SVRD NB",
+          "ped_deaths": "9"
         },
         {
           "rpt_street_name": "N IH 35 NB",
+          "ped_deaths": "8"
+        },
+        {
+          "rpt_street_name": "RIVERSIDE",
           "ped_deaths": "8"
         }
       ],
@@ -188,7 +188,7 @@
       "order": "bike_deaths DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.38,
+      "elapsed_s": 0.27,
       "row_count": 10,
       "rows": [
         {
@@ -244,7 +244,7 @@
       "select": "count(*) AS cnt,sum(death_cnt) AS deaths",
       "where": "road_constr_zone_fl='true'",
       "status": "PASS",
-      "elapsed_s": 2.82,
+      "elapsed_s": 1.07,
       "row_count": 1,
       "rows": [
         {
@@ -267,7 +267,7 @@
       "order": "deaths DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.61,
+      "elapsed_s": 1.88,
       "row_count": 10,
       "rows": [
         {
@@ -336,7 +336,7 @@
       "order": "serious_injuries DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.38,
+      "elapsed_s": 0.43,
       "row_count": 10,
       "rows": [
         {
@@ -395,7 +395,7 @@
       "order": "deaths DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.85,
+      "elapsed_s": 0.53,
       "row_count": 10,
       "rows": [
         {
@@ -464,7 +464,7 @@
       "order": "moto_deaths DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.38,
+      "elapsed_s": 0.41,
       "row_count": 10,
       "rows": [
         {
@@ -523,7 +523,7 @@
       "order": "deaths DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.3,
+      "elapsed_s": 0.53,
       "row_count": 6,
       "rows": [
         {

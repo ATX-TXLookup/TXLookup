@@ -1,6 +1,6 @@
 {
   "dataset": "food_inspections",
-  "generated": "2026-05-09T15:22:33.393584",
+  "generated": "2026-05-09T16:25:12.466411",
   "passed": 10,
   "total": 10,
   "results": [
@@ -15,7 +15,7 @@
       "order": "score ASC",
       "limit": 15,
       "status": "PASS",
-      "elapsed_s": 0.5,
+      "elapsed_s": 0.36,
       "row_count": 15,
       "rows": [
         {
@@ -124,7 +124,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.34,
+      "elapsed_s": 0.49,
       "row_count": 10,
       "rows": [
         {
@@ -201,7 +201,7 @@
       "order": "score ASC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.31,
+      "elapsed_s": 0.29,
       "row_count": 10,
       "rows": [
         {
@@ -280,7 +280,7 @@
       "order": "cnt DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.33,
+      "elapsed_s": 0.28,
       "row_count": 2,
       "rows": [
         {
@@ -307,7 +307,7 @@
       "order": "month ASC",
       "limit": 13,
       "status": "PASS",
-      "elapsed_s": 0.32,
+      "elapsed_s": 0.4,
       "row_count": 12,
       "rows": [
         {
@@ -386,7 +386,7 @@
       "order": "worst ASC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.64,
+      "elapsed_s": 0.28,
       "row_count": 10,
       "rows": [
         {
@@ -523,7 +523,7 @@
       "order": "inspection_date DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.63,
+      "elapsed_s": 0.27,
       "row_count": 10,
       "rows": [
         {
@@ -602,7 +602,7 @@
       "order": "inspections DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.71,
+      "elapsed_s": 0.3,
       "row_count": 2,
       "rows": [
         {

@@ -1,77 +1,76 @@
 #!/usr/bin/env bash
-# Pre-warm the live agent + Socrata caches before going on stage.
-# Run this 30s-60s before recording the demo or starting the live judging session.
-#
-# Hits each marquee question through /api/agent (so OpenAI + Socrata + cache
-# layers all wake up) and checks each response is well-formed.
+# warm-demo.sh — pre-fire the 4 marquee demo questions against /api/agent
+# so the Vercel function, Socrata responses, and OpenAI cold-start are warm
+# before the live stage demo. Run ~30-60s before recording or going on stage.
 #
 # Usage:
-#   bash scripts/warm-demo.sh                      # production (txlookup.vercel.app)
-#   bash scripts/warm-demo.sh https://my-preview   # preview deployment
+#   ./scripts/warm-demo.sh                                # default http://localhost:3000
+#   ./scripts/warm-demo.sh https://txlookup.vercel.app    # against prod
 #
-# If the site is basic-auth gated, set TXLOOKUP_BASIC_AUTH=user:pass in env.
+#   # If the basic-auth gate is on:
+#   TXLOOKUP_BASIC_AUTH=txlookup:aitx2026 \
+#     ./scripts/warm-demo.sh https://txlookup.vercel.app
+#
+# Exit codes: 0 = all queries reached "done"; 1 = at least one stalled or errored.
 
-set -euo pipefail
+set -u
 
-URL="${1:-https://txlookup.vercel.app}"
-AUTH=""
+BASE_URL="${1:-http://localhost:3000}"
+
+AUTH_ARGS=()
 if [ -n "${TXLOOKUP_BASIC_AUTH:-}" ]; then
-  AUTH="-u ${TXLOOKUP_BASIC_AUTH}"
+  AUTH_ARGS=(-u "$TXLOOKUP_BASIC_AUTH")
 fi
 
-QUESTIONS=(
-  "Food truck permits issued in 78702 in the last six months"
+# Marquee questions — keep in sync with app/page.tsx `sampleQuestions[]`.
+# These are the 4 the demo script and home-page chips both reference.
+QUERIES=(
   "Restaurants near 78704 with failing inspections this year"
+  "Food truck permits issued in 78702 in the last six months"
   "311 response times across all 10 council districts"
   "Where are construction permits growing fastest by zip?"
 )
 
-echo "═══════════════════════════════════════════════════════════════════"
-echo "TXLookup — demo cache warmer"
-echo "Target: $URL"
-echo "═══════════════════════════════════════════════════════════════════"
-echo
+echo "Pre-warming ${#QUERIES[@]} marquee questions against ${BASE_URL}"
+echo "(Streaming SSE until 'done' or 'error' — ~5-30s per query)"
+echo ""
 
-# 1. Hit the homepage so the live ticker queries warm
-echo "→ /                  (warming homepage Socrata queries)"
-HOME_CODE=$(curl -s -o /dev/null -w "%{http_code}" $AUTH "$URL/")
-echo "  HTTP $HOME_CODE"
-echo
+failed=0
+total_start=$(date +%s)
 
-# 2. Hit each dataset detail page so per-dataset caches warm
-echo "→ /datasets/3syk-w9eu (permits)"
-curl -s -o /dev/null -w "  HTTP %{http_code}\n" $AUTH "$URL/datasets/3syk-w9eu"
-echo "→ /datasets/ecmv-9xxi (inspections)"
-curl -s -o /dev/null -w "  HTTP %{http_code}\n" $AUTH "$URL/datasets/ecmv-9xxi"
-echo "→ /datasets/xwdj-i9he (311)"
-curl -s -o /dev/null -w "  HTTP %{http_code}\n" $AUTH "$URL/datasets/xwdj-i9he"
-echo
+for q in "${QUERIES[@]}"; do
+  # None of the marquee strings contain a quote or backslash, so simple
+  # JSON construction is safe. If that ever stops being true, swap for jq.
+  payload=$(printf '{"query":"%s"}' "$q")
+  start=$(date +%s)
 
-# 3. Run each marquee question through the live agent (the BIG warm)
-for Q in "${QUESTIONS[@]}"; do
-  echo "→ /api/agent: \"$Q\""
-  RES=$(curl -sN --max-time 60 -X POST "$URL/api/agent" \
-    -H 'Content-Type: application/json' \
-    --data "{\"query\": \"$Q\"}" 2>&1 || true)
-  PHASES=$(echo "$RES" | grep -oE '"phase":"[^"]+"' | sort -u | tr '\n' ' ')
-  DONE=$(echo "$RES" | grep -c '"phase":"done"' || true)
-  echo "  phases seen: $PHASES"
-  echo "  done events: $DONE"
-  echo
+  out=$(curl -s -N -X POST "${BASE_URL}/api/agent" \
+    -H "Content-Type: application/json" \
+    --max-time 60 \
+    "${AUTH_ARGS[@]}" \
+    -d "$payload" 2>&1) || true
+
+  elapsed=$(( $(date +%s) - start ))
+
+  if grep -q '"phase":"done"' <<<"$out"; then
+    echo "  ✓ [${elapsed}s] $q"
+  elif grep -q '"phase":"error"' <<<"$out"; then
+    err=$(grep -oE '"error":"[^"]*"' <<<"$out" | head -1)
+    echo "  ✗ [${elapsed}s] $q  →  $err"
+    failed=$((failed + 1))
+  else
+    echo "  ? [${elapsed}s] $q  →  no done/error event (timeout or auth gate?)"
+    failed=$((failed + 1))
+  fi
 done
 
-# 4. Run each marquee through demo-mode too (fixture replay) so it's also primed
-echo "→ Warming demo-mode fixtures (?demo=1)..."
-for Q in "${QUESTIONS[@]}"; do
-  curl -sN --max-time 15 -X POST "$URL/api/agent?demo=1" \
-    -H 'Content-Type: application/json' \
-    --data "{\"query\": \"$Q\"}" > /dev/null 2>&1 || true
-done
-echo "  done"
-echo
-
-echo "═══════════════════════════════════════════════════════════════════"
-echo "✓ Warm-up complete."
-echo "  Demo-mode toggle:  /q?q=<...>&demo=1   (or pass demo:true in body)"
-echo "  Live mode:         /q?q=<...>"
-echo "═══════════════════════════════════════════════════════════════════"
+total=$(( $(date +%s) - total_start ))
+echo ""
+if [ "$failed" -eq 0 ]; then
+  echo "All ${#QUERIES[@]} queries warm in ${total}s. Cache hot for the next ~60s."
+  exit 0
+else
+  echo "WARN: ${failed} of ${#QUERIES[@]} queries did not complete cleanly."
+  echo "      If hitting prod with the basic-auth gate, set TXLOOKUP_BASIC_AUTH=user:pass."
+  exit 1
+fi

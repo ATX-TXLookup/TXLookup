@@ -430,6 +430,11 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
           }
         }
       } catch (e: unknown) {
+        // AbortError is the canonical "this was deliberate" signal — never
+        // surface it to the user. Fires when the effect re-runs (Strict
+        // Mode in dev, query/dataset prop change, navigation away) and
+        // ctrl.abort() propagates through the in-flight fetch.
+        if (e instanceof Error && e.name === "AbortError") return;
         if (!cancelled.current) {
           setState((s) => ({
             ...s,

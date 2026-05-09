@@ -1,6 +1,6 @@
 {
   "dataset": "mixed_beverage",
-  "generated": "2026-05-09T15:22:33.402080",
+  "generated": "2026-05-09T16:25:12.477438",
   "passed": 10,
   "total": 10,
   "results": [
@@ -15,7 +15,7 @@
       "order": "total_receipts DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.29,
+      "elapsed_s": 0.92,
       "row_count": 10,
       "rows": [
         {
@@ -84,7 +84,7 @@
       "order": "total DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.78,
+      "elapsed_s": 0.64,
       "row_count": 10,
       "rows": [
         {
@@ -143,7 +143,7 @@
       "order": "period DESC",
       "limit": 13,
       "status": "PASS",
-      "elapsed_s": 0.56,
+      "elapsed_s": 0.5,
       "row_count": 13,
       "rows": [
         {
@@ -214,7 +214,7 @@
       "order": "total DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.51,
+      "elapsed_s": 5.57,
       "row_count": 10,
       "rows": [
         {
@@ -270,7 +270,7 @@
       "select": "sum(liquor_receipts) AS liquor,sum(wine_receipts) AS wine,sum(beer_receipts) AS beer",
       "where": "taxpayer_city='AUSTIN'",
       "status": "PASS",
-      "elapsed_s": 0.42,
+      "elapsed_s": 0.5,
       "row_count": 1,
       "rows": [
         {
@@ -293,7 +293,7 @@
       "order": "beer_receipts DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.39,
+      "elapsed_s": 0.46,
       "row_count": 10,
       "rows": [
         {
@@ -351,7 +351,7 @@
       "order": "period DESC",
       "limit": 13,
       "status": "PASS",
-      "elapsed_s": 0.52,
+      "elapsed_s": 1.79,
       "row_count": 13,
       "rows": [
         {
@@ -422,7 +422,7 @@
       "order": "total DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.61,
+      "elapsed_s": 0.57,
       "row_count": 10,
       "rows": [
         {
@@ -478,7 +478,7 @@
       "select": "count(*) AS cnt",
       "where": "taxpayer_city='AUSTIN'",
       "status": "PASS",
-      "elapsed_s": 0.51,
+      "elapsed_s": 0.44,
       "row_count": 1,
       "rows": [
         {
@@ -499,7 +499,7 @@
       "order": "cover_charge_receipts DESC",
       "limit": 10,
       "status": "PASS",
-      "elapsed_s": 0.33,
+      "elapsed_s": 0.34,
       "row_count": 10,
       "rows": [
         {

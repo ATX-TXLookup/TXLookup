@@ -89,7 +89,8 @@ MIRO_BOARD_ID      — Default board
 SUPABASE_URL       — Data storage
 SUPABASE_KEY       — Supabase anon key
 FEATHERLESS_API_KEY — Open-source model inference (free)
-SOCRATA_APP_TOKEN  — Higher rate limits on Socrata APIs (optional)
+SOCRATA_KEY_ID     — Socrata API key id (HTTP Basic auth, recommended)
+SOCRATA_KEY_SECRET — Socrata API key secret (paired with KEY_ID)
 ```
 
 ## Running Locally
