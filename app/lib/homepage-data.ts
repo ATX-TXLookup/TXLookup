@@ -16,8 +16,6 @@ function socrataHeaders(): Record<string, string> {
         ? Buffer.from(`${id}:${secret}`).toString("base64")
         : btoa(`${id}:${secret}`);
     headers["Authorization"] = `Basic ${b}`;
-  } else if (process.env.SOCRATA_APP_TOKEN) {
-    headers["X-App-Token"] = process.env.SOCRATA_APP_TOKEN;
   }
   return headers;
 }

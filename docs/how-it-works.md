@@ -247,7 +247,8 @@ constrains in five places:
 2. **The MCP server** (`mcp/server.py`) — every tool is shape-typed and
    wrapped in try/except returning the standard envelope.
 3. **The TS data layer** (`app/lib/socrata.ts`) — hard 5000-row cap,
-   30s timeout, optional `SOCRATA_APP_TOKEN` for higher rate limits.
+   30s timeout, HTTP Basic auth via `SOCRATA_KEY_ID` + `SOCRATA_KEY_SECRET`
+   for higher rate limits.
 4. **The planner prompt** — explicit disambiguation rules, forbidden
    args (`$select=*`), per-dataset key columns, dynamic TODAY date.
 5. **The doom-loop guard** (`agent/doom_loop.py`) — fingerprints every
