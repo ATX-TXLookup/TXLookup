@@ -6,10 +6,29 @@ const REVALIDATE = 300;
 
 type DailyCount = { day: string; count: number };
 
+function socrataHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {};
+  const id = process.env.SOCRATA_KEY_ID;
+  const secret = process.env.SOCRATA_KEY_SECRET;
+  if (id && secret) {
+    const b =
+      typeof Buffer !== "undefined"
+        ? Buffer.from(`${id}:${secret}`).toString("base64")
+        : btoa(`${id}:${secret}`);
+    headers["Authorization"] = `Basic ${b}`;
+  } else if (process.env.SOCRATA_APP_TOKEN) {
+    headers["X-App-Token"] = process.env.SOCRATA_APP_TOKEN;
+  }
+  return headers;
+}
+
 /** Run a SODA query and return parsed JSON or null on any failure. */
 async function soda(url: string): Promise<unknown[] | null> {
   try {
-    const r = await fetch(url, { next: { revalidate: REVALIDATE } });
+    const r = await fetch(url, {
+      headers: socrataHeaders(),
+      next: { revalidate: REVALIDATE },
+    });
     if (!r.ok) return null;
     return (await r.json()) as unknown[];
   } catch {

@@ -4,6 +4,29 @@
 const HARD_LIMIT = 5000;
 const TIMEOUT_MS = 30_000;
 
+/**
+ * Build auth headers for Socrata.
+ *
+ * Two supported auth modes (in priority order):
+ *   1. SOCRATA_KEY_ID + SOCRATA_KEY_SECRET → HTTP Basic auth (preferred,
+ *      gets the highest rate limit and works on every Socrata-hosted portal)
+ *   2. SOCRATA_APP_TOKEN → X-App-Token header (legacy, lower rate limit)
+ *
+ * Unset → unauthenticated (shared public rate limit).
+ */
+function socrataHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {};
+  const id = process.env.SOCRATA_KEY_ID;
+  const secret = process.env.SOCRATA_KEY_SECRET;
+  if (id && secret) {
+    const b = typeof Buffer !== "undefined" ? Buffer.from(`${id}:${secret}`).toString("base64") : btoa(`${id}:${secret}`);
+    headers["Authorization"] = `Basic ${b}`;
+  } else if (process.env.SOCRATA_APP_TOKEN) {
+    headers["X-App-Token"] = process.env.SOCRATA_APP_TOKEN;
+  }
+  return headers;
+}
+
 export type SodaResult = {
   status: "completed" | "failed";
   result: {
@@ -45,10 +68,7 @@ export async function sodaQuery(
     };
   }
   const url = buildUrl(portal, datasetId, params);
-  const headers: HeadersInit = {};
-  if (process.env.SOCRATA_APP_TOKEN) {
-    headers["X-App-Token"] = process.env.SOCRATA_APP_TOKEN;
-  }
+  const headers = socrataHeaders();
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
@@ -98,10 +118,7 @@ export async function describeDataset(
   datasetId: string,
 ): Promise<SchemaResult> {
   const metaUrl = `https://${portal}/api/views/${datasetId}.json`;
-  const headers: HeadersInit = {};
-  if (process.env.SOCRATA_APP_TOKEN) {
-    headers["X-App-Token"] = process.env.SOCRATA_APP_TOKEN;
-  }
+  const headers = socrataHeaders();
   try {
     const [metaR, sampleR] = await Promise.all([
       fetch(metaUrl, { headers, next: { revalidate: 600 } }),
