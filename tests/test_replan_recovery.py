@@ -55,11 +55,41 @@ import sys
 import urllib.error
 import urllib.request
 
+import pytest
+
 
 BASE_URL = os.environ.get("TXLOOKUP_BASE", "http://localhost:3000")
 TIMEOUT_S = 120  # replans roughly double the time vs a clean run
 
 TRIGGER_QUERY = "how many construction permits in 78701 in the last six months"
+
+
+def _server_reachable() -> bool:
+    """Cheap probe — is the dev server up AND is /api/agent willing to take POST?
+
+    We do a tiny POST with an empty body. If we get a structured 4xx/2xx the
+    route is mounted (test will run for real). If we get a connection error
+    or a 404/405 (route missing or stale build), we skip.
+    """
+    try:
+        req = urllib.request.Request(
+            f"{BASE_URL}/api/agent",
+            data=b"{}",
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=3):
+            return True
+    except urllib.error.HTTPError as e:
+        # 4xx/5xx where route exists is fine — but 404/405 means the agent
+        # route isn't actually serving, so the test would just fail noisily.
+        if e.code in (404, 405):
+            return False
+        return True
+    except (urllib.error.URLError, TimeoutError, ConnectionError):
+        return False
+    except Exception:
+        return False
 
 
 def _parse_sse(stream: bytes) -> list[dict]:
@@ -96,6 +126,10 @@ def _stream_query(query: str) -> list[dict]:
     return _parse_sse(raw)
 
 
+@pytest.mark.skipif(
+    not _server_reachable(),
+    reason=f"dev server not running at {BASE_URL} — this is an end-to-end test",
+)
 def test_replan_triggered_and_recovered():
     """The full replan path: failure → replanning → replanned → done with answer."""
     events = _stream_query(TRIGGER_QUERY)

@@ -12,7 +12,14 @@ Writes: tests/fixtures/<dataset>.json  (one per dataset)
 """
 
 from __future__ import annotations
-import argparse, base64, json, os, time, urllib.parse, urllib.request
+
+import argparse
+import base64
+import json
+import os
+import time
+import urllib.parse
+import urllib.request
 from datetime import datetime, timedelta
 
 SOCRATA_KEY_ID = os.environ.get("SOCRATA_KEY_ID", "")
@@ -299,9 +306,12 @@ def socrata_fetch(ds_key: str, select: str, where: str = "",
                   group: str = "", order: str = "", limit: int = 100) -> dict:
     ds = DATASETS[ds_key]
     params: dict[str, str] = {"$select": select, "$limit": str(limit)}
-    if where:  params["$where"] = where
-    if group:  params["$group"] = group
-    if order:  params["$order"] = order
+    if where:
+        params["$where"] = where
+    if group:
+        params["$group"] = group
+    if order:
+        params["$order"] = order
     url = f"https://{ds['portal']}/resource/{ds['id']}.json?" + urllib.parse.urlencode(params)
     headers = {"Accept": "application/json"}
     if SOCRATA_KEY_ID and SOCRATA_KEY_SECRET:
@@ -348,7 +358,7 @@ def main() -> None:
         if not res["ok"]:
             print(f"         └─ {res['error'][:120]}")
         elif not res.get("rows"):
-            print(f"         └─ 0 rows")
+            print("         └─ 0 rows")
         else:
             print(f"         └─ {len(res['rows'])} rows: {json.dumps(res['rows'][:1], default=str)[:140]}")
 
@@ -378,7 +388,8 @@ def main() -> None:
         p = sum(1 for r in recs if r["status"] == "PASS")
         e = sum(1 for r in recs if r["status"] == "EMPTY")
         f = sum(1 for r in recs if r["status"] == "FAIL")
-        grand_pass += p; grand_total += len(recs)
+        grand_pass += p
+        grand_total += len(recs)
         print(f"  {story}: {p}/{len(recs)} PASS  {e} EMPTY  {f} FAIL")
     print(f"\n  Grand total: {grand_pass}/{grand_total}")
     print(f"\nFixtures written to {out_dir}/")

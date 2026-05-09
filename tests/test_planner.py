@@ -93,6 +93,96 @@ async def test_reason_and_plan_parses_structured_output():
 
 
 @pytest.mark.asyncio
+async def test_replan_with_structured_failure_envelope_threads_diagnosis():
+    """When the executor surfaces a structured failure envelope, `replan`
+    must thread its `error` (and the diagnosis-style fields it carries)
+    through the user message handed to Codex — that's the signal the LLM
+    uses to write a meaningful diagnosis and pick a different shape.
+
+    This guards the contract between agent/executor.py (which produces
+    `{status: "failed", error: "...", artifacts: [...]}` envelopes) and
+    agent/planner.py:replan().
+    """
+    original = Plan.model_validate(_VALID_PLAN_PAYLOAD)
+
+    # A realistic structured failure envelope coming back from the executor.
+    failure_envelope = {
+        "status": "failed",
+        "result": None,
+        "error": (
+            "Socrata HTTP 400 — Unrecognized field 'occurred_date' in "
+            "$where (catalog drift; correct column is 'occ_date')"
+        ),
+        "artifacts": [
+            {
+                "kind": "soda_url",
+                "url": (
+                    "https://data.austintexas.gov/resource/fdj4-gpfu.json"
+                    "?$where=occurred_date%20%3E%20%272026-04-01%27"
+                ),
+            }
+        ],
+    }
+
+    replanned_payload = {
+        "intent": _VALID_PLAN_PAYLOAD["intent"],
+        "steps": [
+            {"tool": "get_dataset_schema", "args": {"dataset_id": "fdj4-gpfu"}},
+            {
+                "tool": "fetch_data",
+                "args": {
+                    "portal": "data.austintexas.gov",
+                    "dataset_id": "fdj4-gpfu",
+                    "where": "occ_date > '2026-04-01'",
+                    "limit": 200,
+                },
+            },
+            {"tool": "cite_dataset", "args": {"dataset_id": "fdj4-gpfu"}},
+        ],
+    }
+
+    fake_resp = _fake_completion(replanned_payload)
+    create_mock = AsyncMock(return_value=fake_resp)
+    fake_client = SimpleNamespace(
+        chat=SimpleNamespace(
+            completions=SimpleNamespace(create=create_mock)
+        )
+    )
+
+    with patch("agent.planner._get_client", return_value=fake_client):
+        new_plan = await replan(
+            query="Show me Austin crime reports since April.",
+            original_plan=original,
+            failed_step_index=2,
+            error=failure_envelope["error"],
+        )
+
+    # 1. New plan validates and replaces the broken column.
+    assert isinstance(new_plan, Plan)
+    fetch_steps = [s for s in new_plan.steps if s.tool == "fetch_data"]
+    assert fetch_steps, "replanner should still emit a fetch_data step"
+    assert "occ_date" in str(fetch_steps[0].args.get("where", ""))
+    assert "occurred_date" not in str(fetch_steps[0].args.get("where", ""))
+
+    # 2. The diagnosis (error string) was actually passed to Codex —
+    #    the user message must contain it verbatim. This is what the LLM
+    #    uses to write the human-readable replan diagnosis.
+    create_mock.assert_awaited_once()
+    call_kwargs = create_mock.await_args.kwargs
+    user_messages = [m for m in call_kwargs["messages"] if m["role"] == "user"]
+    assert user_messages, "replan must build a user message"
+    user_blob = user_messages[-1]["content"]
+    assert "REPLAN MODE" in user_blob
+    assert failure_envelope["error"] in user_blob, (
+        "structured failure envelope's error string must thread into the "
+        "Codex prompt so the diagnosis is grounded"
+    )
+    # 3. Failed step index + original plan are visible to Codex too.
+    assert "Failed step index: 2" in user_blob
+    assert "ecmv-9xxi" in user_blob, "original plan should be included for context"
+
+
+@pytest.mark.asyncio
 async def test_replan_preserves_structure():
     """`replan` returns a structurally valid Plan after a step fails."""
     original = Plan.model_validate(_VALID_PLAN_PAYLOAD)

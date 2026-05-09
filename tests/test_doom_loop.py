@@ -1,8 +1,6 @@
 """Unit tests for agent/doom_loop.py."""
 from __future__ import annotations
 
-import pytest
-
 from agent.doom_loop import DoomLoopGuard, detect
 
 
@@ -118,3 +116,27 @@ def test_window_must_vary_internally():
     assert hit is not None
     # Check classified as identical, not sequence
     assert hit.kind == "identical"
+
+
+def test_AABBA_not_a_doom_loop():
+    """A→A→B→B→A — pairs of two but no full repeating window — must NOT trip.
+
+    This is a real benign pattern: agent retries A once, then tries B twice,
+    then circles back to A as a sanity check. There's no [A,B] or [A,A,B,B]
+    cycle that has fully repeated, so neither identical-3-in-a-row nor any
+    sequence rule should fire.
+    """
+    history = [
+        ("fetch_data", {"id": "A"}),
+        ("fetch_data", {"id": "A"}),
+        ("fetch_data", {"id": "B"}),
+        ("fetch_data", {"id": "B"}),
+        ("fetch_data", {"id": "A"}),
+    ]
+    assert detect(history) is None
+
+    # Same thing through the live guard — must remain quiet step-by-step.
+    g = DoomLoopGuard()
+    for tool, args in history:
+        hit = g.observe(tool, args)
+        assert hit is None, f"unexpected trip on {history}: {hit}"

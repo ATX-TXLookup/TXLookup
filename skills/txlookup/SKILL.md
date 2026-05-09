@@ -30,22 +30,31 @@ Use TXLookup when the user asks any question whose answer lives in a Texas city/
 
 ## Tool catalog
 
-The TXLookup MCP server exposes these tools. Pick the smallest tool that answers the question.
+The TXLookup MCP server exposes these tools. Pick the smallest tool that answers the question. Tool names below are the exact MCP-registered names (see `mcp/server.py`).
 
-### `discover(query: str, city: str | None) -> Dataset[]`
+### `ask_data(query: str)`
+High-level entry point: hand a plain-English data question to the agent loop. Returns a task envelope; the agent plans, fetches, and synthesizes a cited answer. Prefer the lower-level tools below when you want explicit control over each step.
+
+### `get_task_status(task_id: str)`
+Poll the status of a running `ask_data` task — phase, progress, partial results.
+
+### `discover_datasets(query: str, city: str | None) -> Dataset[]`
 Search the dataset catalog by natural-language intent. Returns ranked candidate datasets with their IDs, key columns, and update cadence. **Always call this first** if the user's question doesn't name a specific dataset.
 
-### `describe(dataset_id: str) -> Schema`
+### `get_dataset_schema(dataset_id: str, portal: str | None) -> Schema`
 Return column names, types, sample rows, row count, and last-updated timestamp for a dataset. Call before issuing a non-trivial query.
 
-### `query(dataset_id: str, where: str | None, select: str[] | None, group_by: str[] | None, order_by: str | None, limit: int = 1000) -> Records`
-Run a bounded SODA query against a dataset. **Hard limits enforced server-side**: `limit ≤ 5000`, query timeout 30s, paginates on cursor for larger pulls. Returns records + the exact URL invoked (for citation).
+### `fetch_data(portal: str, dataset_id: str, where, select, group, order, limit=100) -> Records`
+Run a bounded SODA query against a dataset. **Hard limits enforced server-side**: `limit <= 5000`, query timeout 30s, paginates on cursor for larger pulls. Returns records + the exact URL invoked (for citation).
 
-### `summarize(dataset_id: str, where: str | None, dimensions: str[]) -> Summary`
-Group + aggregate without returning row-level data. Best for "what are the top X by Y" questions. Cheaper than `query` and avoids dumping raw records into agent context.
+### `create_miro_board(name: str, description: str)`
+Create a Miro board for the visual demo output. Returns the board id and URL.
 
-### `cite(record_or_dataset_id) -> Citation`
-Return a stable URL + portal attribution string. Always include this in any user-facing output (the Open Data track requires clear attribution).
+### `add_to_miro(board_id, item_type, content, x, y, color)`
+Add a sticky / shape / card to an existing Miro board at the given coordinates.
+
+### `list_known_tools()`
+Return the full registered tool list grouped by category — useful for agents discovering the MCP surface at runtime.
 
 ## Safe-use rules (non-negotiable)
 

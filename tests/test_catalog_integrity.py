@@ -49,20 +49,20 @@ CATALOG = [
     {
         "id": "6wtj-zbtb",
         "portal": "data.austintexas.gov",
-        "title": "Code Violation Cases",
-        "key_columns": ["case_type", "case_status", "location", "opened_date"],
+        "title": "Austin Code Complaint Cases",
+        "key_columns": ["case_type", "status", "address", "zip_code", "opened_date", "priority", "department"],
     },
     {
         "id": "fdj4-gpfu",
         "portal": "data.austintexas.gov",
         "title": "Crime Reports",
-        "key_columns": ["crime_type", "location_type", "occurred_date", "zip_code"],
+        "key_columns": ["crime_type", "category_description", "location_type", "occ_date", "council_district", "clearance_status", "family_violence"],
     },
     {
         "id": "y2wy-tgr5",
         "portal": "data.austintexas.gov",
-        "title": "Austin Traffic Fatalities",
-        "key_columns": ["case_status", "location", "date", "mode"],
+        "title": "Austin Crash Report Data",
+        "key_columns": ["crash_fatal_fl", "death_cnt", "tot_injry_cnt", "rpt_street_name", "crash_speed_limit", "crash_timestamp", "pedestrian_death_count", "bicycle_death_count", "collsn_desc"],
     },
 ]
 

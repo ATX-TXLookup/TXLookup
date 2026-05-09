@@ -858,7 +858,7 @@ def main() -> int:
             })
 
     dt = time.time() - t0
-    print(f"\n--- Summary ---")
+    print("\n--- Summary ---")
     print(f"Passed: {passed}/{total}  ({100 * passed / max(total, 1):.0f}%)")
     print(f"Total time: {dt:.1f}s ({dt / max(total, 1):.1f}s/question)")
 
