@@ -16,16 +16,36 @@ type StepLog = {
   step: number;
   tool: string;
   args: unknown;
+  rationale?: string;
   status: "pending" | "completed" | "failed";
   preview?: string;
   error?: string | null;
+  fromReplan?: boolean;
+};
+
+type ReplanLog = {
+  failedStep: number;
+  failedTool: string;
+  error: string | null;
+  diagnosis?: string;
+  thinking?: string;
 };
 
 type AgentState = {
-  phase: "idle" | "reasoning" | "planning" | "executing" | "completing" | "done" | "error";
+  phase:
+    | "idle"
+    | "reasoning"
+    | "planning"
+    | "executing"
+    | "replanning"
+    | "completing"
+    | "done"
+    | "error";
   totalSteps: number;
   currentStep: number;
+  thinking: string | null;
   steps: StepLog[];
+  replans: ReplanLog[];
   answer: string | null;
   citation: Citation | null;
   artifacts: string[];
@@ -36,7 +56,9 @@ const initial: AgentState = {
   phase: "idle",
   totalSteps: 4,
   currentStep: 0,
+  thinking: null,
   steps: [],
+  replans: [],
   answer: null,
   citation: null,
   artifacts: [],
@@ -51,6 +73,40 @@ function parseSseLine(line: string): unknown | null {
     return null;
   }
 }
+
+type SseEvent = {
+  phase:
+    | "reasoning"
+    | "planning"
+    | "executing"
+    | "step_done"
+    | "replanning"
+    | "replanned"
+    | "completing"
+    | "done"
+    | "error";
+  message?: string;
+  thinking?: string;
+  diagnosis?: string;
+  plan?: {
+    intent?: { thinking?: string };
+    steps?: { tool: string; args: unknown; rationale?: string }[];
+    diagnosis?: string;
+  };
+  step?: number;
+  total?: number;
+  tool?: string;
+  args?: unknown;
+  rationale?: string;
+  status?: "completed" | "failed";
+  preview?: string;
+  error?: string | null;
+  failedStep?: number;
+  failedTool?: string;
+  answer?: string;
+  citation?: Citation | null;
+  artifacts?: string[];
+};
 
 export function AgentRunner({ query, dataset }: { query: string; dataset?: string }) {
   const [state, setState] = useState<AgentState>(initial);
@@ -86,30 +142,7 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
           buf = lines.pop() ?? "";
           for (const block of lines) {
             for (const line of block.split("\n")) {
-              const ev = parseSseLine(line.trim()) as
-                | {
-                    phase:
-                      | "reasoning"
-                      | "planning"
-                      | "executing"
-                      | "step_done"
-                      | "completing"
-                      | "done"
-                      | "error";
-                    message?: string;
-                    plan?: { steps?: { tool: string; args: unknown }[] };
-                    step?: number;
-                    total?: number;
-                    tool?: string;
-                    args?: unknown;
-                    status?: "completed" | "failed";
-                    preview?: string;
-                    error?: string | null;
-                    answer?: string;
-                    citation?: Citation | null;
-                    artifacts?: string[];
-                  }
-                | null;
+              const ev = parseSseLine(line.trim()) as SseEvent | null;
               if (!ev) continue;
               setState((s) => {
                 switch (ev.phase) {
@@ -119,11 +152,13 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
                     return {
                       ...s,
                       phase: "planning",
+                      thinking: ev.thinking ?? ev.plan?.intent?.thinking ?? s.thinking,
                       totalSteps: ev.plan?.steps?.length ?? s.totalSteps,
                       steps: (ev.plan?.steps ?? []).map((p, i) => ({
                         step: i + 1,
                         tool: p.tool,
                         args: p.args,
+                        rationale: p.rationale,
                         status: "pending",
                       })),
                     };
@@ -146,6 +181,46 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
                       };
                     }
                     return { ...s, steps: next };
+                  }
+                  case "replanning":
+                    return {
+                      ...s,
+                      phase: "replanning",
+                      replans: [
+                        ...s.replans,
+                        {
+                          failedStep: ev.failedStep ?? s.currentStep,
+                          failedTool: ev.failedTool ?? "",
+                          error: ev.error ?? null,
+                        },
+                      ],
+                    };
+                  case "replanned": {
+                    // Append the new steps to the visible plan as "from replan".
+                    const newSteps = (ev.plan?.steps ?? []).map((p, i) => ({
+                      step: s.steps.length + i + 1,
+                      tool: p.tool,
+                      args: p.args,
+                      rationale: p.rationale,
+                      status: "pending" as const,
+                      fromReplan: true,
+                    }));
+                    const replans = [...s.replans];
+                    if (replans.length > 0) {
+                      const last = replans[replans.length - 1];
+                      replans[replans.length - 1] = {
+                        ...last,
+                        diagnosis: ev.diagnosis ?? ev.plan?.diagnosis,
+                        thinking: ev.thinking ?? ev.plan?.intent?.thinking,
+                      };
+                    }
+                    return {
+                      ...s,
+                      phase: "executing",
+                      steps: [...s.steps, ...newSteps],
+                      totalSteps: s.steps.length + newSteps.length,
+                      replans,
+                    };
                   }
                   case "completing":
                     return { ...s, phase: "completing" };
@@ -186,7 +261,7 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
   const phaseToActiveStep = (() => {
     if (state.phase === "reasoning") return 0;
     if (state.phase === "planning") return 1;
-    if (state.phase === "executing") return 2;
+    if (state.phase === "executing" || state.phase === "replanning") return 2;
     if (state.phase === "completing") return 3;
     if (state.phase === "done") return 3;
     return -1;
@@ -205,36 +280,40 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
               { n: "04", title: "Complete" },
             ].map((s, i) => {
               const active = i <= phaseToActiveStep && state.phase !== "error";
-              const done = i < phaseToActiveStep || state.phase === "done";
               const isComplete = state.phase === "done" && i === 3;
+              const isReplanning = state.phase === "replanning" && i === 2;
               const status =
                 state.phase === "error"
                   ? "Error"
-                  : i < phaseToActiveStep
-                    ? "Done"
-                    : i === phaseToActiveStep
-                      ? state.phase === "executing" && i === 2
-                        ? `Step ${state.currentStep}/${state.totalSteps}`
-                        : "In progress"
-                      : "Waiting";
+                  : isReplanning
+                    ? "Replanning…"
+                    : i < phaseToActiveStep
+                      ? "Done"
+                      : i === phaseToActiveStep
+                        ? state.phase === "executing" && i === 2
+                          ? `Step ${state.currentStep}/${state.totalSteps}`
+                          : "In progress"
+                        : "Waiting";
               return (
                 <div
                   key={s.n}
                   className={`rounded-md border px-4 py-4 transition-colors ${
-                    isComplete
-                      ? "border-[#1E7A47]/40 bg-[#E5F5EC]"
-                      : active
-                        ? "border-[#0B5FFF]/30 bg-[#F4F6FB]"
-                        : "border-[#1A1F2A]/10 bg-white"
+                    isReplanning
+                      ? "border-[#A06200]/40 bg-[#FFF3D9]"
+                      : isComplete
+                        ? "border-[#1E7A47]/40 bg-[#E5F5EC]"
+                        : active
+                          ? "border-[#0B5FFF]/30 bg-[#F4F6FB]"
+                          : "border-[#1A1F2A]/10 bg-white"
                   }`}
                 >
                   <p
                     className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em]"
                     style={{
-                      color: isComplete
-                        ? "#1E7A47"
-                        : done
-                          ? "#0B5FFF"
+                      color: isReplanning
+                        ? "#A06200"
+                        : isComplete
+                          ? "#1E7A47"
                           : active
                             ? "#0B5FFF"
                             : "#1A1F2A",
@@ -255,35 +334,117 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
         </div>
       </section>
 
-      {/* Plan + step preview */}
-      {state.steps.length > 0 && (
+      {/* Agent thinking — what the agent thinks the question is asking */}
+      {state.thinking && (
         <section className="border-b border-[#1A1F2A]/10 bg-[#F4F6FB]">
+          <div className="mx-auto max-w-[1320px] px-6 py-6 md:px-10">
+            <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+              Agent thinking
+            </p>
+            <p className="mt-2 max-w-[68ch] text-base italic text-[#0B2545] md:text-lg">
+              "{state.thinking}"
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* Plan with rationale per step */}
+      {state.steps.length > 0 && (
+        <section className="border-b border-[#1A1F2A]/10 bg-white">
           <div className="mx-auto max-w-[1320px] px-6 py-8 md:px-10">
             <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
               Plan
             </p>
-            <ol className="mt-3 space-y-1 font-mono text-xs text-[#1A1F2A]">
+            <ol className="mt-4 space-y-3">
               {state.steps.map((s) => (
-                <li key={s.step} className="flex gap-3">
-                  <span className="text-[#1A1F2A]/55">{String(s.step).padStart(2, "0")}</span>
-                  <span className="font-semibold text-[#0B2545]">{s.tool}</span>
-                  <span className="truncate text-[#1A1F2A]/65">
-                    {JSON.stringify(s.args).slice(0, 140)}
-                  </span>
-                  <span
-                    className={`ml-auto ${
-                      s.status === "completed"
-                        ? "text-[#1E7A47]"
-                        : s.status === "failed"
-                          ? "text-[#A0231C]"
-                          : "text-[#1A1F2A]/45"
-                    }`}
-                  >
-                    {s.status}
-                  </span>
+                <li
+                  key={s.step}
+                  className={`rounded-md border px-4 py-3 ${
+                    s.status === "completed"
+                      ? "border-[#1E7A47]/30 bg-[#E5F5EC]"
+                      : s.status === "failed"
+                        ? "border-[#A0231C]/30 bg-[#FBE9E7]"
+                        : s.fromReplan
+                          ? "border-[#A06200]/30 bg-[#FFF3D9]"
+                          : "border-[#1A1F2A]/10 bg-white"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="font-mono text-[11px] font-semibold tabular-nums text-[#1A1F2A]/55">
+                      {String(s.step).padStart(2, "0")}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <span className="font-mono text-sm font-semibold text-[#0B2545]">
+                          {s.tool}
+                          {s.fromReplan && (
+                            <span className="ml-2 rounded-sm bg-[#A06200] px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-white">
+                              Replan
+                            </span>
+                          )}
+                        </span>
+                        <span
+                          className={`font-mono text-[11px] uppercase tracking-wider ${
+                            s.status === "completed"
+                              ? "text-[#1E7A47]"
+                              : s.status === "failed"
+                                ? "text-[#A0231C]"
+                                : "text-[#1A1F2A]/45"
+                          }`}
+                        >
+                          {s.status}
+                        </span>
+                      </div>
+                      {s.rationale && (
+                        <p className="mt-1 text-sm italic text-[#1A1F2A]/75">
+                          {s.rationale}
+                        </p>
+                      )}
+                      <p className="mt-1 truncate font-mono text-[11px] text-[#1A1F2A]/55">
+                        {JSON.stringify(s.args).slice(0, 180)}
+                      </p>
+                      {s.error && (
+                        <p className="mt-2 font-mono text-[11px] text-[#A0231C]">
+                          ↳ {s.error}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </li>
               ))}
             </ol>
+          </div>
+        </section>
+      )}
+
+      {/* Replan diagnoses */}
+      {state.replans.length > 0 && (
+        <section className="border-b border-[#1A1F2A]/10 bg-[#FFF3D9]">
+          <div className="mx-auto max-w-[1320px] px-6 py-6 md:px-10">
+            <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#A06200]">
+              {state.replans.length === 1 ? "Agent adjusted course" : `Agent adjusted course (${state.replans.length}×)`}
+            </p>
+            <ul className="mt-3 space-y-3">
+              {state.replans.map((rp, i) => (
+                <li key={i}>
+                  <p className="text-sm text-[#0B2545]">
+                    Step {rp.failedStep}{" "}
+                    <span className="font-mono text-xs">{rp.failedTool}</span> failed:
+                    <span className="ml-1 font-mono text-xs text-[#A0231C]">{rp.error}</span>
+                  </p>
+                  {rp.diagnosis && (
+                    <p className="mt-1 text-sm italic text-[#0B2545]">
+                      Diagnosis: "{rp.diagnosis}"
+                    </p>
+                  )}
+                  {rp.thinking && rp.thinking !== state.thinking && (
+                    <p className="mt-1 text-sm italic text-[#A06200]">
+                      New approach: "{rp.thinking}"
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       )}
@@ -331,8 +492,8 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
                       Source URLs
                     </p>
                     <ul className="mt-3 space-y-1 font-mono text-[11px]">
-                      {state.artifacts.slice(0, 4).map((a) => (
-                        <li key={a}>
+                      {state.artifacts.slice(0, 4).map((a, idx) => (
+                        <li key={`${a}-${idx}`}>
                           <a
                             href={a}
                             target="_blank"
@@ -375,12 +536,13 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
 
       {state.phase !== "done" && state.phase !== "error" && state.phase !== "idle" && (
         <section className="border-b border-[#1A1F2A]/10 bg-white">
-          <div className="mx-auto max-w-[1320px] px-6 py-12 md:px-10">
+          <div className="mx-auto max-w-[1320px] px-6 py-6 md:px-10">
             <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#1A1F2A]/55">
               {state.phase === "reasoning" && "Reading the question..."}
               {state.phase === "planning" && "Planning the tool sequence..."}
               {state.phase === "executing" &&
                 `Running step ${state.currentStep} of ${state.totalSteps}...`}
+              {state.phase === "replanning" && "Step failed. Adjusting plan..."}
               {state.phase === "completing" && "Synthesizing answer..."}
             </p>
           </div>

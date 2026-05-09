@@ -1,18 +1,24 @@
 // Streaming agent endpoint. SSE.
 // POST { query: string } → stream of phase / step / result events.
+//
+// Loop: Reason → Plan → Tool* → (Replan if any step failed, ≤2 attempts) → Complete.
 
 import { NextRequest } from "next/server";
 
-import { executeStep, reasonAndPlan, synthesize } from "@/app/lib/agent";
+import { executeStep, reasonAndPlan, replan, synthesize, Plan, ToolEnvelope } from "@/app/lib/agent";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const MAX_REPLANS = 2;
+
 type Event =
   | { phase: "reasoning"; message: string }
-  | { phase: "planning"; plan: unknown }
-  | { phase: "executing"; step: number; total: number; tool: string; args: unknown }
+  | { phase: "planning"; plan: unknown; thinking?: string }
+  | { phase: "executing"; step: number; total: number; tool: string; args: unknown; rationale?: string }
   | { phase: "step_done"; step: number; status: string; preview: string; error: string | null }
+  | { phase: "replanning"; failedStep: number; failedTool: string; error: string | null }
+  | { phase: "replanned"; plan: unknown; diagnosis?: string; thinking?: string }
   | { phase: "completing"; message: string }
   | { phase: "done"; answer: string; citation: unknown; artifacts: string[] }
   | { phase: "error"; error: string };
@@ -37,20 +43,28 @@ export async function POST(req: NextRequest) {
       try {
         send({ phase: "reasoning", message: query });
 
-        const plan = await reasonAndPlan(query);
-        send({ phase: "planning", plan });
+        let currentPlan: Plan = await reasonAndPlan(query);
+        send({
+          phase: "planning",
+          plan: currentPlan,
+          thinking: (currentPlan.intent as { thinking?: string })?.thinking,
+        });
 
-        const results = [] as Awaited<ReturnType<typeof executeStep>>[];
+        const results: ToolEnvelope[] = [];
         let citation: unknown = null;
         const artifacts: string[] = [];
-        for (let i = 0; i < plan.steps.length; i++) {
-          const step = plan.steps[i];
+        let replanCount = 0;
+        let i = 0;
+
+        while (i < currentPlan.steps.length) {
+          const step = currentPlan.steps[i];
           send({
             phase: "executing",
             step: i + 1,
-            total: plan.steps.length,
+            total: currentPlan.steps.length,
             tool: step.tool,
             args: step.args,
+            rationale: step.rationale,
           });
           const r = await executeStep(step);
           results.push(r);
@@ -65,10 +79,48 @@ export async function POST(req: NextRequest) {
             preview: JSON.stringify(r.result).slice(0, 240),
             error: r.error,
           });
+
+          // Replan on a failure if we have budget left.
+          if (r.status === "failed" && replanCount < MAX_REPLANS) {
+            replanCount += 1;
+            send({
+              phase: "replanning",
+              failedStep: i + 1,
+              failedTool: step.tool,
+              error: r.error,
+            });
+            try {
+              const newPlan = await replan(query, currentPlan, i, r);
+              send({
+                phase: "replanned",
+                plan: newPlan,
+                diagnosis: newPlan.diagnosis,
+                thinking: (newPlan.intent as { thinking?: string })?.thinking,
+              });
+              // Replace remaining steps from the failed one onward with the new plan's steps.
+              currentPlan = {
+                ...newPlan,
+                steps: [...currentPlan.steps.slice(0, i), ...newPlan.steps],
+              };
+              // Re-run starting at the failed-step index.
+              continue;
+            } catch (e) {
+              // Replan itself failed — give up gracefully and continue.
+              send({
+                phase: "step_done",
+                step: i + 1,
+                status: "failed",
+                preview: "",
+                error: `replan failed: ${e instanceof Error ? e.message : String(e)}`,
+              });
+            }
+          }
+
+          i += 1;
         }
 
         send({ phase: "completing", message: "Synthesizing answer..." });
-        const answer = await synthesize(query, plan, results);
+        const answer = await synthesize(query, currentPlan, results);
 
         send({ phase: "done", answer, citation, artifacts });
         controller.close();
