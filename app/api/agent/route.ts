@@ -272,6 +272,7 @@ export async function POST(req: NextRequest) {
                 currentPlan,
                 i,
                 syntheticFailure,
+                results.slice(0, i),
                 undefined,
                 hit.message,
               );
@@ -340,7 +341,7 @@ export async function POST(req: NextRequest) {
               reason: "step_failed",
             });
             try {
-              const re = await replan(query, currentPlan, i, r);
+              const re = await replan(query, currentPlan, i, r, results.slice(0, i));
               usageTotal = addUsage(usageTotal, re.usage);
               send({
                 phase: "replanned",
@@ -353,6 +354,13 @@ export async function POST(req: NextRequest) {
                 ...re.plan,
                 steps: [...currentPlan.steps.slice(0, i), ...re.plan.steps],
               };
+              // Drop the failed step's result; results[0..i-1] now align
+              // 1:1 with the rebuilt currentPlan.steps[0..i-1]. Without
+              // this, results[i] still points at the OLD failed-step
+              // envelope and any code reading results-by-index (the
+              // replanner's "prior steps" block, the synthesizer) sees
+              // the wrong row.
+              results.length = i;
               guard.reset();
               continue;
             } catch (e) {
