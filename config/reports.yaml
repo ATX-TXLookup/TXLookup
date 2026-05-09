@@ -1,0 +1,140 @@
+# Newsletter-style reports — declarative definitions consumed by the report builder.
+#
+# IMPORTANT: this YAML file is the canonical, human-readable source of truth.
+# The runtime loader lives at `config/reports.ts` (mirror of this file in TS form,
+# kept in sync by hand). We avoid adding `js-yaml` as a dependency to keep the
+# bundle tight per CLAUDE.md guidance.
+#
+# Each report:
+#   slug:                URL-safe identifier
+#   title:               display title
+#   subtitle:            one-line summary
+#   dataset_ids:         list of Socrata dataset ids cited at the bottom
+#   intro_paragraph:     opening copy
+#   conclusion_paragraph optional closing copy
+#   socrata_queries:     ordered list of {label, portal, dataset_id, params, viz}
+#                        viz ∈ {stat | line | bar}
+
+reports:
+
+  - slug: austin-construction-2026
+    title: "Austin Construction in 2026"
+    subtitle: "Where, what, and how fast — read live from the City of Austin permits feed."
+    dataset_ids: ["3syk-w9eu"]
+    intro_paragraph: >
+      Every construction permit issued by the City of Austin lands in a single
+      public dataset. This report reads that feed live and summarizes what is
+      under way right now: how many permits issued in the last month, where
+      they cluster, how the trend has moved, and what kind of work is
+      dominating the pipeline.
+    conclusion_paragraph: >
+      Permits are a leading indicator. They tell you what is about to be built
+      before the cranes arrive. Watch the zip leaders quarter over quarter and
+      the permit-class mix month over month.
+    socrata_queries:
+      - label: "Permits issued in the last 30 days"
+        portal: data.austintexas.gov
+        dataset_id: 3syk-w9eu
+        viz: stat
+        params:
+          select: "count(*) AS count"
+          where_template: "issue_date >= '${ISO_DATE_30D}'"
+      - label: "Top 5 zip codes by permit count, last 12 months"
+        portal: data.austintexas.gov
+        dataset_id: 3syk-w9eu
+        viz: bar
+        params:
+          select: "original_zip AS zip, count(*) AS count"
+          where_template: "issue_date >= '${ISO_DATE_365D}'"
+          group: "original_zip"
+          order: "count DESC"
+          limit: 5
+      - label: "Monthly permit count, last 12 months"
+        portal: data.austintexas.gov
+        dataset_id: 3syk-w9eu
+        viz: bar
+        params:
+          select: "date_extract_y(issue_date) AS y, date_extract_m(issue_date) AS m, count(*) AS count"
+          where_template: "issue_date >= '${ISO_DATE_365D}'"
+          group: "y, m"
+          order: "y, m"
+          limit: 24
+      - label: "Top 5 permit classes, last 12 months"
+        portal: data.austintexas.gov
+        dataset_id: 3syk-w9eu
+        viz: bar
+        params:
+          select: "permit_class_mapped AS label, count(*) AS count"
+          where_template: "issue_date >= '${ISO_DATE_365D}' AND permit_class_mapped IS NOT NULL"
+          group: "permit_class_mapped"
+          order: "count DESC"
+          limit: 5
+
+  - slug: austin-restaurants-watchlist
+    title: "Austin Restaurants Watchlist"
+    subtitle: "Repeat offenders in Austin Public Health inspection scores."
+    dataset_ids: ["ecmv-9xxi"]
+    intro_paragraph: >
+      Austin Public Health inspects every food establishment on a rolling
+      schedule and publishes the score. This report surfaces the lowest
+      recent scores — useful as a leading indicator before a closure.
+    socrata_queries:
+      - label: "Inspections logged in the last 30 days"
+        portal: data.austintexas.gov
+        dataset_id: ecmv-9xxi
+        viz: stat
+        params:
+          select: "count(*) AS count"
+          where_template: "inspection_date >= '${ISO_DATE_30D}'"
+
+  - slug: austin-311-leaderboard
+    title: "Austin 311 Leaderboard"
+    subtitle: "How quickly each part of the city gets a 311 response."
+    dataset_ids: ["xwdj-i9he"]
+    intro_paragraph: >
+      Austin 311 logs every non-emergency request — potholes, graffiti, animal
+      services. This report ranks zip codes by recent request volume.
+    socrata_queries:
+      - label: "311 requests in the last 30 days"
+        portal: datahub.austintexas.gov
+        dataset_id: xwdj-i9he
+        viz: stat
+        params:
+          select: "count(*) AS count"
+          where_template: "sr_created_date >= '${ISO_DATE_30D}'"
+
+  - slug: austin-code-violations-trend
+    title: "Austin Code Violations — 12-month trend"
+    subtitle: "Where the Code Department is opening cases."
+    dataset_ids: ["6wtj-zbtb"]
+    intro_paragraph: >
+      Code complaint cases reflect neighborhood-level signal: short-term
+      rentals, building issues, junk vehicles. This report tracks active
+      cases and the 12-month opening trend.
+    socrata_queries:
+      - label: "Currently active cases"
+        portal: data.austintexas.gov
+        dataset_id: 6wtj-zbtb
+        viz: stat
+        params:
+          select: "count(*) AS count"
+          where_template: "status='Active'"
+
+  - slug: austin-permits-heatmap
+    title: "Austin Permits Heatmap"
+    subtitle: "Building activity by zip code."
+    dataset_ids: ["3syk-w9eu"]
+    intro_paragraph: >
+      A second view of the construction permits feed — this time leaning
+      hard on geographic distribution. Which zip codes are heating up?
+    socrata_queries:
+      - label: "Top 10 zip codes by permit count, last 90 days"
+        portal: data.austintexas.gov
+        dataset_id: 3syk-w9eu
+        viz: bar
+        params:
+          select: "original_zip AS zip, count(*) AS count"
+          where_template: "issue_date >= '${ISO_DATE_90D}'"
+          group: "original_zip"
+          order: "count DESC"
+          limit: 10

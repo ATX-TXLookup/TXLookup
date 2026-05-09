@@ -174,6 +174,9 @@ export default async function HomePage() {
             <Link href="#datasets" className="hidden hover:text-[#0B5FFF] md:inline">
               Datasets
             </Link>
+            <Link href="/reports" className="hidden hover:text-[#0B5FFF] md:inline">
+              Reports
+            </Link>
             <Link href="#topics" className="hidden hover:text-[#0B5FFF] md:inline">
               Topics
             </Link>
