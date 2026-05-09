@@ -122,11 +122,102 @@ GET https://data.austintexas.gov/resource/{dataset-id}.json
 ## How to Contribute (for agents)
 
 1. **Read this file first** — understand the architecture before writing code
-2. **Check existing issues** — pick one labeled `good-first-issue` or `agent-task`
-3. **Create a branch** — `feat/tool-name` or `fix/description`
-4. **Implement with tests** — at minimum, the happy path should work
-5. **Open a PR** — use the PR template, reference the issue
-6. **Keep changes focused** — don't refactor unrelated code in the same PR
+2. **Check existing issues** — pick one labeled `good-first-issue` or `agent-task` (use the `pickup-next` skill in `.claude/skills/`)
+3. **Work in your own git worktree** — see "Working in isolation" below. Required.
+4. **Create a branch** — `feat/issue-N-short-slug` or `fix/issue-N-short-slug`
+5. **Maintain a `log.md` in your worktree** — see "Logging convention" below. Required.
+6. **Implement with tests** — at minimum, the happy path should work
+7. **Update the GitHub issue as you go** — use the `update-issue` skill in `.claude/skills/`
+8. **Open a PR** — use the PR template, reference the issue with `Closes #N`
+9. **Keep changes focused** — don't refactor unrelated code in the same PR
+
+## Working in isolation (REQUIRED for local AI agents)
+
+Local AI agents (Claude Code, Codex, Cursor running on a teammate's machine) **must work in a dedicated git worktree** — not in the shared checkout. This prevents the parallel-push trap (one of the documented hackathon-killer pitfalls — see `docs/lessons.md`).
+
+### Setting up a worktree
+
+```bash
+# From the main repo checkout:
+ISSUE=42                         # the issue number you claimed
+SLUG=discover-tool               # short, hyphenated
+git fetch origin
+git worktree add ../TXLookup-issue-${ISSUE}-${SLUG} -b feat/issue-${ISSUE}-${SLUG} origin/main
+cd ../TXLookup-issue-${ISSUE}-${SLUG}
+```
+
+You now have a clean, isolated working directory at `../TXLookup-issue-42-discover-tool/` on a fresh branch. Build there. Push from there. Open the PR from there.
+
+### Cleaning up after merge
+
+```bash
+cd /path/to/main/checkout
+git worktree remove ../TXLookup-issue-${ISSUE}-${SLUG}
+git fetch --prune
+```
+
+### Why
+- No accidental commits to `main`
+- No fighting another agent for `git pull` / `git push` on the same checkout
+- The orchestrator can spawn N parallel agents on N different issues without coordination overhead
+
+## Logging convention (REQUIRED for local AI agents)
+
+Every agent working on an issue **must maintain a `log.md` in the root of its worktree**, tracking what it did and what it learned. This is *not* committed to the repo (it's in `.gitignore`) — it's the agent's working memory and the human's audit trail.
+
+### Format
+
+```markdown
+# Agent log — issue #42 (discover() tool)
+
+Agent: claude-code (or codex, cursor)
+Worktree: ../TXLookup-issue-42-discover-tool
+Started: 2026-05-09 14:12
+
+## Plan
+- [ ] Read existing catalog loader in agent/tools/data.py
+- [ ] Implement discover() with NL → ranked candidates
+- [ ] Add unit test against permits + 311
+- [ ] Wire into MCP server.py
+- [ ] Update SKILL.md examples if signature changed
+
+## Log
+
+### 2026-05-09 14:18 — exploration
+Read agent/tools/data.py and config/datasets.yaml. Catalog loader returns
+flat dict; need to wrap with NL match. Considering simple keyword + Jaccard
+score for v1, embedding-based for v2.
+
+### 2026-05-09 14:35 — decision
+Going with keyword + Jaccard. Embeddings would need a model dependency we
+haven't picked yet — punted to a follow-up issue.
+
+### 2026-05-09 15:02 — progress
+discover() returns ranked list. Tested locally: "Austin permits" → 3syk-w9eu
+top, "311" → i26j-ai4z top. Posting progress comment to issue.
+
+### 2026-05-09 15:40 — blocker
+Need to confirm with team: should discover() also accept a `city:` filter?
+Current sig only takes query string. Asked in tracking issue.
+```
+
+### When to log
+
+- **At start**: write the plan (3-7 bullets)
+- **At meaningful decisions**: which library, which approach, which trade-off
+- **At every ~20 minutes** of active work: short progress note
+- **When blocked**: what's blocking, who can unblock
+- **When resuming after a pause**: catch yourself up by re-reading the log
+- **At PR open**: final summary that becomes the PR body
+
+### Mirror to GitHub
+
+Every blocker, every decision worth remembering, and every "done" event also gets a comment on the GitHub issue (use the `update-issue` skill). The `log.md` is for *you*; the issue comment is for the *team*.
+
+### Why
+- Survives context resets — you can re-read your own log after a compaction
+- Lets a human pick up where you left off if you crash
+- Makes post-mortems trivial — the log already wrote itself
 
 ## How to Contribute (for humans)
 

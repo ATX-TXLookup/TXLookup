@@ -7,3 +7,6 @@ __pycache__/
 dist/
 .vercel/
 .DS_Store
+
+# Per-worktree agent log (see AGENTS.md "Logging convention")
+log.md
