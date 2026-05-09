@@ -16,19 +16,27 @@ from __future__ import annotations
 import asyncio
 import os
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
 import httpx
 import yaml
 
-from agent.models import Column, Dataset, Schema
+from agent.models import Citation, Column, Dataset, Schema
 
 
 KNOWN_PORTALS = {
     "austin": "data.austintexas.gov",
     "texas": "data.texas.gov",
     "census": "data.census.gov",
+}
+
+# Human labels for the portals — used by ``cite()`` so output reads naturally.
+PORTAL_LABELS = {
+    "data.austintexas.gov": "City of Austin",
+    "data.texas.gov": "State of Texas",
+    "data.census.gov": "US Census Bureau",
 }
 
 # Socrata app token for higher rate limits (optional)
@@ -335,6 +343,237 @@ def _extract_row_count(meta: dict) -> Optional[int]:
             except (TypeError, ValueError):
                 continue
     return None
+
+
+# --------------------------------------------------------------------------- #
+# summarize — group + count via SoQL (issue #6)                                #
+# --------------------------------------------------------------------------- #
+
+
+async def summarize(
+    dataset_id: str,
+    *,
+    where: Optional[str] = None,
+    dimensions: list[str],
+    portal: Optional[str] = None,
+    limit: int = 1000,
+) -> dict[str, Any]:
+    """Group + count via SoQL. Cheaper than fetching rows.
+
+    Builds ``$select=<dims>, count(*) AS count`` and ``$group=<dims>`` then
+    delegates to ``soda_query``. Always includes the resolved Socrata URL in
+    both ``result.url`` and ``artifacts`` so callers can cite the exact query.
+
+    Args:
+        dataset_id: Socrata dataset ID (e.g. ``3syk-w9eu``).
+        where: Optional SoQL ``$where`` clause.
+        dimensions: One or more column names to group by. Required — empty
+            list returns a ``failed`` status with a clear error.
+        portal: Optional portal host or shortname. If omitted, looked up from
+            the catalog (falling back to Austin).
+        limit: Row cap on the grouped result set. Defaults to 1000.
+
+    Returns:
+        ``{
+          "status": "completed" | "failed",
+          "result": {
+            "dimensions": [...],
+            "rows": [{"<dim>": ..., "count": <int>}, ...],
+            "url": "<resolved socrata url>"
+          },
+          "artifacts": ["<the url>"],
+          "error": Optional[str]
+        }``
+
+    Empty result sets return ``rows: []`` with status ``completed`` — an
+    empty group-by is a valid answer (e.g. zip + permit-type combination
+    that has no records), not an error.
+    """
+    if not dimensions:
+        return {
+            "status": "failed",
+            "result": None,
+            "artifacts": [],
+            "error": "dimensions must contain at least one column name",
+        }
+
+    host = (
+        KNOWN_PORTALS.get(portal, portal) if portal
+        else _portal_for(dataset_id)
+    )
+
+    dims_clause = ", ".join(dimensions)
+    select_clause = f"{dims_clause}, count(*) AS count"
+    group_clause = dims_clause
+    # Order by count desc so the most common bucket comes back first — the
+    # natural "top X" framing for grouped queries.
+    order_clause = "count DESC"
+
+    try:
+        out = await soda_query(
+            portal=host,
+            dataset_id=dataset_id,
+            where=where,
+            select=select_clause,
+            group_by=group_clause,
+            order_by=order_clause,
+            limit=limit,
+        )
+    except Exception as e:  # noqa: BLE001 — keep the loop alive
+        return {
+            "status": "failed",
+            "result": None,
+            "artifacts": [],
+            "error": str(e),
+        }
+
+    if out.get("status") != "completed":
+        return {
+            "status": "failed",
+            "result": None,
+            "artifacts": [],
+            "error": out.get("error") or "soda_query failed",
+        }
+
+    raw_rows = out["result"].get("records") or []
+    # Coerce count → int so downstream callers don't have to. Socrata
+    # returns aggregates as strings.
+    rows: list[dict[str, Any]] = []
+    for r in raw_rows:
+        row = dict(r)
+        if "count" in row:
+            try:
+                row["count"] = int(row["count"])
+            except (TypeError, ValueError):
+                pass
+        rows.append(row)
+
+    url = out["result"].get("url", "")
+
+    return {
+        "status": "completed",
+        "result": {
+            "dimensions": list(dimensions),
+            "rows": rows,
+            "url": url,
+        },
+        "artifacts": [url] if url else [],
+        "error": None,
+    }
+
+
+# --------------------------------------------------------------------------- #
+# cite + cite_with_freshness — stable attribution (issue #7)                   #
+# --------------------------------------------------------------------------- #
+
+
+def _portal_label(host: str) -> str:
+    """Map a portal host to a human-readable label.
+
+    Falls back to the host itself if we don't have a label registered.
+    """
+    return PORTAL_LABELS.get(host, host)
+
+
+def _catalog_entry(dataset_id: str) -> Dataset:
+    """Look up a Dataset by id in the catalog, raising KeyError if absent."""
+    for ds in _load_catalog():
+        if ds.id == dataset_id:
+            return ds
+    raise KeyError(
+        f"dataset_id={dataset_id!r} not found in config/datasets.yaml — "
+        "add it to the catalog before citing"
+    )
+
+
+def cite(dataset_id: str, *, portal: Optional[str] = None) -> Citation:
+    """Return a stable citation for a dataset. Sync — pulls from the catalog
+    only, no network call.
+
+    Args:
+        dataset_id: Socrata dataset ID. Must be present in
+            ``config/datasets.yaml``.
+        portal: Optional portal host or shortname. When provided, overrides
+            the catalog's portal — useful for datasets that exist on
+            multiple portals.
+
+    Returns:
+        Populated ``Citation`` with ``last_refreshed=None``. Use
+        ``cite_with_freshness()`` if you need the freshness stamp.
+
+    Raises:
+        KeyError: If ``dataset_id`` isn't in the catalog.
+    """
+    ds = _catalog_entry(dataset_id)
+
+    host = (
+        KNOWN_PORTALS.get(portal, portal) if portal
+        else (ds.portal or KNOWN_PORTALS["austin"])
+    )
+
+    return Citation(
+        portal=_portal_label(host),
+        portal_host=host,
+        dataset_name=ds.name,
+        dataset_id=ds.id,
+        url=f"https://{host}/d/{ds.id}",
+        api_url=f"https://{host}/resource/{ds.id}.json",
+        last_refreshed=None,
+    )
+
+
+def _coerce_last_refreshed(ts: Any) -> Optional[str]:
+    """Best-effort convert Socrata's ``last_updated`` into ISO-8601.
+
+    Socrata stores it as a unix epoch (int seconds). Strings get returned
+    as-is — they're already a portal-provided format and rejecting them
+    would lose information.
+    """
+    if ts is None:
+        return None
+    if isinstance(ts, (int, float)):
+        try:
+            return datetime.fromtimestamp(int(ts), tz=timezone.utc).isoformat()
+        except (ValueError, OSError, OverflowError):
+            return None
+    if isinstance(ts, str):
+        return ts
+    return None
+
+
+async def cite_with_freshness(
+    dataset_id: str,
+    *,
+    portal: Optional[str] = None,
+) -> Citation:
+    """Same as ``cite()`` but also calls ``describe()`` to populate
+    ``last_refreshed``.
+
+    Falls back to the bare ``cite()`` Citation if the metadata fetch fails —
+    a missing freshness stamp is a soft warning, not a fatal error.
+
+    Args:
+        dataset_id: Socrata dataset ID.
+        portal: Optional portal host or shortname.
+
+    Returns:
+        ``Citation`` with ``last_refreshed`` populated when the portal
+        reports it; ``None`` otherwise.
+
+    Raises:
+        KeyError: If ``dataset_id`` isn't in the catalog.
+    """
+    base = cite(dataset_id, portal=portal)
+
+    try:
+        schema = await describe(dataset_id, portal=portal or base.portal_host)
+    except Exception:  # noqa: BLE001
+        return base
+
+    fresh = _coerce_last_refreshed(schema.last_updated)
+    if fresh is None:
+        return base
+    return base.model_copy(update={"last_refreshed": fresh})
 
 
 # --------------------------------------------------------------------------- #
