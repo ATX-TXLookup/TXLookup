@@ -88,6 +88,9 @@ const topics = [
   { name: "Demographics & Housing", count: 4 },
 ];
 
+// Force dynamic rendering — the homepage hits Socrata at request time, and we
+// don't want the build sandbox to prerender it (some calls hang without auth).
+export const dynamic = "force-dynamic";
 export const revalidate = 300;
 
 export default async function HomePage() {

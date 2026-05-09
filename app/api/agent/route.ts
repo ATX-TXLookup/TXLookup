@@ -6,6 +6,7 @@
 import { NextRequest } from "next/server";
 
 import { executeStep, reasonAndPlan, replan, synthesize, Plan, ToolEnvelope } from "@/app/lib/agent";
+import { findFixture } from "@/app/lib/demo-fixtures";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,12 +28,121 @@ function sse(ev: Event): string {
   return `data: ${JSON.stringify(ev)}\n\n`;
 }
 
+function replayFixture(
+  query: string,
+  fx: ReturnType<typeof findFixture> & object,
+): ReadableStream {
+  return new ReadableStream({
+    async start(controller) {
+      const enc = new TextEncoder();
+      const send = (obj: unknown) =>
+        controller.enqueue(enc.encode(`data: ${JSON.stringify(obj)}\n\n`));
+      const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+      send({ phase: "reasoning", message: query });
+      await wait(400);
+
+      send({
+        phase: "planning",
+        plan: { intent: fx.intent, steps: fx.steps },
+        thinking: fx.intent.thinking,
+      });
+      await wait(500);
+
+      const totalSteps = fx.steps.length;
+      let didReplan = false;
+      for (let i = 0; i < fx.steps.length; i++) {
+        const s = fx.steps[i];
+        send({
+          phase: "executing",
+          step: i + 1,
+          total: totalSteps,
+          tool: s.tool,
+          args: s.args,
+          rationale: s.rationale,
+        });
+        await wait(s.delay_ms ?? 600);
+        send({
+          phase: "step_done",
+          step: i + 1,
+          status: s.status,
+          preview: s.resultPreview.slice(0, 240),
+          error: s.error ?? null,
+        });
+
+        // Inject a replan after the configured failAt step
+        if (
+          fx.failAt !== undefined &&
+          !didReplan &&
+          i + 1 === fx.failAt &&
+          s.status === "failed"
+        ) {
+          didReplan = true;
+          await wait(400);
+          send({
+            phase: "replanning",
+            failedStep: i + 1,
+            failedTool: s.tool,
+            error: fx.failError ?? s.error ?? null,
+          });
+          await wait(800);
+          // The "replanned" plan replaces the remaining steps with the rest of the fixture.
+          send({
+            phase: "replanned",
+            plan: {
+              intent: fx.intent,
+              steps: fx.steps.slice(i + 1),
+              diagnosis: fx.diagnosis,
+            },
+            diagnosis: fx.diagnosis,
+            thinking: fx.intent.thinking,
+          });
+          await wait(300);
+        }
+      }
+
+      send({ phase: "completing", message: "Synthesizing answer..." });
+      await wait(500);
+      send({
+        phase: "done",
+        answer: fx.answer,
+        citation: fx.citation,
+        artifacts: fx.artifacts,
+      });
+      controller.close();
+    },
+  });
+}
+
 export async function POST(req: NextRequest) {
-  const body = (await req.json().catch(() => ({}))) as { query?: string };
+  const body = (await req.json().catch(() => ({}))) as {
+    query?: string;
+    demo?: boolean;
+  };
   const query = (body.query ?? "").trim();
   if (!query) {
     return new Response(JSON.stringify({ error: "missing query" }), {
       status: 400,
+    });
+  }
+
+  // Demo mode — replay a pre-recorded SSE flow if the query matches a fixture.
+  // Toggled by ?demo=1 on the page or { demo: true } in the body.
+  const url = new URL(req.url);
+  const demoMode =
+    body.demo === true ||
+    url.searchParams.get("demo") === "1" ||
+    req.headers.get("x-txlookup-demo") === "1";
+  const fixture = demoMode ? findFixture(query) : null;
+  if (fixture) {
+    return new Response(replayFixture(query, fixture), {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        "X-Accel-Buffering": "no",
+        "X-TXLookup-Mode": "demo",
+        Connection: "keep-alive",
+      },
     });
   }
 
