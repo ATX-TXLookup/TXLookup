@@ -6,6 +6,7 @@ import OpenAI from "openai";
 
 import { CATALOG, PORTAL_LABELS, discover, findById } from "./catalog";
 import { describeDataset, sodaQuery } from "./socrata";
+import { callSpecialist, isSpecialistName } from "./specialists";
 
 let _client: OpenAI | null = null;
 function client() {
@@ -546,6 +547,45 @@ export async function executeStep(step: PlanStep): Promise<ToolEnvelope> {
             error: e instanceof Error ? e.message : String(e),
           };
         }
+      }
+      case "delegate_to": {
+        // Multi-agent step (issue #67). The orchestrator hands off to a
+        // specialist registered in app/lib/specialists.ts. Specialists are
+        // landing in #64/#65/#66 — until then this just routes to a stub
+        // that returns "not yet implemented", and the planner prompt has
+        // no rule that emits delegate_to (so this case is dormant on main).
+        const args = step.args as {
+          specialist?: string;
+          input?: Record<string, unknown>;
+        };
+        const name = (args.specialist ?? "").trim();
+        if (!isSpecialistName(name)) {
+          return {
+            status: "failed",
+            result: null,
+            error: `delegate_to: unknown specialist "${name}" (known: data_analyst, reporter, support)`,
+          };
+        }
+        const env = await callSpecialist(name, args.input ?? {});
+        // Fold the SpecialistEnvelope into the executor's ToolEnvelope shape.
+        // The "agent" + "confidence" + "caveats" + "next_actions" extras are
+        // stashed on the result so the SSE step_done preview can surface them
+        // and the synthesizer can attribute findings to the right specialist.
+        return {
+          status: env.status === "needs_input" ? "completed" : env.status,
+          result: {
+            agent: env.agent,
+            ...(typeof env.result === "object" && env.result !== null
+              ? env.result
+              : { value: env.result }),
+            ...(env.confidence !== undefined ? { confidence: env.confidence } : {}),
+            ...(env.caveats ? { caveats: env.caveats } : {}),
+            ...(env.next_actions ? { next_actions: env.next_actions } : {}),
+            ...(env.status === "needs_input" ? { needs_input: true } : {}),
+          },
+          error: env.error,
+          artifacts: env.artifacts,
+        };
       }
       default:
         return { status: "failed", result: null, error: `unknown tool ${step.tool}` };
