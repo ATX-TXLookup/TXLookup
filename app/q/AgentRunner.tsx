@@ -3,6 +3,11 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import {
+  trackAgentDone,
+  trackAgentError,
+  trackAgentStart,
+} from "../lib/analytics-events";
 import { AgentObservatory, ObsEvent } from "./AgentObservatory";
 
 type Citation = {
@@ -252,6 +257,7 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
     if (!query.trim()) return;
 
     const startedAt = Date.now();
+    trackAgentStart(query);
     setState({
       ...initial,
       phase: "reasoning",
@@ -296,6 +302,7 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
         const reader = r.body.getReader();
         const decoder = new TextDecoder();
         let buf = "";
+        let replanCount = 0;
         while (!cancelled.current) {
           const { done, value } = await reader.read();
           if (done) break;
@@ -306,6 +313,16 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
             for (const line of block.split("\n")) {
               const ev = parseSseLine(line.trim()) as SseEvent | null;
               if (!ev) continue;
+              if (ev.phase === "replanning") replanCount += 1;
+              if (ev.phase === "done") {
+                trackAgentDone(
+                  typeof ev.duration_ms === "number" ? ev.duration_ms : 0,
+                  replanCount,
+                  ev.usage_total?.total ?? 0,
+                );
+              } else if (ev.phase === "error") {
+                trackAgentError(ev.error ?? "unknown");
+              }
               const obs = eventForObservatory(ev);
               setState((s) => {
                 const eventsNext = obs ? [...s.events, obs] : s.events;
