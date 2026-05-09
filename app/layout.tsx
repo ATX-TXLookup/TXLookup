@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Manrope, JetBrains_Mono } from "next/font/google";
+import { Inter, Manrope, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -20,6 +20,14 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500"],
 });
 
+// Editorial serif — newspaper-grade headlines and lede prose
+const sourceSerif = Source_Serif_4({
+  subsets: ["latin"],
+  variable: "--font-serif",
+  weight: ["400", "600", "700", "900"],
+  style: ["normal", "italic"],
+});
+
 export const metadata: Metadata = {
   title: "TXLookup — Texas open data, in plain English",
   description:
@@ -34,7 +42,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${manrope.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${manrope.variable} ${inter.variable} ${jetbrainsMono.variable} ${sourceSerif.variable}`}
     >
       <body>{children}</body>
     </html>
