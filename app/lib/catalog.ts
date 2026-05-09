@@ -20,7 +20,7 @@ export const CATALOG: CatalogDataset[] = [
     cadence: "daily",
     blurb:
       "Every construction permit issued by the City of Austin since the 1980s — type, address, contractor, status, value.",
-    keyColumns: ["permittype", "status_current", "original_address1", "original_zip", "issued_date"],
+    keyColumns: ["permittype", "status_current", "original_address1", "original_zip", "issue_date"],
   },
   {
     id: "ecmv-9xxi",
