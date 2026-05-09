@@ -96,7 +96,9 @@ export async function austin311Last30d(): Promise<number> {
 
 /** Currently open code-violation cases. */
 export async function austinOpenCodeViolations(): Promise<number> {
-  const url = `https://data.austintexas.gov/resource/6wtj-zbtb.json?$select=count(*) AS count&$where=case_status='OPEN'`;
+  // Dataset 6wtj-zbtb (Austin Code Complaint Cases) uses `status` column with
+  // values "Active" / "Pending" / "Closed" — not `case_status='OPEN'`.
+  const url = `https://data.austintexas.gov/resource/6wtj-zbtb.json?$select=count(*) AS count&$where=status in('Active','Pending')`;
   const rows = (await soda(encodeURI(url))) as { count?: string }[] | null;
   return Number(rows?.[0]?.count ?? 0);
 }
