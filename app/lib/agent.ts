@@ -63,10 +63,12 @@ Disambiguation rules (apply BEFORE picking a dataset):
 - "traffic fatalities" / "vision zero" → y2wy-tgr5
 
 Hard rules:
+- EVERY plan MUST include at least one summarize_data or fetch_data step BEFORE cite_dataset. A plan with only discover_datasets + cite_dataset is FORBIDDEN — the synthesizer will have no real data to cite and will produce an ungrounded answer paraphrased from catalog blurbs. If you can't pick the right column or filter, call get_dataset_schema first, then summarize_data.
 - ALWAYS end with cite_dataset.
+- For ambiguous "easy/best/worst/most/fewest/which" questions, default to summarize_data grouped by a geographic key column (original_zip, council_district, zip_code, etc. — pick from the dataset's KEY COLUMNS). Prefer NO 'where' filter (or only a date filter); over-restrictive value-matching like permittype='Building' often returns zero rows because the dataset's real values don't match your guess. Surface counts; let the user infer the answer from volume.
 - For questions like "top X by Y" / "what are the most common", use summarize_data — cheaper than fetch_data.
 - For specific records ("show me the permits in 78702"), use fetch_data with a where clause.
-- Use SoQL syntax in 'where'. Example for permits: "original_zip='78702' AND issued_date >= '${sixMonthsAgo}'". Example for inspections: "zip_code='78704' AND inspection_date >= '${sixMonthsAgo}' AND score < 70".
+- Use SoQL syntax in 'where'. Example for permits: "original_zip='78702' AND issue_date >= '${sixMonthsAgo}'". Example for inspections: "zip_code='78704' AND inspection_date >= '${sixMonthsAgo}' AND score < 70".
 - The KEY COLUMNS shown above are the only valid SoQL field names per dataset. Don't guess.
 - limit ≤ 100 by default.
 - DO NOT pass "select" to fetch_data — Socrata rejects $select=*. Just omit it.

@@ -19,6 +19,7 @@ import {
 import { DoomLoopGuard, type DoomLoopHit } from "@/app/lib/doomLoop";
 import { findFixture } from "@/app/lib/demo-fixtures";
 import { findRun, saveRun, type SavedRun } from "@/app/lib/run-archive";
+import { findById } from "@/app/lib/catalog";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -221,8 +222,10 @@ export async function POST(req: NextRequest) {
     query?: string;
     demo?: boolean;
     fallback?: boolean;
+    dataset?: string;
   };
   const query = (body.query ?? "").trim();
+  const datasetId = (body.dataset ?? "").trim();
   if (!query) {
     return new Response(JSON.stringify({ error: "missing query" }), {
       status: 400,
@@ -287,7 +290,26 @@ export async function POST(req: NextRequest) {
       try {
         send({ phase: "reasoning", message: query });
 
-        const planned = await reasonAndPlan(query);
+        // If the UI pre-selected a dataset (user asked from /datasets/[id]),
+        // tell the planner to anchor on it. This OVERRIDES the SCOPING RULES
+        // "must start with discover_datasets" requirement for these requests
+        // only — the discovery step has already been done by the UI, and
+        // re-running it wastes a tool call (and one Codex turn) that the
+        // user explicitly skipped by clicking into a specific dataset.
+        const scoped = datasetId ? findById(datasetId) : null;
+        const scopeNote = scoped
+          ? `OVERRIDE THE PRECEDING SCOPING RULES: the UI has already pre-selected ` +
+            `dataset "${scoped.title}" (id: ${scoped.id}, portal: ${scoped.portal}, ` +
+            `key columns: ${scoped.keyColumns.join(", ")}). The discovery step is DONE — ` +
+            `do not call discover_datasets. Start the plan with ` +
+            `get_dataset_schema({datasetId:"${scoped.id}"}), then summarize_data or ` +
+            `fetch_data on the same datasetId with whatever where-clause the user's ` +
+            `wording requires (zip/date filters from the SCOPING RULES still apply), ` +
+            `then cite_dataset({datasetId:"${scoped.id}"}). Every step's args.datasetId ` +
+            `MUST be exactly "${scoped.id}".`
+          : undefined;
+
+        const planned = await reasonAndPlan(query, undefined, scopeNote);
         let currentPlan: Plan = planned.plan;
         usageTotal = addUsage(usageTotal, planned.usage);
         send({
