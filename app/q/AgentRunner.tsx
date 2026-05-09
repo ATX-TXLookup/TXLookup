@@ -88,7 +88,14 @@ export function AgentRunner({ query, dataset }: { query: string; dataset?: strin
             for (const line of block.split("\n")) {
               const ev = parseSseLine(line.trim()) as
                 | {
-                    phase: AgentState["phase"];
+                    phase:
+                      | "reasoning"
+                      | "planning"
+                      | "executing"
+                      | "step_done"
+                      | "completing"
+                      | "done"
+                      | "error";
                     message?: string;
                     plan?: { steps?: { tool: string; args: unknown }[] };
                     step?: number;
