@@ -1,0 +1,74 @@
+---
+title: Tool reference
+description: "Eight tools exposed by mcp/server.py, grouped by category."
+---
+
+Every tool returns the standard envelope:
+
+```json
+{
+  "status": "completed | accepted | failed",
+  "result": ...,
+  "artifacts": [...],
+  "error": null
+}
+```
+
+## Agent loop
+
+### `ask_data(query: str)`
+
+Submit a natural-language question to the agent loop. Returns a `task_id` you can poll. The full Reason → Plan → Tool → Complete loop is wired in issues #10/#11; the MCP surface contract is stable today and returns an accepted-but-not-yet-run envelope.
+
+### `get_task_status(task_id: str)`
+
+Check the current phase of a running task. Returns the phase (`reasoning`, `planning`, `executing`, `completing`, `done`) and any partial results so far.
+
+## Data tools (live)
+
+These are wired to `agent/tools/data.py` and call Socrata directly.
+
+### `discover_datasets(query: str, city: str | None)`
+
+Search the curated catalog (`config/datasets.yaml`) by intent. `city` is one of `austin`, `dallas`, `san_antonio`, `houston`, `texas`. Returns ranked candidate datasets with their IDs, key columns, and update cadence. **Always call this first** if the question doesn't name a specific dataset.
+
+### `get_dataset_schema(dataset_id: str, portal: str | None)`
+
+Return column names, types, sample rows, row count, and `last_updated` for a dataset. Call before issuing a non-trivial query — Socrata field names are not guessable. `portal` defaults to the catalog's recorded portal for that dataset.
+
+### `fetch_data(portal, dataset_id, where, select, group, order, limit=100)`
+
+Run a bounded SoQL query. Hard cap: `limit ≤ 5000`. Returns records plus the exact URL invoked, for citation.
+
+```python
+fetch_data(
+  portal="data.austintexas.gov",
+  dataset_id="3syk-w9eu",
+  where="original_zip='78704' AND issue_date > '2026-02-08'",
+  select="permittype, count(*)",
+  group="permittype",
+  limit=100,
+)
+```
+
+## Miro tools
+
+Stubs today — full wiring tracked in issue #16.
+
+### `create_miro_board(name: str, description: str = "")`
+
+Create a board for visual output. Returns `board_id` + `url`.
+
+### `add_to_miro(board_id, item_type, content, x=0, y=0, color="yellow")`
+
+Add a sticky, card, or frame to a board. `item_type` is one of `sticky`, `card`, `frame`, `shape`.
+
+## Utility
+
+### `list_known_tools()`
+
+Returns every tool the server exposes, grouped by category. Useful as a smoke test from any runtime.
+
+## Source
+
+All eight definitions live in [`mcp/server.py`](https://github.com/promptkv/TXLookup/blob/main/mcp/server.py). The Pydantic models and Socrata client live in [`agent/tools/data.py`](https://github.com/promptkv/TXLookup/blob/main/agent/tools/data.py).

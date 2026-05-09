@@ -1,0 +1,76 @@
+---
+title: Install the MCP server
+description: "Run mcp/server.py locally and register it with your agent runtime."
+---
+
+The TXLookup MCP server lives at `mcp/server.py`. It uses [FastMCP](https://github.com/jlowin/fastmcp) and speaks stdio, so any MCP-compliant runtime (Claude Code, Codex, Cursor) can call it.
+
+## Prerequisites
+
+- Python 3.11+
+- `pip install -r requirements.txt` (installs `fastmcp`, `httpx`, `pydantic`, etc.)
+- Optional: a Socrata app token — without one, requests are throttled per IP.
+
+## Environment variables
+
+Set these in `.env` at the repo root:
+
+```bash
+# Optional but recommended (lifts rate limits)
+SOCRATA_KEY_ID=your_key_id
+SOCRATA_KEY_SECRET=your_key_secret
+
+# Only needed for Miro tools
+MIRO_API_TOKEN=...
+MIRO_BOARD_ID=...
+```
+
+See `.env.example` for the full list.
+
+## Run the server standalone
+
+```bash
+python mcp/server.py
+```
+
+It starts a stdio MCP loop and waits for a client.
+
+## Register with Claude Code
+
+```bash
+claude mcp add txlookup -- python /absolute/path/to/TXLookup/mcp/server.py
+```
+
+Verify:
+
+```bash
+claude mcp list
+# txlookup    python .../mcp/server.py    [stdio]
+```
+
+## Register with Codex CLI
+
+```bash
+codex mcp add txlookup --command python --args /absolute/path/to/TXLookup/mcp/server.py
+```
+
+## Register with Cursor
+
+In Cursor settings → MCP servers, add a new stdio server:
+
+- **Command:** `python`
+- **Args:** `/absolute/path/to/TXLookup/mcp/server.py`
+
+## Verify it's wired
+
+In any agent runtime, ask:
+
+> *List the tools the txlookup MCP exposes.*
+
+The runtime should report eight tools: `ask_data`, `get_task_status`, `discover_datasets`, `get_dataset_schema`, `fetch_data`, `create_miro_board`, `add_to_miro`, `list_known_tools`. Full reference on the [tools page](/mcp/tools).
+
+## Troubleshooting
+
+- **`ModuleNotFoundError: agent.tools.data`** — run from the repo root, or set `PYTHONPATH` to it. The server inserts the parent directory on import; if you symlink the file, point the symlink target at the repo.
+- **`fastmcp` not found** — `pip install -r requirements.txt`. The PyPI package `mcp` and the local `mcp/` directory share a name; the server side-steps this by importing `fastmcp` first.
+- **HTTP 429 from Socrata** — set `SOCRATA_KEY_ID` and `SOCRATA_KEY_SECRET`.

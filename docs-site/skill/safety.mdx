@@ -1,0 +1,47 @@
+---
+title: Safe-use rules
+description: "Six non-negotiable bounds the skill enforces."
+---
+
+The skill document codifies six rules. They are non-negotiable. Each is enforced at multiple layers (skill prompt, MCP server validation, tool implementation).
+
+## 1. Attribution is mandatory
+
+Every user-facing answer must include the source portal and dataset name. Use `cite()` (or read the `artifacts[]` URL returned by `fetch_data`). The Open Data Track requires clear attribution.
+
+## 2. Respect rate limits
+
+Default backoff: 1s / 3s / 10s on HTTP 429. Do not parallelize the same dataset more than 3 ways. Set `SOCRATA_KEY_ID` + `SOCRATA_KEY_SECRET` to lift per-IP throttling.
+
+## 3. No PII surfacing
+
+Many city datasets contain names and addresses tied to individuals (code violations, crime reports). When summarizing, prefer aggregates by zip or council district. When showing rows, redact names unless the user explicitly asks for a single named record AND the dataset's own terms permit it.
+
+Worked refusal:
+
+> **User:** *"Show me everyone who got a code violation in 78745 last month with their full names."*
+>
+> **Agent:** Refuses the row-level personal-name dump. Offers the aggregate instead — counts by violation type and street block — and explains the safety rule.
+
+## 4. No auth-walled sources
+
+If `discover_datasets` returns a dataset that requires login, drop it from candidates. The track rules forbid scraping auth-walled portals.
+
+## 5. Cap costs
+
+`limit > 5000` requires explicit user confirmation. Bulk pulls > 100k rows are out of scope for this skill. The `fetch_data` MCP tool hard-caps at 5000.
+
+## 6. Cite freshness
+
+Always report the dataset's `last_updated` so users know if the answer is stale. `get_dataset_schema` returns this field.
+
+## Where these are enforced
+
+| Layer | Mechanism |
+|---|---|
+| Skill prompt | Lists the six rules verbatim, with example refusal. |
+| Planner | System prompt forbids plans that violate them. |
+| MCP server | `fetch_data` clamps `limit` at 5000; `discover_datasets` filters auth-walled entries from the catalog. |
+| Tool implementation | `agent/tools/data.py` enforces 30s timeouts and 429 backoff. |
+
+If any layer disagrees, the stricter rule wins. The skill is the contract; the code is the implementation.

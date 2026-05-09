@@ -1,0 +1,51 @@
+---
+title: Introduction
+description: "TXLookup is an open-data agent for Texas and Austin public datasets. It ships as an MCP server and as a portable agent skill."
+---
+
+## What it is
+
+TXLookup connects autonomous agents to Texas and Austin open-data portals (Socrata SODA APIs). It exposes a curated dataset catalog and a small set of bounded tools, so any agent runtime — Claude Code, Codex, Cursor, custom orchestrators — can answer civic-data questions with real citations.
+
+It ships in two forms:
+
+<CardGroup cols={2}>
+  <Card title="MCP Server" icon="server" href="/mcp/install">
+    A FastMCP server (`mcp/server.py`) exposing eight tools: discovery, schema, query, Miro board ops, and task status.
+  </Card>
+  <Card title="Agent Skill" icon="book" href="/skill/install">
+    A single `SKILL.md` file you drop into `~/.claude/skills/txlookup/`. Teaches an agent when to call which tool, with non-negotiable safety rules.
+  </Card>
+</CardGroup>
+
+## What it does
+
+The agent loop is **Reason → Plan → Tool Use → Complete**. A user asks a plain-English question; the planner picks datasets and SoQL; the executor runs bounded queries against Socrata; the synthesizer produces an answer with the exact source URL.
+
+Example questions it handles today:
+
+- *"What permits were issued for food trucks in 78702 in the last 6 months?"*
+- *"Top 311 complaint types in East Austin this year."*
+- *"Restaurant inspections in 78704 with score below 80."*
+
+## What it is not
+
+- Not a chat wrapper. The dispatcher is deterministic TypeScript; the planner emits a typed `(tool, args)` list validated against a JSON schema.
+- Not a scraper for auth-walled sources.
+- Not a PII lookup. Row-level personal-name dumps are refused.
+- Not real-time emergency data.
+
+## Built for
+
+AITX Community × Codex Hackathon (May 8–10, 2026). Agents Track + Brainforge / Vicinity Texas Open Data Track.
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Install the MCP server and ask a question in three steps.
+  </Card>
+  <Card title="Architecture" icon="diagram-project" href="/agent/architecture">
+    How Reason → Plan → Tool → Complete maps onto code.
+  </Card>
+</CardGroup>

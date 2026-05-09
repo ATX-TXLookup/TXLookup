@@ -1,0 +1,72 @@
+---
+title: Install the agent skill
+description: "Drop SKILL.md into your runtime's skills directory."
+---
+
+The TXLookup skill is a single Markdown file with YAML frontmatter — `skills/txlookup/SKILL.md`. It tells an agent runtime *when* to invoke TXLookup, *which* tool to pick, *what* the safe bounds are, and *how* to cite results.
+
+It is portable across runtimes. The same file works in Claude Code, Codex, and Cursor.
+
+## Claude Code
+
+```bash
+mkdir -p ~/.claude/skills/txlookup
+cp skills/txlookup/SKILL.md ~/.claude/skills/txlookup/SKILL.md
+```
+
+Restart Claude Code. The skill auto-loads on session start.
+
+Verify:
+
+```
+/skills
+```
+
+You should see `txlookup` in the list.
+
+## Codex CLI
+
+Codex reads skills from `~/.codex/skills/`:
+
+```bash
+mkdir -p ~/.codex/skills/txlookup
+cp skills/txlookup/SKILL.md ~/.codex/skills/txlookup/SKILL.md
+```
+
+## Cursor
+
+Cursor reads skills via `.cursor/skills/` at the project root:
+
+```bash
+mkdir -p .cursor/skills/txlookup
+cp skills/txlookup/SKILL.md .cursor/skills/txlookup/SKILL.md
+```
+
+## What's in the file
+
+The frontmatter:
+
+```yaml
+---
+name: txlookup
+description: Use when an agent needs to discover, query, or summarize Texas public datasets...
+license: MIT
+maintainer: ATX-TXLookup
+---
+```
+
+The body covers:
+
+- **When to use** — trigger phrases (Austin permits, Texas state expenditures, "compare X across zip codes", etc.) and explicit non-uses (no PII, no auth-walled sources, no real-time emergency data).
+- **Tool catalog** — `discover`, `describe`, `query`, `summarize`, `cite`, with hard limits.
+- **Safe-use rules** — six non-negotiables. See the [safety page](/skill/safety).
+- **Example invocations** — three worked examples including a refusal.
+- **Personas** — Sarah (parent), Marcus (small-business owner), Jordan (journalist).
+
+## Pair the skill with the MCP server
+
+The skill teaches the agent the policy. The MCP server provides the implementation. Install both for the full loop — see the [MCP install page](/mcp/install).
+
+## Source
+
+[`skills/txlookup/SKILL.md`](https://github.com/promptkv/TXLookup/blob/main/skills/txlookup/SKILL.md)

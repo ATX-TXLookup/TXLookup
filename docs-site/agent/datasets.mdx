@@ -1,0 +1,71 @@
+---
+title: Datasets
+description: "What the curated catalog covers."
+---
+
+The dataset catalog lives at [`config/datasets.yaml`](https://github.com/promptkv/TXLookup/blob/main/config/datasets.yaml). It is the source of truth for `discover_datasets`. The frontend mirror lives at `app/lib/catalog.ts`.
+
+## Coverage today
+
+### Austin (`data.austintexas.gov`)
+
+| Dataset | Socrata ID | Updated |
+|---|---|---|
+| Issued Construction Permits | `3syk-w9eu` | daily |
+| Food Establishment Inspection Scores | `ecmv-9xxi` | weekly |
+| Austin 311 Public Data | `xwdj-i9he` | daily |
+| Austin Code Complaint Cases | `6wtj-zbtb` | daily |
+| Crime Reports | `fdj4-gpfu` | weekly |
+| Austin Crash Report Data | `y2wy-tgr5` | monthly |
+
+### Texas (`data.texas.gov`)
+
+| Dataset | Socrata ID | Updated |
+|---|---|---|
+| Active Franchise Tax Permit Holders | `9cir-efmm` | quarterly |
+| Texas State Expenditures | `2zpi-yjjs` | monthly |
+| Mixed Beverage Gross Receipts | `naix-2893` | monthly |
+
+The skill is also scoped to **Dallas, San Antonio, and Houston** open-data portals — those entries are added to the catalog as the team verifies field names against the live APIs.
+
+## Adding a dataset
+
+1. Add an entry to `config/datasets.yaml` under the right city.
+2. Document `id`, `name`, `key_columns`, `updated` cadence, and any sensitivity flags.
+3. Verify field names against the live API:
+
+```bash
+curl https://<portal>/api/views/<id>.json | jq '.columns[].fieldName'
+```
+
+4. The MCP server picks it up on next reload — no code change required.
+
+## Adding a city portal
+
+1. Add a new top-level key in `config/datasets.yaml` with its `portal` host.
+2. Confirm the portal speaks SODA (most TX cities do).
+3. Add a smoke-test query in `tests/smoke/`.
+
+## Sources we use
+
+| Source | URL | API |
+|---|---|---|
+| Texas Open Data | data.texas.gov | Socrata SODA |
+| Austin Open Data | data.austintexas.gov | Socrata SODA |
+| Dallas Open Data | dallasopendata.com | Socrata SODA |
+| San Antonio Open Data | data.sanantonio.gov | Socrata SODA |
+| Houston Open Data | data.houstontx.gov | Socrata SODA |
+| TX Secretary of State | sos.state.tx.us | Web scraping (Playwright) |
+| TX Comptroller | comptroller.texas.gov | CSV/Excel downloads |
+
+## Field-name gotchas
+
+A few that have bitten us — documented in `config/datasets.yaml`:
+
+- **Austin code violations:** status is `Active | Closed | Pending`, **not** `Open`.
+- **Austin crime reports:** date field is `occ_date`, **not** `occurred_date`. Use `category_description` for text labels.
+- **Austin crashes:** `crash_fatal_fl` is the string `'true'`/`'false'`, not a boolean.
+- **TX state expenditures:** no `county` field — use `agency_name` + `major_spending_category` + `amount`.
+- **TX mixed beverage:** no `location_city` — use `taxpayer_city`.
+
+Always call `get_dataset_schema` before composing a non-trivial query.

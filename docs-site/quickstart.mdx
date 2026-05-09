@@ -1,0 +1,65 @@
+---
+title: Quickstart
+description: "Install the MCP server, ask Claude a question, see the result with a citation."
+---
+
+Three steps. ~5 minutes.
+
+## 1. Install the MCP server
+
+Clone the repo and install Python deps.
+
+```bash
+git clone https://github.com/promptkv/TXLookup.git
+cd TXLookup
+pip install -r requirements.txt
+```
+
+Register the server with Claude Code:
+
+```bash
+claude mcp add txlookup -- python /absolute/path/to/TXLookup/mcp/server.py
+```
+
+(Codex and Cursor use equivalent `mcp add` commands. The server speaks stdio.)
+
+## 2. Ask Claude a question
+
+Open Claude Code in any project and ask:
+
+> *Use the txlookup MCP to find the top 5 building-permit types issued in zip 78704 in the last 90 days.*
+
+Claude will call `discover_datasets`, then `get_dataset_schema`, then `fetch_data` with a bounded SoQL `$where` clause.
+
+## 3. See the result with a citation
+
+Every reply carries the exact Socrata URL invoked. Example shape:
+
+```json
+{
+  "status": "completed",
+  "result": [
+    {"permittype": "Residential", "count": "412"},
+    {"permittype": "Commercial",  "count":  "57"}
+  ],
+  "artifacts": [
+    {
+      "type": "url",
+      "value": "https://data.austintexas.gov/resource/3syk-w9eu.json?$where=original_zip='78704'&$select=permittype,count(*)&$group=permittype&$limit=100"
+    }
+  ]
+}
+```
+
+Click the URL to replay the query yourself. That round-trip — *plain English in, cited records out* — is the whole product.
+
+## What's next
+
+<CardGroup cols={2}>
+  <Card title="MCP tool catalog" icon="wrench" href="/mcp/tools">
+    All eight tools exposed by `mcp/server.py`, with arguments and return shapes.
+  </Card>
+  <Card title="Agent skill" icon="book" href="/skill/install">
+    Install the portable `SKILL.md` so the agent knows *when* to call each tool.
+  </Card>
+</CardGroup>

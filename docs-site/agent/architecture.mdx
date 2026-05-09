@@ -1,0 +1,59 @@
+---
+title: Architecture
+description: "Reason → Plan → Tool Use → Complete, mapped onto code."
+---
+
+## The loop
+
+```
+Data Question → Reason → Plan → Execute (tools) → Complete (answer + Miro board)
+                  ↑                    │
+                  └──── Replan ────────┘
+```
+
+If a step fails ≤ 2 times, the planner replans from the failure point. Max 3 retries per step, 10 steps per plan. A doom-loop guard injects a corrective system prompt on `[A,B,A,B]` patterns.
+
+## Layers
+
+| Layer | Components |
+|---|---|
+| User surface | Browser, MCP client (Claude Code, Codex, Cursor) |
+| Edge | Vercel — `/`, `/q`, `/datasets/[id]`, `/api/agent` (SSE) |
+| Agent loop | Codex (`gpt-4o`), replanner, synthesizer, doom-loop guard |
+| Tool dispatch | `discover` · `describe` · `query` · `summarize` · `cite` · `render_to_miro` |
+| Data + I/O | Socrata SODA APIs (live), local YAML catalog, Miro REST API |
+| Bound + safety | Skill doc · 5000-row cap · 30s timeout · 429 backoff · citation enforced |
+
+## What Codex does
+
+Five distinct LLM-driven roles. Each is a real OpenAI API call with structured outputs (`response_format={"type": "json_schema"}`).
+
+| Step | Prompt | Output |
+|---|---|---|
+| **Reason** | `prompts/planner.md` | `{intent, data_domain, geography, time_range, analysis_type}` |
+| **Plan** | `prompts/planner.md` | Ordered list of `{tool, args}` steps |
+| **Execute** | (no LLM) | Deterministic dispatch |
+| **Recover** | `prompts/planner.md` (replan mode) | New plan if a step failed |
+| **Complete** | `prompts/writer.md` | Summary + Miro board layout JSON |
+
+## Where Codex calls live
+
+- [`agent/planner.py`](https://github.com/promptkv/TXLookup/blob/main/agent/planner.py) — Reason + Plan + Replan.
+- [`agent/executor.py`](https://github.com/promptkv/TXLookup/blob/main/agent/executor.py) — Tool dispatch. **Not** an LLM call.
+- `agent/synthesizer.py` — Complete.
+- [`agent/main.py`](https://github.com/promptkv/TXLookup/blob/main/agent/main.py) — Orchestrator. Manages the loop, tracks tool history, runs the doom-loop guard, surfaces phase events.
+
+## Why this isn't a wrapper
+
+- **Routing decisions live in the agent.** The planner picks dataset, columns, time range, and SoQL given a fuzzy question. Nothing is hardcoded.
+- **Real external systems.** Socrata (6+ datasets, 4 cities + state), Miro (live board generation), local YAML catalog.
+- **Multi-step structured output.** The plan is a typed `(tool, args)` list validated against a JSON schema. The dispatcher is deterministic TypeScript.
+- **Failure recovery.** Bad SoQL, HTTP 429, timeouts, infinite loops — all handled defensively.
+- **Policy + safety bounds.** The skill document enforces attribution, no-PII, no-auth-walled, rate-limit ethics — at four layers.
+- **Verifiable answers.** Every reply carries the exact SODA URL it ran. Click to replay.
+
+## See also
+
+- [Tool reference](/mcp/tools) — every tool the MCP server exposes.
+- [Safe-use rules](/skill/safety) — the six non-negotiables.
+- [Datasets](/agent/datasets) — what the catalog covers.

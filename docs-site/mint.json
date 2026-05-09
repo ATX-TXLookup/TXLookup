@@ -1,0 +1,67 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "TXLookup",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#0B5FFF",
+    "light": "#3D82FF",
+    "dark": "#0B2545",
+    "background": {
+      "dark": "#0B2545"
+    }
+  },
+  "topbarCtaButton": {
+    "name": "Live demo →",
+    "url": "https://txlookup.vercel.app"
+  },
+  "topbarLinks": [
+    {
+      "name": "GitHub",
+      "url": "https://github.com/promptkv/TXLookup"
+    }
+  ],
+  "tabs": [
+    {
+      "name": "Get Started",
+      "url": ""
+    },
+    {
+      "name": "MCP Server",
+      "url": "mcp"
+    },
+    {
+      "name": "Agent Skill",
+      "url": "skill"
+    },
+    {
+      "name": "Architecture",
+      "url": "agent"
+    }
+  ],
+  "versions": ["v0.1-alpha"],
+  "navigation": [
+    {
+      "group": "Get Started",
+      "pages": ["introduction", "quickstart"]
+    },
+    {
+      "group": "MCP Server",
+      "pages": ["mcp/install", "mcp/tools"]
+    },
+    {
+      "group": "Agent Skill",
+      "pages": ["skill/install", "skill/safety"]
+    },
+    {
+      "group": "Architecture",
+      "pages": ["agent/architecture", "agent/datasets"]
+    }
+  ],
+  "footerSocials": {
+    "github": "https://github.com/promptkv/TXLookup"
+  }
+}
