@@ -124,8 +124,11 @@ function replayFixture(
   return new ReadableStream({
     async start(controller) {
       const enc = new TextEncoder();
-      const send = (obj: unknown) =>
+      const captured: unknown[] = [];
+      const send = (obj: unknown) => {
+        captured.push(obj);
         controller.enqueue(enc.encode(`data: ${JSON.stringify(obj)}\n\n`));
+      };
       const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
       send({ phase: "reasoning", message: query });
@@ -201,6 +204,13 @@ function replayFixture(
         usage_total: { prompt: 0, completion: 0, total: 0 },
         duration_ms: 0,
       });
+      // Persist the fixture run to the archive so /admin can list/replay it.
+      // Fire-and-forget; never breaks the stream.
+      try {
+        await saveRun(query, { intent: fx.intent, steps: fx.steps }, captured, fx.answer, fx.citation, 0, 0);
+      } catch (e) {
+        console.warn("[agent] saveRun (demo) failed:", e);
+      }
       controller.close();
     },
   });
