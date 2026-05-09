@@ -18,6 +18,18 @@ function client() {
   return _client;
 }
 
+// Canonical tool list — kept in one place so the planner and replanner stay
+// in sync. The LLM has been observed inventing tool names (analyze_data,
+// summarize_text, render_data_viz) when the replan prompt didn't list these.
+const TOOL_LIST = `1. discover_datasets({query: string, city?: string}) — returns top candidate datasets
+2. get_dataset_schema({datasetId: string}) — returns column names + types + last_updated
+3. summarize_data({datasetId: string, where: string, dimensions: string[]}) — group + count, returns rows {col, count}
+4. fetch_data({datasetId: string, where: string, order?: string, limit?: number}) — returns rows. DO NOT pass a "select" arg — that's not supported.
+5. cite_dataset({datasetId: string}) — returns the citation block for the answer
+6. render_to_miro({title: string, summary: string, records: array}) — agent-to-agent: hands off to Miro to render a visual board with the answer. Use ONLY for "show me a board", "visualize", or as the optional final step on multi-record results.`;
+
+const TOOL_NAMES = `"discover_datasets" | "get_dataset_schema" | "summarize_data" | "fetch_data" | "cite_dataset" | "render_to_miro"`;
+
 function buildPlannerPrompt(): string {
   const today = new Date().toISOString().slice(0, 10);
   const sixMonthsAgo = new Date(Date.now() - 183 * 86400_000)
@@ -37,12 +49,7 @@ TODAY is ${today}. Compute time ranges from TODAY (e.g. "last six months" = >= $
 
 You have these tools to call (in order):
 
-1. discover_datasets({query: string, city?: string}) — returns top candidate datasets
-2. get_dataset_schema({datasetId: string}) — returns column names + types + last_updated
-3. summarize_data({datasetId: string, where: string, dimensions: string[]}) — group + count, returns rows {col, count}
-4. fetch_data({datasetId: string, where: string, order?: string, limit?: number}) — returns rows. DO NOT pass a "select" arg — that's not supported.
-5. cite_dataset({datasetId: string}) — returns the citation block for the answer
-6. render_to_miro({title: string, summary: string, records: array}) — agent-to-agent: hands off to Miro to render a visual board with the answer. Use ONLY for "show me a board", "visualize", or as the optional final step on multi-record results.
+${TOOL_LIST}
 
 Available datasets (use these EXACTLY — pick the most appropriate by KEY COLUMNS, not just by keyword match):
 ${catalogTable}
@@ -68,7 +75,7 @@ Return a JSON object with this exact shape:
 {
   "intent": {"data_domain": string, "geography": string|null, "time_range": string|null, "analysis_type": string, "thinking": string},
   "steps": [
-    {"tool": "discover_datasets" | "get_dataset_schema" | "summarize_data" | "fetch_data" | "cite_dataset" | "render_to_miro",
+    {"tool": ${TOOL_NAMES},
      "args": object,
      "rationale": string (one short sentence — WHY this step, not just what it does)}
   ]
@@ -93,6 +100,10 @@ function buildReplanPrompt(
   return `You are TXLookup's REPLANNER. The original plan failed at step ${failedIndex + 1}.
 TODAY is ${today}.
 
+You have these tools available — use ONLY these. ANY other tool name (analyze_data, summarize_text, render_data_viz, etc.) will fail with "unknown tool X":
+
+${TOOL_LIST}
+
 Original user intent:
 ${JSON.stringify(originalIntent, null, 2)}
 
@@ -106,7 +117,7 @@ Failure at step ${failedIndex + 1} (${failedStep.tool}):
 DIAGNOSE the failure (one line) then emit a NEW plan that fixes it. The fix could be:
 - A different dataset (the picked one didn't have the right columns)
 - A different where clause (column name was wrong, date was off, value didn't match)
-- A different tool (summarize_data instead of fetch_data, etc.)
+- A different tool (summarize_data instead of fetch_data, etc.) — but ONLY from the 6 tools listed above
 - Skipping the failed step and using a related dataset
 
 Available datasets:
@@ -116,7 +127,7 @@ Return a JSON object with this shape:
 {
   "diagnosis": string (one sentence — what went wrong + how you'll fix it),
   "intent": {"data_domain": string, "geography": string|null, "time_range": string|null, "analysis_type": string, "thinking": string},
-  "steps": [{"tool": "...", "args": object, "rationale": string}]
+  "steps": [{"tool": ${TOOL_NAMES}, "args": object, "rationale": string}]
 }
 
 The new "steps" replace ALL steps from the failed step onward — but you should re-run the failed step in a fixed form. Always end with cite_dataset.
