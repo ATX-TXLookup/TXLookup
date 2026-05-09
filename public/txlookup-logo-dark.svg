@@ -1,0 +1,59 @@
+<svg width="480" height="160" viewBox="0 0 480 160" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>TXLookup Logo — Dark</title>
+  <desc>TXLookup Lone Star Intelligence logo on navy background. TX in gold, Lookup in cream, star mark with data nodes.</desc>
+
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;800&amp;family=IBM+Plex+Mono:wght@400&amp;display=swap');
+    </style>
+  </defs>
+
+  <rect width="480" height="160" fill="#0D2340" rx="12"/>
+
+  <polygon
+    points="72,18 77,34 94,34 81,44 86,60 72,50 58,60 63,44 50,34 67,34"
+    fill="none"
+    stroke="#D48B10"
+    stroke-width="2"
+    stroke-linejoin="round"
+  />
+  <circle cx="72" cy="38" r="3.5" fill="#D48B10"/>
+
+  <line x1="72" y1="61" x2="72" y2="80" stroke="#3A7FBE" stroke-width="1" stroke-opacity="0.6"/>
+  <line x1="72" y1="72" x2="52" y2="88" stroke="#3A7FBE" stroke-width="1" stroke-opacity="0.5"/>
+  <line x1="72" y1="72" x2="92" y2="88" stroke="#3A7FBE" stroke-width="1" stroke-opacity="0.5"/>
+
+  <circle cx="72" cy="81" r="3" fill="#3A7FBE"/>
+  <circle cx="51" cy="89" r="3" fill="#3A7FBE" fill-opacity="0.85"/>
+  <circle cx="93" cy="89" r="3" fill="#3A7FBE" fill-opacity="0.85"/>
+
+  <text
+    x="118" y="66"
+    font-family="'Syne', 'Arial Black', sans-serif"
+    font-size="52"
+    font-weight="800"
+    fill="#D48B10"
+    letter-spacing="2"
+  >TX</text>
+
+  <text
+    x="212" y="66"
+    font-family="'Syne', Arial, sans-serif"
+    font-size="52"
+    font-weight="400"
+    fill="#FAF7F2"
+    letter-spacing="1"
+  >Lookup</text>
+
+  <text
+    x="118" y="88"
+    font-family="'IBM Plex Mono', 'Courier New', monospace"
+    font-size="11"
+    font-weight="400"
+    fill="#D48B10"
+    letter-spacing="3"
+    fill-opacity="0.7"
+  >TEXAS PUBLIC INTELLIGENCE</text>
+
+  <line x1="118" y1="75" x2="440" y2="75" stroke="#D48B10" stroke-width="0.5" stroke-opacity="0.2"/>
+</svg>
