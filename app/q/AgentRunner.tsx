@@ -526,13 +526,21 @@ export function AgentRunner({
         ? 1
         : 0;
 
+  // Pull standout numbers out of the answer (USAFacts-style "by the numbers" pull-out).
+  const numbers = state.answer ? extractKeyNumbers(state.answer) : [];
+
+  // Auto-suggest related-angle questions based on which dataset answered this one.
+  const relatedAngles = state.citation
+    ? buildRelatedAngles(state.citation.dataset_id, query)
+    : [];
+
   return (
     <div className="grid md:grid-cols-[1fr_420px]">
       {/* Left column — answer-first body */}
-      <div className="min-w-0">
+      <div className="min-w-0 bg-[#FAFBFD]">
         {/* Question recap with live status pill */}
         <section className="border-b border-[#E1E5EE] bg-white">
-          <div className="px-6 py-8 md:px-10">
+          <div className="px-6 py-6 md:px-10">
             <div className="flex items-baseline justify-between gap-4">
               <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
                 {state.phase === "done" ? "Answered" : "Asked"}
@@ -555,16 +563,21 @@ export function AgentRunner({
           </div>
         </section>
 
-        {/* Answer card — promoted to top */}
+        {/* Answer card — promoted to top, USAFacts editorial density */}
         {state.phase === "done" && state.answer ? (
-          <section className="bg-white">
-            <div className="px-6 py-12 md:px-10 md:py-16">
-              <div className="grid gap-10 md:grid-cols-12">
+          <section className="border-b border-[#E1E5EE] bg-white">
+            <div className="relative px-6 py-8 md:px-10 md:py-10">
+              {/* Left action-blue accent strip — USAFacts editorial cue */}
+              <div
+                aria-hidden
+                className="absolute left-0 top-8 h-[calc(100%-3rem)] w-[4px] bg-[#0B5FFF] md:top-10"
+              />
+              <div className="grid gap-8 md:grid-cols-12 md:gap-10">
                 <div className="md:col-span-8">
                   <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
                     Insight
                   </p>
-                  <p className="mt-3 max-w-[58ch] font-display text-2xl font-semibold leading-snug text-[#0B2545] md:text-3xl">
+                  <p className="mt-3 max-w-[58ch] font-display text-2xl font-semibold leading-snug text-[#0B2545] md:text-[30px]">
                     {state.answer}
                   </p>
                   {/* Action row — sellable */}
@@ -639,6 +652,27 @@ export function AgentRunner({
                       />
                     )}
                   </div>
+
+                  {/* By the numbers — USAFacts pull-out: standout figures from the answer */}
+                  {numbers.length > 0 && (
+                    <div className="mt-7 border-t border-[#E1E5EE] pt-5">
+                      <p className="font-display text-[10px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+                        By the numbers
+                      </p>
+                      <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-3 md:grid-cols-3">
+                        {numbers.slice(0, 3).map((n, i) => (
+                          <div key={i} className="border-l-2 border-[#0B5FFF] pl-3">
+                            <div className="font-display text-[28px] font-bold leading-none tabular-nums text-[#0B2545]">
+                              {n.value}
+                            </div>
+                            <div className="mt-1.5 text-[11px] uppercase tracking-wider text-[#1A1F2A]/60">
+                              {n.label}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <aside className="md:col-span-4">
@@ -680,9 +714,36 @@ export function AgentRunner({
               </div>
             </div>
           </section>
-        ) : state.phase === "error" ? (
-          <section className="bg-white">
-            <div className="px-6 py-12 md:px-10">
+        ) : null}
+
+        {/* Related angles — only after a successful answer */}
+        {state.phase === "done" && state.answer && relatedAngles.length > 0 && (
+          <section className="border-b border-[#E1E5EE] bg-[#FAFBFD]">
+            <div className="px-6 py-7 md:px-10">
+              <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+                Related angles
+              </p>
+              <div className="mt-3 grid gap-2 md:grid-cols-3">
+                {relatedAngles.map((q) => (
+                  <Link
+                    key={q}
+                    href={`/q?q=${encodeURIComponent(q)}`}
+                    className="group flex items-center justify-between gap-3 rounded-md border border-[#E1E5EE] bg-white px-4 py-3 text-sm text-[#0B2545] transition-colors hover:border-[#0B5FFF] hover:text-[#0B5FFF]"
+                  >
+                    <span className="line-clamp-2">{q}</span>
+                    <span className="font-mono text-[11px] text-[#0B5FFF] opacity-0 transition-opacity group-hover:opacity-100">
+                      →
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {state.phase === "error" && (
+          <section className="border-b border-[#E1E5EE] bg-white">
+            <div className="px-6 py-10 md:px-10">
               <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#A0231C]">
                 Agent error
               </p>
@@ -698,29 +759,36 @@ export function AgentRunner({
               </p>
             </div>
           </section>
-        ) : (
-          // Live in-flight body — not "educational", just a confidence-building loading state
-          <section className="bg-white">
-            <div className="px-6 py-12 md:px-10 md:py-16">
-              <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
-                Insight
-              </p>
-              <div className="mt-3 max-w-[58ch] space-y-3">
-                <div className="h-7 w-[90%] animate-pulse rounded bg-[#F4F6FB]" />
-                <div className="h-7 w-[78%] animate-pulse rounded bg-[#F4F6FB]" />
-                <div className="h-7 w-[60%] animate-pulse rounded bg-[#F4F6FB]" />
-              </div>
-              <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.16em] text-[#1A1F2A]/55">
-                {state.phase === "reasoning" && "Codex parsing the question…"}
-                {state.phase === "planning" && "Building the tool sequence…"}
-                {state.phase === "executing" &&
-                  `Step ${state.currentStep}/${state.totalSteps}${currentTool ? ` · ${currentTool}` : ""}…`}
-                {state.phase === "replanning" && "Self-correcting after a failure…"}
-                {state.phase === "completing" && "Synthesizing the answer…"}
-              </p>
-            </div>
-          </section>
         )}
+
+        {state.phase !== "done" &&
+          state.phase !== "error" &&
+          state.phase !== "idle" && (
+            <section className="border-b border-[#E1E5EE] bg-white">
+              <div className="relative px-6 py-8 md:px-10 md:py-10">
+                <div
+                  aria-hidden
+                  className="absolute left-0 top-8 h-[calc(100%-3rem)] w-[4px] bg-[#0B5FFF] md:top-10"
+                />
+                <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+                  Insight
+                </p>
+                <div className="mt-3 max-w-[58ch] space-y-3">
+                  <div className="h-7 w-[90%] animate-pulse rounded bg-[#F4F6FB]" />
+                  <div className="h-7 w-[78%] animate-pulse rounded bg-[#F4F6FB]" />
+                  <div className="h-7 w-[60%] animate-pulse rounded bg-[#F4F6FB]" />
+                </div>
+                <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.16em] text-[#1A1F2A]/55">
+                  {state.phase === "reasoning" && "Codex parsing the question…"}
+                  {state.phase === "planning" && "Building the tool sequence…"}
+                  {state.phase === "executing" &&
+                    `Step ${state.currentStep}/${state.totalSteps}${currentTool ? ` · ${currentTool}` : ""}…`}
+                  {state.phase === "replanning" && "Self-correcting after a failure…"}
+                  {state.phase === "completing" && "Synthesizing the answer…"}
+                </p>
+              </div>
+            </section>
+          )}
       </div>
 
       {/* Right column — 4-tab agent sidebar */}
@@ -749,4 +817,73 @@ function MetaChip({ label, value }: { label: string; value: string }) {
       <span className="font-semibold tabular-nums text-[#0B2545]">{value}</span>
     </span>
   );
+}
+
+// Pull standout numbers from the answer text (USAFacts-style "by the numbers" callout).
+// Heuristic — finds raw numbers, percentages, dollar amounts, plus the surrounding
+// noun-phrase as a label. Caps at 3 and dedupes by formatted value.
+type KeyNumber = { value: string; label: string };
+function extractKeyNumbers(text: string): KeyNumber[] {
+  const out: KeyNumber[] = [];
+  const seen = new Set<string>();
+  // Order matters — match richer patterns first.
+  const patterns: { re: RegExp; format: (m: RegExpExecArray) => KeyNumber }[] = [
+    {
+      re: /(\d+(?:\.\d+)?)%\s+([a-z]+(?:\s+[a-z]+){0,3})/gi,
+      format: (m) => ({ value: `${m[1]}%`, label: m[2] }),
+    },
+    {
+      re: /\$([\d,]+(?:\.\d+)?[KMB]?)\s*(?:in\s+)?([a-z]+(?:\s+[a-z]+){0,2})?/gi,
+      format: (m) => ({ value: `$${m[1]}`, label: (m[2] ?? "spend").trim() }),
+    },
+    {
+      re: /([\d,]{2,}(?:\.\d+)?)\s+([a-z]+(?:\s+[a-z]+){0,2})/gi,
+      format: (m) => ({ value: m[1], label: m[2] }),
+    },
+  ];
+  for (const { re, format } of patterns) {
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(text)) !== null && out.length < 3) {
+      const k = format(match);
+      const trimmedLabel = k.label
+        .replace(/\b(the|a|an|of|in|by|with|and|or|to|from)\b/gi, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (!trimmedLabel || trimmedLabel.length < 3) continue;
+      const key = k.value.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ value: k.value, label: trimmedLabel.slice(0, 28) });
+    }
+    if (out.length >= 3) break;
+  }
+  return out;
+}
+
+// Suggest 3 follow-up questions tied to the dataset that just answered.
+// Hard-coded per dataset — the agent can only follow up with what it knows.
+function buildRelatedAngles(datasetId: string, _query: string): string[] {
+  const map: Record<string, string[]> = {
+    "3syk-w9eu": [
+      "Which permit types are growing fastest year-over-year?",
+      "What's the total construction value approved in 2026 so far?",
+      "Show me the busiest contractors by zip this year",
+    ],
+    "ecmv-9xxi": [
+      "Which restaurants have multiple failures this year?",
+      "Average inspection score by zip — best and worst 5",
+      "Trend in failure rate quarter-over-quarter",
+    ],
+    "xwdj-i9he": [
+      "What's the slowest 311 response category in 2026?",
+      "Top 5 complaint types in District 3 this year",
+      "Compare 311 volume in flood-prone zips vs the city average",
+    ],
+    "6wtj-zbtb": [
+      "Which violation types are closing fastest?",
+      "Repeat violators by address this year",
+      "Open violations by department — backlog snapshot",
+    ],
+  };
+  return map[datasetId] ?? [];
 }
