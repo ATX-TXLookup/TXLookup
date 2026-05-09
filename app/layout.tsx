@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Public_Sans } from "next/font/google";
 import "./globals.css";
 
+import { Analytics } from "./components/Analytics";
+
 // Public Sans — the US Web Design System font. Civic-portal authoritative.
 const publicSans = Public_Sans({
   subsets: ["latin"],
@@ -37,7 +39,10 @@ export default function RootLayout({
       lang="en"
       className={`${publicSans.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <Analytics />
+        {children}
+      </body>
     </html>
   );
 }
