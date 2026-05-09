@@ -1,0 +1,39 @@
+# Model routing configuration for TXLookup
+# Maps agent roles to specific models
+
+planner:
+  model: gpt-4o
+  temperature: 0.3
+  max_tokens: 2000
+  description: "Task decomposition — needs strong reasoning"
+
+executor:
+  model: gpt-4o-mini
+  temperature: 0.1
+  max_tokens: 1000
+  description: "Step execution — fast and focused"
+
+browser:
+  model: gpt-4o-mini
+  temperature: 0.1
+  max_tokens: 500
+  description: "Browser automation decisions — quick responses"
+
+miro:
+  model: gpt-4o-mini
+  temperature: 0.2
+  max_tokens: 1000
+  description: "Miro layout decisions — creative but structured"
+
+synthesizer:
+  model: gpt-4o
+  temperature: 0.5
+  max_tokens: 2000
+  description: "Final output synthesis — quality matters"
+
+# Fallback models (if primary fails or quota exceeded)
+fallback:
+  featherless:
+    model: "meta-llama/Meta-Llama-3.1-70B-Instruct"
+    base_url: "https://api.featherless.ai/v1"
+    description: "Free open-source inference via Featherless"
