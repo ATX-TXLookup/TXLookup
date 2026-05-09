@@ -72,8 +72,40 @@ The judge sees: *Codex reasoning, Codex planning, real tools running, real data,
 2. Do we cache Codex responses for the demo flow (in case rate limits / network blip during demo)? Recommend: yes, pre-cache one persona per persona.
 3. Show the actual Codex prompt + response somewhere in the UI for transparency, or hide it?
 
+## Why this isn't a wrapper (Agents Track guard rail)
+
+The Agents Track spec is explicit: *"Projects should go beyond a simple
+chatbot or wrapper around an LLM."* TXLookup is not a wrapper because:
+
+- **Routing decisions live in the agent.** The planner picks dataset,
+  columns, time range, and SoQL given a fuzzy question. Nothing is
+  hardcoded. See `app/lib/agent.ts → buildPlannerPrompt`.
+- **Real external systems.** Socrata (6 datasets, 4 cities + state),
+  Miro (live board generation), local YAML catalog. Real I/O, not a
+  prompt loop.
+- **Multi-step structured output.** Plan is a typed list of
+  `(tool, args)` pairs validated against a json-schema. The
+  dispatcher is deterministic TypeScript, not another LLM call.
+- **Failure recovery.** Bad SoQL, HTTP 429, timeouts, infinite loops
+  all handled defensively. Doom-loop guard (`agent/doom_loop.py`)
+  injects a corrective system prompt on `[A,B,A,B]` patterns.
+- **Policy + safety bounds.** The skill document
+  (`skills/txlookup/SKILL.md`) is a non-trivial contract: attribution
+  mandatory, no PII, no auth-walled sources, rate-limit ethics —
+  enforced at four layers below it.
+- **Ships as a tool for other agents.** The MCP server +
+  skill doc mean any other Codex / Claude Code agent installs
+  TXLookup and inherits our bounded access. Wrappers are leaves;
+  TXLookup is a node.
+- **Verifiable answers.** Every reply carries the exact SODA URL it
+  ran. Judges can click and replay.
+
+For a full live-trace walkthrough of one question end-to-end, see
+[`docs/how-it-works.md`](how-it-works.md).
+
 ## See also
 
+- [`docs/how-it-works.md`](how-it-works.md) — full end-to-end live trace
 - [`docs/architecture.md`](architecture.md) — full layered diagram including the Models layer
 - [`prompts/planner.md`](../prompts/planner.md) — the planner system prompt
 - [`docs/event.md`](event.md) — judging criteria including Partner Ecosystem axis
