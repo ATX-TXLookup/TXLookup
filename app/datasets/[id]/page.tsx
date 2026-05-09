@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { findById, type CatalogDataset } from "../../lib/catalog";
+import { SiteHeader } from "@/app/components/SiteHeader";
+import { SiteFooter } from "@/app/components/SiteFooter";
 
 type Dataset = CatalogDataset;
 
@@ -55,46 +57,6 @@ async function fetchSample(
   }
 }
 
-function CivicHeader({ ds }: { ds: Dataset }) {
-  return (
-    <>
-      <div className="bg-[#0B2545] text-white">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-6 py-2 text-[13px] md:px-10">
-          <span>An open-source agent for Texas public data.</span>
-          <span className="hidden font-mono text-[11px] uppercase tracking-wider text-white/70 md:inline">
-            v0.1 · alpha
-          </span>
-        </div>
-      </div>
-      <header className="border-b border-[#1A1F2A]/10 bg-white">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-6 px-6 py-5 md:px-10 md:py-6">
-          <Link href="/" className="flex items-center gap-3">
-            <span aria-hidden="true" className="block h-8 w-8 rounded-sm bg-[#0B2545]" />
-            <div className="flex flex-col leading-tight">
-              <span className="font-display text-[22px] font-extrabold tracking-tight text-[#0B2545]">
-                TXLookup
-              </span>
-              <span className="text-[11px] font-medium uppercase tracking-wider text-[#1A1F2A]/55">
-                Texas open data · cited
-              </span>
-            </div>
-          </Link>
-          <nav className="flex items-center gap-7 font-display text-sm font-semibold">
-            <Link href="/#datasets" className="hover:text-[#0B5FFF]">
-              All datasets
-            </Link>
-            <a
-              href={`https://${ds.portal}/d/${ds.id}`}
-              className="rounded-sm bg-[#0B2545] px-4 py-2 font-medium text-white hover:bg-[#0B5FFF]"
-            >
-              Source portal ↗
-            </a>
-          </nav>
-        </div>
-      </header>
-    </>
-  );
-}
 
 export default async function DatasetPage({
   params,
@@ -119,7 +81,7 @@ export default async function DatasetPage({
 
   return (
     <main className="min-h-screen bg-white text-[#1A1F2A] font-body">
-      <CivicHeader ds={ds} />
+      <SiteHeader activePath="/datasets" />
 
       {/* Title block + scoped search */}
       <section className="border-b border-[#1A1F2A]/10 bg-[#F4F6FB]">
@@ -304,17 +266,18 @@ export default async function DatasetPage({
           <p className="mt-5 font-mono text-[11px] uppercase tracking-wider text-[#1A1F2A]/65">
             Source · {ds.portal} · dataset {ds.id} · last refresh {lastRefreshed}
           </p>
+          <p className="mt-3 text-sm">
+            <a
+              href={`https://${ds.portal}/resource/${ds.id}.json`}
+              className="font-display font-semibold text-[#0B5FFF] hover:underline"
+            >
+              Open dataset →
+            </a>
+          </p>
         </div>
       </section>
 
-      <footer className="bg-[#06182F] text-white/85">
-        <div className="mx-auto flex max-w-[1320px] flex-col gap-3 px-6 py-8 text-sm md:flex-row md:items-center md:justify-between md:px-10">
-          <p>All data sourced from public Texas open-data portals · Attribution enforced</p>
-          <Link href="/" className="hover:text-white">
-            ← Back to TXLookup
-          </Link>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }

@@ -5,6 +5,8 @@
 import Link from "next/link";
 import { REPORTS } from "@/config/reports";
 import { REPORT_REVALIDATE } from "@/app/lib/report-builder";
+import { SiteHeader } from "@/app/components/SiteHeader";
+import { SiteFooter } from "@/app/components/SiteFooter";
 
 export const revalidate = REPORT_REVALIDATE;
 
@@ -12,28 +14,7 @@ export default function ReportsIndex() {
   const updated = new Date().toISOString().slice(0, 10);
   return (
     <main className="min-h-screen bg-[#F4F6FB] text-[#1A1F2A] font-body">
-      {/* Header */}
-      <header className="border-b border-[#1A1F2A]/10 bg-white">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-6 px-6 py-5 md:px-10">
-          <Link href="/" className="flex items-center gap-3">
-            <span aria-hidden="true" className="block h-8 w-8 rounded-sm bg-[#0B2545]" />
-            <span className="font-display text-[22px] font-extrabold tracking-tight text-[#0B2545]">
-              TXLookup
-            </span>
-          </Link>
-          <nav className="flex items-center gap-7 font-display text-sm font-semibold">
-            <Link href="/" className="hover:text-[#0B5FFF]">Home</Link>
-            <Link href="/#datasets" className="hover:text-[#0B5FFF]">Datasets</Link>
-            <Link href="/reports" className="text-[#0B5FFF]">Reports</Link>
-            <a
-              href="https://github.com/ATX-TXLookup/TXLookup"
-              className="rounded-sm bg-[#0B2545] px-4 py-2 font-medium text-white hover:bg-[#0B5FFF]"
-            >
-              GitHub ↗
-            </a>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader activePath="/reports" />
 
       <section className="mx-auto max-w-[800px] px-6 py-14 md:py-20">
         <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
@@ -76,6 +57,8 @@ export default function ReportsIndex() {
           ))}
         </ul>
       </section>
+
+      <SiteFooter />
     </main>
   );
 }

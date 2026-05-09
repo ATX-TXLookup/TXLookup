@@ -13,6 +13,8 @@ import { StatBlock } from "@/app/components/reports/StatBlock";
 import { ChartBar } from "@/app/components/reports/ChartBar";
 import { ChartLine } from "@/app/components/reports/ChartLine";
 import { CitationFooter } from "@/app/components/reports/CitationFooter";
+import { SiteHeader } from "@/app/components/SiteHeader";
+import { SiteFooter } from "@/app/components/SiteFooter";
 
 export const revalidate = REPORT_REVALIDATE;
 
@@ -73,27 +75,9 @@ export default async function ReportPage({
   return (
     <main className="min-h-screen bg-white text-[#1A1F2A] font-body">
       {/* Header (hidden on print) */}
-      <header className="border-b border-[#1A1F2A]/10 bg-white print:hidden">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-6 px-6 py-5 md:px-10">
-          <Link href="/" className="flex items-center gap-3">
-            <span aria-hidden="true" className="block h-8 w-8 rounded-sm bg-[#0B2545]" />
-            <span className="font-display text-[22px] font-extrabold tracking-tight text-[#0B2545]">
-              TXLookup
-            </span>
-          </Link>
-          <nav className="flex items-center gap-7 font-display text-sm font-semibold">
-            <Link href="/" className="hover:text-[#0B5FFF]">Home</Link>
-            <Link href="/#datasets" className="hover:text-[#0B5FFF]">Datasets</Link>
-            <Link href="/reports" className="text-[#0B5FFF]">Reports</Link>
-            <a
-              href="https://github.com/ATX-TXLookup/TXLookup"
-              className="rounded-sm bg-[#0B2545] px-4 py-2 font-medium text-white hover:bg-[#0B5FFF]"
-            >
-              GitHub ↗
-            </a>
-          </nav>
-        </div>
-      </header>
+      <div className="print:hidden">
+        <SiteHeader activePath="/reports" />
+      </div>
 
       <article className="mx-auto max-w-[800px] px-6 py-12 print:px-0 print:py-0">
         <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
@@ -139,6 +123,10 @@ export default async function ReportPage({
           </p>
         </section>
       </article>
+
+      <div className="print:hidden">
+        <SiteFooter />
+      </div>
 
       {/* Print stylesheet — A4-friendly, no nav/footer chrome */}
       <style>{`

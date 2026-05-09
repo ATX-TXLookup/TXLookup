@@ -7,6 +7,7 @@ import {
   austinPermitsLast7Days,
   datasetMetadata,
 } from "./lib/homepage-data";
+import { SiteHeader } from "./components/SiteHeader";
 
 const datasetSeed = [
   {
@@ -143,58 +144,10 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen bg-white text-[#1A1F2A] font-body">
-      {/* Top utility bar */}
-      <div className="bg-[#0B2545] text-white">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-6 py-2 text-[13px] md:px-10">
-          <span>An open-source agent for Texas public data. Live counts on this page are computed from Socrata at request time.</span>
-          <span className="hidden font-mono text-[11px] uppercase tracking-wider text-white/70 md:inline">
-            v0.1 · alpha
-          </span>
-        </div>
-      </div>
-
-      {/* Header */}
-      <header className="border-b border-[#1A1F2A]/10 bg-white">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-6 px-6 py-5 md:px-10 md:py-6">
-          <Link href="/" className="flex items-center gap-3">
-            <span aria-hidden="true" className="block h-8 w-8 rounded-sm bg-[#0B2545]" />
-            <div className="flex flex-col leading-tight">
-              <span className="font-display text-[22px] font-extrabold tracking-tight text-[#0B2545]">
-                TXLookup
-              </span>
-              <span className="text-[11px] font-medium uppercase tracking-wider text-[#1A1F2A]/55">
-                Texas open data · cited
-              </span>
-            </div>
-          </Link>
-          <nav className="flex items-center gap-7 font-display text-sm font-semibold">
-            <Link href="#search" className="hover:text-[#0B5FFF]">
-              Search
-            </Link>
-            <Link href="#datasets" className="hidden hover:text-[#0B5FFF] md:inline">
-              Datasets
-            </Link>
-            <Link href="/reports" className="hidden hover:text-[#0B5FFF] md:inline">
-              Reports
-            </Link>
-            <Link href="#topics" className="hidden hover:text-[#0B5FFF] md:inline">
-              Topics
-            </Link>
-            <a
-              href="https://github.com/ATX-TXLookup/TXLookup/blob/main/docs/usage.md"
-              className="hidden hover:text-[#0B5FFF] md:inline"
-            >
-              Use as a tool
-            </a>
-            <a
-              href="https://github.com/ATX-TXLookup/TXLookup"
-              className="rounded-sm bg-[#0B2545] px-4 py-2 font-medium text-white hover:bg-[#0B5FFF]"
-            >
-              GitHub ↗
-            </a>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader
+        activePath="/"
+        utilityNote="An open-source agent for Texas public data. Live counts on this page are computed from Socrata at request time."
+      />
 
       {/* HERO */}
       <section
