@@ -1,0 +1,74 @@
+name: Deploy to Vercel (Production)
+
+# Auto-deploys main to https://txlookup.vercel.app on every push.
+# Replaces hand-running `vercel --prod` from a laptop.
+#
+# Required GitHub secrets (Settings → Secrets and variables → Actions):
+#   VERCEL_TOKEN       — create at https://vercel.com/account/tokens
+#   VERCEL_ORG_ID      — value of `orgId` in .vercel/project.json
+#   VERCEL_PROJECT_ID  — value of `projectId` in .vercel/project.json
+#
+# Vercel project IDs from .vercel/project.json (also pinned in this workflow
+# as defaults — secrets override if set):
+#   orgId      = team_gTi8bP8KPiXdCKoIj2RL4Iut
+#   projectId  = prj_U6oaQXFXvw6ICxek6mHxmITc2ZqL
+#
+# Env vars (OPENAI_API_KEY, SOCRATA_KEY_ID/SECRET, MIRO_API_TOKEN,
+# NEXT_PUBLIC_GA_ID, TXLOOKUP_BASIC_AUTH) live in the Vercel project,
+# pulled into the build via `vercel pull`. They never enter this repo.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel environment (production)
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build with Vercel
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy prebuilt artifact
+        id: deploy
+        run: |
+          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "Deployed: $DEPLOY_URL"
+
+      - name: Verify live (HTTP 200 + content match)
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --retry-delay 2 -o /tmp/index.html https://txlookup.vercel.app/
+          # Smoke: title rendered (we use this exact string in app/layout.tsx)
+          grep -q 'TXLookup' /tmp/index.html
+          echo "✓ live: title rendered"
+          # Smoke: ticker label present (proves homepage server-rendered)
+          grep -q 'Austin permits, 7d' /tmp/index.html
+          echo "✓ live: ticker rendered"
+
+      - name: Summary
+        run: |
+          echo "## Deploy summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Deploy URL: ${{ steps.deploy.outputs.deploy_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Public alias: https://txlookup.vercel.app/" >> $GITHUB_STEP_SUMMARY
+          echo "- Verified: HTTP 200 + title + ticker" >> $GITHUB_STEP_SUMMARY
