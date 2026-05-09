@@ -16,6 +16,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // BRAND.md §3 — TXLookup brand tokens (used by app/v2/)
+        "tx-navy":  "#0D2340",
+        "tx-rust":  "#C4420A",
+        "tx-gold":  "#D48B10",
+        "tx-sky":   "#3A7FBE",
+        "tx-sage":  "#3B6D3B",
+        "tx-cream": "#FAF7F2",
+        "tx-ink":   "#1A1510",
+        "tx-muted": "#6B6660",
+
         // Primary (ember)
         primary: {
           DEFAULT: "#9E3D00",
