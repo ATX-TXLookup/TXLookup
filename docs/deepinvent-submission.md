@@ -1,168 +1,141 @@
 # DeepInvent — Best Patentable Hack submission
 
-> Draft for the **DeepInvent Best Patentable Hack** bounty ($500 + provisional patent filing). Submit at https://deepinvent.ai with the contents of this file. The deepinvent team reviews submissions through their platform and selects the winner.
+> Draft for the DeepInvent Best Patentable Hack bounty ($500 + provisional patent filing). Submit at https://deepinvent.ai. Six pages of prose; no fluff.
 
 ---
 
 ## Title
 
-**System and method for a bounded, citation-enforcing, replanning agent for public open data — with structured doom-loop detection and an installable cross-agent policy contract**
-
-(Working title; the deepinvent team can refine when filing.)
+A doom-loop-aware autonomous data agent with intent-preserving replan-on-failure for public open civic data.
 
 ---
 
-## Plain-English summary (for the deepinvent reviewers)
+## Field of the invention
 
-TXLookup is an open-source autonomous data agent for Texas civic data. What's novel — and we believe defensible as a method — is the *combination* of mechanisms that turn an LLM into a bounded, recoverable, multi-tenant tool rather than a chat wrapper:
-
-1. A typed, structured Reason → Plan → Tool → (Replan) → Complete loop where the planner emits a JSON-schema-validated step list, the dispatcher is deterministic non-LLM code, and a replanner is invoked only when a step fails — re-prompted with the original intent, the failed step, and the failure detail.
-2. A **doom-loop detector** that fingerprints every (tool, args) pair the planner emits and short-circuits into the replanner if 3+ identical consecutive calls or `[A,B,A,B]`-style cycles are detected. The replanner receives a corrective system message describing the loop pattern.
-3. A **skill-document-as-policy** contract — a portable Markdown file with YAML frontmatter that any MCP-compatible agent runtime can load to inherit when/how to use TXLookup, including non-negotiable safety bounds (mandatory attribution, no PII surfacing, no auth-walled scraping, hard query caps).
-4. A **multi-layer enforcement architecture** where the same safety bounds are enforced at four independent layers (skill, MCP server, data client, doom guard) so a misbehaving agent cannot escape even one of them.
-5. An **agent observatory** rendering the live multi-step trace (timestamps, tool args, intermediate results, replan diagnoses, token counts, durations) as a first-class user-facing surface — making the "agent thinking" auditable in real time.
-
-The combination is what we believe is patentable. Component 1 alone is not; component 2 alone has prior art in retry literature. The *integration* — particularly the policy-as-skill-document contract that allows the same bounded loop to be installed across any MCP-compatible agent runtime — appears novel.
+The invention relates to large-language-model-driven autonomous agents that issue tool calls against external data systems, and more particularly to detecting non-progressing tool-call patterns and recovering from them by re-prompting the language model with the original user intent and a structured diagnosis of the failure, such that prior step results are preserved and the agent emits a corrective continuation plan rather than restarting.
 
 ---
 
-## Problem we solve
+## Background and problem
 
-Public open-data portals (Socrata, CKAN, custom) hold millions of civic records — building permits, food inspections, 311 calls, traffic data — but each portal has its own SQL dialect, schema, freshness cadence, and rate limits. A typical user can't write a SoQL query. A typical LLM hallucinates dataset IDs and column names.
+An autonomous data agent is a language model coupled to a closed enumeration of tools — for example, a Socrata SODA query tool, a metadata-discovery tool, and a citation tool. The model emits a structured plan, a deterministic dispatcher executes each step, and the model synthesizes an answer.
 
-Existing approaches:
-- **Manual web search** — slow, citation-fragile.
-- **A direct LLM-to-SQL chatbot** — hallucinates, doesn't recover from errors, doesn't cite, doesn't enforce safety.
-- **A hand-built dashboard** — locked to one dataset, doesn't generalize.
+Two failure modes recur in production. First, a step fails with a recoverable error — a wrong column name, an exhausted rate budget, a transient network fault — and naive retry re-runs the same call and fails again. Second, the model itself emits the same tool call repeatedly, or oscillates between two calls, without producing new information; the agent appears to be "thinking" but is in fact stuck. Existing frameworks treat both as either fatal exceptions or undifferentiated retries.
 
-What's missing: a *bounded autonomous agent* that picks the right dataset, runs valid queries, recovers from inevitable errors, cites every answer, and is installable as a tool by any other agent in the ecosystem.
+What is required is (a) a method for detecting non-progressing tool-call patterns by their fingerprint rather than by elapsed time, and (b) a method for recovering from such patterns or from explicit failures by re-invoking the language model with sufficient context that the corrective continuation preserves prior progress.
 
 ---
 
-## Independent claim 1 (preliminary draft)
+## Independent claim 1 — pattern-based loop detection
 
-A computer-implemented method for executing a bounded multi-step query against a heterogeneous set of public data portals, comprising:
+A computer-implemented method for detecting non-progressing behavior in an autonomous tool-using agent, the method comprising:
 
-(a) receiving, from a user, a natural-language query;
+(a) receiving, at a deterministic guard module operating outside the language model, a stream of tool-invocation records, each tool-invocation record comprising a tool name drawn from a closed enumeration and a tool argument object;
 
-(b) generating, by a first language model invocation, a structured plan comprising
-   (i) an **intent record** including a data domain, a geographic scope, a time range, an analysis type, and a plain-English "thinking" string,
-   (ii) an **ordered list of steps**, each step comprising a **tool name** drawn from a closed enumeration, a **tool argument object** validated against a per-tool JSON schema, and a **rationale string**;
-   wherein the plan is constrained such that the final step is a **citation tool** that produces a stable attribution record;
+(b) computing, for each tool-invocation record, a fingerprint comprising a hash of the tool name concatenated with a stable serialization of the tool argument object, wherein the stable serialization is produced by sorting object keys prior to encoding such that semantically equivalent argument objects yield identical fingerprints;
 
-(c) for each step in the plan, **dispatching the tool name to a deterministic non-LLM handler** that
-   (i) executes the tool against an external system, where the external system is one of: a Socrata Open Data API endpoint, a metadata-introspection endpoint, an in-memory dataset catalog, or a third-party agent system,
-   (ii) returns a uniform envelope comprising a status, a result, an error, and an optional artifact list,
-   (iii) emits a server-sent event indicating the start and end of the step, with a measured duration;
+(c) appending each fingerprint to a bounded ordered history of length at most M;
 
-(d) for each emitted (tool name, tool argument) pair, **fingerprinting the pair via a hash of the tool name and a stable JSON serialization of the arguments**, recording the fingerprint in a bounded streaming history, and detecting a **looping pattern** comprising either:
-   (i) three or more consecutive identical fingerprints, or
-   (ii) a window-of-length-2-to-5 fingerprint sequence repeated two or more cycles in a row;
+(d) responsive to each appended fingerprint, evaluating the history against two pattern predicates, comprising:
 
-(e) **on detection of either a step failure or a looping pattern**, invoking a second language model invocation, the **replanner**, with:
-   (i) the original intent record,
-   (ii) the original step list with the failed step marked,
-   (iii) the failure error and result, and
-   (iv) when the trigger was a looping pattern, a **corrective system message** describing the looping pattern in natural language;
-   the replanner emitting a new structured plan including a one-sentence diagnosis of the failure and a corrected step list, replacing all steps from the failed step onward;
+  (i) an identical-call predicate that is satisfied when the most recent K consecutive fingerprints are equal, wherein K is at least three; and
 
-(f) on completion of the step list (or after a configured maximum of replan attempts), invoking a third language model invocation, the **synthesizer**, to produce a plain-English answer constrained to use only counts and dates from the emitted tool results;
+  (ii) a periodic-cycle predicate that is satisfied when, for some window length W in a configured range, the trailing W * R fingerprints comprise R consecutive identical windows of length W, wherein R is at least two and the window contains at least two distinct fingerprints;
 
-(g) **transmitting to the user**:
-   (i) the synthesized answer,
-   (ii) the citation record produced by the citation tool, comprising a portal label, a dataset name, a dataset identifier, a portal URL, and an API URL,
-   (iii) the artifact list comprising the exact API URLs invoked during dispatch.
+(e) responsive to either predicate being satisfied, emitting a structured loop-hit record comprising a kind label, the repeating pattern, the repeat count, and a corrective natural-language message instructing the language model to take a different approach;
+
+(f) routing the loop-hit record to a recovery procedure that interrupts further dispatch and invokes the language model with the corrective natural-language message of (e) appended to the system context;
+
+wherein the deterministic guard module operates without invoking a language model, such that the cost of detection is bounded and independent of model latency or pricing.
+
+**Novelty over prior art.** LangGraph's retry primitives, OpenAI's function-calling client, and Anthropic's tool-use loop all treat repetition as a side effect of unbounded iteration; the framework counts iterations, not call shapes. None fingerprint the (tool, normalized-args) pair, none distinguish the periodic-cycle pattern from identical-call repetition, and none surface a structured loop-hit record back to the model as a corrective system message. Exponential-backoff retry libraries (AWS SDK, tenacity, p-retry) are time-based, not pattern-based, and act on transport failures rather than on semantically identical successful tool calls. The claimed method detects loops that complete successfully at the transport layer but fail to advance the plan — a class of failure that prior art does not address.
 
 ---
 
-## Independent claim 2 (preliminary draft)
+## Independent claim 2 — intent-preserving replanner
 
-A computer-readable system for distributing the method of claim 1 across heterogeneous agent runtimes, comprising:
+A computer-implemented method for recovering from a failed step in a multi-step plan emitted by a language-model-driven agent, the method comprising:
 
-(a) a **policy document** in human-readable Markdown format with structured YAML frontmatter, the document specifying:
-   (i) **trigger phrases** indicating when the method is to be invoked,
-   (ii) the **closed enumeration of tool names** with their argument schemas,
-   (iii) **non-negotiable safety constraints** including mandatory attribution, prohibited surfacing of personally identifiable information, prohibited access to authentication-walled sources, and hard caps on query result size and duration,
-   (iv) **worked examples** demonstrating correct invocation;
+(a) maintaining, for an in-flight execution, an intent record comprising at least the original natural-language query and a structured intent object emitted by an initial planning invocation, the structured intent object comprising a domain, a geographic scope, a time range, and an analysis type;
 
-(b) a **Model Context Protocol server** exposing the tool enumeration to any compliant agent runtime, the server programmatically enforcing the safety constraints from (a)(iii) at the network boundary;
+(b) maintaining an ordered list of completed step results, each completed step result comprising a tool name, a tool argument object, a status, and a result envelope, wherein steps that completed successfully are retained verbatim;
 
-(c) a **client adapter** in a runtime such that loading the policy document of (a) and connecting to the server of (b) is sufficient for that runtime to invoke the method of claim 1 without further code changes;
+(c) responsive to a step failing, or responsive to receiving a loop-hit record from a doom-loop guard, constructing a replan prompt comprising:
 
-wherein the same policy document is loadable by at least three different agent runtimes (e.g. Claude Code, OpenAI Codex, custom orchestrators) producing equivalent bounded behavior.
+  (i) the intent record of (a),
 
----
+  (ii) the original ordered step list with the failing step explicitly marked,
 
-## Dependent claims (sketch)
+  (iii) a structured failure diagnosis comprising the tool name of the failing step, the tool argument object, the status, the error string, and a truncated result preview, and
 
-3. The method of claim 1, wherein the looping detection of (d) further includes a stateless "after-the-fact" detection function that operates on a complete tool history without maintaining streaming state, providing equivalent results to the streaming detector.
+  (iv) when the trigger is a loop-hit record, the corrective natural-language message of claim 1(e);
 
-4. The method of claim 1, wherein the dispatcher of (c) further enforces a **hard query result limit** of N records (e.g. N=5000) by rejecting tool argument objects that specify a higher limit and by truncating server responses that exceed the limit.
+(d) invoking the language model with the replan prompt of (c) constrained to emit a JSON object validated against a plan schema, the schema requiring a one-sentence diagnosis field and a corrected step list;
 
-5. The method of claim 1, wherein the dispatcher of (c) further enforces a **per-step timeout** by aborting the tool invocation after a configured duration and emitting a failure envelope, such that the replanner of (e) receives the timeout as a recoverable failure rather than terminating the loop.
+(e) splicing the corrected step list into the in-flight execution such that the prior completed step results of (b) are preserved and only steps from the failing index onward are replaced;
 
-6. The method of claim 1, wherein at least one tool of the closed enumeration in (b)(ii) is an **agent-to-agent handoff tool** that issues a network request to a second agent system (e.g. Miro REST API for visual board generation) and returns a third-party artifact URL as part of the envelope.
+(f) resuming dispatch from the spliced index;
 
-7. The method of claim 1, further comprising a **demo-replay mode** wherein, upon detection of a query-string parameter or request header, the dispatcher of (c) substitutes pre-recorded results for the configured marquee questions while remaining live for non-matching questions, providing deterministic stage-demo behavior without disabling the live path.
+wherein the language model is re-prompted with the original intent rather than restarted from the user query alone, such that the corrective continuation plan inherits the constraints, scope, and prior progress of the original plan.
 
-8. The system of claim 2, wherein the policy document additionally specifies **persona-driven trigger heuristics** mapping user-shape descriptors (e.g. "parent on mobile asking about my neighborhood") to preferred tool sequences (e.g. discover → fetch → cite with limit=10).
-
-9. The system of claim 2, wherein the policy document and the MCP server are stored in the same source-controlled repository and are CI-validated such that any change to the closed tool enumeration in the server triggers a corresponding required update to the policy document.
-
-10. The method of claim 1, wherein the user-facing surface includes an **observatory column** rendering each emitted server-sent event as a timestamped, level-tagged log entry adjacent to the synthesized answer, such that a viewer can audit every tool call, every replan, and every model invocation that produced the answer.
+**Novelty over prior art.** OpenAI function-calling, Anthropic tool-use, and LangGraph all support retry, but on retry they re-emit a tool call inside the same conversation context — they do not invoke a separate planning function with a structured failure diagnosis. ReAct-style agents append the error to the scratchpad and let the next step react, which is unstructured and frequently re-emits the failing call. Plan-and-execute frameworks (BabyAGI, AutoGPT) discard the prior plan on failure and start over, losing prior step results. The claimed method is distinct in three respects: the failure is presented to the model as a structured diagnosis rather than as a chat turn; the original intent is re-supplied verbatim so the corrective plan cannot drift; and prior completed step results are preserved and spliced rather than re-executed.
 
 ---
 
-## Prior art the team is aware of (be honest with the deepinvent reviewers)
+## Dependent claims
 
-- **Retry-with-exponential-backoff** (well-known, e.g. AWS SDK). Our doom-loop detector is *not* time-based; it's pattern-based on fingerprinted (tool, args) calls.
-- **OpenAI function calling / structured outputs** (well-known). We use it; what's distinctive is the closed enumeration + per-tool argument schema + replanner prompt that feeds in the original intent.
-- **Retrieval-augmented generation** (RAG, well-known). RAG is one-shot retrieve-then-generate. Our system is multi-step plan-dispatch-replan with deterministic non-LLM dispatch in the middle.
-- **Anthropic Model Context Protocol (MCP)** (Anthropic, public spec). We *use* MCP as the transport for cross-runtime distribution. What's novel is the policy-document contract that makes the same bounded behavior reproducible across multiple MCP-compliant runtimes via a single Markdown file.
-- **Civic open-data search engines** (CKAN, Socrata Discovery, USAFacts). These are catalogs; they don't reason, plan, dispatch, or recover. They don't generate answers; they return links.
+3. The method of claim 1, wherein the bounded ordered history of (c) is implemented as a streaming guard maintaining state across invocations, and a stateless detection function is additionally provided that operates on a complete tool history without retained state and produces equivalent loop-hit records, such that detection is reproducible from a stored execution trace.
+
+4. The method of claim 1, wherein the periodic-cycle predicate of (d)(ii) is evaluated for window lengths W in the closed range two to five inclusive, and is suppressed when the window contains only a single distinct fingerprint, such that identical-call patterns are reported only by the predicate of (d)(i).
+
+5. The method of claim 1, wherein the corrective natural-language message of (e) is parameterized by the kind label and includes a human-readable description of the repeating pattern, such that the language model receives an explanation of why it was interrupted in addition to the instruction to take a different approach.
+
+6. The method of claim 2, wherein the structured failure diagnosis of (c)(iii) further comprises a truncated serialization of the result field bounded to a configured byte budget, such that large result payloads do not exhaust the model context window during replan.
+
+7. The method of claim 2, further comprising a maximum replan attempt counter, wherein on exceeding the counter the agent emits a terminal envelope comprising the synthesized partial results and a status indicating that the plan was not completed, rather than entering an unbounded replan loop.
+
+8. The method of claim 2, wherein the corrected step list of (d) is constrained by the plan schema to terminate in a citation tool drawn from the closed tool enumeration, such that no recovery path can produce a final answer without an attribution record.
+
+9. The method of claim 2, wherein the replan prompt of (c) is augmented with a per-step rationale string from the original plan, such that the corrective continuation plan can refer to and preserve the reasoning of completed steps when constructing replacement steps.
+
+10. The method of claim 1, in combination with the method of claim 2, wherein a loop-hit record from claim 1(e) is routed into the replan prompt construction of claim 2(c)(iv), such that pattern-based loop detection and intent-preserving replanning are composed in a single recovery procedure that handles both explicit step failure and silent non-progression.
 
 ---
 
-## Implementation we ship as evidence (filed with submission)
+## Reduction to practice
 
-- Open-source repository: https://github.com/ATX-TXLookup/TXLookup (MIT)
-- Live demo: https://txlookup.vercel.app (basic-auth gated during dev; will be public for judging)
-- The full method as TS at `app/api/agent/route.ts` and `app/lib/agent.ts`
-- The doom-loop detector at `app/lib/doomLoop.ts` (TS) and `agent/doom_loop.py` (Python — same algorithm)
-- The policy document at `skills/txlookup/SKILL.md`
-- The MCP server at `mcp/server.py`
-- The architecture writeup at https://txlookup.vercel.app/architecture and `docs/architecture.md`
-- The end-to-end live trace at `docs/how-it-works.md`
+The claimed methods are implemented in TypeScript and Python in the open-source TXLookup repository. The streaming guard of claim 1 is `DoomLoopGuard` in `app/lib/doomLoop.ts` (lines 96–118), wrapping the fingerprint function (lines 22–33), the identical-call predicate `checkIdentical` (lines 50–62), and the periodic-cycle predicate `checkSequence` (lines 64–94). The stateless detector of claim 3 is exported as `detect` (lines 120–125). The corrective system message of claim 1(e) is constructed via `buildHit` (lines 35–48) using the prompt template `CORRECTIVE_SYSTEM_PROMPT` (lines 8–12). A behaviorally equivalent Python implementation is in `agent/doom_loop.py`.
+
+The intent-preserving replanner of claim 2 is `replan` in `app/lib/agent.ts` (lines 234–270). The replan prompt of claim 2(c) is constructed by `buildReplanPrompt` (lines 105–173), which takes the intent record, the original step list, the failed-step index, the failure envelope, and the prior completed step results. The structured failure diagnosis of claim 2(c)(iii) is produced by `summarizePriorStep` (lines 88–103). The plan-schema validation of claim 2(d) is enforced via the OpenAI `response_format: { type: "json_object" }` parameter (line 261) and a runtime shape check on the parsed plan (lines 265–268). The composition of claim 10 is performed at the call site in `app/api/agent/route.ts`, where a loop-hit record from `DoomLoopGuard.observe` is forwarded as the `correctiveSystem` argument to `replan` (line 255 of `agent.ts`).
+
+The configurable bounds of claim 1(c) and claim 7 — history length M, identical-call threshold K, cycle window range W, repeat threshold R, replan attempt counter — are exposed as runtime constants and are unit-tested against synthetic histories in `tests/doom_loop_test.ts` and `tests/replan_integration_test.ts`.
+
+The MIT-licensed source, a public live deployment at https://txlookup.vercel.app, and end-to-end execution traces in `docs/how-it-works.md` are provided as evidence of reduction to practice as of the filing date.
+
+---
+
+## What is not claimed
+
+The language model itself, the Socrata SODA API, the Model Context Protocol transport, the underlying OpenAI or Anthropic SDKs, and the public datasets queried by the agent are not claimed. The general concept of an LLM-driven agent, retrieval-augmented generation, retry-on-failure, and structured-output function-calling are not claimed. What is claimed is the specific composition of pattern-based fingerprint loop detection (claim 1), intent-preserving structured-failure replanning (claim 2), and their integrated recovery procedure (claim 10), as reduced to practice in the cited source.
 
 ---
 
 ## Inventors
 
-- **Ravinder Jilkapally** (jravinder, GitHub) — primary architect, agent loop, observatory
-- **Kunal Vyas** (promptkv, GitHub) — data quality, dataset onboarding, catalog correctness
-- **Godwyn James** (goodguygoddy, GitHub) — doom-loop wiring, token usage tracking, performance instrumentation
-- **Raj Akula** (rajakula1, GitHub) — external-client validation, MCP integration testing
+- Ravinder Jilkapally (jravinder, GitHub) — agent loop, replanner, observatory.
+- Kunal Vyas (promptkv, GitHub) — dataset onboarding, catalog correctness.
+- Godwyn James (goodguygoddy, GitHub) — doom-loop wiring, instrumentation.
+- Raj Akula (rajakula1, GitHub) — external-runtime validation, MCP integration.
 
-(Built collaboratively at the AITX Community × Codex Hackathon, May 8–10, 2026.)
+Built at the AITX Community x Codex Hackathon, May 8–10, 2026.
 
 ---
 
 ## Filing checklist
 
-- [ ] Submit this document at https://deepinvent.ai
-- [ ] Attach link to public repo
-- [ ] Attach link to live demo (after public-toggle Sunday)
-- [ ] List all four inventors with email addresses
-- [ ] Confirm willingness to file provisional through deepinvent
-- [ ] Specify open-source license (MIT) — does NOT preclude provisional patent filing on the method
-
----
-
-## What we're NOT claiming
-
-- We are not claiming the LLM (gpt-4o, Claude, etc.) itself.
-- We are not claiming Socrata's SODA API or any of the public datasets.
-- We are not claiming the MCP transport spec (Anthropic's).
-- We are not claiming "agent" or "RAG" as concepts.
-
-We are claiming the specific *integration* described above as a method/system, when reduced to practice in the manner shown.
+- [ ] Submit this document at https://deepinvent.ai.
+- [ ] Attach link to public repository (https://github.com/ATX-TXLookup/TXLookup).
+- [ ] Attach link to live deployment.
+- [ ] List inventors with email addresses.
+- [ ] Confirm willingness to file provisional through DeepInvent.
+- [ ] Confirm MIT license does not preclude provisional filing on the method.
