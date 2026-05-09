@@ -88,8 +88,10 @@ export async function austinInspections30dByZip(): Promise<{ zip: string; count:
 
 /** 311 service requests opened in the last 30d (raw count). */
 export async function austin311Last30d(): Promise<number> {
+  // 311 dataset moved: id is xwdj-i9he on datahub.austintexas.gov (NOT data.austintexas.gov),
+  // and the date column is sr_created_date (per PR #41).
   const since = new Date(Date.now() - 30 * 86400_000).toISOString().slice(0, 10);
-  const url = `https://data.austintexas.gov/resource/i26j-ai4z.json?$select=count(*) AS count&$where=created_date >= '${since}'`;
+  const url = `https://datahub.austintexas.gov/resource/xwdj-i9he.json?$select=count(*) AS count&$where=sr_created_date >= '${since}'`;
   const rows = (await soda(encodeURI(url))) as { count?: string }[] | null;
   return Number(rows?.[0]?.count ?? 0);
 }
