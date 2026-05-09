@@ -1,0 +1,623 @@
+{
+  "dataset": "food_inspections",
+  "generated": "2026-05-09T15:22:33.393584",
+  "passed": 10,
+  "total": 10,
+  "results": [
+    {
+      "ds": "food",
+      "story": "food_inspections",
+      "story_n": 1,
+      "q": 1,
+      "note": "worst-scoring restaurants last 6mo",
+      "select": "restaurant_name,score,inspection_date,zip_code",
+      "where": "score<80 AND inspection_date>'2025-11-10T00:00:00.000'",
+      "order": "score ASC",
+      "limit": 15,
+      "status": "PASS",
+      "elapsed_s": 0.5,
+      "row_count": 15,
+      "rows": [
+        {
+          "restaurant_name": "K-Bop",
+          "score": "57.000000",
+          "inspection_date": "2025-12-02T00:00:00.000",
+          "zip_code": "78705-6656"
+        },
+        {
+          "restaurant_name": "Musashino Sushi Dokoro",
+          "score": "58.000000",
+          "inspection_date": "2026-01-15T00:00:00.000",
+          "zip_code": "78705-3539"
+        },
+        {
+          "restaurant_name": "WakeSurf Saloon",
+          "score": "60.000000",
+          "inspection_date": "2026-01-08T00:00:00.000",
+          "zip_code": "78734-2112"
+        },
+        {
+          "restaurant_name": "Fresh Bowl",
+          "score": "60.000000",
+          "inspection_date": "2025-12-16T00:00:00.000",
+          "zip_code": "78753-3305"
+        },
+        {
+          "restaurant_name": "Dumpling World",
+          "score": "60.000000",
+          "inspection_date": "2025-12-08T00:00:00.000",
+          "zip_code": "78751-3147"
+        },
+        {
+          "restaurant_name": "BC - Cafe Blue",
+          "score": "61.000000",
+          "inspection_date": "2026-04-09T00:00:00.000",
+          "zip_code": "78738-6897"
+        },
+        {
+          "restaurant_name": "Ho Ho Chinese Restaurant",
+          "score": "62.000000",
+          "inspection_date": "2026-01-21T00:00:00.000",
+          "zip_code": "78753"
+        },
+        {
+          "restaurant_name": "Desilicious Cafe",
+          "score": "62.000000",
+          "inspection_date": "2025-12-17T00:00:00.000",
+          "zip_code": "78727-4167"
+        },
+        {
+          "restaurant_name": "Austin Land and Cattle Co.",
+          "score": "63.000000",
+          "inspection_date": "2025-12-09T00:00:00.000",
+          "zip_code": "78703-4130"
+        },
+        {
+          "restaurant_name": "La Fruta Feliz",
+          "score": "64.000000",
+          "inspection_date": "2025-12-22T00:00:00.000",
+          "zip_code": "78723-5719"
+        },
+        {
+          "restaurant_name": "First Chinese BBQ",
+          "score": "65.000000",
+          "inspection_date": "2026-01-15T00:00:00.000",
+          "zip_code": "78753-3798"
+        },
+        {
+          "restaurant_name": "Star Market",
+          "score": "65.000000",
+          "inspection_date": "2025-12-11T00:00:00.000",
+          "zip_code": "78747-4054"
+        },
+        {
+          "restaurant_name": "OOB - Grand Oriental Express Co. Ltd",
+          "score": "65.000000",
+          "inspection_date": "2025-11-18T00:00:00.000",
+          "zip_code": "78752-2053"
+        },
+        {
+          "restaurant_name": "El Borrego de Oro",
+          "score": "66.000000",
+          "inspection_date": "2026-03-12T00:00:00.000",
+          "zip_code": "78704-7220"
+        },
+        {
+          "restaurant_name": "Step In Grocery",
+          "score": "66.000000",
+          "inspection_date": "2026-03-09T00:00:00.000",
+          "zip_code": "78752-2985"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=restaurant_name%2Cscore%2Cinspection_date%2Czip_code&%24limit=15&%24where=score%3C80+AND+inspection_date%3E%272025-11-10T00%3A00%3A00.000%27&%24order=score+ASC"
+    },
+    {
+      "ds": "food",
+      "story": "food_inspections",
+      "story_n": 1,
+      "q": 2,
+      "note": "restaurants by zip with most low scores",
+      "select": "zip_code,count(*) AS cnt",
+      "where": "score<80 AND inspection_date>'2025-11-10T00:00:00.000'",
+      "group": "zip_code",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.34,
+      "row_count": 10,
+      "rows": [
+        {
+          "zip_code": "78753",
+          "cnt": "8"
+        },
+        {
+          "zip_code": "78759",
+          "cnt": "7"
+        },
+        {
+          "zip_code": "78750",
+          "cnt": "5"
+        },
+        {
+          "zip_code": "78653",
+          "cnt": "5"
+        },
+        {
+          "zip_code": "78729",
+          "cnt": "5"
+        },
+        {
+          "zip_code": "78752",
+          "cnt": "4"
+        },
+        {
+          "zip_code": "78758",
+          "cnt": "4"
+        },
+        {
+          "zip_code": "78717",
+          "cnt": "3"
+        },
+        {
+          "zip_code": "78705-5607",
+          "cnt": "3"
+        },
+        {
+          "zip_code": "78717-5912",
+          "cnt": "3"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=zip_code%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=score%3C80+AND+inspection_date%3E%272025-11-10T00%3A00%3A00.000%27&%24group=zip_code&%24order=cnt+DESC"
+    },
+    {
+      "ds": "food",
+      "story": "food_inspections",
+      "story_n": 1,
+      "q": 3,
+      "note": "count of sub-70 scores last year",
+      "select": "count(*) AS cnt",
+      "where": "score<70 AND inspection_date>'2025-05-09T00:00:00.000'",
+      "status": "PASS",
+      "elapsed_s": 0.29,
+      "row_count": 1,
+      "rows": [
+        {
+          "cnt": "34"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=count%28%2A%29+AS+cnt&%24limit=100&%24where=score%3C70+AND+inspection_date%3E%272025-05-09T00%3A00%3A00.000%27"
+    },
+    {
+      "ds": "food",
+      "story": "food_inspections",
+      "story_n": 1,
+      "q": 4,
+      "note": "restaurants on 6th St with low scores",
+      "select": "restaurant_name,score,inspection_date,address",
+      "where": "upper(address) LIKE '%6TH%' AND score<85 AND inspection_date>'2025-11-10T00:00:00.000'",
+      "order": "score ASC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.31,
+      "row_count": 10,
+      "rows": [
+        {
+          "restaurant_name": "Parlor & Yard",
+          "score": "67.000000",
+          "inspection_date": "2026-04-02T00:00:00.000",
+          "address": "601 W 6th St Austin"
+        },
+        {
+          "restaurant_name": "Bar Peached",
+          "score": "70.000000",
+          "inspection_date": "2026-02-12T00:00:00.000",
+          "address": "1315 W 6th St Austin"
+        },
+        {
+          "restaurant_name": "Licha's Cantina",
+          "score": "72.000000",
+          "inspection_date": "2026-02-18T00:00:00.000",
+          "address": "1306 E 6th St Austin"
+        },
+        {
+          "restaurant_name": "Ah Sing Den",
+          "score": "75.000000",
+          "inspection_date": "2026-02-06T00:00:00.000",
+          "address": "1100 E 6th St Austin"
+        },
+        {
+          "restaurant_name": "East Austin Hotel",
+          "score": "75.000000",
+          "inspection_date": "2026-01-28T00:00:00.000",
+          "address": "1108 E 6th St Austin"
+        },
+        {
+          "restaurant_name": "ARRIVE Austin",
+          "score": "78.000000",
+          "inspection_date": "2026-01-22T00:00:00.000",
+          "address": "1813 E 6th St Austin"
+        },
+        {
+          "restaurant_name": "Kitchen Austin, The LLC",
+          "score": "79.000000",
+          "inspection_date": "2026-01-22T00:00:00.000",
+          "address": "400 W 6th St Ste 125 Austin"
+        },
+        {
+          "restaurant_name": "Roppolo's Pizzeria II",
+          "score": "81.000000",
+          "inspection_date": "2025-12-03T00:00:00.000",
+          "address": "316 E 6th St Austin"
+        },
+        {
+          "restaurant_name": "Casino El Camino",
+          "score": "81.000000",
+          "inspection_date": "2025-11-20T00:00:00.000",
+          "address": "517 E 6th St Austin"
+        },
+        {
+          "restaurant_name": "Buenos Aires Cafe",
+          "score": "81.000000",
+          "inspection_date": "2026-02-25T00:00:00.000",
+          "address": "1201 E 6th St Austin"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=restaurant_name%2Cscore%2Cinspection_date%2Caddress&%24limit=10&%24where=upper%28address%29+LIKE+%27%256TH%25%27+AND+score%3C85+AND+inspection_date%3E%272025-11-10T00%3A00%3A00.000%27&%24order=score+ASC"
+    },
+    {
+      "ds": "food",
+      "story": "food_inspections",
+      "story_n": 1,
+      "q": 5,
+      "note": "most common inspection type for low-scorers",
+      "select": "process_description,count(*) AS cnt",
+      "where": "score<80 AND inspection_date>'2025-11-10T00:00:00.000'",
+      "group": "process_description",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.33,
+      "row_count": 2,
+      "rows": [
+        {
+          "process_description": "Routine Inspection",
+          "cnt": "301"
+        },
+        {
+          "process_description": "Follow-Up Inspection",
+          "cnt": "11"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=process_description%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=score%3C80+AND+inspection_date%3E%272025-11-10T00%3A00%3A00.000%27&%24group=process_description&%24order=cnt+DESC"
+    },
+    {
+      "ds": "food",
+      "story": "food_inspections",
+      "story_n": 2,
+      "q": 6,
+      "note": "score trend by month last 12mo",
+      "select": "date_trunc_ym(inspection_date) AS month,avg(score) AS avg_score,count(*) AS cnt",
+      "where": "inspection_date>'2025-05-09T00:00:00.000'",
+      "group": "date_trunc_ym(inspection_date)",
+      "order": "month ASC",
+      "limit": 13,
+      "status": "PASS",
+      "elapsed_s": 0.32,
+      "row_count": 12,
+      "rows": [
+        {
+          "month": "2025-05-01T00:00:00.000",
+          "avg_score": "91.0850515463917526",
+          "cnt": "388"
+        },
+        {
+          "month": "2025-06-01T00:00:00.000",
+          "avg_score": "90.1141618497109827",
+          "cnt": "692"
+        },
+        {
+          "month": "2025-07-01T00:00:00.000",
+          "avg_score": "89.5506849315068493",
+          "cnt": "730"
+        },
+        {
+          "month": "2025-08-01T00:00:00.000",
+          "avg_score": "89.5772946859903382",
+          "cnt": "414"
+        },
+        {
+          "month": "2025-09-01T00:00:00.000",
+          "avg_score": "91.4329113924050633",
+          "cnt": "395"
+        },
+        {
+          "month": "2025-10-01T00:00:00.000",
+          "avg_score": "91.5000000000000000",
+          "cnt": "224"
+        },
+        {
+          "month": "2025-11-01T00:00:00.000",
+          "avg_score": "91.7926829268292683",
+          "cnt": "656"
+        },
+        {
+          "month": "2025-12-01T00:00:00.000",
+          "avg_score": "91.0875179340028694",
+          "cnt": "697"
+        },
+        {
+          "month": "2026-01-01T00:00:00.000",
+          "avg_score": "89.8685446009389671",
+          "cnt": "639"
+        },
+        {
+          "month": "2026-02-01T00:00:00.000",
+          "avg_score": "91.0418353576248313",
+          "cnt": "741"
+        },
+        {
+          "month": "2026-03-01T00:00:00.000",
+          "avg_score": "91.4201438848920863",
+          "cnt": "695"
+        },
+        {
+          "month": "2026-04-01T00:00:00.000",
+          "avg_score": "91.0458333333333333",
+          "cnt": "240"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=date_trunc_ym%28inspection_date%29+AS+month%2Cavg%28score%29+AS+avg_score%2Ccount%28%2A%29+AS+cnt&%24limit=13&%24where=inspection_date%3E%272025-05-09T00%3A00%3A00.000%27&%24group=date_trunc_ym%28inspection_date%29&%24order=month+ASC"
+    },
+    {
+      "ds": "food",
+      "story": "food_inspections",
+      "story_n": 2,
+      "q": 7,
+      "note": "restaurants with multiple inspections, worst score",
+      "select": "restaurant_name,count(*) AS inspections,min(score) AS worst",
+      "where": "inspection_date>'2025-05-09T00:00:00.000'",
+      "group": "restaurant_name",
+      "order": "worst ASC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.64,
+      "row_count": 10,
+      "rows": [
+        {
+          "restaurant_name": "Maher Business LLC",
+          "inspections": "1",
+          "worst": "0.000000"
+        },
+        {
+          "restaurant_name": "K-Bop",
+          "inspections": "2",
+          "worst": "57.000000"
+        },
+        {
+          "restaurant_name": "Musashino Sushi Dokoro",
+          "inspections": "2",
+          "worst": "58.000000"
+        },
+        {
+          "restaurant_name": "Dumpling World",
+          "inspections": "3",
+          "worst": "60.000000"
+        },
+        {
+          "restaurant_name": "WakeSurf Saloon",
+          "inspections": "2",
+          "worst": "60.000000"
+        },
+        {
+          "restaurant_name": "Fresh Bowl",
+          "inspections": "4",
+          "worst": "60.000000"
+        },
+        {
+          "restaurant_name": "BC - Cafe Blue",
+          "inspections": "2",
+          "worst": "61.000000"
+        },
+        {
+          "restaurant_name": "Ho Ho Chinese Restaurant",
+          "inspections": "2",
+          "worst": "62.000000"
+        },
+        {
+          "restaurant_name": "SouthIndiaKitchen LLC",
+          "inspections": "3",
+          "worst": "62.000000"
+        },
+        {
+          "restaurant_name": "Whip In",
+          "inspections": "2",
+          "worst": "62.000000"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=restaurant_name%2Ccount%28%2A%29+AS+inspections%2Cmin%28score%29+AS+worst&%24limit=10&%24where=inspection_date%3E%272025-05-09T00%3A00%3A00.000%27&%24group=restaurant_name&%24order=worst+ASC"
+    },
+    {
+      "ds": "food",
+      "story": "food_inspections",
+      "story_n": 3,
+      "q": 8,
+      "note": "avg score by zip last 6mo",
+      "select": "zip_code,avg(score) AS avg_score,count(*) AS cnt",
+      "where": "inspection_date>'2025-11-10T00:00:00.000'",
+      "group": "zip_code",
+      "order": "avg_score ASC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.29,
+      "row_count": 10,
+      "rows": [
+        {
+          "zip_code": "78738-6897",
+          "avg_score": "61.0000000000000000",
+          "cnt": "1"
+        },
+        {
+          "zip_code": "78705-3539",
+          "avg_score": "66.5000000000000000",
+          "cnt": "2"
+        },
+        {
+          "zip_code": "78701-2705",
+          "avg_score": "67.0000000000000000",
+          "cnt": "1"
+        },
+        {
+          "zip_code": "78753-3305",
+          "avg_score": "67.0000000000000000",
+          "cnt": "2"
+        },
+        {
+          "zip_code": "78705-6656",
+          "avg_score": "67.5000000000000000",
+          "cnt": "2"
+        },
+        {
+          "zip_code": "78753-4151",
+          "avg_score": "70.0000000000000000",
+          "cnt": "1"
+        },
+        {
+          "zip_code": "78703-5210",
+          "avg_score": "70.0000000000000000",
+          "cnt": "1"
+        },
+        {
+          "zip_code": "78745-2983",
+          "avg_score": "70.0000000000000000",
+          "cnt": "1"
+        },
+        {
+          "zip_code": "78727-4337",
+          "avg_score": "70.0000000000000000",
+          "cnt": "1"
+        },
+        {
+          "zip_code": "78728-7092",
+          "avg_score": "70.0000000000000000",
+          "cnt": "1"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=zip_code%2Cavg%28score%29+AS+avg_score%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=inspection_date%3E%272025-11-10T00%3A00%3A00.000%27&%24group=zip_code&%24order=avg_score+ASC"
+    },
+    {
+      "ds": "food",
+      "story": "food_inspections",
+      "story_n": 4,
+      "q": 9,
+      "note": "latest inspection per restaurant (top 10 by date)",
+      "select": "restaurant_name,score,inspection_date,address",
+      "where": "inspection_date>'2026-02-08T00:00:00.000'",
+      "order": "inspection_date DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.63,
+      "row_count": 10,
+      "rows": [
+        {
+          "restaurant_name": "Mango King",
+          "score": "88.000000",
+          "inspection_date": "2026-04-10T00:00:00.000",
+          "address": "10601 N Lamar Blvd Austin"
+        },
+        {
+          "restaurant_name": "Hanara Sushi and Grill",
+          "score": "80.000000",
+          "inspection_date": "2026-04-10T00:00:00.000",
+          "address": "10000  RESEARCH SB BLVD Unit 139 AUSTIN"
+        },
+        {
+          "restaurant_name": "Renaissance Austin Hotel",
+          "score": "75.000000",
+          "inspection_date": "2026-04-10T00:00:00.000",
+          "address": "9721 Arboretum Blvd Austin"
+        },
+        {
+          "restaurant_name": "Antojitos La Botanita",
+          "score": "97.000000",
+          "inspection_date": "2026-04-10T00:00:00.000",
+          "address": "10601 N Lamar Blvd Austin"
+        },
+        {
+          "restaurant_name": "Yummi Joy",
+          "score": "94.000000",
+          "inspection_date": "2026-04-10T00:00:00.000",
+          "address": "409 W 2nd St Austin"
+        },
+        {
+          "restaurant_name": "Blazier Relief School",
+          "score": "100.000000",
+          "inspection_date": "2026-04-10T00:00:00.000",
+          "address": "8801 Vertex Blvd Austin"
+        },
+        {
+          "restaurant_name": "Einstein Bros. Bagels #3606",
+          "score": "90.000000",
+          "inspection_date": "2026-04-10T00:00:00.000",
+          "address": "6611 S MOPAC NB EXPY Bunit 700 AUSTIN"
+        },
+        {
+          "restaurant_name": "Tian Tian Golden Palace Seafood and Dim Sum",
+          "score": "68.000000",
+          "inspection_date": "2026-04-10T00:00:00.000",
+          "address": "10901 N Lamar Blvd Ste A1 Austin"
+        },
+        {
+          "restaurant_name": "Target (Food Service) T-1061",
+          "score": "93.000000",
+          "inspection_date": "2026-04-10T00:00:00.000",
+          "address": "5300 S MOPAC SB EXPY AUSTIN"
+        },
+        {
+          "restaurant_name": "Lake Point Elementary School",
+          "score": "100.000000",
+          "inspection_date": "2026-04-10T00:00:00.000",
+          "address": "11801 Sonoma Dr Bee Cave"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=restaurant_name%2Cscore%2Cinspection_date%2Caddress&%24limit=10&%24where=inspection_date%3E%272026-02-08T00%3A00%3A00.000%27&%24order=inspection_date+DESC"
+    },
+    {
+      "ds": "food",
+      "story": "food_inspections",
+      "story_n": 5,
+      "q": 10,
+      "note": "restaurants with repeat failures in 78704",
+      "select": "restaurant_name,count(*) AS inspections,min(score) AS worst",
+      "where": "zip_code='78704' AND score<80 AND inspection_date>'2025-05-09T00:00:00.000'",
+      "group": "restaurant_name",
+      "order": "inspections DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.71,
+      "row_count": 2,
+      "rows": [
+        {
+          "restaurant_name": "Whip In",
+          "inspections": "2",
+          "worst": "62.000000"
+        },
+        {
+          "restaurant_name": "Hunan Lion Restaurant",
+          "inspections": "1",
+          "worst": "74.000000"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/ecmv-9xxi.json?%24select=restaurant_name%2Ccount%28%2A%29+AS+inspections%2Cmin%28score%29+AS+worst&%24limit=10&%24where=zip_code%3D%2778704%27+AND+score%3C80+AND+inspection_date%3E%272025-05-09T00%3A00%3A00.000%27&%24group=restaurant_name&%24order=inspections+DESC"
+    }
+  ]
+}

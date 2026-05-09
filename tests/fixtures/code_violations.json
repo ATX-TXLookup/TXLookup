@@ -1,0 +1,273 @@
+{
+  "dataset": "code_violations",
+  "generated": "2026-05-09T15:22:33.397274",
+  "passed": 5,
+  "total": 10,
+  "results": [
+    {
+      "ds": "code",
+      "story": "code_violations",
+      "story_n": 1,
+      "q": 1,
+      "note": "open violations by zip",
+      "select": "zip_code,count(*) AS cnt",
+      "where": "status='Open'",
+      "group": "zip_code",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "EMPTY",
+      "elapsed_s": 0.69,
+      "row_count": 0,
+      "rows": [],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/6wtj-zbtb.json?%24select=zip_code%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=status%3D%27Open%27&%24group=zip_code&%24order=cnt+DESC"
+    },
+    {
+      "ds": "code",
+      "story": "code_violations",
+      "story_n": 1,
+      "q": 2,
+      "note": "case types for open violations",
+      "select": "case_type,count(*) AS cnt",
+      "where": "status='Open'",
+      "group": "case_type",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "EMPTY",
+      "elapsed_s": 0.69,
+      "row_count": 0,
+      "rows": [],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/6wtj-zbtb.json?%24select=case_type%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=status%3D%27Open%27&%24group=case_type&%24order=cnt+DESC"
+    },
+    {
+      "ds": "code",
+      "story": "code_violations",
+      "story_n": 2,
+      "q": 3,
+      "note": "violations open over 90 days",
+      "select": "case_id,case_type,address,opened_date",
+      "where": "status='Open' AND opened_date<'2026-02-08T00:00:00.000'",
+      "order": "opened_date ASC",
+      "limit": 15,
+      "status": "EMPTY",
+      "elapsed_s": 0.78,
+      "row_count": 0,
+      "rows": [],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/6wtj-zbtb.json?%24select=case_id%2Ccase_type%2Caddress%2Copened_date&%24limit=15&%24where=status%3D%27Open%27+AND+opened_date%3C%272026-02-08T00%3A00%3A00.000%27&%24order=opened_date+ASC"
+    },
+    {
+      "ds": "code",
+      "story": "code_violations",
+      "story_n": 2,
+      "q": 4,
+      "note": "oldest open violations",
+      "select": "case_id,case_type,address,opened_date",
+      "where": "status='Open'",
+      "order": "opened_date ASC",
+      "limit": 10,
+      "status": "EMPTY",
+      "elapsed_s": 0.45,
+      "row_count": 0,
+      "rows": [],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/6wtj-zbtb.json?%24select=case_id%2Ccase_type%2Caddress%2Copened_date&%24limit=10&%24where=status%3D%27Open%27&%24order=opened_date+ASC"
+    },
+    {
+      "ds": "code",
+      "story": "code_violations",
+      "story_n": 3,
+      "q": 5,
+      "note": "violations opened YTD by zip",
+      "select": "zip_code,count(*) AS cnt",
+      "where": "opened_date>'2026-01-01T00:00:00.000'",
+      "group": "zip_code",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 1.81,
+      "row_count": 10,
+      "rows": [
+        {
+          "cnt": "1371"
+        },
+        {
+          "zip_code": "78741",
+          "cnt": "718"
+        },
+        {
+          "zip_code": "78758",
+          "cnt": "707"
+        },
+        {
+          "zip_code": "78704",
+          "cnt": "638"
+        },
+        {
+          "zip_code": "78702",
+          "cnt": "576"
+        },
+        {
+          "zip_code": "78745",
+          "cnt": "554"
+        },
+        {
+          "zip_code": "78744",
+          "cnt": "533"
+        },
+        {
+          "zip_code": "78753",
+          "cnt": "461"
+        },
+        {
+          "zip_code": "78723",
+          "cnt": "373"
+        },
+        {
+          "zip_code": "78752",
+          "cnt": "320"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/6wtj-zbtb.json?%24select=zip_code%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=opened_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=zip_code&%24order=cnt+DESC"
+    },
+    {
+      "ds": "code",
+      "story": "code_violations",
+      "story_n": 3,
+      "q": 6,
+      "note": "case types opened YTD",
+      "select": "case_type,count(*) AS cnt",
+      "where": "opened_date>'2026-01-01T00:00:00.000'",
+      "group": "case_type",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 3.17,
+      "row_count": 1,
+      "rows": [
+        {
+          "case_type": "Complaints",
+          "cnt": "9910"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/6wtj-zbtb.json?%24select=case_type%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=opened_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=case_type&%24order=cnt+DESC"
+    },
+    {
+      "ds": "code",
+      "story": "code_violations",
+      "story_n": 4,
+      "q": 7,
+      "note": "addresses with most open violations",
+      "select": "address,count(*) AS cnt",
+      "where": "status='Open'",
+      "group": "address",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "EMPTY",
+      "elapsed_s": 0.3,
+      "row_count": 0,
+      "rows": [],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/6wtj-zbtb.json?%24select=address%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=status%3D%27Open%27&%24group=address&%24order=cnt+DESC"
+    },
+    {
+      "ds": "code",
+      "story": "code_violations",
+      "story_n": 4,
+      "q": 8,
+      "note": "violations by priority level",
+      "select": "priority,count(*) AS cnt",
+      "where": "opened_date>'2026-01-01T00:00:00.000'",
+      "group": "priority",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.32,
+      "row_count": 6,
+      "rows": [
+        {
+          "priority": "5",
+          "cnt": "5928"
+        },
+        {
+          "priority": "2",
+          "cnt": "2352"
+        },
+        {
+          "priority": "3",
+          "cnt": "840"
+        },
+        {
+          "cnt": "439"
+        },
+        {
+          "priority": "4",
+          "cnt": "350"
+        },
+        {
+          "priority": "0",
+          "cnt": "1"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/6wtj-zbtb.json?%24select=priority%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=opened_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=priority&%24order=cnt+DESC"
+    },
+    {
+      "ds": "code",
+      "story": "code_violations",
+      "story_n": 5,
+      "q": 9,
+      "note": "closed vs open count YTD",
+      "select": "status,count(*) AS cnt",
+      "where": "opened_date>'2026-01-01T00:00:00.000'",
+      "group": "status",
+      "order": "cnt DESC",
+      "limit": 5,
+      "status": "PASS",
+      "elapsed_s": 0.36,
+      "row_count": 3,
+      "rows": [
+        {
+          "status": "Closed",
+          "cnt": "7794"
+        },
+        {
+          "status": "Active",
+          "cnt": "1934"
+        },
+        {
+          "status": "Pending",
+          "cnt": "182"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/6wtj-zbtb.json?%24select=status%2Ccount%28%2A%29+AS+cnt&%24limit=5&%24where=opened_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=status&%24order=cnt+DESC"
+    },
+    {
+      "ds": "code",
+      "story": "code_violations",
+      "story_n": 5,
+      "q": 10,
+      "note": "violations by department",
+      "select": "department,count(*) AS cnt",
+      "where": "opened_date>'2026-01-01T00:00:00.000'",
+      "group": "department",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.33,
+      "row_count": 1,
+      "rows": [
+        {
+          "department": "Code Enforcement",
+          "cnt": "9910"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/6wtj-zbtb.json?%24select=department%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=opened_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=department&%24order=cnt+DESC"
+    }
+  ]
+}

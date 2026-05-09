@@ -1,0 +1,503 @@
+{
+  "dataset": "crime_reports",
+  "generated": "2026-05-09T15:22:33.398020",
+  "passed": 9,
+  "total": 10,
+  "results": [
+    {
+      "ds": "crime",
+      "story": "crime_reports",
+      "story_n": 1,
+      "q": 1,
+      "note": "crime counts by category YTD",
+      "select": "ucr_category,count(*) AS cnt",
+      "where": "occ_date>'2026-01-01T00:00:00.000'",
+      "group": "ucr_category",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.75,
+      "row_count": 10,
+      "rows": [
+        {
+          "cnt": "17234"
+        },
+        {
+          "ucr_category": "23H",
+          "cnt": "2878"
+        },
+        {
+          "ucr_category": "23F",
+          "cnt": "1820"
+        },
+        {
+          "ucr_category": "220",
+          "cnt": "1131"
+        },
+        {
+          "ucr_category": "240",
+          "cnt": "989"
+        },
+        {
+          "ucr_category": "23C",
+          "cnt": "788"
+        },
+        {
+          "ucr_category": "13A",
+          "cnt": "681"
+        },
+        {
+          "ucr_category": "23G",
+          "cnt": "468"
+        },
+        {
+          "ucr_category": "23A",
+          "cnt": "260"
+        },
+        {
+          "ucr_category": "120",
+          "cnt": "248"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/fdj4-gpfu.json?%24select=ucr_category%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=occ_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=ucr_category&%24order=cnt+DESC"
+    },
+    {
+      "ds": "crime",
+      "story": "crime_reports",
+      "story_n": 1,
+      "q": 2,
+      "note": "crimes by council district YTD",
+      "select": "council_district,count(*) AS cnt",
+      "where": "occ_date>'2026-01-01T00:00:00.000'",
+      "group": "council_district",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.27,
+      "row_count": 10,
+      "rows": [
+        {
+          "council_district": "3",
+          "cnt": "4852"
+        },
+        {
+          "council_district": "9",
+          "cnt": "4448"
+        },
+        {
+          "council_district": "4",
+          "cnt": "3468"
+        },
+        {
+          "council_district": "1",
+          "cnt": "2850"
+        },
+        {
+          "council_district": "2",
+          "cnt": "2828"
+        },
+        {
+          "council_district": "7",
+          "cnt": "2591"
+        },
+        {
+          "council_district": "5",
+          "cnt": "1798"
+        },
+        {
+          "council_district": "6",
+          "cnt": "1322"
+        },
+        {
+          "council_district": "10",
+          "cnt": "1260"
+        },
+        {
+          "council_district": "8",
+          "cnt": "1045"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/fdj4-gpfu.json?%24select=council_district%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=occ_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=council_district&%24order=cnt+DESC"
+    },
+    {
+      "ds": "crime",
+      "story": "crime_reports",
+      "story_n": 2,
+      "q": 3,
+      "note": "top crime types last 6mo",
+      "select": "crime_type,count(*) AS cnt",
+      "where": "occ_date>'2025-11-10T00:00:00.000'",
+      "group": "crime_type",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.76,
+      "row_count": 10,
+      "rows": [
+        {
+          "crime_type": "FAMILY DISTURBANCE",
+          "cnt": "3656"
+        },
+        {
+          "crime_type": "BURGLARY OF VEHICLE",
+          "cnt": "2582"
+        },
+        {
+          "crime_type": "THEFT",
+          "cnt": "2460"
+        },
+        {
+          "crime_type": "CRIMINAL MISCHIEF",
+          "cnt": "1771"
+        },
+        {
+          "crime_type": "AUTO THEFT",
+          "cnt": "1526"
+        },
+        {
+          "crime_type": "ASSAULT WITH INJURY-FAM/DATING VIO",
+          "cnt": "1520"
+        },
+        {
+          "crime_type": "MAIL THEFT",
+          "cnt": "1380"
+        },
+        {
+          "crime_type": "CRIMINAL TRESPASS",
+          "cnt": "1378"
+        },
+        {
+          "crime_type": "HARASSMENT",
+          "cnt": "1353"
+        },
+        {
+          "crime_type": "THEFT BY SHOPLIFTING",
+          "cnt": "1162"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/fdj4-gpfu.json?%24select=crime_type%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=occ_date%3E%272025-11-10T00%3A00%3A00.000%27&%24group=crime_type&%24order=cnt+DESC"
+    },
+    {
+      "ds": "crime",
+      "story": "crime_reports",
+      "story_n": 2,
+      "q": 4,
+      "note": "crimes by location type",
+      "select": "location_type,count(*) AS cnt",
+      "where": "occ_date>'2026-01-01T00:00:00.000'",
+      "group": "location_type",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.29,
+      "row_count": 10,
+      "rows": [
+        {
+          "location_type": "RESIDENCE / HOME",
+          "cnt": "10519"
+        },
+        {
+          "location_type": "HWY / ROAD / ALLEY/ STREET/ SIDEWALK",
+          "cnt": "5412"
+        },
+        {
+          "location_type": "PARKING /DROP LOT/ GARAGE",
+          "cnt": "3070"
+        },
+        {
+          "location_type": "COMMERCIAL / OFFICE BUILDING",
+          "cnt": "829"
+        },
+        {
+          "location_type": "OTHER / UNKNOWN",
+          "cnt": "699"
+        },
+        {
+          "location_type": "HOTEL / MOTEL / ETC.",
+          "cnt": "622"
+        },
+        {
+          "location_type": "DEPARTMENT / DISCOUNT STORE",
+          "cnt": "548"
+        },
+        {
+          "location_type": "RESTAURANT",
+          "cnt": "531"
+        },
+        {
+          "location_type": "GROCERY / SUPERMARKET",
+          "cnt": "524"
+        },
+        {
+          "location_type": "BAR / NIGHTCLUB",
+          "cnt": "502"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/fdj4-gpfu.json?%24select=location_type%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=occ_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=location_type&%24order=cnt+DESC"
+    },
+    {
+      "ds": "crime",
+      "story": "crime_reports",
+      "story_n": 3,
+      "q": 5,
+      "note": "crimes by sector YTD",
+      "select": "sector,count(*) AS cnt",
+      "where": "occ_date>'2026-01-01T00:00:00.000'",
+      "group": "sector",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.36,
+      "row_count": 10,
+      "rows": [
+        {
+          "sector": "DA",
+          "cnt": "3392"
+        },
+        {
+          "sector": "FR",
+          "cnt": "3391"
+        },
+        {
+          "sector": "ED",
+          "cnt": "3308"
+        },
+        {
+          "sector": "CH",
+          "cnt": "3182"
+        },
+        {
+          "sector": "AD",
+          "cnt": "3117"
+        },
+        {
+          "sector": "HE",
+          "cnt": "2805"
+        },
+        {
+          "sector": "BA",
+          "cnt": "2490"
+        },
+        {
+          "sector": "GE",
+          "cnt": "2377"
+        },
+        {
+          "sector": "ID",
+          "cnt": "2337"
+        },
+        {
+          "sector": "AP",
+          "cnt": "158"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/fdj4-gpfu.json?%24select=sector%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=occ_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=sector&%24order=cnt+DESC"
+    },
+    {
+      "ds": "crime",
+      "story": "crime_reports",
+      "story_n": 3,
+      "q": 6,
+      "note": "monthly crime trend last 12mo",
+      "select": "date_trunc_ym(occ_date) AS month,count(*) AS cnt",
+      "where": "occ_date>'2025-05-09T00:00:00.000'",
+      "group": "date_trunc_ym(occ_date)",
+      "order": "month ASC",
+      "limit": 13,
+      "status": "PASS",
+      "elapsed_s": 0.78,
+      "row_count": 13,
+      "rows": [
+        {
+          "month": "2025-05-01T00:00:00.000",
+          "cnt": "5330"
+        },
+        {
+          "month": "2025-06-01T00:00:00.000",
+          "cnt": "7331"
+        },
+        {
+          "month": "2025-07-01T00:00:00.000",
+          "cnt": "7608"
+        },
+        {
+          "month": "2025-08-01T00:00:00.000",
+          "cnt": "7866"
+        },
+        {
+          "month": "2025-09-01T00:00:00.000",
+          "cnt": "7571"
+        },
+        {
+          "month": "2025-10-01T00:00:00.000",
+          "cnt": "7864"
+        },
+        {
+          "month": "2025-11-01T00:00:00.000",
+          "cnt": "7198"
+        },
+        {
+          "month": "2025-12-01T00:00:00.000",
+          "cnt": "7099"
+        },
+        {
+          "month": "2026-01-01T00:00:00.000",
+          "cnt": "6869"
+        },
+        {
+          "month": "2026-02-01T00:00:00.000",
+          "cnt": "6345"
+        },
+        {
+          "month": "2026-03-01T00:00:00.000",
+          "cnt": "7083"
+        },
+        {
+          "month": "2026-04-01T00:00:00.000",
+          "cnt": "6359"
+        },
+        {
+          "month": "2026-05-01T00:00:00.000",
+          "cnt": "360"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/fdj4-gpfu.json?%24select=date_trunc_ym%28occ_date%29+AS+month%2Ccount%28%2A%29+AS+cnt&%24limit=13&%24where=occ_date%3E%272025-05-09T00%3A00%3A00.000%27&%24group=date_trunc_ym%28occ_date%29&%24order=month+ASC"
+    },
+    {
+      "ds": "crime",
+      "story": "crime_reports",
+      "story_n": 4,
+      "q": 7,
+      "note": "theft/burglary counts by district",
+      "select": "council_district,count(*) AS cnt",
+      "where": "(ucr_category='Theft' OR ucr_category='Burglary') AND occ_date>'2026-01-01T00:00:00.000'",
+      "group": "council_district",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "EMPTY",
+      "elapsed_s": 0.36,
+      "row_count": 0,
+      "rows": [],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/fdj4-gpfu.json?%24select=council_district%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=%28ucr_category%3D%27Theft%27+OR+ucr_category%3D%27Burglary%27%29+AND+occ_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=council_district&%24order=cnt+DESC"
+    },
+    {
+      "ds": "crime",
+      "story": "crime_reports",
+      "story_n": 4,
+      "q": 8,
+      "note": "family violence incidents YTD",
+      "select": "count(*) AS cnt",
+      "where": "family_violence='Y' AND occ_date>'2026-01-01T00:00:00.000'",
+      "status": "PASS",
+      "elapsed_s": 0.31,
+      "row_count": 1,
+      "rows": [
+        {
+          "cnt": "2122"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/fdj4-gpfu.json?%24select=count%28%2A%29+AS+cnt&%24limit=100&%24where=family_violence%3D%27Y%27+AND+occ_date%3E%272026-01-01T00%3A00%3A00.000%27"
+    },
+    {
+      "ds": "crime",
+      "story": "crime_reports",
+      "story_n": 5,
+      "q": 9,
+      "note": "clearance status breakdown YTD",
+      "select": "clearance_status,count(*) AS cnt",
+      "where": "occ_date>'2026-01-01T00:00:00.000'",
+      "group": "clearance_status",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.35,
+      "row_count": 4,
+      "rows": [
+        {
+          "clearance_status": "N",
+          "cnt": "17423"
+        },
+        {
+          "clearance_status": "C",
+          "cnt": "5853"
+        },
+        {
+          "cnt": "3440"
+        },
+        {
+          "clearance_status": "O",
+          "cnt": "14"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/fdj4-gpfu.json?%24select=clearance_status%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=occ_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=clearance_status&%24order=cnt+DESC"
+    },
+    {
+      "ds": "crime",
+      "story": "crime_reports",
+      "story_n": 5,
+      "q": 10,
+      "note": "crimes with no clearance last 6mo",
+      "select": "crime_type,count(*) AS cnt",
+      "where": "clearance_status='N' AND occ_date>'2025-11-10T00:00:00.000'",
+      "group": "crime_type",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.62,
+      "row_count": 10,
+      "rows": [
+        {
+          "crime_type": "FAMILY DISTURBANCE",
+          "cnt": "2487"
+        },
+        {
+          "crime_type": "BURGLARY OF VEHICLE",
+          "cnt": "2448"
+        },
+        {
+          "crime_type": "THEFT",
+          "cnt": "1890"
+        },
+        {
+          "crime_type": "CRIMINAL MISCHIEF",
+          "cnt": "1528"
+        },
+        {
+          "crime_type": "AUTO THEFT",
+          "cnt": "1364"
+        },
+        {
+          "crime_type": "MAIL THEFT",
+          "cnt": "1303"
+        },
+        {
+          "crime_type": "HARASSMENT",
+          "cnt": "1263"
+        },
+        {
+          "crime_type": "THEFT BY SHOPLIFTING",
+          "cnt": "804"
+        },
+        {
+          "crime_type": "ASSAULT WITH INJURY",
+          "cnt": "765"
+        },
+        {
+          "crime_type": "POSS OF DRUG PARAPHERNALIA",
+          "cnt": "749"
+        }
+      ],
+      "error": null,
+      "url": "https://data.austintexas.gov/resource/fdj4-gpfu.json?%24select=crime_type%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=clearance_status%3D%27N%27+AND+occ_date%3E%272025-11-10T00%3A00%3A00.000%27&%24group=crime_type&%24order=cnt+DESC"
+    }
+  ]
+}

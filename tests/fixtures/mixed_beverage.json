@@ -1,0 +1,550 @@
+{
+  "dataset": "mixed_beverage",
+  "generated": "2026-05-09T15:22:33.402080",
+  "passed": 10,
+  "total": 10,
+  "results": [
+    {
+      "ds": "mixed_bev",
+      "story": "mixed_beverage",
+      "story_n": 1,
+      "q": 1,
+      "note": "top Austin bars by total receipts",
+      "select": "location_name,total_receipts,obligation_end_date_yyyymmdd",
+      "where": "taxpayer_city='AUSTIN'",
+      "order": "total_receipts DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.29,
+      "row_count": 10,
+      "rows": [
+        {
+          "location_name": "ACL MUSIC FESTIVAL/PLATINUM LOUNGE",
+          "total_receipts": "14783293",
+          "obligation_end_date_yyyymmdd": "2023-10-31T00:00:00.000"
+        },
+        {
+          "location_name": "EMOS EAST",
+          "total_receipts": "14567301",
+          "obligation_end_date_yyyymmdd": "2024-10-31T00:00:00.000"
+        },
+        {
+          "location_name": "SCOOT INN CONCESSION COMPANY, LLC",
+          "total_receipts": "12540139",
+          "obligation_end_date_yyyymmdd": "2025-10-31T00:00:00.000"
+        },
+        {
+          "location_name": "MOODY AMPHITHEATER AT WATERLOO GREENWAY",
+          "total_receipts": "3727508",
+          "obligation_end_date_yyyymmdd": "2025-04-30T00:00:00.000"
+        },
+        {
+          "location_name": "SCOOT INN CONCESSION COMPANY, LLC",
+          "total_receipts": "3159711",
+          "obligation_end_date_yyyymmdd": "2023-04-30T00:00:00.000"
+        },
+        {
+          "location_name": "EMOS EAST",
+          "total_receipts": "2854018",
+          "obligation_end_date_yyyymmdd": "2024-03-31T00:00:00.000"
+        },
+        {
+          "location_name": "EMOS EAST",
+          "total_receipts": "2711308",
+          "obligation_end_date_yyyymmdd": "2024-04-30T00:00:00.000"
+        },
+        {
+          "location_name": "CRAVE CATERING",
+          "total_receipts": "2024575",
+          "obligation_end_date_yyyymmdd": "2023-03-31T00:00:00.000"
+        },
+        {
+          "location_name": "SCOOT INN CONCESSION COMPANY, LLC",
+          "total_receipts": "1729716",
+          "obligation_end_date_yyyymmdd": "2025-04-30T00:00:00.000"
+        },
+        {
+          "location_name": "CRAVE CATERING",
+          "total_receipts": "1436941",
+          "obligation_end_date_yyyymmdd": "2022-03-31T00:00:00.000"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/naix-2893.json?%24select=location_name%2Ctotal_receipts%2Cobligation_end_date_yyyymmdd&%24limit=10&%24where=taxpayer_city%3D%27AUSTIN%27&%24order=total_receipts+DESC"
+    },
+    {
+      "ds": "mixed_bev",
+      "story": "mixed_beverage",
+      "story_n": 1,
+      "q": 2,
+      "note": "total receipts by city in TX",
+      "select": "taxpayer_city,sum(total_receipts) AS total",
+      "where": "taxpayer_state='TX'",
+      "group": "taxpayer_city",
+      "order": "total DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.78,
+      "row_count": 10,
+      "rows": [
+        {
+          "taxpayer_city": "HOUSTON",
+          "total": "20333872769"
+        },
+        {
+          "taxpayer_city": "DALLAS",
+          "total": "16487443355"
+        },
+        {
+          "taxpayer_city": "AUSTIN",
+          "total": "10936115760"
+        },
+        {
+          "taxpayer_city": "SAN ANTONIO",
+          "total": "7060520749"
+        },
+        {
+          "taxpayer_city": "FORT WORTH",
+          "total": "2775908300"
+        },
+        {
+          "taxpayer_city": "EL PASO",
+          "total": "2507986341"
+        },
+        {
+          "taxpayer_city": "COPPELL",
+          "total": "2362964699"
+        },
+        {
+          "taxpayer_city": "PLANO",
+          "total": "2257635974"
+        },
+        {
+          "taxpayer_city": "IRVING",
+          "total": "1426417484"
+        },
+        {
+          "taxpayer_city": "LUBBOCK",
+          "total": "1301261664"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/naix-2893.json?%24select=taxpayer_city%2Csum%28total_receipts%29+AS+total&%24limit=10&%24where=taxpayer_state%3D%27TX%27&%24group=taxpayer_city&%24order=total+DESC"
+    },
+    {
+      "ds": "mixed_bev",
+      "story": "mixed_beverage",
+      "story_n": 2,
+      "q": 3,
+      "note": "Austin receipts by obligation period (trend)",
+      "select": "date_trunc_ym(obligation_end_date_yyyymmdd) AS period,sum(total_receipts) AS total",
+      "where": "taxpayer_city='AUSTIN'",
+      "group": "date_trunc_ym(obligation_end_date_yyyymmdd)",
+      "order": "period DESC",
+      "limit": 13,
+      "status": "PASS",
+      "elapsed_s": 0.56,
+      "row_count": 13,
+      "rows": [
+        {
+          "period": "2026-05-01T00:00:00.000",
+          "total": "0"
+        },
+        {
+          "period": "2026-04-01T00:00:00.000",
+          "total": "7877924"
+        },
+        {
+          "period": "2026-03-01T00:00:00.000",
+          "total": "92154837"
+        },
+        {
+          "period": "2026-02-01T00:00:00.000",
+          "total": "76852149"
+        },
+        {
+          "period": "2026-01-01T00:00:00.000",
+          "total": "67293732"
+        },
+        {
+          "period": "2025-12-01T00:00:00.000",
+          "total": "79510439"
+        },
+        {
+          "period": "2025-11-01T00:00:00.000",
+          "total": "81841036"
+        },
+        {
+          "period": "2025-10-01T00:00:00.000",
+          "total": "101365547"
+        },
+        {
+          "period": "2025-09-01T00:00:00.000",
+          "total": "76184581"
+        },
+        {
+          "period": "2025-08-01T00:00:00.000",
+          "total": "79135611"
+        },
+        {
+          "period": "2025-07-01T00:00:00.000",
+          "total": "73114222"
+        },
+        {
+          "period": "2025-06-01T00:00:00.000",
+          "total": "74336360"
+        },
+        {
+          "period": "2025-05-01T00:00:00.000",
+          "total": "90614572"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/naix-2893.json?%24select=date_trunc_ym%28obligation_end_date_yyyymmdd%29+AS+period%2Csum%28total_receipts%29+AS+total&%24limit=13&%24where=taxpayer_city%3D%27AUSTIN%27&%24group=date_trunc_ym%28obligation_end_date_yyyymmdd%29&%24order=period+DESC"
+    },
+    {
+      "ds": "mixed_bev",
+      "story": "mixed_beverage",
+      "story_n": 2,
+      "q": 4,
+      "note": "Austin downtown zip receipts",
+      "select": "location_zip,sum(total_receipts) AS total",
+      "where": "taxpayer_city='AUSTIN'",
+      "group": "location_zip",
+      "order": "total DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.51,
+      "row_count": 10,
+      "rows": [
+        {
+          "location_zip": "78701",
+          "total": "3228281373"
+        },
+        {
+          "location_zip": "78704",
+          "total": "1329155524"
+        },
+        {
+          "location_zip": "78702",
+          "total": "782716035"
+        },
+        {
+          "location_zip": "78758",
+          "total": "373636457"
+        },
+        {
+          "location_zip": "78703",
+          "total": "361034472"
+        },
+        {
+          "location_zip": "78757",
+          "total": "258342320"
+        },
+        {
+          "location_zip": "78741",
+          "total": "191374508"
+        },
+        {
+          "location_zip": "78748",
+          "total": "191119886"
+        },
+        {
+          "location_zip": "78705",
+          "total": "185900403"
+        },
+        {
+          "location_zip": "78745",
+          "total": "174216687"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/naix-2893.json?%24select=location_zip%2Csum%28total_receipts%29+AS+total&%24limit=10&%24where=taxpayer_city%3D%27AUSTIN%27&%24group=location_zip&%24order=total+DESC"
+    },
+    {
+      "ds": "mixed_bev",
+      "story": "mixed_beverage",
+      "story_n": 3,
+      "q": 5,
+      "note": "beer vs wine vs liquor receipts in Austin",
+      "select": "sum(liquor_receipts) AS liquor,sum(wine_receipts) AS wine,sum(beer_receipts) AS beer",
+      "where": "taxpayer_city='AUSTIN'",
+      "status": "PASS",
+      "elapsed_s": 0.42,
+      "row_count": 1,
+      "rows": [
+        {
+          "liquor": "6602941015",
+          "wine": "1235130451",
+          "beer": "3063399982"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/naix-2893.json?%24select=sum%28liquor_receipts%29+AS+liquor%2Csum%28wine_receipts%29+AS+wine%2Csum%28beer_receipts%29+AS+beer&%24limit=100&%24where=taxpayer_city%3D%27AUSTIN%27"
+    },
+    {
+      "ds": "mixed_bev",
+      "story": "mixed_beverage",
+      "story_n": 3,
+      "q": 6,
+      "note": "locations with highest beer receipts Austin",
+      "select": "location_name,beer_receipts",
+      "where": "taxpayer_city='AUSTIN'",
+      "order": "beer_receipts DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.39,
+      "row_count": 10,
+      "rows": [
+        {
+          "location_name": "ACL MUSIC FESTIVAL/PLATINUM LOUNGE",
+          "beer_receipts": "7023836"
+        },
+        {
+          "location_name": "EMOS EAST",
+          "beer_receipts": "6928585"
+        },
+        {
+          "location_name": "SCOOT INN CONCESSION COMPANY, LLC",
+          "beer_receipts": "5756787"
+        },
+        {
+          "location_name": "MOODY AMPHITHEATER AT WATERLOO GREENWAY",
+          "beer_receipts": "1759187"
+        },
+        {
+          "location_name": "SCOOT INN CONCESSION COMPANY, LLC",
+          "beer_receipts": "1679483"
+        },
+        {
+          "location_name": "EMOS EAST",
+          "beer_receipts": "1402739"
+        },
+        {
+          "location_name": "EMOS EAST",
+          "beer_receipts": "1371319"
+        },
+        {
+          "location_name": "SCOOT INN CONCESSION COMPANY, LLC",
+          "beer_receipts": "706589"
+        },
+        {
+          "location_name": "CONTIGO CATERING",
+          "beer_receipts": "606886"
+        },
+        {
+          "location_name": "RED 7",
+          "beer_receipts": "597163"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/naix-2893.json?%24select=location_name%2Cbeer_receipts&%24limit=10&%24where=taxpayer_city%3D%27AUSTIN%27&%24order=beer_receipts+DESC"
+    },
+    {
+      "ds": "mixed_bev",
+      "story": "mixed_beverage",
+      "story_n": 4,
+      "q": 7,
+      "note": "statewide total receipts by period",
+      "select": "date_trunc_ym(obligation_end_date_yyyymmdd) AS period,sum(total_receipts) AS total",
+      "group": "date_trunc_ym(obligation_end_date_yyyymmdd)",
+      "order": "period DESC",
+      "limit": 13,
+      "status": "PASS",
+      "elapsed_s": 0.52,
+      "row_count": 13,
+      "rows": [
+        {
+          "period": "2026-05-01T00:00:00.000",
+          "total": "7298"
+        },
+        {
+          "period": "2026-04-01T00:00:00.000",
+          "total": "103791218"
+        },
+        {
+          "period": "2026-03-01T00:00:00.000",
+          "total": "963941198"
+        },
+        {
+          "period": "2026-02-01T00:00:00.000",
+          "total": "832194918"
+        },
+        {
+          "period": "2026-01-01T00:00:00.000",
+          "total": "744791276"
+        },
+        {
+          "period": "2025-12-01T00:00:00.000",
+          "total": "915911346"
+        },
+        {
+          "period": "2025-11-01T00:00:00.000",
+          "total": "847722974"
+        },
+        {
+          "period": "2025-10-01T00:00:00.000",
+          "total": "914904469"
+        },
+        {
+          "period": "2025-09-01T00:00:00.000",
+          "total": "822048298"
+        },
+        {
+          "period": "2025-08-01T00:00:00.000",
+          "total": "860109525"
+        },
+        {
+          "period": "2025-07-01T00:00:00.000",
+          "total": "799579711"
+        },
+        {
+          "period": "2025-06-01T00:00:00.000",
+          "total": "839568342"
+        },
+        {
+          "period": "2025-05-01T00:00:00.000",
+          "total": "964265634"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/naix-2893.json?%24select=date_trunc_ym%28obligation_end_date_yyyymmdd%29+AS+period%2Csum%28total_receipts%29+AS+total&%24limit=13&%24group=date_trunc_ym%28obligation_end_date_yyyymmdd%29&%24order=period+DESC"
+    },
+    {
+      "ds": "mixed_bev",
+      "story": "mixed_beverage",
+      "story_n": 4,
+      "q": 8,
+      "note": "total receipts by county",
+      "select": "taxpayer_county,sum(total_receipts) AS total",
+      "where": "taxpayer_state='TX'",
+      "group": "taxpayer_county",
+      "order": "total DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.61,
+      "row_count": 10,
+      "rows": [
+        {
+          "taxpayer_county": "101",
+          "total": "24240487533"
+        },
+        {
+          "taxpayer_county": "57",
+          "total": "22888388922"
+        },
+        {
+          "taxpayer_county": "227",
+          "total": "11671570592"
+        },
+        {
+          "taxpayer_county": "15",
+          "total": "7575196886"
+        },
+        {
+          "taxpayer_county": "220",
+          "total": "6109182976"
+        },
+        {
+          "taxpayer_county": "43",
+          "total": "4353051326"
+        },
+        {
+          "taxpayer_county": "71",
+          "total": "2571924636"
+        },
+        {
+          "taxpayer_county": "61",
+          "total": "2429523110"
+        },
+        {
+          "taxpayer_county": "170",
+          "total": "1903197277"
+        },
+        {
+          "taxpayer_county": "84",
+          "total": "1662447070"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/naix-2893.json?%24select=taxpayer_county%2Csum%28total_receipts%29+AS+total&%24limit=10&%24where=taxpayer_state%3D%27TX%27&%24group=taxpayer_county&%24order=total+DESC"
+    },
+    {
+      "ds": "mixed_bev",
+      "story": "mixed_beverage",
+      "story_n": 5,
+      "q": 9,
+      "note": "count of active permit holders in Austin",
+      "select": "count(*) AS cnt",
+      "where": "taxpayer_city='AUSTIN'",
+      "status": "PASS",
+      "elapsed_s": 0.51,
+      "row_count": 1,
+      "rows": [
+        {
+          "cnt": "210534"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/naix-2893.json?%24select=count%28%2A%29+AS+cnt&%24limit=100&%24where=taxpayer_city%3D%27AUSTIN%27"
+    },
+    {
+      "ds": "mixed_bev",
+      "story": "mixed_beverage",
+      "story_n": 5,
+      "q": 10,
+      "note": "cover charge receipts top Austin venues",
+      "select": "location_name,cover_charge_receipts",
+      "where": "taxpayer_city='AUSTIN' AND cover_charge_receipts>0",
+      "order": "cover_charge_receipts DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.33,
+      "row_count": 10,
+      "rows": [
+        {
+          "location_name": "MALA VIDA",
+          "cover_charge_receipts": "312500"
+        },
+        {
+          "location_name": "MALA VIDA",
+          "cover_charge_receipts": "147230"
+        },
+        {
+          "location_name": "MALA VIDA",
+          "cover_charge_receipts": "130735"
+        },
+        {
+          "location_name": "MALA VIDA",
+          "cover_charge_receipts": "128195"
+        },
+        {
+          "location_name": "MALA VIDA",
+          "cover_charge_receipts": "119700"
+        },
+        {
+          "location_name": "MALA VIDA",
+          "cover_charge_receipts": "117210"
+        },
+        {
+          "location_name": "MALA VIDA",
+          "cover_charge_receipts": "117115"
+        },
+        {
+          "location_name": "MALA VIDA",
+          "cover_charge_receipts": "116030"
+        },
+        {
+          "location_name": "MALA VIDA",
+          "cover_charge_receipts": "115260"
+        },
+        {
+          "location_name": "MALA VIDA",
+          "cover_charge_receipts": "114290"
+        }
+      ],
+      "error": null,
+      "url": "https://data.texas.gov/resource/naix-2893.json?%24select=location_name%2Ccover_charge_receipts&%24limit=10&%24where=taxpayer_city%3D%27AUSTIN%27+AND+cover_charge_receipts%3E0&%24order=cover_charge_receipts+DESC"
+    }
+  ]
+}

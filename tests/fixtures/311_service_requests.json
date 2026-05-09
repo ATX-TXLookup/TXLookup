@@ -1,0 +1,496 @@
+{
+  "dataset": "311_service_requests",
+  "generated": "2026-05-09T15:22:33.396351",
+  "passed": 9,
+  "total": 10,
+  "results": [
+    {
+      "ds": "s311",
+      "story": "311_service_requests",
+      "story_n": 1,
+      "q": 1,
+      "note": "top issue types YTD",
+      "select": "sr_type_desc,count(*) AS cnt",
+      "where": "sr_created_date>'2026-01-01T00:00:00.000'",
+      "group": "sr_type_desc",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 7.7,
+      "row_count": 10,
+      "rows": [
+        {
+          "sr_type_desc": "ARR - Garbage",
+          "cnt": "8286"
+        },
+        {
+          "sr_type_desc": "TPW - Parking Violation Enforcement",
+          "cnt": "7868"
+        },
+        {
+          "sr_type_desc": "DSD - Request Code Officer",
+          "cnt": "7742"
+        },
+        {
+          "sr_type_desc": "TPW - Traffic Signal - Maintenance",
+          "cnt": "5757"
+        },
+        {
+          "sr_type_desc": "ARR - Compost",
+          "cnt": "5642"
+        },
+        {
+          "sr_type_desc": "ARR - Bulk",
+          "cnt": "4398"
+        },
+        {
+          "sr_type_desc": "ARR - Recycling",
+          "cnt": "4038"
+        },
+        {
+          "sr_type_desc": "Animal Protection - Loose Dog",
+          "cnt": "3562"
+        },
+        {
+          "sr_type_desc": "311 CC - Other",
+          "cnt": "3494"
+        },
+        {
+          "sr_type_desc": "APD - Vehicle Abatement Report",
+          "cnt": "3231"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=sr_type_desc%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=sr_created_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=sr_type_desc&%24order=cnt+DESC"
+    },
+    {
+      "ds": "s311",
+      "story": "311_service_requests",
+      "story_n": 1,
+      "q": 2,
+      "note": "zip codes with most complaints YTD",
+      "select": "sr_location_zip_code,count(*) AS cnt",
+      "where": "sr_created_date>'2026-01-01T00:00:00.000'",
+      "group": "sr_location_zip_code",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.36,
+      "row_count": 10,
+      "rows": [
+        {
+          "sr_location_zip_code": "78704",
+          "cnt": "7279"
+        },
+        {
+          "sr_location_zip_code": "78745",
+          "cnt": "6366"
+        },
+        {
+          "sr_location_zip_code": "78702",
+          "cnt": "6188"
+        },
+        {
+          "sr_location_zip_code": "78744",
+          "cnt": "5744"
+        },
+        {
+          "sr_location_zip_code": "78701",
+          "cnt": "4323"
+        },
+        {
+          "sr_location_zip_code": "78723",
+          "cnt": "4038"
+        },
+        {
+          "sr_location_zip_code": "78753",
+          "cnt": "3988"
+        },
+        {
+          "sr_location_zip_code": "78758",
+          "cnt": "3929"
+        },
+        {
+          "sr_location_zip_code": "78748",
+          "cnt": "3696"
+        },
+        {
+          "sr_location_zip_code": "78741",
+          "cnt": "3559"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=sr_location_zip_code%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=sr_created_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=sr_location_zip_code&%24order=cnt+DESC"
+    },
+    {
+      "ds": "s311",
+      "story": "311_service_requests",
+      "story_n": 2,
+      "q": 3,
+      "note": "requests by department YTD",
+      "select": "sr_department_desc,count(*) AS cnt",
+      "where": "sr_created_date>'2026-01-01T00:00:00.000'",
+      "group": "sr_department_desc",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.66,
+      "row_count": 10,
+      "rows": [
+        {
+          "sr_department_desc": "Austin Resource Recovery",
+          "cnt": "29299"
+        },
+        {
+          "sr_department_desc": "Austin Transportation and Public Works",
+          "cnt": "27993"
+        },
+        {
+          "sr_department_desc": "Austin Animal Services",
+          "cnt": "11437"
+        },
+        {
+          "sr_department_desc": "Austin Development Services",
+          "cnt": "11219"
+        },
+        {
+          "sr_department_desc": "311-Command Center",
+          "cnt": "3494"
+        },
+        {
+          "sr_department_desc": "Austin Police",
+          "cnt": "3481"
+        },
+        {
+          "sr_department_desc": "Austin Parks and Recreation",
+          "cnt": "2616"
+        },
+        {
+          "sr_department_desc": "Austin Watershed Protection",
+          "cnt": "1846"
+        },
+        {
+          "sr_department_desc": "Austin Energy",
+          "cnt": "1711"
+        },
+        {
+          "sr_department_desc": "Austin Public Health",
+          "cnt": "941"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=sr_department_desc%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=sr_created_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=sr_department_desc&%24order=cnt+DESC"
+    },
+    {
+      "ds": "s311",
+      "story": "311_service_requests",
+      "story_n": 2,
+      "q": 4,
+      "note": "open vs closed requests YTD",
+      "select": "sr_status_desc,count(*) AS cnt",
+      "where": "sr_created_date>'2026-01-01T00:00:00.000'",
+      "group": "sr_status_desc",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.59,
+      "row_count": 7,
+      "rows": [
+        {
+          "sr_status_desc": "Closed",
+          "cnt": "86179"
+        },
+        {
+          "sr_status_desc": "Open",
+          "cnt": "5487"
+        },
+        {
+          "sr_status_desc": "Duplicate (closed)",
+          "cnt": "3294"
+        },
+        {
+          "sr_status_desc": "Duplicate (open)",
+          "cnt": "278"
+        },
+        {
+          "sr_status_desc": "Work In Progress",
+          "cnt": "185"
+        },
+        {
+          "sr_status_desc": "New",
+          "cnt": "4"
+        },
+        {
+          "sr_status_desc": "Pending",
+          "cnt": "4"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=sr_status_desc%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=sr_created_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=sr_status_desc&%24order=cnt+DESC"
+    },
+    {
+      "ds": "s311",
+      "story": "311_service_requests",
+      "story_n": 3,
+      "q": 5,
+      "note": "unresolved requests 78704",
+      "select": "sr_type_desc,count(*) AS cnt",
+      "where": "sr_location_zip_code='78704' AND sr_status_desc='Open'",
+      "group": "sr_type_desc",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 1.21,
+      "row_count": 10,
+      "rows": [
+        {
+          "sr_type_desc": "DSD - Request Code Officer",
+          "cnt": "180"
+        },
+        {
+          "sr_type_desc": "APH - Graffiti Abatement - Public Property",
+          "cnt": "69"
+        },
+        {
+          "sr_type_desc": "APD - Vehicle Abatement Report",
+          "cnt": "69"
+        },
+        {
+          "sr_type_desc": "Park Maintenance - Grounds",
+          "cnt": "49"
+        },
+        {
+          "sr_type_desc": "ARR - Garbage",
+          "cnt": "44"
+        },
+        {
+          "sr_type_desc": "DSD - Short Term Rental Complaint",
+          "cnt": "42"
+        },
+        {
+          "sr_type_desc": "ARR - Recycling",
+          "cnt": "29"
+        },
+        {
+          "sr_type_desc": "ARR - Bulk",
+          "cnt": "27"
+        },
+        {
+          "sr_type_desc": "APD - Non Emergency Collision",
+          "cnt": "24"
+        },
+        {
+          "sr_type_desc": "ATD - Shared Micromobility",
+          "cnt": "23"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=sr_type_desc%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=sr_location_zip_code%3D%2778704%27+AND+sr_status_desc%3D%27Open%27&%24group=sr_type_desc&%24order=cnt+DESC"
+    },
+    {
+      "ds": "s311",
+      "story": "311_service_requests",
+      "story_n": 3,
+      "q": 6,
+      "note": "top 10 oldest open requests",
+      "select": "sr_type_desc,sr_created_date,sr_location",
+      "where": "sr_status_desc='Open'",
+      "order": "sr_created_date ASC",
+      "limit": 10,
+      "status": "FAIL",
+      "elapsed_s": 25.53,
+      "row_count": 0,
+      "rows": [],
+      "error": "The read operation timed out",
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=sr_type_desc%2Csr_created_date%2Csr_location&%24limit=10&%24where=sr_status_desc%3D%27Open%27&%24order=sr_created_date+ASC"
+    },
+    {
+      "ds": "s311",
+      "story": "311_service_requests",
+      "story_n": 4,
+      "q": 7,
+      "note": "pothole complaints last 90 days",
+      "select": "count(*) AS cnt",
+      "where": "upper(sr_type_desc) LIKE '%POTHOLE%' AND sr_created_date>'2026-02-08T00:00:00.000'",
+      "status": "PASS",
+      "elapsed_s": 0.37,
+      "row_count": 1,
+      "rows": [
+        {
+          "cnt": "1094"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=count%28%2A%29+AS+cnt&%24limit=100&%24where=upper%28sr_type_desc%29+LIKE+%27%25POTHOLE%25%27+AND+sr_created_date%3E%272026-02-08T00%3A00%3A00.000%27"
+    },
+    {
+      "ds": "s311",
+      "story": "311_service_requests",
+      "story_n": 4,
+      "q": 8,
+      "note": "most common issue in 78702",
+      "select": "sr_type_desc,count(*) AS cnt",
+      "where": "sr_location_zip_code='78702' AND sr_created_date>'2026-01-01T00:00:00.000'",
+      "group": "sr_type_desc",
+      "order": "cnt DESC",
+      "limit": 5,
+      "status": "PASS",
+      "elapsed_s": 0.36,
+      "row_count": 5,
+      "rows": [
+        {
+          "sr_type_desc": "TPW - Parking Violation Enforcement",
+          "cnt": "916"
+        },
+        {
+          "sr_type_desc": "ARR - Garbage",
+          "cnt": "534"
+        },
+        {
+          "sr_type_desc": "DSD - Request Code Officer",
+          "cnt": "419"
+        },
+        {
+          "sr_type_desc": "ARR - Compost",
+          "cnt": "357"
+        },
+        {
+          "sr_type_desc": "311 CC - Other",
+          "cnt": "241"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=sr_type_desc%2Ccount%28%2A%29+AS+cnt&%24limit=5&%24where=sr_location_zip_code%3D%2778702%27+AND+sr_created_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=sr_type_desc&%24order=cnt+DESC"
+    },
+    {
+      "ds": "s311",
+      "story": "311_service_requests",
+      "story_n": 5,
+      "q": 9,
+      "note": "graffiti reports by month last 12mo",
+      "select": "date_trunc_ym(sr_created_date) AS month,count(*) AS cnt",
+      "where": "upper(sr_type_desc) LIKE '%GRAFFITI%' AND sr_created_date>'2025-05-09T00:00:00.000'",
+      "group": "date_trunc_ym(sr_created_date)",
+      "order": "month ASC",
+      "limit": 13,
+      "status": "PASS",
+      "elapsed_s": 0.71,
+      "row_count": 13,
+      "rows": [
+        {
+          "month": "2025-05-01T00:00:00.000",
+          "cnt": "91"
+        },
+        {
+          "month": "2025-06-01T00:00:00.000",
+          "cnt": "130"
+        },
+        {
+          "month": "2025-07-01T00:00:00.000",
+          "cnt": "113"
+        },
+        {
+          "month": "2025-08-01T00:00:00.000",
+          "cnt": "77"
+        },
+        {
+          "month": "2025-09-01T00:00:00.000",
+          "cnt": "115"
+        },
+        {
+          "month": "2025-10-01T00:00:00.000",
+          "cnt": "183"
+        },
+        {
+          "month": "2025-11-01T00:00:00.000",
+          "cnt": "118"
+        },
+        {
+          "month": "2025-12-01T00:00:00.000",
+          "cnt": "88"
+        },
+        {
+          "month": "2026-01-01T00:00:00.000",
+          "cnt": "248"
+        },
+        {
+          "month": "2026-02-01T00:00:00.000",
+          "cnt": "139"
+        },
+        {
+          "month": "2026-03-01T00:00:00.000",
+          "cnt": "128"
+        },
+        {
+          "month": "2026-04-01T00:00:00.000",
+          "cnt": "132"
+        },
+        {
+          "month": "2026-05-01T00:00:00.000",
+          "cnt": "35"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=date_trunc_ym%28sr_created_date%29+AS+month%2Ccount%28%2A%29+AS+cnt&%24limit=13&%24where=upper%28sr_type_desc%29+LIKE+%27%25GRAFFITI%25%27+AND+sr_created_date%3E%272025-05-09T00%3A00%3A00.000%27&%24group=date_trunc_ym%28sr_created_date%29&%24order=month+ASC"
+    },
+    {
+      "ds": "s311",
+      "story": "311_service_requests",
+      "story_n": 5,
+      "q": 10,
+      "note": "trash/debris complaints by zip YTD",
+      "select": "sr_location_zip_code,count(*) AS cnt",
+      "where": "(upper(sr_type_desc) LIKE '%TRASH%' OR upper(sr_type_desc) LIKE '%DEBRIS%') AND sr_created_date>'2026-01-01T00:00:00.000'",
+      "group": "sr_location_zip_code",
+      "order": "cnt DESC",
+      "limit": 10,
+      "status": "PASS",
+      "elapsed_s": 0.7,
+      "row_count": 10,
+      "rows": [
+        {
+          "sr_location_zip_code": "78704",
+          "cnt": "117"
+        },
+        {
+          "sr_location_zip_code": "78702",
+          "cnt": "85"
+        },
+        {
+          "sr_location_zip_code": "78745",
+          "cnt": "71"
+        },
+        {
+          "sr_location_zip_code": "78744",
+          "cnt": "60"
+        },
+        {
+          "sr_location_zip_code": "78753",
+          "cnt": "47"
+        },
+        {
+          "sr_location_zip_code": "78741",
+          "cnt": "44"
+        },
+        {
+          "sr_location_zip_code": "78752",
+          "cnt": "43"
+        },
+        {
+          "sr_location_zip_code": "78758",
+          "cnt": "42"
+        },
+        {
+          "sr_location_zip_code": "78701",
+          "cnt": "39"
+        },
+        {
+          "sr_location_zip_code": "78723",
+          "cnt": "38"
+        }
+      ],
+      "error": null,
+      "url": "https://datahub.austintexas.gov/resource/xwdj-i9he.json?%24select=sr_location_zip_code%2Ccount%28%2A%29+AS+cnt&%24limit=10&%24where=%28upper%28sr_type_desc%29+LIKE+%27%25TRASH%25%27+OR+upper%28sr_type_desc%29+LIKE+%27%25DEBRIS%25%27%29+AND+sr_created_date%3E%272026-01-01T00%3A00%3A00.000%27&%24group=sr_location_zip_code&%24order=cnt+DESC"
+    }
+  ]
+}
