@@ -3,51 +3,57 @@ import Link from "next/link";
 const datasets = [
   {
     id: "3syk-w9eu",
-    title: "ISSUED CONSTRUCTION PERMITS",
-    city: "AUSTIN",
+    title: "Issued Construction Permits",
+    agency: "Development Services Department",
     rows: "2,354,632",
-    cadence: "DAILY",
-    blurb: "Every construction permit issued by the City of Austin since the 1980s — type, address, contractor, status, value.",
+    cadence: "Daily",
+    blurb:
+      "Every construction permit issued by the City of Austin since the 1980s — type, address, contractor, status, value.",
   },
   {
     id: "ecmv-9xxi",
-    title: "FOOD ESTABLISHMENT INSPECTIONS",
-    city: "AUSTIN",
-    rows: "120K+",
-    cadence: "WEEKLY",
-    blurb: "Health-inspection scores and violations for Austin restaurants, food trucks, and grocery stores. Each row is one inspection.",
+    title: "Food Establishment Inspections",
+    agency: "Austin Public Health",
+    rows: "120,000+",
+    cadence: "Weekly",
+    blurb:
+      "Health-inspection scores and violations for Austin restaurants, food trucks, and grocery stores.",
   },
   {
     id: "i26j-ai4z",
-    title: "311 SERVICE REQUESTS",
-    city: "AUSTIN",
-    rows: "1.5M+",
-    cadence: "DAILY",
-    blurb: "Every non-emergency 311 call logged in Austin — pothole, graffiti, animal services, code complaints, by zip and district.",
+    title: "311 Service Requests",
+    agency: "Communications & Public Information",
+    rows: "1,500,000+",
+    cadence: "Daily",
+    blurb:
+      "Every non-emergency 311 call logged in Austin — pothole, graffiti, animal services, code complaints.",
   },
   {
     id: "6wtj-zbtb",
-    title: "CODE VIOLATION CASES",
-    city: "AUSTIN",
-    rows: "300K+",
-    cadence: "DAILY",
-    blurb: "Open and closed building, zoning, and short-term-rental violations.",
+    title: "Code Violation Cases",
+    agency: "Code Department",
+    rows: "300,000+",
+    cadence: "Daily",
+    blurb:
+      "Open and closed building, zoning, and short-term-rental violations across Austin.",
   },
   {
     id: "fdj4-gpfu",
-    title: "CRIME REPORTS",
-    city: "AUSTIN",
-    rows: "2M+",
-    cadence: "WEEKLY",
-    blurb: "Reported crimes by type, location, and time. APD case-level data.",
+    title: "Crime Reports",
+    agency: "Austin Police Department",
+    rows: "2,000,000+",
+    cadence: "Weekly",
+    blurb:
+      "Reported crimes by type, location, and time. Case-level data published by APD.",
   },
   {
     id: "y2wy-tgr5",
-    title: "TRAFFIC FATALITIES",
-    city: "AUSTIN",
-    rows: "1K+",
-    cadence: "MONTHLY",
-    blurb: "Fatal traffic crashes — location, mode, year. The Vision Zero source data.",
+    title: "Traffic Fatalities",
+    agency: "Austin Transportation",
+    rows: "1,000+",
+    cadence: "Monthly",
+    blurb:
+      "Fatal traffic crashes by location, mode, and year. Vision Zero source data.",
   },
 ];
 
@@ -58,261 +64,310 @@ const sampleQuestions = [
   "Where are construction permits growing fastest by zip?",
 ];
 
+const topics = [
+  { name: "Permits & Building", count: 12 },
+  { name: "Public Health", count: 6 },
+  { name: "Public Safety", count: 9 },
+  { name: "311 & Code", count: 5 },
+  { name: "Transportation", count: 7 },
+  { name: "Demographics & Housing", count: 4 },
+];
+
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-white text-black">
-      {/* Header — thick navy band */}
-      <header className="border-b-4 border-black bg-[#002868] text-white">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between px-6 py-5 md:px-10">
-          <Link href="/" className="flex items-baseline gap-3">
-            <span className="font-display text-2xl font-extrabold uppercase tracking-tight">
-              TXLookup
-            </span>
-            <span className="hidden font-mono text-[11px] uppercase tracking-[0.2em] text-white/70 md:inline">
-              public data, cited
-            </span>
+    <main className="min-h-screen bg-white text-[#1A1F2A] font-body">
+      {/* Top utility bar — civic-portal disclaimer */}
+      <div className="bg-[#0B2545] text-white">
+        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-6 py-2 text-[13px] md:px-10">
+          <span>
+            An open-source agent for Texas public data. Built on the Socrata
+            SODA API.
+          </span>
+          <span className="hidden font-mono text-[11px] uppercase tracking-wider text-white/70 md:inline">
+            v0.1 · alpha
+          </span>
+        </div>
+      </div>
+
+      {/* Header */}
+      <header className="border-b border-[#1A1F2A]/10 bg-white">
+        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-6 px-6 py-5 md:px-10 md:py-6">
+          <Link href="/" className="flex items-center gap-3">
+            <span aria-hidden="true" className="block h-8 w-8 rounded-sm bg-[#0B2545]" />
+            <div className="flex flex-col leading-tight">
+              <span className="font-display text-[22px] font-extrabold tracking-tight text-[#0B2545]">
+                TXLookup
+              </span>
+              <span className="text-[11px] font-medium uppercase tracking-wider text-[#1A1F2A]/55">
+                Texas open data · cited
+              </span>
+            </div>
           </Link>
-          <nav className="flex items-center gap-7 font-display text-sm font-bold uppercase tracking-wider">
-            <Link href="#datasets" className="hover:underline">
+          <nav className="flex items-center gap-7 font-display text-sm font-semibold">
+            <Link href="#search" className="hover:text-[#0B5FFF]">
+              Search
+            </Link>
+            <Link href="#datasets" className="hidden hover:text-[#0B5FFF] md:inline">
               Datasets
             </Link>
-            <Link href="/components" className="hidden hover:underline md:inline">
-              Components
+            <Link href="#topics" className="hidden hover:text-[#0B5FFF] md:inline">
+              Topics
             </Link>
             <a
               href="https://github.com/ATX-TXLookup/TXLookup/blob/main/docs/usage.md"
-              className="hidden hover:underline md:inline"
+              className="hidden hover:text-[#0B5FFF] md:inline"
             >
-              Docs
+              Use as a tool
             </a>
             <a
               href="https://github.com/ATX-TXLookup/TXLookup"
-              className="border-2 border-white bg-white px-3 py-1.5 text-[#002868] hover:bg-[#FFD93D]"
+              className="rounded-sm bg-[#0B2545] px-4 py-2 font-medium text-white hover:bg-[#0B5FFF]"
             >
-              Source ↗
+              GitHub ↗
             </a>
           </nav>
         </div>
       </header>
 
-      {/* HERO — search-first. The page is usable. */}
-      <section className="border-b-4 border-black bg-white">
-        <div className="mx-auto max-w-[1320px] px-6 pt-16 pb-20 md:px-10 md:pt-24 md:pb-28">
-          <div className="grid gap-12 md:grid-cols-12">
-            <div className="md:col-span-8">
-              <h1 className="font-display text-[44px] font-extrabold uppercase leading-[0.95] tracking-tight md:text-[88px]">
-                ASK TEXAS<br />
-                A QUESTION.<br />
-                <span className="bg-[#002868] px-3 text-white">GET</span>{" "}
-                <span className="bg-[#FFD93D] px-3">THE DATA.</span>
-              </h1>
-              <p className="mt-7 max-w-[60ch] text-base leading-relaxed text-black/80 md:text-lg">
-                Search the Austin, Dallas, San Antonio, and Houston open-data
-                portals plus state filings — in plain English. Every answer
-                cites the source dataset and when it was last refreshed.
-              </p>
+      {/* HERO — the search-first surface */}
+      <section
+        id="search"
+        className="border-b border-[#1A1F2A]/10 bg-gradient-to-b from-[#F4F6FB] to-white"
+      >
+        <div className="mx-auto max-w-[1320px] px-6 py-16 md:px-10 md:py-24">
+          <div className="mx-auto max-w-[860px] text-center">
+            <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+              The Texas Open Data Agent
+            </p>
+            <h1 className="mt-4 font-display text-[40px] font-black leading-[1.05] tracking-tight text-[#0B2545] md:text-[64px]">
+              Ask Texas a question.
+              <br />
+              <span className="text-[#0B5FFF]">Get the answer with the source attached.</span>
+            </h1>
+            <p className="mx-auto mt-6 max-w-[60ch] text-base leading-relaxed text-[#1A1F2A]/75 md:text-lg">
+              TXLookup searches Austin, Dallas, San Antonio, and Houston
+              open-data portals — plus state filings — in plain English. Every
+              answer cites the source dataset and when it was last refreshed.
+            </p>
+          </div>
 
-              {/* SEARCH — the primary call to action */}
-              <form
-                action="/q"
-                method="GET"
-                className="mt-10 flex flex-col gap-3 md:flex-row md:items-stretch"
+          <form
+            action="/q"
+            method="GET"
+            className="mx-auto mt-10 flex max-w-[820px] gap-2 rounded-md border border-[#1A1F2A]/15 bg-white p-2 shadow-[0_2px_24px_-8px_rgba(11,37,69,0.18)]"
+          >
+            <label htmlFor="q" className="sr-only">
+              Search Texas public data
+            </label>
+            <input
+              id="q"
+              name="q"
+              type="text"
+              required
+              placeholder="e.g. restaurants near 78704 with failing inspections this year"
+              className="flex-1 rounded-sm bg-white px-4 py-3 text-base text-[#1A1F2A] placeholder:text-[#1A1F2A]/45 focus:outline-none md:text-lg"
+            />
+            <button
+              type="submit"
+              className="rounded-sm bg-[#0B5FFF] px-7 py-3 font-display text-base font-semibold text-white hover:bg-[#0B2545] md:text-lg"
+            >
+              Search
+            </button>
+          </form>
+
+          <div className="mx-auto mt-5 flex max-w-[820px] flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+            <span className="font-medium text-[#1A1F2A]/60">Try:</span>
+            {sampleQuestions.map((q) => (
+              <a
+                key={q}
+                href={`/q?q=${encodeURIComponent(q)}`}
+                className="text-[#0B5FFF] hover:underline"
               >
-                <label htmlFor="q" className="sr-only">
-                  Ask about Texas public data
-                </label>
-                <input
-                  id="q"
-                  name="q"
-                  type="text"
-                  required
-                  defaultValue=""
-                  placeholder="Restaurants near 78704 with failing inspections this year…"
-                  className="flex-1 border-4 border-black bg-white px-5 py-4 text-base font-medium text-black shadow-[6px_6px_0_0_#000] placeholder:text-black/55 focus:bg-[#FFD93D] focus:outline-none focus:shadow-[3px_3px_0_0_#000] focus:translate-x-[3px] focus:translate-y-[3px] md:text-lg"
-                />
-                <button
-                  type="submit"
-                  className="border-4 border-black bg-[#BF0A30] px-8 py-4 font-display text-base font-extrabold uppercase tracking-wider text-white shadow-[6px_6px_0_0_#000] hover:shadow-[3px_3px_0_0_#000] hover:translate-x-[3px] hover:translate-y-[3px] active:shadow-none active:translate-x-[6px] active:translate-y-[6px] md:text-lg"
-                >
-                  Ask →
-                </button>
-              </form>
-
-              <div className="mt-6 flex flex-wrap gap-2">
-                {sampleQuestions.map((q) => (
-                  <a
-                    key={q}
-                    href={`/q?q=${encodeURIComponent(q)}`}
-                    className="border-2 border-black bg-white px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-black hover:bg-[#FFD93D]"
-                  >
-                    {q}
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            <aside className="md:col-span-4">
-              <div className="border-4 border-black bg-[#FFD93D] p-6 shadow-[8px_8px_0_0_#000]">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-black">
-                  Austin permits / last 7 days
-                </p>
-                <div className="mt-4 flex items-end gap-2 border-b-2 border-black pb-3">
-                  {[42, 38, 51, 49, 67, 58, 72].map((v, i) => (
-                    <span
-                      key={i}
-                      className="block w-7 border-2 border-black bg-[#002868]"
-                      style={{ height: `${v * 1.4}px` }}
-                    />
-                  ))}
-                </div>
-                <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-wider text-black">
-                  source · 3syk-w9eu · data.austintexas.gov
-                </p>
-                <Link
-                  href="/datasets/3syk-w9eu"
-                  className="mt-3 inline-block font-mono text-[11px] font-bold uppercase tracking-wider text-black underline underline-offset-4 hover:text-[#BF0A30]"
-                >
-                  Browse this dataset →
-                </Link>
-              </div>
-
-              <div className="mt-6 border-4 border-black bg-white p-6 shadow-[8px_8px_0_0_#BF0A30]">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#BF0A30]">
-                  How it works
-                </p>
-                <ol className="mt-3 space-y-2 text-sm text-black">
-                  <li>
-                    <span className="font-display font-bold uppercase">1. Reason</span>{" "}
-                    — pick the right dataset from your question
-                  </li>
-                  <li>
-                    <span className="font-display font-bold uppercase">2. Plan</span>{" "}
-                    — emit a structured tool sequence
-                  </li>
-                  <li>
-                    <span className="font-display font-bold uppercase">3. Tool</span>{" "}
-                    — run a bounded SoQL query
-                  </li>
-                  <li>
-                    <span className="font-display font-bold uppercase">4. Complete</span>{" "}
-                    — answer in plain English with citation
-                  </li>
-                </ol>
-              </div>
-            </aside>
+                {q}
+              </a>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* DATASETS — browsable list. This is the main usable surface. */}
-      <section
-        id="datasets"
-        className="border-b-4 border-black bg-[#F5F5F0] scroll-mt-24"
-      >
-        <div className="mx-auto max-w-[1320px] px-6 py-16 md:px-10 md:py-20">
-          <div className="grid gap-8 md:grid-cols-12">
-            <div className="md:col-span-7">
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-[#BF0A30]">
-                Browse datasets
+      {/* TOPICS — quick browse */}
+      <section id="topics" className="border-b border-[#1A1F2A]/10 bg-white">
+        <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+                Browse by topic
               </p>
-              <h2 className="mt-3 font-display text-4xl font-extrabold uppercase leading-[1] tracking-tight md:text-6xl">
-                Six datasets,<br />live and queryable.
+              <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-[#0B2545] md:text-4xl">
+                Pick a subject.
               </h2>
             </div>
-            <p className="self-end text-sm text-black/75 md:col-span-5">
-              Each card links to the dataset's TXLookup browser — schema,
-              sample rows, freshness, and a search box scoped to that dataset.
-              Adding more is a YAML edit:{" "}
+            <Link
+              href="#datasets"
+              className="hidden text-sm font-medium text-[#0B5FFF] hover:underline md:inline"
+            >
+              See all datasets →
+            </Link>
+          </div>
+          <div className="mt-8 grid gap-3 md:grid-cols-3 lg:grid-cols-6">
+            {topics.map((t) => (
               <a
-                href="https://github.com/ATX-TXLookup/TXLookup/blob/main/config/datasets.yaml"
-                className="font-bold text-[#002868] underline underline-offset-2 hover:text-[#BF0A30]"
+                key={t.name}
+                href={`/q?q=${encodeURIComponent(t.name + " in Austin")}`}
+                className="group flex flex-col rounded-md border border-[#1A1F2A]/10 bg-white px-4 py-4 transition-colors hover:border-[#0B5FFF] hover:bg-[#F4F6FB]"
               >
-                config/datasets.yaml ↗
+                <span className="font-display text-base font-semibold text-[#0B2545] group-hover:text-[#0B5FFF]">
+                  {t.name}
+                </span>
+                <span className="mt-1 font-mono text-[11px] uppercase tracking-wider text-[#1A1F2A]/55">
+                  {t.count} datasets
+                </span>
               </a>
-            </p>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* DATASETS — popular, full grid */}
+      <section
+        id="datasets"
+        className="scroll-mt-24 border-b border-[#1A1F2A]/10 bg-[#F4F6FB]"
+      >
+        <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+                Popular datasets
+              </p>
+              <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-[#0B2545] md:text-4xl">
+                What the agent knows about today.
+              </h2>
+            </div>
+            <a
+              href="https://github.com/ATX-TXLookup/TXLookup/blob/main/config/datasets.yaml"
+              className="hidden text-sm font-medium text-[#0B5FFF] hover:underline md:inline"
+            >
+              View catalog →
+            </a>
           </div>
 
-          <div className="mt-12 grid gap-0 border-4 border-black md:grid-cols-3">
-            {datasets.map((d, i) => {
-              const accent =
-                i % 3 === 0
-                  ? "bg-white shadow-[8px_8px_0_0_#002868]"
-                  : i % 3 === 1
-                  ? "bg-white shadow-[8px_8px_0_0_#BF0A30]"
-                  : "bg-white shadow-[8px_8px_0_0_#FFD93D]";
-              const borderRight =
-                i % 3 < 2 ? "md:border-r-4 md:border-black" : "";
-              const borderBottom =
-                i < datasets.length - 3
-                  ? "border-b-4 border-black"
-                  : "border-b-4 border-black md:border-b-0";
-              return (
-                <Link
-                  key={d.id}
-                  href={`/datasets/${d.id}`}
-                  className={`group relative block ${accent} ${borderRight} ${borderBottom} p-6 transition-all hover:-translate-x-1 hover:-translate-y-1`}
-                >
-                  <div className="flex items-baseline justify-between">
-                    <span className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-[#BF0A30]">
-                      {d.city}
-                    </span>
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-black/60">
-                      {d.cadence}
-                    </span>
-                  </div>
-                  <h3 className="mt-3 font-display text-xl font-extrabold uppercase leading-tight tracking-tight md:text-2xl">
-                    {d.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-black/75">
-                    {d.blurb}
-                  </p>
-                  <div className="mt-5 flex items-baseline justify-between border-t-2 border-black pt-3">
-                    <span className="font-mono text-xs uppercase text-black/70">
-                      {d.id}
-                    </span>
-                    <span className="font-mono text-xs font-bold uppercase tracking-wider text-black">
-                      {d.rows} rows →
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {datasets.map((d) => (
+              <Link
+                key={d.id}
+                href={`/datasets/${d.id}`}
+                className="group flex flex-col rounded-md border border-[#1A1F2A]/10 bg-white p-6 transition-all hover:border-[#0B5FFF] hover:shadow-[0_8px_24px_-12px_rgba(11,37,69,0.18)]"
+              >
+                <div className="flex items-baseline justify-between">
+                  <span className="rounded-sm bg-[#0B2545] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-white">
+                    Austin
+                  </span>
+                  <span className="font-mono text-[11px] uppercase tracking-wider text-[#1A1F2A]/55">
+                    Updated {d.cadence.toLowerCase()}
+                  </span>
+                </div>
+                <h3 className="mt-4 font-display text-xl font-bold leading-tight text-[#0B2545] group-hover:text-[#0B5FFF]">
+                  {d.title}
+                </h3>
+                <p className="mt-1 text-sm text-[#1A1F2A]/65">{d.agency}</p>
+                <p className="mt-4 flex-1 text-sm leading-relaxed text-[#1A1F2A]/80">
+                  {d.blurb}
+                </p>
+                <div className="mt-5 flex items-baseline justify-between border-t border-[#1A1F2A]/10 pt-3">
+                  <span className="font-mono text-xs text-[#1A1F2A]/55">
+                    {d.id}
+                  </span>
+                  <span className="font-display text-xs font-semibold text-[#0B5FFF]">
+                    {d.rows} rows →
+                  </span>
+                </div>
+              </Link>
+            ))}
           </div>
 
-          <p className="mt-6 font-mono text-[11px] uppercase tracking-wider text-black/65">
-            Dallas · San Antonio · Houston portals queryable via the same
-            Socrata client. Their datasets are being onboarded.
+          <p className="mt-6 text-sm text-[#1A1F2A]/60">
+            Dallas, San Antonio, and Houston portals are queryable via the same
+            Socrata client. Datasets being onboarded.
           </p>
         </div>
       </section>
 
-      {/* USE IT YOURSELF — the agent skill, MCP install */}
-      <section className="border-b-4 border-black bg-white">
-        <div className="mx-auto max-w-[1320px] px-6 py-16 md:px-10 md:py-20">
-          <div className="grid gap-10 md:grid-cols-12">
+      {/* HOW IT WORKS — short, clean, numbered */}
+      <section className="border-b border-[#1A1F2A]/10 bg-white">
+        <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
+          <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+            How it works
+          </p>
+          <h2 className="mt-2 max-w-[24ch] font-display text-3xl font-extrabold tracking-tight text-[#0B2545] md:text-4xl">
+            Four steps from question to cited answer.
+          </h2>
+
+          <div className="mt-10 grid gap-8 md:grid-cols-4">
+            {[
+              {
+                n: "01",
+                title: "Reason",
+                body: "Codex parses the question and identifies the relevant data domain, geography, and time range.",
+              },
+              {
+                n: "02",
+                title: "Plan",
+                body: "Codex emits a structured tool sequence — discover, describe, query, summarize, cite.",
+              },
+              {
+                n: "03",
+                title: "Tool",
+                body: "Bounded SoQL queries run through the TXLookup MCP server against live Socrata endpoints.",
+              },
+              {
+                n: "04",
+                title: "Complete",
+                body: "Codex synthesizes the records into a plain-English answer with mandatory citation.",
+              },
+            ].map((s) => (
+              <div key={s.n}>
+                <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+                  Step {s.n}
+                </span>
+                <h3 className="mt-3 font-display text-2xl font-bold tracking-tight text-[#0B2545]">
+                  {s.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#1A1F2A]/75">
+                  {s.body}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* AGENT BUILDERS */}
+      <section className="border-b border-[#1A1F2A]/10 bg-[#0B2545] text-white">
+        <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
+          <div className="grid gap-12 md:grid-cols-12">
             <div className="md:col-span-5">
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-[#BF0A30]">
-                For agent builders
+              <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#7BA8FF]">
+                For builders
               </p>
-              <h2 className="mt-3 font-display text-4xl font-extrabold uppercase leading-[0.95] tracking-tight md:text-6xl">
+              <h2 className="mt-2 font-display text-3xl font-extrabold leading-tight tracking-tight md:text-4xl">
                 Install TXLookup as a tool.
               </h2>
-              <p className="mt-6 text-base leading-relaxed text-black/80">
-                TXLookup ships an MCP server and a portable agent skill.
-                Drop them into Claude Code, Codex, or any MCP-compliant
-                runtime and your agent gets safe, bounded access to Texas
-                civic data with citation enforced.
+              <p className="mt-5 max-w-[44ch] text-base leading-relaxed text-white/80">
+                The repository ships an MCP server and a portable agent skill.
+                Drop them into Claude Code, Codex, or any MCP-compliant runtime
+                and your agent gets safe, bounded access to Texas civic data
+                with citation enforced.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-7 flex flex-wrap gap-3">
                 <a
                   href="https://github.com/ATX-TXLookup/TXLookup/blob/main/docs/usage.md"
-                  className="border-4 border-black bg-[#002868] px-7 py-3.5 font-display font-extrabold uppercase tracking-wider text-white shadow-[6px_6px_0_0_#000] hover:shadow-[3px_3px_0_0_#000] hover:translate-x-[3px] hover:translate-y-[3px]"
+                  className="rounded-sm bg-white px-5 py-2.5 font-display text-sm font-semibold text-[#0B2545] hover:bg-[#7BA8FF]"
                 >
                   Read docs →
                 </a>
                 <a
                   href="https://github.com/ATX-TXLookup/TXLookup/blob/main/skills/txlookup/SKILL.md"
-                  className="border-4 border-black bg-white px-7 py-3.5 font-display font-extrabold uppercase tracking-wider text-black shadow-[6px_6px_0_0_#BF0A30] hover:shadow-[3px_3px_0_0_#BF0A30] hover:translate-x-[3px] hover:translate-y-[3px]"
+                  className="rounded-sm border border-white/30 px-5 py-2.5 font-display text-sm font-semibold text-white hover:border-white"
                 >
                   See the skill →
                 </a>
@@ -320,72 +375,74 @@ export default function HomePage() {
             </div>
 
             <div className="md:col-span-7">
-              <div className="border-4 border-black bg-black p-5 font-mono text-xs leading-relaxed text-[#FFD93D] md:p-7 md:text-sm">
-                <p className="text-white/55"># Install in Claude Code</p>
-                <p className="mt-1">
-                  $ claude mcp add --transport stdio txlookup \
-                </p>
-                <p>
-                  &nbsp;&nbsp;"python /path/to/TXLookup/mcp/server.py"
-                </p>
-                <p className="mt-4 text-white/55"># Then ask anything</p>
+              <div className="rounded-md border border-white/15 bg-[#06182F] p-5 font-mono text-xs leading-relaxed text-[#D6E4FF] md:p-7 md:text-sm">
+                <p className="text-white/45"># Install in Claude Code</p>
+                <p className="mt-1">$ claude mcp add --transport stdio txlookup \</p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;"python /path/to/TXLookup/mcp/server.py"</p>
+                <p className="mt-5 text-white/45"># Then ask</p>
                 <p className="mt-1">$ claude</p>
                 <p>&gt; mcp__txlookup__discover_datasets("food trucks 78702")</p>
-                <p className="mt-1 text-white">
-                  → 3syk-w9eu (Austin Issued Construction Permits)
-                </p>
-                <p className="mt-4 text-white/55">
+                <p className="mt-1 text-white">→ 3syk-w9eu (Austin Issued Construction Permits)</p>
+                <p className="mt-5 text-white/45">
                   # Five tools: discover · describe · query · summarize · cite
                 </p>
               </div>
-              <p className="mt-3 font-mono text-[11px] uppercase tracking-wider text-black/65">
-                Bounded queries · 30s timeout · 5000-row cap · backoff on 429 · citation enforced
+              <p className="mt-3 font-mono text-[11px] uppercase tracking-wider text-white/55">
+                Bounded queries · 30s timeout · 5,000-row cap · backoff on 429 · citation enforced
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FOOTER — thick red band */}
-      <footer className="bg-[#BF0A30] text-white">
-        <div className="mx-auto max-w-[1320px] px-6 py-10 md:px-10">
-          <div className="grid gap-8 md:grid-cols-12">
+      {/* FOOTER */}
+      <footer className="bg-[#06182F] text-white/85">
+        <div className="mx-auto max-w-[1320px] px-6 py-12 md:px-10 md:py-14">
+          <div className="grid gap-10 md:grid-cols-12">
             <div className="md:col-span-5">
-              <p className="font-display text-xl font-extrabold uppercase tracking-tight">
-                TXLookup
-              </p>
-              <p className="mt-2 max-w-[40ch] text-sm leading-relaxed">
-                An open-source agent for Texas public data. MIT licensed.
-                Built on the Socrata SODA API, FastMCP, and structured
-                outputs.
+              <div className="flex items-center gap-3">
+                <span aria-hidden="true" className="block h-7 w-7 rounded-sm bg-white/85" />
+                <span className="font-display text-xl font-extrabold tracking-tight text-white">
+                  TXLookup
+                </span>
+              </div>
+              <p className="mt-4 max-w-[42ch] text-sm leading-relaxed">
+                An open-source agent for Texas public data. Built on the
+                Socrata SODA API, FastMCP, and structured outputs. MIT
+                licensed.
               </p>
             </div>
             <div className="md:col-span-2">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/70">
-                Product
+              <p className="font-display text-[11px] font-semibold uppercase tracking-wider text-white/55">
+                Use it
               </p>
               <ul className="mt-3 space-y-1 text-sm">
                 <li>
-                  <Link href="#datasets" className="hover:underline">
+                  <Link href="#search" className="hover:text-white">
+                    Search
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#datasets" className="hover:text-white">
                     Datasets
                   </Link>
                 </li>
                 <li>
-                  <Link href="/components" className="hover:underline">
-                    Components
+                  <Link href="#topics" className="hover:text-white">
+                    Topics
                   </Link>
                 </li>
               </ul>
             </div>
             <div className="md:col-span-2">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/70">
+              <p className="font-display text-[11px] font-semibold uppercase tracking-wider text-white/55">
                 Build
               </p>
               <ul className="mt-3 space-y-1 text-sm">
                 <li>
                   <a
                     href="https://github.com/ATX-TXLookup/TXLookup"
-                    className="hover:underline"
+                    className="hover:text-white"
                   >
                     GitHub
                   </a>
@@ -393,7 +450,7 @@ export default function HomePage() {
                 <li>
                   <a
                     href="https://github.com/ATX-TXLookup/TXLookup/issues"
-                    className="hover:underline"
+                    className="hover:text-white"
                   >
                     Issues
                   </a>
@@ -401,14 +458,14 @@ export default function HomePage() {
               </ul>
             </div>
             <div className="md:col-span-3">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/70">
-                Use it
+              <p className="font-display text-[11px] font-semibold uppercase tracking-wider text-white/55">
+                Integrate
               </p>
               <ul className="mt-3 space-y-1 text-sm">
                 <li>
                   <a
                     href="https://github.com/ATX-TXLookup/TXLookup/blob/main/skills/txlookup/SKILL.md"
-                    className="hover:underline"
+                    className="hover:text-white"
                   >
                     Agent skill (MCP)
                   </a>
@@ -416,7 +473,7 @@ export default function HomePage() {
                 <li>
                   <a
                     href="https://github.com/ATX-TXLookup/TXLookup/blob/main/docs/usage.md"
-                    className="hover:underline"
+                    className="hover:text-white"
                   >
                     Integration guide
                   </a>
@@ -424,8 +481,10 @@ export default function HomePage() {
               </ul>
             </div>
           </div>
-          <div className="mt-10 border-t-2 border-white/30 pt-5 font-mono text-[11px] uppercase tracking-wider text-white/80">
-            ALL DATA SOURCED FROM PUBLIC TEXAS OPEN-DATA PORTALS · ATTRIBUTION ENFORCED · 2026
+          <div className="mt-12 flex flex-wrap gap-y-2 border-t border-white/10 pt-5 text-[12px] text-white/55">
+            <span className="mr-6">All data sourced from public Texas open-data portals.</span>
+            <span className="mr-6">Attribution enforced.</span>
+            <span>Set in Public Sans + JetBrains Mono · 2026</span>
           </div>
         </div>
       </footer>

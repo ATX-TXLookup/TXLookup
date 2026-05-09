@@ -81,9 +81,10 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ["Manrope", "system-ui", "sans-serif"],
-        sans: ["Inter", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+        display: ["var(--font-display)", "Public Sans", "system-ui", "sans-serif"],
+        body: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
+        sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
+        mono: ["var(--font-jetbrains-mono)", "JetBrains Mono", "ui-monospace", "monospace"],
       },
       fontSize: {
         // tokens from DESIGN.md typography
