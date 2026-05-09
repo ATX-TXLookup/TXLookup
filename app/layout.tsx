@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Inter, Manrope, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Public_Sans } from "next/font/google";
 import "./globals.css";
 
-const manrope = Manrope({
+// Public Sans — the US Web Design System font. Civic-portal authoritative.
+const publicSans = Public_Sans({
   subsets: ["latin"],
-  variable: "--font-manrope",
-  weight: ["700", "800"],
+  variable: "--font-display",
+  weight: ["400", "500", "600", "700", "900"],
 });
 
 const inter = Inter({
@@ -34,7 +35,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${manrope.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${publicSans.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
       <body>{children}</body>
     </html>
