@@ -51,5 +51,5 @@ Miro sticky note colors (use these exact values):
 The $500 Miro MCP bounty requires:
 1. Working MCP server that exposes Miro operations as tools
 2. Agent can create boards and populate them autonomously
-3. Live demo showing board creation from a voice command
+3. Live demo showing board creation from a data query
 4. Clean visual layout (not random placement)

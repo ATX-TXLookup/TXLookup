@@ -1,76 +1,109 @@
-# TXLookup — Voice-Driven Autonomous Task Agent
+# TXLookup — Open Data Agents for Texas
 
 **AITX Community x Codex Hackathon | May 8-10, 2026 | Antler VC, Austin TX**
 
-**Track:** Agents Track (Reason, Plan, Tool Use, Complete)
+**Tracks:** Agents + Open Data (combined)
 **Bounty:** Miro MCP Integration ($500)
 
 ## What It Does
 
-TXLookup is a voice-driven autonomous agent that takes a spoken goal, breaks it into steps, interacts with web services and APIs, and completes real tasks — not just answers questions.
+TXLookup connects autonomous agents to Texas and Austin open data portals. Point it at any public dataset — permits, inspections, business filings, census data, 311 calls, transit routes — and the agent ingests, analyzes, and visualizes what it finds on Miro boards.
 
-You speak. It plans. It acts. It delivers.
+It doesn't just answer questions. It reasons about data, plans multi-step analyses, uses tools to query and transform datasets, and delivers finished visual outputs.
 
 ### Example Flows
-- "Research the top 5 AI startups in Austin and put them on a Miro board"
-- "Fill out this job application using my resume"
-- "Find open permits in my neighborhood and summarize the trends"
-- "Plan my errands for Saturday, check store hours, and map the route"
+- "Show me all restaurant health inspections in 78701 that failed in the last 6 months"
+- "Compare Austin building permit trends across zip codes and map the hotspots on Miro"
+- "Pull the latest 311 complaint data, categorize by type, and show me the top issues by neighborhood"
+- "Find which Austin startups filed with the TX Secretary of State this quarter"
 
-## Architecture
+## Architecture (from whiteboard)
 
 ```
 ┌─────────────────────────────────────────┐
-│                  UI                      │
-│         (Next.js + Voice Input)          │
+│               Dataset                    │
+│   (Texas Open Data, Austin Data Portal,  │
+│    data.texas.gov, Socrata APIs)         │
 └─────────────┬───────────────────────────┘
               │
 ┌─────────────▼───────────────────────────┐
-│              Context Layer               │
-│    (Goal → Break → Plan → Execute)       │
+│              Ingest                      │
+│   (Fetch, parse, normalize, validate)    │
+└─────────────┬───────────────────────────┘
+              │
+┌─────────────▼───────────────────────────┐
+│                DB                        │
+│     (Supabase — structured storage)      │
 └─────────┬──────────┬────────────────────┘
           │          │
 ┌─────────▼──┐ ┌────▼─────┐ ┌───────────┐
 │   Agents   │ │   APIs   │ │    MCP    │
-│            │ │          │ │  Servers  │
-│ - Planner  │ │ - Web    │ │ - Miro    │
-│ - Browser  │ │ - Search │ │ - Data    │
-│ - Writer   │ │ - LLM    │ │ - Tools   │
+│  (Context) │ │          │ │  Servers  │
+│            │ │ - Socrata│ │           │
+│ - Planner  │ │ - Search │ │ - Miro    │
+│ - Analyst  │ │ - LLM    │ │ - Data    │
+│ - Browser  │ │ - Geo    │ │ - Tools   │
 └─────────┬──┘ └────┬─────┘ └─────┬─────┘
           │          │             │
 ┌─────────▼──────────▼─────────────▼──────┐
-│                  DB                      │
-│     (Task state, results, context)       │
+│                  UI                      │
+│   (Next.js — search, explore, results)   │
+│   (Miro — visual data boards)            │
 └─────────────────────────────────────────┘
 ```
 
+## Core Loop: Reason → Plan → Tool Use → Complete
+
+1. **Reason** — Agent receives a data question, identifies which datasets and sources are relevant
+2. **Plan** — Breaks the analysis into ordered steps: fetch data, filter, aggregate, compare, visualize
+3. **Tool Use** — Executes each step: Socrata API queries, data transforms, Miro board creation
+4. **Complete** — Delivers a finished Miro board with organized findings + text summary
+
 ## Tech Stack
 
-- **Frontend:** Next.js 14, React, Tailwind CSS
-- **Voice:** Web Speech API / Gemini Live API
-- **Agent Engine:** OpenAI Codex + GPT-4o for reasoning
-- **Browser Automation:** Playwright (headless web interaction)
-- **MCP Servers:** Miro MCP, custom tool servers via FastMCP
-- **Database:** Supabase for task state
-- **Deployment:** Vercel (frontend) + local agent runtime
+| Layer | Tech |
+|-------|------|
+| **Frontend** | Next.js 14, React, Tailwind CSS |
+| **Agent Engine** | Python 3.11+, OpenAI Codex / GPT-4o |
+| **Data Sources** | data.texas.gov, data.austintexas.gov (Socrata SODA API) |
+| **Data Ingestion** | httpx, pandas, Socrata API client |
+| **Database** | Supabase (PostgreSQL) |
+| **MCP Server** | FastMCP — exposes agent + data tools |
+| **Visualization** | Miro MCP — boards, frames, stickies, cards |
+| **Browser** | Playwright (for data portals without APIs) |
+
+## Open Data Sources
+
+| Source | URL | API |
+|--------|-----|-----|
+| Texas Open Data | data.texas.gov | Socrata SODA |
+| Austin Open Data | data.austintexas.gov | Socrata SODA |
+| TX Secretary of State | sos.state.tx.us | Web scraping |
+| TX Comptroller | comptroller.texas.gov | CSV/Excel downloads |
+| US Census (TX) | data.census.gov | Census API |
+
+### Socrata SODA API
+Most Texas/Austin open data portals run on Socrata. Query any dataset with SQL-like syntax:
+```
+https://data.austintexas.gov/resource/{dataset-id}.json?$where=zip_code='78701'&$limit=1000
+```
 
 ## Quick Start
 
 ```bash
-# Clone
 git clone https://github.com/ATX-TXLookup/TXLookup.git
 cd TXLookup
 
 # Frontend
 npm install
-cp .env.example .env  # Add your API keys
+cp .env.example .env
 npm run dev
 
-# Agent runtime (separate terminal)
+# Agent runtime
 pip install -r requirements.txt
 python agent/main.py
 
-# MCP server (separate terminal)
+# MCP server
 python mcp/server.py
 ```
 
@@ -78,35 +111,18 @@ python mcp/server.py
 
 | Criteria | How We Hit It |
 |----------|--------------|
-| **Reason** | LLM parses goal, extracts intent and constraints |
-| **Plan** | Decomposes into ordered steps with fallbacks |
-| **Tool Use** | Playwright browser, Miro MCP, web search APIs |
-| **Complete** | Delivers organized Miro board + text summary |
+| **Reason** | Agent parses data questions, identifies relevant TX/Austin datasets |
+| **Plan** | Decomposes into data fetch → transform → analyze → visualize steps |
+| **Tool Use** | Socrata API, Playwright scraping, pandas transforms, Miro MCP |
+| **Complete** | Delivers organized Miro board with frames, color-coded findings, summary |
 
 ## Contributing
 
-We welcome both human and AI agent contributors. See:
-- [`AGENTS.md`](AGENTS.md) — Instructions for AI agents (Codex, Claude Code, Cursor)
-- [`CLAUDE.md`](CLAUDE.md) — Claude Code specific context
+Both humans and AI agents contribute to this repo. See:
+- [`AGENTS.md`](AGENTS.md) — Instructions for AI coding agents (Codex, Cursor, etc.)
+- [`CLAUDE.md`](CLAUDE.md) — Additional agent context
 - [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md) — PR template
 - [`.github/ISSUE_TEMPLATE/`](.github/ISSUE_TEMPLATE/) — Issue templates
-
-### For Humans
-1. Open an issue describing what you want to build
-2. Label it `human` or `agent-task` depending on who should do it
-3. Submit a PR using the template
-
-### For AI Agents
-1. Read `AGENTS.md` first
-2. Pick an issue labeled `agent-task` or `good-first-issue`
-3. Create a branch, implement, open a PR
-
-## Miro Integration
-
-The agent creates and populates Miro boards as visual output:
-- Research results organized with frames and color-coded stickies
-- Task progress boards (To Do / In Progress / Done)
-- Data visualizations with cards and connectors
 
 ## Team
 

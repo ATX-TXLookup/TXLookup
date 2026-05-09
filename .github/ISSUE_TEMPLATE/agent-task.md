@@ -1,6 +1,6 @@
 ---
 name: Agent Task
-about: A task specifically designed for AI agents (Codex, Claude Code) to pick up
+about: A task specifically designed for AI agents (Codex, Cursor) to pick up
 labels: agent-task, good-first-issue
 ---
 

@@ -19,7 +19,7 @@ labels: enhancement
 ## Who Should Build This
 
 - [ ] `human` — Requires human judgment or domain knowledge
-- [ ] `agent-task` — AI agent can handle this (Codex, Claude Code)
+- [ ] `agent-task` — AI agent can handle this (Codex, Cursor)
 - [ ] Either
 
 ## Acceptance Criteria

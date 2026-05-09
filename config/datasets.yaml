@@ -1,0 +1,62 @@
+# Known TX/Austin datasets — pre-cataloged for faster lookups
+# Agents can discover more via the Socrata catalog API
+
+austin:
+  portal: data.austintexas.gov
+  datasets:
+    building_permits:
+      id: 3syk-w9eu
+      name: "Issued Construction Permits"
+      key_columns: [permit_type, status_current, original_address, original_zip]
+      updated: daily
+
+    food_inspections:
+      id: ecmv-9xxi
+      name: "Food Establishment Inspection Scores"
+      key_columns: [restaurant_name, score, inspection_date, address, zip_code]
+      updated: weekly
+
+    service_requests_311:
+      id: i26j-ai4z
+      name: "Austin 311 Service Requests"
+      key_columns: [description, sr_status_desc, sr_location, created_date]
+      updated: daily
+
+    code_violations:
+      id: 6wtj-zbtb
+      name: "Code Violation Cases"
+      key_columns: [case_type, case_status, location, opened_date]
+      updated: daily
+
+    crime_reports:
+      id: fdj4-gpfu
+      name: "Crime Reports"
+      key_columns: [crime_type, location_type, occurred_date, zip_code]
+      updated: weekly
+
+    traffic_fatalities:
+      id: y2wy-tgr5
+      name: "Austin Traffic Fatalities"
+      key_columns: [case_status, location, date, mode]
+      updated: monthly
+
+texas:
+  portal: data.texas.gov
+  datasets:
+    active_businesses:
+      id: 7dv9-jx6p
+      name: "Active Franchise Tax Permit Holders"
+      key_columns: [taxpayer_name, taxpayer_city, taxpayer_state]
+      updated: quarterly
+
+    state_expenditures:
+      id: mfhq-bx4n
+      name: "State of Texas Expenditures"
+      key_columns: [agency_name, vendor_name, amount, fiscal_year]
+      updated: monthly
+
+    mixed_beverage:
+      id: naix-2893
+      name: "Mixed Beverage Gross Receipts"
+      key_columns: [location_name, location_city, total_receipts]
+      updated: monthly

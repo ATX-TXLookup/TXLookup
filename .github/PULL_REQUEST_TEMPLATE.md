@@ -21,7 +21,7 @@
 ## Author Type
 
 - [ ] Human contributor
-- [ ] AI agent (Codex / Claude Code / Cursor)
+- [ ] AI agent (Codex / Cursor)
 
 ## Checklist
 

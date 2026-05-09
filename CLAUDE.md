@@ -1,13 +1,13 @@
-# CLAUDE.md — Claude Code Context
+# CLAUDE.md
 
-> This file is automatically read by Claude Code when working in this repo.
+> Context file for AI agents working in this repo.
 
 ## Project: TXLookup
 
-Voice-driven autonomous task agent. Speaks a goal, plans steps, executes with tools, delivers results on Miro boards.
+Autonomous data agent for Texas/Austin open data. Combines Agents Track (Reason, Plan, Tool Use, Complete) with Open Data Track. Ingests public datasets, analyzes them with LLM-powered agents, visualizes results on Miro boards.
 
 **Hackathon:** AITX Community x Codex Hackathon (May 8-10, 2026)
-**Track:** Agents Track — Reason, Plan, Tool Use, Complete
+**Tracks:** Agents + Open Data (combined)
 **Bounty:** Miro MCP Integration ($500)
 
 ## Quick Context
@@ -16,12 +16,20 @@ Voice-driven autonomous task agent. Speaks a goal, plans steps, executes with to
 - Agent runtime: Python 3.11+ async in `agent/`
 - MCP server: FastMCP in `mcp/`
 - Prompts: Markdown system prompts in `prompts/`
-- Config: Model routing in `config/`
+- Config: Model routing in `config/models.yaml`, dataset catalog in `config/datasets.yaml`
+
+## Architecture: Dataset → Ingest → DB → Context → UI
+
+1. **Dataset** — TX/Austin open data portals (Socrata SODA API)
+2. **Ingest** — Fetch, parse, normalize, validate
+3. **DB** — Supabase (PostgreSQL) for structured storage
+4. **Context** — Agents reason over data: plan queries, analyze results, identify patterns
+5. **UI** — Next.js search interface + Miro boards for visual output
 
 ## Core Loop
 
 ```
-Goal → Reason → Plan → Execute (with tools) → Complete
+Data Question → Reason → Plan → Execute (tools) → Complete (Miro board)
 ```
 
 If a step fails, the agent replans from the failure point. Max 3 retries per step, 10 steps per plan.
@@ -31,7 +39,7 @@ If a step fails, the agent replans from the failure point. Max 3 retries per ste
 ### Python (`agent/`, `mcp/`)
 - Always `async/await` — the agent is concurrent
 - Type hints on every function signature
-- Pydantic models for structured data (plans, results, task state)
+- Pydantic models for structured data (datasets, records, plans)
 - Every tool returns `{"status": "completed|failed", "result": ..., "artifacts": [...]}`
 - Try/except with structured error returns — never crash the loop
 - Imports at top, no inline imports except for optional deps
@@ -53,25 +61,35 @@ If a step fails, the agent replans from the failure point. Max 3 retries per ste
 | File | Purpose |
 |------|---------|
 | `agent/main.py` | Orchestrator — the brain |
-| `agent/planner.py` | LLM-powered task decomposition |
+| `agent/planner.py` | LLM-powered query decomposition |
 | `agent/executor.py` | Step execution with tool dispatch |
-| `agent/tools/*.py` | Individual tool implementations |
-| `mcp/server.py` | FastMCP server exposing agent as MCP tools |
+| `agent/tools/data.py` | Socrata SODA API client — primary data tool |
+| `agent/tools/miro.py` | Miro board creation and population |
+| `agent/tools/browser.py` | Playwright for portals without APIs |
+| `mcp/server.py` | FastMCP server exposing agent + data tools |
 | `prompts/*.md` | System prompts for each agent role |
-| `app/page.tsx` | Main voice interface |
-| `app/api/agent/route.ts` | POST endpoint for goal submission |
+| `config/datasets.yaml` | Catalog of known TX/Austin datasets |
+| `app/page.tsx` | Main search/explore interface |
+
+## Data Sources
+
+Primary: Socrata SODA API (used by data.texas.gov, data.austintexas.gov)
+```
+https://data.austintexas.gov/resource/{dataset-id}.json?$where=...&$limit=1000
+```
+
+Secondary: Playwright scraping for portals without APIs (TX SOS, Comptroller)
 
 ## Environment Variables
 
 ```
-OPENAI_API_KEY     — Codex / GPT-4o
-GEMINI_API_KEY     — Voice (Gemini Live API)
+OPENAI_API_KEY     — Codex / GPT-4o for reasoning
 MIRO_API_TOKEN     — Miro board operations
 MIRO_BOARD_ID      — Default board
-SUPABASE_URL       — Task state storage
+SUPABASE_URL       — Data storage
 SUPABASE_KEY       — Supabase anon key
-FEATHERLESS_API_KEY — Open-source model inference
-FAL_API_KEY        — Image/video generation
+FEATHERLESS_API_KEY — Open-source model inference (free)
+SOCRATA_APP_TOKEN  — Higher rate limits on Socrata APIs (optional)
 ```
 
 ## Running Locally
@@ -83,19 +101,11 @@ python agent/main.py                # Agent runtime
 python mcp/server.py                # MCP server
 ```
 
-## Reference Repos
-
-These sibling repos have working code to pull from:
-- `../studypal/` — Gemini Live voice, WebSocket, Playwright
-- `../homenest/mcp_server.py` — FastMCP server (working example)
-- `../job_copilot/` — LiteLLM multi-model routing
-- `../ml-intern/` — Agentic loop with doom loop detection
-- `../hd-research-agent/` — Multi-agent autonomous research
-
 ## What NOT to Do
 
 - Don't add new top-level directories without updating AGENTS.md
 - Don't use synchronous I/O in the agent runtime
-- Don't hardcode API keys or board IDs
+- Don't hardcode API keys, board IDs, or dataset IDs
 - Don't skip error handling on tool calls
 - Don't make the orchestrator complex — push logic to tools
+- Don't store raw API responses without normalizing first
