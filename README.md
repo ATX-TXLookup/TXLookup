@@ -1,9 +1,20 @@
 # TXLookup — Open Data Agents for Texas
 
-**AITX Community x Codex Hackathon | May 8-10, 2026 | Antler VC, Austin TX**
+**AITX Community × Codex Hackathon | May 8-10, 2026 | Antler VC, Austin TX**
 
-**Tracks:** Agents + Open Data (combined)
-**Bounty:** Miro MCP Integration ($500)
+**Tracks:** Agents + Brainforge / Vicinity Texas Open Data
+**Bounties:** Miro MCP ($500), DeepInvent Best Patentable Hack ($500 + provisional patent)
+
+## Joining the build (5-minute version)
+
+1. Make sure you have org write access to `ATX-TXLookup` (ping Ravinder with your GH handle if not)
+2. Read [`docs/setup.md`](docs/setup.md) — clone, env, smoke test (~20 min)
+3. Read [`CONTRIBUTING.md`](CONTRIBUTING.md) — how we coordinate (issues, branches, PRs)
+4. Pick your first issue: `gh issue list --repo ATX-TXLookup/TXLookup --label ready --label priority:p0`
+5. Join WhatsApp: https://chat.whatsapp.com/EcDliphWA7XA4QImK2drhy
+6. Track via the pinned 📌 Demo Tracker issue
+
+**Code freeze: Sunday May 10, 11:00 AM CT.** Working backward from that — see [`docs/plan.md`](docs/plan.md).
 
 ## What It Does
 
