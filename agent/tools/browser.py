@@ -6,9 +6,7 @@ Handles web navigation, form filling, and data extraction.
 from typing import Dict, Any
 
 
-# TODO: Codex — implement browser tool
-# Reference: ../studypal/ for Playwright patterns
-# Reference: prompts/browser.md for system prompt
+# TODO: implement browser tool with Playwright (see prompts/browser.md)
 
 async def browser_navigate(url: str) -> Dict[str, Any]:
     """

@@ -1,8 +1,7 @@
 ---
 version: alpha
 name: TXLookup
-description: Civic-data design system for TXLookup — Texas open-data agent. Extends the AISOFT stone-and-ember baseline with civic-blue district accents and signal greens/reds for inspection / permit / violation states. Manrope display + Inter body. Light primary, dark variant available for power-user views.
-extends: AISOFT
+description: Civic-data design system for TXLookup — Texas open-data agent. Warm stone surfaces with an ember accent for action, civic-blue for maps and data, and a signal trio (pass/warn/fail) for inspection / permit / violation states. Manrope display + Inter body. Light primary, dark variant available for power-user views.
 colors:
   primary: "#9E3D00"
   primary-container: "#C64F00"
@@ -232,7 +231,7 @@ components:
 
 ## Overview
 
-**Civic-data, accessible, agent-forward.** TXLookup helps Texans explore public data without becoming part-time analysts. The brand inherits AISOFT's warm stone-and-ember baseline (cream surfaces, ember accent, Manrope/Inter type) and extends it with the things this product specifically needs:
+**Civic-data, accessible, agent-forward.** TXLookup helps Texans explore public data without becoming part-time analysts. The brand pairs warm stone surfaces with a single ember accent for action — calm enough for a parent on a phone, dense enough for a journalist at a desk. On top of that baseline we add what this product specifically needs:
 
 - A **civic blue** secondary (`#3D5AAB`, "bluebonnet") for districts, maps, and data viz
 - **Signal colors** for the three states civic data lives in: pass (green), warn (amber), fail (red)
@@ -256,7 +255,7 @@ If a component doesn't serve at least one persona, it doesn't ship.
 ## Colors
 
 ### Primary (ember)
-Inherits AISOFT. `#9E3D00` for the single most important call-to-action on any view. Never decorative.
+`#9E3D00`. The single most important call-to-action on any view. Never decorative.
 
 - **Primary (`#9E3D00`).** "Ask" button, claim CTA, active nav state, agent-step-active.
 - **Primary Container (`#C64F00`).** Hover state for primary buttons.
@@ -286,11 +285,11 @@ Hand-tuned for Austin's 10 council districts but reusable for any 10-way categor
 `district-1` through `district-10` are visually distinguishable in colorblind-safe pairs and balanced in luminance. **Use the full palette only when comparing all 10**; for fewer than 10 categories, prefer secondary + signal-pass + signal-warn + signal-fail.
 
 ### Surfaces
-Inherits AISOFT's stone scale. `surface` (`#FCF9F8`) for body, `surface-low` for alternating sections, `surface-lowest` for cards, `inverse-surface` for the announcement bar and footer.
+A five-step warm-stone scale. `surface` (`#FCF9F8`) for body, `surface-low` for alternating sections, `surface-lowest` for cards, `inverse-surface` for the announcement bar and footer. Cream, never pure white.
 
 ## Typography
 
-Inherits AISOFT exactly. **Manrope 700/800** for display + headings + nav + label-caps. **Inter 400/500/600** for all body and UI text. **JetBrains Mono** only for permit IDs, dataset IDs, SHA citations, and code blocks. Never decorative.
+Two families, strict hierarchy. **Manrope 700/800** for display + headings + nav + label-caps. **Inter 400/500/600** for all body and UI text. **JetBrains Mono** only for permit IDs, dataset IDs, SHA citations, and code blocks. Never decorative.
 
 Display headlines use a fluid `clamp(2.5rem, 6vw, 4.5rem)`. The agent's step name (Reason / Plan / Tool / Complete) uses `label-caps` to read as a state badge, not a noun.
 
@@ -305,7 +304,7 @@ Display headlines use a fluid `clamp(2.5rem, 6vw, 4.5rem)`. The agent's step nam
 
 ## Elevation & Depth
 
-Inherits AISOFT's warm-light shadows.
+Warm-light shadows — long, low-opacity, suggesting morning light on limestone.
 
 - **Card rest:** `0 1px 0 rgba(140,113,102,0.12)` (hairline only).
 - **Card hover:** `0 20px 50px -15px rgba(158,61,0,0.08)`.
@@ -358,7 +357,7 @@ Three chips below the search input. Each shows an example query rotating per per
 
 Tapping a chip pre-fills the search and submits.
 
-### Standard Inheritances (from AISOFT)
+### Standard Components
 - **Button Primary** — Ember CTA, full-pill, white text. The "Ask" button.
 - **Button Secondary** — Bluebonnet, full-pill, for "Compare" / "Show map" / "Export" actions.
 - **Button Ghost** — Transparent + hairline border, primary text. Used for "Clear filters", "Try another question".

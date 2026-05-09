@@ -51,7 +51,7 @@ Areas are *primary ownership*, not exclusive. Anyone can pick up anything — bu
 - Merge requires **one approval**. The author hits the merge button. Squash-merge by default — keeps `main` history clean.
 - After merge, update the [pinned tracking issue](https://github.com/ATX-TXLookup/TXLookup/issues) with one bullet: "✅ #N — short summary"
 
-## The one-pusher rule (lessons from prior hackathons)
+## The one-pusher rule
 
 When two agents (or two humans) push to the same branch within seconds of each other, you get nasty merge conflicts at 11pm Saturday. To avoid this:
 - **Each PR has one author** (don't both push to the same feature branch)

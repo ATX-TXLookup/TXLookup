@@ -288,15 +288,6 @@ async def fetch_dataset(portal: str, dataset_id: str, query: dict) -> Dict[str, 
         return {"status": "failed", "error": str(e), "result": None}
 ```
 
-## Reference Repos
-
-These sibling repos have working code to reference:
-- `../studypal/` — WebSocket, Playwright browser automation
-- `../homenest/mcp_server.py` — FastMCP server (working example)
-- `../job_copilot/` — LiteLLM multi-model routing, agentic search
-- `../ml-intern/` — Agentic loop with doom loop detection
-- `../hd-research-agent/` — Multi-agent autonomous research system
-
 ## Priority Build Order
 
 1. Data ingestion tool — Socrata SODA API client for TX/Austin open data

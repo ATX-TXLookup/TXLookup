@@ -62,13 +62,6 @@ real Texas data, real results."
 - Miro MCP — early access + $500 bounty
 - Fal.ai API key for image/video if needed
 
-## Existing Code Arsenal
-- **StudyPal** — WebSocket, Playwright browser automation
-- **Applly/job_copilot** — Agentic search, LiteLLM, multi-model routing
-- **Homenest** — FastMCP server implementation (Python)
-- **ML Intern** — Agentic loop with doom loop detection
-- **HD Research Agent** — Autonomous multi-agent research
-
 ## Win Conditions
 1. Live working demo — real data from a real Texas portal
 2. Agent reasons about which dataset to use (not hardcoded)

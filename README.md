@@ -126,9 +126,8 @@ Both humans and AI agents contribute to this repo. See:
 
 ## Team
 
-- **Ravinder Jilkapally** — Principal Consultant, AISOFT LLC
-  - 6 hackathons, 1st place DGX Spark (Undervolt), Runner-up GTC (Studio Copilot)
-  - Built: RefereAI, Sideline, CoachClaw, StudyPal, Applly, HD Research Hub
+Built at the AITX Community x Codex Hackathon, May 8-10, 2026.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for how the team coordinates work.
 
 ## License
 

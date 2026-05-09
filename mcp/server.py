@@ -1,13 +1,11 @@
 """
-TXLookup MCP Server — Exposes open data agent as MCP tools.
-Built with FastMCP (same pattern as Homenest).
+TXLookup MCP Server — exposes the open-data agent as MCP tools.
 
-Combines agent capabilities with direct data access + Miro visualization.
-Qualifies for the Miro MCP bounty ($500).
+Combines agent capabilities with direct data access plus visual output for the
+Miro MCP bounty.
 """
 
-# TODO: Codex — install fastmcp: pip install fastmcp
-# Reference: ../homenest/mcp_server.py for working FastMCP example
+# TODO: install fastmcp — `pip install fastmcp`
 
 from fastmcp import FastMCP
 
