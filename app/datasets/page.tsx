@@ -96,8 +96,8 @@ export default async function DatasetsUniversePage() {
   const totalRows = summaries.reduce((sum, d) => sum + (d.row_count ?? 0), 0);
 
   return (
-    <main className="min-h-screen bg-tx-cream text-tx-ink font-body">
-      <div className="bg-tx-navy text-white">
+    <main className="min-h-screen bg-[var(--ds-bg)] text-[var(--ds-text)] font-body">
+      <div className="bg-[var(--ds-bg-elev)] text-white">
         <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-6 py-2 text-[13px] md:px-10">
           <span>The corpus · grown by the dataset scout, queried by every agent.</span>
           <span className="hidden font-mono text-[11px] uppercase tracking-wider text-white/70 md:inline">
@@ -108,7 +108,7 @@ export default async function DatasetsUniversePage() {
 
       {/* Hero */}
       <section
-        className="border-b border-tx-ink/10"
+        className="border-b border-[var(--ds-border)]"
         style={{
           background: "var(--tx-navy)",
           backgroundImage:
@@ -116,16 +116,16 @@ export default async function DatasetsUniversePage() {
         }}
       >
         <div className="mx-auto max-w-[1320px] px-6 py-12 md:px-10 md:py-16">
-          <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-tx-sky">
+          <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-accent)]">
             The universe
           </p>
-          <h1 className="mt-3 max-w-[26ch] font-display text-4xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl">
+          <h1 className="mt-3 max-w-[26ch] font-display-serif text-4xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl">
             Texas civic data,<br />
-            <span className="italic text-tx-gold">one corpus.</span>
+            <span className="italic text-[var(--ds-warn)]">one corpus.</span>
           </h1>
           <p className="mt-5 max-w-[58ch] text-base leading-relaxed text-white/85 md:text-lg">
             Every dataset our agents can query, in one place. Curated across Austin, Dallas, San Antonio, Houston, and the state. Pre-canned questions per dataset. Live counts at request time. Growing every 6 hours via the {" "}
-            <Link href="/agents/dataset-scout" className="text-tx-gold underline">
+            <Link href="/agents/dataset-scout" className="text-[var(--ds-warn)] underline">
               dataset scout
             </Link>
             .
@@ -134,7 +134,7 @@ export default async function DatasetsUniversePage() {
       </section>
 
       {/* Stat strip */}
-      <section className="border-b border-tx-ink/10 bg-white">
+      <section className="border-b border-[var(--ds-border)] bg-white">
         <div className="mx-auto max-w-[1320px] px-6 py-8 md:px-10">
           <div className="grid gap-px bg-tx-ink/10 md:grid-cols-4">
             <Tile label="Datasets in catalog" value={summaries.length.toString()} />
@@ -146,19 +146,19 @@ export default async function DatasetsUniversePage() {
       </section>
 
       {/* Filter + jump nav */}
-      <section className="sticky top-0 z-10 border-b border-tx-ink/10 bg-tx-cream/95 backdrop-blur">
+      <section className="sticky top-0 z-10 border-b border-[var(--ds-border)] bg-[var(--ds-bg)]/95 backdrop-blur">
         <div className="mx-auto max-w-[1320px] px-6 py-4 md:px-10">
           <div className="flex flex-wrap items-center gap-3">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-tx-ink/55">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[var(--ds-text)]/55">
               Jump to
             </p>
             {cities.map((city) => (
               <a
                 key={city}
                 href={`#${city.toLowerCase().replace(/\s+/g, "-")}`}
-                className="rounded-sm border border-tx-ink/20 bg-white px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-tx-navy hover:border-tx-rust hover:text-tx-rust"
+                className="rounded-sm border border-tx-ink/20 bg-white px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--ds-text)] hover:border-[var(--ds-warm)] hover:text-[var(--ds-warm)]"
               >
-                {city} <span className="text-tx-ink/55">({byCity[city].length})</span>
+                {city} <span className="text-[var(--ds-text)]/55">({byCity[city].length})</span>
               </a>
             ))}
           </div>
@@ -167,45 +167,45 @@ export default async function DatasetsUniversePage() {
 
       {/* Per-city dataset grids */}
       {cities.map((city) => (
-        <section key={city} className="border-b border-tx-ink/10 bg-white" id={city.toLowerCase().replace(/\s+/g, "-")}>
+        <section key={city} className="border-b border-[var(--ds-border)] bg-white" id={city.toLowerCase().replace(/\s+/g, "-")}>
           <div className="mx-auto max-w-[1320px] px-6 py-12 md:px-10 md:py-16">
             <div className="flex items-baseline justify-between gap-4">
               <div>
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
                   {byCity[city].length} dataset{byCity[city].length === 1 ? "" : "s"}
                 </p>
-                <h2 className="mt-2 font-display text-3xl font-bold text-tx-navy md:text-4xl">
+                <h2 className="mt-2 font-display-serif text-3xl font-bold text-[var(--ds-text)] md:text-4xl">
                   {city}
                 </h2>
               </div>
-              <p className="hidden font-mono text-[11px] uppercase tracking-wider text-tx-ink/55 md:block">
+              <p className="hidden font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text)]/55 md:block">
                 {byCity[city].reduce((s, d) => s + (d.row_count ?? 0), 0).toLocaleString()} rows total
               </p>
             </div>
             <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {byCity[city].map((d) => (
-                <article key={d.id} className="border border-tx-ink/15 bg-tx-cream">
-                  <div className="border-b border-tx-ink/10 p-5">
-                    <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
+                <article key={d.id} className="border border-[var(--ds-border)] bg-[var(--ds-bg)]">
+                  <div className="border-b border-[var(--ds-border)] p-5">
+                    <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warn)]">
                       {d.category}
                     </p>
-                    <h3 className="mt-2 font-display text-lg font-bold text-tx-navy">{d.title}</h3>
-                    <p className="mt-1 font-mono text-[10px] text-tx-ink/55">
+                    <h3 className="mt-2 font-display-serif text-lg font-bold text-[var(--ds-text)]">{d.title}</h3>
+                    <p className="mt-1 font-mono text-[10px] text-[var(--ds-text)]/55">
                       {d.id} · {d.portal}
                     </p>
                   </div>
                   <div className="px-5 py-4">
-                    {d.blurb && <p className="text-sm leading-relaxed text-tx-ink/85 line-clamp-2">{d.blurb}</p>}
-                    <p className="mt-3 font-mono text-[11px] text-tx-ink/65">
-                      <span className="font-bold text-tx-navy">
+                    {d.blurb && <p className="text-sm leading-relaxed text-[var(--ds-text)]/85 line-clamp-2">{d.blurb}</p>}
+                    <p className="mt-3 font-mono text-[11px] text-[var(--ds-text)]/65">
+                      <span className="font-bold text-[var(--ds-text)]">
                         {d.row_count !== null ? d.row_count.toLocaleString() : "—"}
                       </span>{" "}
                       rows live
                     </p>
                   </div>
                   {d.sample_questions.length > 0 && (
-                    <div className="border-t border-tx-ink/10 px-5 py-4">
-                      <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-tx-rust">
+                    <div className="border-t border-[var(--ds-border)] px-5 py-4">
+                      <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[var(--ds-warm)]">
                         What to ask
                       </p>
                       <ul className="mt-2 space-y-1">
@@ -213,7 +213,7 @@ export default async function DatasetsUniversePage() {
                           <li key={q}>
                             <Link
                               href={`/q?q=${encodeURIComponent(q)}&dataset=${d.id}`}
-                              className="text-sm text-tx-navy hover:text-tx-rust hover:underline"
+                              className="text-sm text-[var(--ds-text)] hover:text-[var(--ds-warm)] hover:underline"
                             >
                               · {q}
                             </Link>
@@ -222,17 +222,17 @@ export default async function DatasetsUniversePage() {
                       </ul>
                     </div>
                   )}
-                  <div className="flex items-center justify-between border-t border-tx-ink/10 px-5 py-3">
+                  <div className="flex items-center justify-between border-t border-[var(--ds-border)] px-5 py-3">
                     <Link
                       href={`/datasets/${d.id}`}
-                      className="font-mono text-[11px] font-semibold uppercase tracking-wider text-tx-rust hover:text-tx-navy"
+                      className="font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--ds-warm)] hover:text-[var(--ds-text)]"
                     >
                       Open dataset →
                     </Link>
                     {d.has_report && (
                       <Link
                         href={`/reports`}
-                        className="font-mono text-[11px] font-semibold uppercase tracking-wider text-tx-gold hover:text-tx-navy"
+                        className="font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--ds-warn)] hover:text-[var(--ds-text)]"
                       >
                         Read report →
                       </Link>
@@ -246,12 +246,12 @@ export default async function DatasetsUniversePage() {
       ))}
 
       {/* Help-grow CTA */}
-      <section className="border-b border-tx-ink/10 bg-tx-navy text-white">
+      <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)] text-white">
         <div className="mx-auto max-w-[1320px] px-6 py-12 md:px-10 md:py-16">
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
+          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warn)]">
             Help us grow
           </p>
-          <h2 className="mt-2 max-w-[28ch] font-display text-3xl font-bold tracking-tight text-white md:text-4xl">
+          <h2 className="mt-2 max-w-[28ch] font-display-serif text-3xl font-bold tracking-tight text-white md:text-4xl">
             Know a Texas civic dataset we should have?
           </h2>
           <p className="mt-4 max-w-[60ch] text-base leading-relaxed text-white/85">
@@ -266,7 +266,7 @@ export default async function DatasetsUniversePage() {
             </a>
             <Link
               href="/agents/dataset-scout"
-              className="inline-flex items-center rounded-sm border-2 border-tx-gold px-5 py-2.5 font-mono text-[13px] font-semibold uppercase tracking-wider text-tx-gold hover:bg-tx-gold hover:text-tx-navy"
+              className="inline-flex items-center rounded-sm border-2 border-tx-gold px-5 py-2.5 font-mono text-[13px] font-semibold uppercase tracking-wider text-[var(--ds-warn)] hover:bg-tx-gold hover:text-[var(--ds-text)]"
             >
               How the scout works →
             </Link>
@@ -274,11 +274,11 @@ export default async function DatasetsUniversePage() {
         </div>
       </section>
 
-      <footer className="bg-tx-navy-dark text-white">
+      <footer className="bg-[var(--ds-bg-deep)] text-white">
         <div className="mx-auto max-w-[1320px] px-6 py-6 md:px-10">
           <p className="text-[13px] text-white/60">
             All data sourced from public Texas open-data portals · Attribution enforced ·{" "}
-            <Link href="/" className="text-white/85 hover:text-tx-gold">
+            <Link href="/" className="text-white/85 hover:text-[var(--ds-warn)]">
               ← Back to TXLookup
             </Link>
           </p>
@@ -291,8 +291,8 @@ export default async function DatasetsUniversePage() {
 function Tile({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-white px-5 py-4">
-      <p className="font-mono text-[10px] uppercase tracking-wider text-tx-ink/55">{label}</p>
-      <p className="mt-2 font-display text-2xl font-bold tabular-nums text-tx-navy">{value}</p>
+      <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text)]/55">{label}</p>
+      <p className="mt-2 font-display-serif text-2xl font-bold tabular-nums text-[var(--ds-text)]">{value}</p>
     </div>
   );
 }

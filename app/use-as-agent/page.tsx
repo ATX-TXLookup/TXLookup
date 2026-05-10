@@ -104,8 +104,8 @@ const MOATS = [
 
 export default function UseAsAgentPage() {
   return (
-    <main className="min-h-screen bg-tx-cream text-tx-ink font-body">
-      <div className="bg-tx-navy text-white">
+    <main className="min-h-screen bg-[var(--ds-bg)] text-[var(--ds-text)] font-body">
+      <div className="bg-[var(--ds-bg-elev)] text-white">
         <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-6 py-2 text-[13px] md:px-10">
           <span>Install TXLookup as an MCP server in any agent runtime — copy-paste below.</span>
           <span className="hidden font-mono text-[11px] uppercase tracking-wider text-white/70 md:inline">
@@ -116,7 +116,7 @@ export default function UseAsAgentPage() {
 
       {/* Hero */}
       <section
-        className="border-b border-tx-ink/10"
+        className="border-b border-[var(--ds-border)]"
         style={{
           background: "var(--tx-navy)",
           backgroundImage:
@@ -124,12 +124,12 @@ export default function UseAsAgentPage() {
         }}
       >
         <div className="mx-auto max-w-[1100px] px-6 py-16 md:px-10 md:py-24">
-          <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-tx-sky">
+          <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-accent)]">
             Use TXLookup as your agent
           </p>
-          <h1 className="mt-3 max-w-[24ch] font-display text-4xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl">
+          <h1 className="mt-3 max-w-[24ch] font-display-serif text-4xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl">
             Sourced Texas civic data,<br />
-            <span className="italic text-tx-gold">wherever your agent lives.</span>
+            <span className="italic text-[var(--ds-warn)]">wherever your agent lives.</span>
           </h1>
           <p className="mt-6 max-w-[58ch] text-base leading-relaxed text-white/85 md:text-lg">
             One MCP server. Eight tools. Curated catalog of Texas public datasets across Austin, Dallas, San Antonio, Houston, and the state. Install in 30 seconds. Verify in 60.
@@ -143,7 +143,7 @@ export default function UseAsAgentPage() {
             </a>
             <a
               href="#prove"
-              className="inline-flex items-center rounded-sm border-2 border-tx-gold px-5 py-2.5 font-mono text-[13px] font-semibold uppercase tracking-wider text-tx-gold hover:bg-tx-gold hover:text-tx-navy"
+              className="inline-flex items-center rounded-sm border-2 border-tx-gold px-5 py-2.5 font-mono text-[13px] font-semibold uppercase tracking-wider text-[var(--ds-warn)] hover:bg-tx-gold hover:text-[var(--ds-text)]"
             >
               Prove it works in 60s →
             </a>
@@ -158,21 +158,21 @@ export default function UseAsAgentPage() {
       </section>
 
       {/* Why */}
-      <section className="border-b border-tx-ink/10 bg-white">
+      <section className="border-b border-[var(--ds-border)] bg-white">
         <div className="mx-auto max-w-[1100px] px-6 py-14 md:px-10 md:py-20">
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
+          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
             Why TXLookup, not a wrapper
           </p>
-          <h2 className="mt-2 max-w-[28ch] font-display text-3xl font-bold tracking-tight text-tx-navy md:text-4xl">
+          <h2 className="mt-2 max-w-[28ch] font-display-serif text-3xl font-bold tracking-tight text-[var(--ds-text)] md:text-4xl">
             Six reasons your agent should use this instead of writing its own SoQL.
           </h2>
           <div className="mt-10 grid gap-px bg-tx-ink/10 md:grid-cols-2">
             {MOATS.map((m) => (
               <div key={m.eyebrow} className="bg-white p-6">
-                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warn)]">
                   {m.eyebrow}
                 </p>
-                <p className="mt-3 text-base leading-relaxed text-tx-ink">{m.body}</p>
+                <p className="mt-3 text-base leading-relaxed text-[var(--ds-text)]">{m.body}</p>
               </div>
             ))}
           </div>
@@ -180,33 +180,33 @@ export default function UseAsAgentPage() {
       </section>
 
       {/* Install */}
-      <section id="install" className="border-b border-tx-ink/10 bg-tx-cream">
+      <section id="install" className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
         <div className="mx-auto max-w-[1100px] px-6 py-14 md:px-10 md:py-20">
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
+          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
             Install
           </p>
-          <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-tx-navy md:text-4xl">
+          <h2 className="mt-2 font-display-serif text-3xl font-bold tracking-tight text-[var(--ds-text)] md:text-4xl">
             Pick your runtime. Copy. Paste. Done.
           </h2>
-          <p className="mt-4 max-w-[60ch] text-base leading-relaxed text-tx-ink/75">
+          <p className="mt-4 max-w-[60ch] text-base leading-relaxed text-[var(--ds-text)]/75">
             TXLookup ships as a stdio MCP server. Any client that speaks MCP can install it — Claude Code, Codex CLI, Cursor, your own Python orchestrator. Requires Python 3.11+ and an OpenAI API key.
           </p>
           <div className="mt-8 grid gap-4">
             {RUNTIMES.map((r) => (
-              <div key={r.id} className="border border-tx-ink/15 bg-white">
-                <div className="border-b border-tx-ink/10 bg-tx-navy px-5 py-3">
-                  <p className="font-display text-lg font-semibold text-white">{r.label}</p>
+              <div key={r.id} className="border border-[var(--ds-border)] bg-white">
+                <div className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-5 py-3">
+                  <p className="font-display-serif text-lg font-semibold text-white">{r.label}</p>
                 </div>
                 <div className="divide-y divide-tx-ink/10">
                   <div className="px-5 py-4">
-                    <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-tx-rust">Install</p>
-                    <pre className="mt-2 overflow-x-auto bg-tx-navy-dark px-4 py-3 font-mono text-[12px] leading-relaxed text-tx-cream">
+                    <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[var(--ds-warm)]">Install</p>
+                    <pre className="mt-2 overflow-x-auto bg-[var(--ds-bg-deep)] px-4 py-3 font-mono text-[12px] leading-relaxed text-[var(--ds-text)]">
 {r.install}
                     </pre>
                   </div>
                   <div className="px-5 py-4">
-                    <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-tx-gold">Verify</p>
-                    <pre className="mt-2 overflow-x-auto bg-tx-navy-dark px-4 py-3 font-mono text-[12px] leading-relaxed text-tx-cream">
+                    <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[var(--ds-warn)]">Verify</p>
+                    <pre className="mt-2 overflow-x-auto bg-[var(--ds-bg-deep)] px-4 py-3 font-mono text-[12px] leading-relaxed text-[var(--ds-text)]">
 {r.verify}
                     </pre>
                   </div>
@@ -214,44 +214,44 @@ export default function UseAsAgentPage() {
               </div>
             ))}
           </div>
-          <p className="mt-6 max-w-[60ch] text-sm leading-relaxed text-tx-ink/65">
-            Pre-install: <code className="bg-tx-cream px-1.5 py-0.5 font-mono text-[11px]">git clone https://github.com/ATX-TXLookup/TXLookup &amp;&amp; cd TXLookup &amp;&amp; pip install -r requirements.txt</code> — then export <code className="bg-tx-cream px-1.5 py-0.5 font-mono text-[11px]">OPENAI_API_KEY</code>.
+          <p className="mt-6 max-w-[60ch] text-sm leading-relaxed text-[var(--ds-text)]/65">
+            Pre-install: <code className="bg-[var(--ds-bg)] px-1.5 py-0.5 font-mono text-[11px]">git clone https://github.com/ATX-TXLookup/TXLookup &amp;&amp; cd TXLookup &amp;&amp; pip install -r requirements.txt</code> — then export <code className="bg-[var(--ds-bg)] px-1.5 py-0.5 font-mono text-[11px]">OPENAI_API_KEY</code>.
           </p>
         </div>
       </section>
 
       {/* Prove */}
-      <section id="prove" className="border-b border-tx-ink/10 bg-white">
+      <section id="prove" className="border-b border-[var(--ds-border)] bg-white">
         <div className="mx-auto max-w-[1100px] px-6 py-14 md:px-10 md:py-20">
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
+          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
             Prove it works
           </p>
-          <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-tx-navy md:text-4xl">
+          <h2 className="mt-2 font-display-serif text-3xl font-bold tracking-tight text-[var(--ds-text)] md:text-4xl">
             Sixty seconds to a sourced answer.
           </h2>
           <div className="mt-8 grid gap-8 md:grid-cols-2">
             <div>
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-tx-gold">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[var(--ds-warn)]">
                 Option 1 · Hosted, no install
               </p>
-              <p className="mt-3 text-base leading-relaxed text-tx-ink">
-                Hit the live agent at <Link href="/q?q=Where%20do%20permits%20and%20code%20violations%20both%20spike%20together%20this%20year%20by%20zip" className="text-tx-rust underline hover:text-tx-navy">/q</Link>. Watch the DAG light up in the right column. Every node carries an agent name + source pill (cache / live).
+              <p className="mt-3 text-base leading-relaxed text-[var(--ds-text)]">
+                Hit the live agent at <Link href="/q?q=Where%20do%20permits%20and%20code%20violations%20both%20spike%20together%20this%20year%20by%20zip" className="text-[var(--ds-warm)] underline hover:text-[var(--ds-text)]">/q</Link>. Watch the DAG light up in the right column. Every node carries an agent name + source pill (cache / live).
               </p>
               <Link
                 href="/q?q=Where%20do%20permits%20and%20code%20violations%20both%20spike%20together%20this%20year%20by%20zip"
-                className="mt-4 inline-flex items-center rounded-sm border-2 border-tx-rust bg-tx-rust px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-wider text-white hover:bg-tx-rust-dark"
+                className="mt-4 inline-flex items-center rounded-sm border-2 border-[var(--ds-warm)] bg-tx-rust px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-wider text-white hover:bg-tx-rust-dark"
               >
                 Try a marquee query →
               </Link>
             </div>
             <div>
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-tx-gold">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[var(--ds-warn)]">
                 Option 2 · One-shot smoke from your shell
               </p>
-              <p className="mt-3 text-base leading-relaxed text-tx-ink">
-                After install, run this from anywhere. Returns a JSON envelope with <code className="bg-tx-cream px-1 font-mono text-[11px]">answer</code> + <code className="bg-tx-cream px-1 font-mono text-[11px]">citation</code>.
+              <p className="mt-3 text-base leading-relaxed text-[var(--ds-text)]">
+                After install, run this from anywhere. Returns a JSON envelope with <code className="bg-[var(--ds-bg)] px-1 font-mono text-[11px]">answer</code> + <code className="bg-[var(--ds-bg)] px-1 font-mono text-[11px]">citation</code>.
               </p>
-              <pre className="mt-4 overflow-x-auto bg-tx-navy-dark px-4 py-3 font-mono text-[12px] leading-relaxed text-tx-cream">
+              <pre className="mt-4 overflow-x-auto bg-[var(--ds-bg-deep)] px-4 py-3 font-mono text-[12px] leading-relaxed text-[var(--ds-text)]">
 {`echo '{"query":"food truck permits in 78702 last 6 months"}' \\
   | python -c '
 import asyncio, json, sys
@@ -264,26 +264,26 @@ print(asyncio.run(ask_data(json.load(sys.stdin)["query"])))'`}
       </section>
 
       {/* Tools catalog */}
-      <section className="border-b border-tx-ink/10 bg-tx-cream">
+      <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
         <div className="mx-auto max-w-[1100px] px-6 py-14 md:px-10 md:py-20">
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
+          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
             What you get
           </p>
-          <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-tx-navy md:text-4xl">
+          <h2 className="mt-2 font-display-serif text-3xl font-bold tracking-tight text-[var(--ds-text)] md:text-4xl">
             Eight tools, all bounded, all cited.
           </h2>
-          <p className="mt-3 max-w-[60ch] text-base leading-relaxed text-tx-ink/75">
-            Full machine-readable catalog at <a href="https://github.com/ATX-TXLookup/TXLookup/blob/main/mcp/manifest.json" className="text-tx-rust underline hover:text-tx-navy">mcp/manifest.json</a>. Skill doc with safety rules at <a href="https://github.com/ATX-TXLookup/TXLookup/blob/main/skills/txlookup/SKILL.md" className="text-tx-rust underline hover:text-tx-navy">skills/txlookup/SKILL.md</a>.
+          <p className="mt-3 max-w-[60ch] text-base leading-relaxed text-[var(--ds-text)]/75">
+            Full machine-readable catalog at <a href="https://github.com/ATX-TXLookup/TXLookup/blob/main/mcp/manifest.json" className="text-[var(--ds-warm)] underline hover:text-[var(--ds-text)]">mcp/manifest.json</a>. Skill doc with safety rules at <a href="https://github.com/ATX-TXLookup/TXLookup/blob/main/skills/txlookup/SKILL.md" className="text-[var(--ds-warm)] underline hover:text-[var(--ds-text)]">skills/txlookup/SKILL.md</a>.
           </p>
-          <div className="mt-8 divide-y divide-tx-ink/10 border border-tx-ink/15 bg-white">
+          <div className="mt-8 divide-y divide-tx-ink/10 border border-[var(--ds-border)] bg-white">
             {TOOLS.map((t) => (
               <div key={t.name} className="grid gap-4 p-5 md:grid-cols-[200px_1fr]">
                 <div>
-                  <p className="font-mono text-sm font-bold text-tx-navy">{t.name}</p>
+                  <p className="font-mono text-sm font-bold text-[var(--ds-text)]">{t.name}</p>
                 </div>
                 <div>
-                  <p className="text-base leading-relaxed text-tx-ink">{t.description}</p>
-                  <pre className="mt-3 overflow-x-auto bg-tx-cream px-3 py-2 font-mono text-[11px] leading-relaxed text-tx-navy">
+                  <p className="text-base leading-relaxed text-[var(--ds-text)]">{t.description}</p>
+                  <pre className="mt-3 overflow-x-auto bg-[var(--ds-bg)] px-3 py-2 font-mono text-[11px] leading-relaxed text-[var(--ds-text)]">
 {t.example}
                   </pre>
                 </div>
@@ -294,28 +294,28 @@ print(asyncio.run(ask_data(json.load(sys.stdin)["query"])))'`}
       </section>
 
       {/* Marketplace */}
-      <section className="border-b border-tx-ink/10 bg-tx-navy text-white">
+      <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)] text-white">
         <div className="mx-auto max-w-[1100px] px-6 py-14 md:px-10 md:py-20">
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
+          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warn)]">
             Find us
           </p>
-          <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-white md:text-4xl">
+          <h2 className="mt-2 font-display-serif text-3xl font-bold tracking-tight text-white md:text-4xl">
             Discoverable wherever agents look.
           </h2>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             <a href="https://smithery.ai" className="block border border-white/20 p-5 hover:border-tx-gold">
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-tx-gold">Smithery</p>
-              <p className="mt-2 font-display text-lg font-semibold text-white">MCP server index</p>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[var(--ds-warn)]">Smithery</p>
+              <p className="mt-2 font-display-serif text-lg font-semibold text-white">MCP server index</p>
               <p className="mt-1 text-sm text-white/70">Submitted via mcp/manifest.json</p>
             </a>
             <a href="https://github.com/ATX-TXLookup/TXLookup" className="block border border-white/20 p-5 hover:border-tx-gold">
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-tx-gold">GitHub</p>
-              <p className="mt-2 font-display text-lg font-semibold text-white">Topic: mcp-server</p>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[var(--ds-warn)]">GitHub</p>
+              <p className="mt-2 font-display-serif text-lg font-semibold text-white">Topic: mcp-server</p>
               <p className="mt-1 text-sm text-white/70">+ texas-data, agent-skill</p>
             </a>
             <a href="https://github.com/ATX-TXLookup/TXLookup/blob/main/skills/txlookup/SKILL.md" className="block border border-white/20 p-5 hover:border-tx-gold">
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-tx-gold">Anthropic Skills</p>
-              <p className="mt-2 font-display text-lg font-semibold text-white">SKILL.md installable</p>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[var(--ds-warn)]">Anthropic Skills</p>
+              <p className="mt-2 font-display-serif text-lg font-semibold text-white">SKILL.md installable</p>
               <p className="mt-1 text-sm text-white/70">Drop into ~/.claude/skills/txlookup/</p>
             </a>
           </div>
@@ -325,11 +325,11 @@ print(asyncio.run(ask_data(json.load(sys.stdin)["query"])))'`}
         </div>
       </section>
 
-      <footer className="bg-tx-navy-dark text-white">
+      <footer className="bg-[var(--ds-bg-deep)] text-white">
         <div className="mx-auto max-w-[1320px] px-6 py-8 md:px-10">
           <p className="text-[13px] text-white/60">
             All data sourced from public Texas open-data portals · Attribution enforced ·{" "}
-            <Link href="/" className="text-white/80 hover:text-tx-gold">← Back to TXLookup</Link>
+            <Link href="/" className="text-white/80 hover:text-[var(--ds-warn)]">← Back to TXLookup</Link>
           </p>
         </div>
       </footer>
