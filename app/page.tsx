@@ -29,12 +29,12 @@ export const dynamic = "force-dynamic";
 export const revalidate = 300;
 
 const TOPICS = [
-  { key: "housing",   label: "Housing & Permits",   blurb: "Construction, zoning, code enforcement.", q: "permits and code violations by zip" },
-  { key: "safety",    label: "Public Safety",       blurb: "Crime reports, traffic fatalities, 911 calls.", q: "crime hotspots vs permit growth this year" },
-  { key: "health",    label: "Public Health",       blurb: "Restaurant inspections, food safety, outbreaks.", q: "restaurants near 78704 with failing inspections this year" },
-  { key: "transit",   label: "Transportation",      blurb: "Vision Zero, road incidents, transit data.", q: "traffic fatalities by zip last 24 months" },
-  { key: "civic",     label: "311 & Code",          blurb: "Service requests, code violations, response times.", q: "311 response times across the 10 council districts" },
-  { key: "economy",   label: "Economy & Business",  blurb: "Franchise tax, mixed beverage, expenditures.", q: "active franchise tax permits by industry" },
+  { num: "01", key: "housing",   label: "Housing & Permits",  blurb: "Construction, zoning, code enforcement.",     primaryDataset: "3syk-w9eu", count: "2.3M permits" },
+  { num: "02", key: "safety",    label: "Public Safety",      blurb: "Crime reports, traffic fatalities, 311.",     primaryDataset: "fdj4-gpfu", count: "2M+ incidents" },
+  { num: "03", key: "health",    label: "Public Health",      blurb: "Restaurant inspections, food-safety scoring.", primaryDataset: "ecmv-9xxi", count: "120K inspections" },
+  { num: "04", key: "transit",   label: "Transportation",     blurb: "Vision Zero, road incidents, mobility data.",  primaryDataset: "y2wy-tgr5", count: "1K+ fatal crashes" },
+  { num: "05", key: "civic",     label: "311 & Code",         blurb: "Service requests, code violations, response.", primaryDataset: "xwdj-i9he", count: "1.5M requests" },
+  { num: "06", key: "economy",   label: "Economy & Business", blurb: "Franchise tax, mixed beverage, expenditures.", primaryDataset: "9cir-efmm", count: "3M+ permits" },
 ];
 
 const SAMPLES = [
@@ -72,15 +72,14 @@ export default async function HomePage() {
         <div className="mx-auto max-w-[1240px] px-6 py-12 md:px-8 md:py-16">
           <div className="grid items-end gap-8 md:grid-cols-12 md:gap-12">
             <div className="md:col-span-7">
-              <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.16em] text-[var(--ds-warm)]">
-                Multi-agent civic-data system · live · v0.1
+              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
+                TXLookup · Civic-data agent · v0.1
               </p>
-              <h1 className="mt-3 max-w-[20ch] text-[36px] font-bold leading-[1.05] tracking-[-0.025em] text-[var(--ds-text)] md:text-[56px]">
-                Redefining{" "}
-                <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">civic transparency.</span>
+              <h1 className="mt-4 max-w-[16ch] text-[52px] font-bold leading-[1.0] tracking-[-0.03em] text-[var(--ds-text)] md:text-[88px]">
+                Redefining civic transparency.
               </h1>
-              <p className="mt-4 max-w-[58ch] text-[14.5px] leading-relaxed text-[var(--ds-text-mute)]">
-                We bring together public records, scoring methods, agents, and shared access to bridge the long-standing gap between civic data and answers anyone can use. Curated across Austin · Dallas · TX state, growing every 6 hours via the dataset scout.
+              <p className="mt-6 max-w-[58ch] text-[18px] leading-[1.55] text-[var(--ds-text-mute)]">
+                Public records, scoring methods, multi-agent reasoning, and shared access — bridging the gap between civic data and answers anyone can use. Curated across Austin · Dallas · TX state. Growing every 6 hours via the dataset scout.
               </p>
             </div>
             <div className="md:col-span-5">
@@ -123,30 +122,44 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* TOPIC ICON GRID — 6 categories, info-dense */}
+      {/* TOPIC GRID — numbered, larger, links to dataset detail pages */}
       <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
-        <div className="mx-auto max-w-[1240px] px-6 py-10 md:px-8 md:py-14">
-          <div className="flex items-baseline justify-between">
-            <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.16em] text-[var(--ds-text-dim)]">
-              Browse by topic
-            </p>
-            <Link href="/datasets" className="font-mono text-[10.5px] uppercase tracking-wider text-[var(--ds-accent)] hover:text-[var(--ds-text)]">
-              all datasets →
+        <div className="mx-auto max-w-[1240px] px-6 py-14 md:px-8 md:py-20">
+          <div className="flex items-end justify-between gap-6">
+            <div>
+              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-text-dim)]">
+                Browse by topic
+              </p>
+              <h2 className="mt-3 max-w-[20ch] text-[34px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[44px]">
+                Six domains, hundreds of datasets.
+              </h2>
+            </div>
+            <Link href="/datasets" className="hidden md:inline-flex items-center font-mono text-[12px] uppercase tracking-[0.14em] text-[var(--ds-accent)] hover:text-[var(--ds-text)]">
+              All datasets →
             </Link>
           </div>
-          <div className="mt-6 grid gap-3 md:grid-cols-3 lg:grid-cols-6">
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {TOPICS.map((t) => (
               <Link
                 key={t.key}
-                href={`/q?q=${encodeURIComponent(t.q)}`}
-                className="group flex flex-col rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg)] p-4 transition-colors hover:border-[var(--ds-accent)]/40"
+                href={`/datasets/${t.primaryDataset}`}
+                className="group flex flex-col rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg)] p-6 transition-colors hover:border-[var(--ds-accent)]/50"
               >
-                <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-accent)] group-hover:text-[var(--ds-text)]">
+                <p className="font-mono text-[18px] font-bold tabular-nums text-[var(--ds-accent)]">
+                  {t.num}
+                </p>
+                <h3 className="mt-3 text-[20px] font-bold tracking-tight text-[var(--ds-text)]">
                   {t.label}
-                </span>
-                <span className="mt-2 text-[12px] leading-snug text-[var(--ds-text-mute)]">
+                </h3>
+                <p className="mt-2 flex-1 text-[14px] leading-relaxed text-[var(--ds-text-mute)]">
                   {t.blurb}
-                </span>
+                </p>
+                <div className="mt-5 flex items-center justify-between border-t border-[var(--ds-border)] pt-3 font-mono text-[11px] uppercase tracking-wider">
+                  <span className="text-[var(--ds-text-dim)]">{t.count}</span>
+                  <span className="text-[var(--ds-accent)] group-hover:text-[var(--ds-text)]">
+                    Open →
+                  </span>
+                </div>
               </Link>
             ))}
           </div>
@@ -163,7 +176,7 @@ export default async function HomePage() {
               </p>
               <h2 className="mt-2 max-w-[20ch] text-[26px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[34px]">
                 Three cities. Three domains.{" "}
-                <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">All real-time.</span>
+                <span className="text-[var(--ds-text-mute)]">All real-time.</span>
               </h2>
               <p className="mt-4 max-w-[40ch] text-[14px] leading-relaxed text-[var(--ds-text-mute)]">
                 Counts pulled live from each portal at request time. Recomputed every 5 minutes. The corpus answers in any domain — not just permits, not just Austin.
@@ -253,7 +266,7 @@ export default async function HomePage() {
               </p>
               <h2 className="mt-2 max-w-[20ch] text-[26px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[34px]">
                 Any dataset. Any portal.{" "}
-                <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">Knowledge in 24 hours.</span>
+                <span className="text-[var(--ds-text-mute)]">Knowledge in 24 hours.</span>
               </h2>
               <p className="mt-4 max-w-[40ch] text-[14px] leading-relaxed text-[var(--ds-text-mute)]">
                 The scout + ingestor + multi-agent loop is portable. Texas is the demo corpus — the same pipeline ingests Chicago, NYC, federal data.gov, anywhere with a Socrata-compatible API.
