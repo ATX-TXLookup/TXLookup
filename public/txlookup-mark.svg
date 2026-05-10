@@ -1,0 +1,23 @@
+<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>TXLookup Mark</title>
+  <desc>TXLookup lone star mark with data nodes. For use as favicon, app icon, or avatar.</desc>
+
+  <rect width="80" height="80" fill="#0D2340" rx="16"/>
+
+  <polygon
+    points="40,10 45.5,27 64,27 50,37 55.5,54 40,44 24.5,54 30,37 16,27 34.5,27"
+    fill="none"
+    stroke="#D48B10"
+    stroke-width="2"
+    stroke-linejoin="round"
+  />
+  <circle cx="40" cy="31" r="3" fill="#D48B10"/>
+
+  <line x1="40" y1="55" x2="40" y2="64" stroke="#3A7FBE" stroke-width="1" stroke-opacity="0.6"/>
+  <line x1="40" y1="60" x2="28" y2="68" stroke="#3A7FBE" stroke-width="1" stroke-opacity="0.5"/>
+  <line x1="40" y1="60" x2="52" y2="68" stroke="#3A7FBE" stroke-width="1" stroke-opacity="0.5"/>
+
+  <circle cx="40" cy="65" r="2.5" fill="#3A7FBE"/>
+  <circle cx="27" cy="69" r="2.5" fill="#3A7FBE" fill-opacity="0.85"/>
+  <circle cx="53" cy="69" r="2.5" fill="#3A7FBE" fill-opacity="0.85"/>
+</svg>

@@ -1,0 +1,15 @@
+/* TXLookup v2 — brand CSS variables from BRAND.md §3 */
+:root {
+  --tx-navy:       #0D2340;
+  --tx-rust:       #C4420A;
+  --tx-rust-light: #F5E8DF;
+  --tx-gold:       #D48B10;
+  --tx-gold-light: #FDF3DC;
+  --tx-sky:        #3A7FBE;
+  --tx-sky-light:  #DFF0FA;
+  --tx-sage:       #3B6D3B;
+  --tx-cream:      #FAF7F2;
+  --tx-ink:        #1A1510;
+  --tx-muted:      #6B6660;
+  --tx-border:     rgba(26, 21, 16, 0.10);
+}
