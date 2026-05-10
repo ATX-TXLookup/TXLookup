@@ -1,5 +1,18 @@
 "use client";
 
+// AgentSidebar — the right-column observatory panel for /q.
+//
+// Brand-faithful per BRAND.md (brand-guide/BRAND.md): the dark-hero pattern
+// from §7 (tx-navy-dark bg with subtle radial-glow), tx-cream foreground,
+// tx-gold for state/labels, tx-sky for info, tx-sage for completion,
+// tx-rust for errors, IBM Plex Mono for telemetry rows. Tabs keep their
+// 4-tab structure but render as gold-underlined uppercase labels on navy.
+//
+// IMPORTANT: prop shapes, tab IDs, filter logic, scroll/auto-tail behavior,
+// and the SidebarStep / SidebarReplan / TokenUsage types are byte-identical
+// to the pre-restyle version. Only `className`, inline styles, and the
+// visual structure change.
+
 import { useEffect, useRef, useState } from "react";
 
 import type { ObsEvent } from "./AgentObservatory";
@@ -60,21 +73,47 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "telemetry", label: "Telemetry" },
 ];
 
+// Step-status palette on dark navy. Matches the brand mapping:
+//   completed → sage   ·  failed → rust   ·  pending → muted cream
+//   replan-origin step → gold (highlighted on dark)
 const PILL_COLORS: Record<string, { bg: string; fg: string; border: string }> = {
-  completed: { bg: "#E5F5EC", fg: "#1E7A47", border: "#1E7A47" },
-  failed: { bg: "#FBE9E7", fg: "#A0231C", border: "#A0231C" },
-  pending: { bg: "#F4F6FB", fg: "#1A1F2A", border: "#E1E5EE" },
-  replan: { bg: "#FFF3D9", fg: "#A06200", border: "#A06200" },
+  completed: {
+    bg: "rgba(59,109,59,0.18)",
+    fg: "var(--tx-sage)",
+    border: "rgba(59,109,59,0.55)",
+  },
+  failed: {
+    bg: "rgba(196,66,10,0.18)",
+    fg: "var(--tx-rust-light)",
+    border: "rgba(196,66,10,0.65)",
+  },
+  pending: {
+    bg: "rgba(250,247,242,0.04)",
+    fg: "rgba(250,247,242,0.55)",
+    border: "rgba(250,247,242,0.12)",
+  },
+  replan: {
+    bg: "rgba(212,139,16,0.16)",
+    fg: "var(--tx-gold)",
+    border: "rgba(212,139,16,0.5)",
+  },
 };
 
 export function AgentSidebar(props: Props) {
   const [tab, setTab] = useState<Tab>("status");
 
   return (
-    <aside className="border-l border-[#E1E5EE] bg-white">
+    <aside
+      className="border-l border-white/10 text-tx-cream"
+      style={{
+        background: "var(--tx-navy-dark)",
+        backgroundImage:
+          "radial-gradient(circle at 80% 10%, rgba(58,127,190,0.14) 0%, transparent 55%), radial-gradient(circle at 10% 90%, rgba(196,66,10,0.10) 0%, transparent 50%)",
+      }}
+    >
       <div className="flex h-full flex-col">
-        {/* Tab bar */}
-        <div role="tablist" className="flex border-b border-[#E1E5EE]">
+        {/* Tab bar — gold underline on active, mono labels */}
+        <div role="tablist" className="flex border-b border-white/10">
           {TABS.map((t) => {
             const active = tab === t.id;
             return (
@@ -83,10 +122,10 @@ export function AgentSidebar(props: Props) {
                 role="tab"
                 aria-selected={active}
                 onClick={() => setTab(t.id)}
-                className={`flex-1 border-b-2 px-3 py-3 font-display text-[12px] font-semibold uppercase tracking-[0.16em] transition-colors ${
+                className={`flex-1 border-b-2 px-3 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors ${
                   active
-                    ? "border-[#0B5FFF] text-[#0B2545]"
-                    : "border-transparent text-[#1A1F2A]/55 hover:text-[#0B2545]"
+                    ? "border-tx-gold text-tx-cream"
+                    : "border-transparent text-tx-cream/55 hover:text-tx-cream"
                 }`}
               >
                 {t.label}
@@ -147,12 +186,12 @@ function StatusTab({
 
   const dot =
     status === "running"
-      ? "#A06200"
+      ? "var(--tx-gold)"
       : status === "done"
-        ? "#1E7A47"
+        ? "var(--tx-sage)"
         : status === "error"
-          ? "#A0231C"
-          : "#1A1F2A";
+          ? "var(--tx-rust)"
+          : "rgba(250,247,242,0.45)";
 
   const phaseLabel = (() => {
     if (status === "running") return "Operational · in flight";
@@ -163,7 +202,7 @@ function StatusTab({
 
   return (
     <div className="px-5 py-5">
-      <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
         Agent status
       </p>
       <div className="mt-2 flex items-center gap-2">
@@ -173,14 +212,18 @@ function StatusTab({
           }`}
           style={{ backgroundColor: dot }}
         />
-        <p className="text-sm font-medium text-[#0B2545]">{phaseLabel}</p>
+        <p className="font-display text-base font-normal text-tx-cream">{phaseLabel}</p>
       </div>
-      <p className="mt-1 text-[12px] text-[#1A1F2A]/70">{phaseLine}</p>
+      <p className="mt-1 text-[12px] leading-relaxed text-tx-cream/65">{phaseLine}</p>
       {status === "running" && totalSteps > 0 && (
-        <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-[#F4F6FB]">
+        <div
+          className="mt-3 h-1 w-full overflow-hidden rounded-full"
+          style={{ background: "rgba(250,247,242,0.10)" }}
+        >
           <div
-            className="h-full bg-[#0B5FFF] transition-all duration-300"
+            className="h-full transition-all duration-300"
             style={{
+              background: "var(--tx-gold)",
               width: `${Math.min(100, Math.round(((currentStep + (phase === "completing" ? 1 : 0)) / Math.max(totalSteps, 1)) * 100))}%`,
             }}
           />
@@ -206,14 +249,27 @@ function StatusTab({
         <Tile label="Self-corrections" value={replans.length.toString()} />
       </div>
 
-      <div className="mt-5 rounded-md border border-[#E1E5EE] bg-[#F4F6FB] px-4 py-3">
-        <p className="font-mono text-[10px] uppercase tracking-wider text-[#1A1F2A]/55">
+      <div
+        className="mt-5 rounded-[10px] px-4 py-3"
+        style={{
+          background: "rgba(250,247,242,0.04)",
+          border: "0.5px solid rgba(250,247,242,0.12)",
+        }}
+      >
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-tx-cream/55">
           Service-level
         </p>
-        <ul className="mt-2 space-y-1 text-[12px] text-[#0B2545]">
-          <li>● Codex reachable</li>
-          <li>● Socrata reachable</li>
-          <li>● {citationCount} primary source{citationCount === 1 ? "" : "s"} cited</li>
+        <ul className="mt-2 space-y-1 font-mono text-[12px] text-tx-cream/85">
+          <li>
+            <span className="text-tx-sage">●</span> Codex reachable
+          </li>
+          <li>
+            <span className="text-tx-sage">●</span> Socrata reachable
+          </li>
+          <li>
+            <span className="text-tx-sage">●</span> {citationCount} primary source
+            {citationCount === 1 ? "" : "s"} cited
+          </li>
         </ul>
       </div>
     </div>
@@ -222,11 +278,17 @@ function StatusTab({
 
 function Tile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-[#E1E5EE] bg-white px-3 py-3">
-      <p className="font-mono text-[10px] uppercase tracking-wider text-[#1A1F2A]/55">
+    <div
+      className="rounded-[10px] px-3 py-3"
+      style={{
+        background: "rgba(250,247,242,0.04)",
+        border: "0.5px solid rgba(250,247,242,0.12)",
+      }}
+    >
+      <p className="font-mono text-[10px] uppercase tracking-wider text-tx-cream/55">
         {label}
       </p>
-      <p className="mt-1 font-display text-lg font-semibold tabular-nums text-[#0B2545]">
+      <p className="mt-1 font-display text-lg font-normal tabular-nums text-tx-cream">
         {value}
       </p>
     </div>
@@ -242,7 +304,7 @@ function FlowTab({
 }) {
   if (steps.length === 0) {
     return (
-      <div className="px-5 py-12 text-center text-sm text-[#1A1F2A]/45">
+      <div className="px-5 py-12 text-center font-mono text-[12px] text-tx-cream/45">
         Waiting for plan…
       </div>
     );
@@ -250,7 +312,7 @@ function FlowTab({
   const replanIndex = new Set(replans.map((r) => r.failedStep));
   return (
     <div className="px-5 py-5">
-      <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
         Reasoning trace
       </p>
       <ol className="mt-4 space-y-0">
@@ -270,20 +332,24 @@ function FlowTab({
               {!isLast && (
                 <span
                   aria-hidden
-                  className="absolute left-[11px] top-5 h-full w-px bg-[#E1E5EE]"
+                  className="absolute left-[11px] top-5 h-full w-px"
+                  style={{ background: "rgba(250,247,242,0.15)" }}
                 />
               )}
               <span
                 aria-hidden
-                className="absolute left-[6px] top-1.5 h-3 w-3 rounded-full border-2 bg-white"
-                style={{ borderColor: colors.border }}
+                className="absolute left-[6px] top-1.5 h-3 w-3 rounded-full border-2"
+                style={{
+                  borderColor: colors.border,
+                  background: "var(--tx-navy-dark)",
+                }}
               />
               <div
-                className="rounded-md border px-3 py-2"
-                style={{ borderColor: colors.border + "55", backgroundColor: colors.bg }}
+                className="rounded-[10px] px-3 py-2"
+                style={{ borderColor: colors.border, borderWidth: "0.5px", borderStyle: "solid", backgroundColor: colors.bg }}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-[12px] font-semibold text-[#0B2545]">
+                  <span className="font-mono text-[12px] font-semibold text-tx-cream">
                     {s.tool}
                   </span>
                   <span
@@ -292,7 +358,7 @@ function FlowTab({
                   >
                     {s.status}
                     {typeof s.durationMs === "number" && s.status !== "pending" && (
-                      <span className="ml-1.5 normal-case tracking-normal text-[#1A1F2A]/55">
+                      <span className="ml-1.5 normal-case tracking-normal text-tx-cream/55">
                         {s.durationMs}ms
                       </span>
                     )}
@@ -300,7 +366,14 @@ function FlowTab({
                 </div>
               </div>
               {replan && (
-                <div className="mt-1 ml-2 rounded-sm border-l-2 border-[#A06200] bg-[#FFF3D9] px-2 py-1 font-mono text-[10px] text-[#A06200]">
+                <div
+                  className="mt-1 ml-2 rounded-sm px-2 py-1 font-mono text-[10px]"
+                  style={{
+                    borderLeft: "2px solid var(--tx-gold)",
+                    background: "rgba(212,139,16,0.12)",
+                    color: "var(--tx-gold)",
+                  }}
+                >
                   ↳ REPLAN · self-correction
                 </div>
               )}
@@ -321,7 +394,7 @@ function ExecutionTab({
 }) {
   if (steps.length === 0) {
     return (
-      <div className="px-5 py-12 text-center text-sm text-[#1A1F2A]/45">
+      <div className="px-5 py-12 text-center font-mono text-[12px] text-tx-cream/45">
         No steps yet.
       </div>
     );
@@ -329,7 +402,7 @@ function ExecutionTab({
   const replanByStep = new Map(replans.map((r) => [r.failedStep, r]));
   return (
     <div className="px-5 py-5 space-y-2">
-      <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
         Execution
       </p>
       <ol className="space-y-2">
@@ -343,20 +416,30 @@ function ExecutionTab({
                   ? PILL_COLORS.replan
                   : PILL_COLORS.pending;
           const rp = replanByStep.get(s.step);
+          const isDoomLoop = rp?.reason === "doom_loop";
           return (
             <li key={s.step}>
-              <div className="rounded-md border border-[#E1E5EE] bg-white px-3 py-2">
-                <div className="flex items-baseline gap-2">
-                  <span className="font-mono text-[10px] tabular-nums text-[#1A1F2A]/55">
+              <div
+                className="rounded-[10px] px-3 py-2"
+                style={{
+                  background: "rgba(250,247,242,0.04)",
+                  border: "0.5px solid rgba(250,247,242,0.12)",
+                }}
+              >
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <span className="font-mono text-[10px] tabular-nums text-tx-cream/55">
                     {String(s.step).padStart(2, "0")}
                   </span>
-                  <span className="font-mono text-[12px] font-semibold text-[#0B2545]">
+                  <span className="font-mono text-[12px] font-semibold text-tx-cream">
                     {s.tool}
                   </span>
                   {s.fromReplan && (
                     <span
-                      className="rounded-sm px-1 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-white"
-                      style={{ backgroundColor: "#A06200" }}
+                      className="rounded-sm px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.08em]"
+                      style={{
+                        background: "var(--tx-gold)",
+                        color: "var(--tx-navy-dark)",
+                      }}
                     >
                       Replan
                     </span>
@@ -366,28 +449,50 @@ function ExecutionTab({
                     style={{
                       color: colors.fg,
                       backgroundColor: colors.bg,
-                      border: `1px solid ${colors.border}`,
+                      border: `0.5px solid ${colors.border}`,
                     }}
                   >
                     {s.status}
                   </span>
                 </div>
                 {typeof s.durationMs === "number" && s.status !== "pending" && (
-                  <p className="mt-1 font-mono text-[10px] text-[#1A1F2A]/55">
+                  <p className="mt-1 font-mono text-[10px] text-tx-cream/55">
                     {s.durationMs}ms
                   </p>
                 )}
                 {s.error && (
-                  <p className="mt-1 font-mono text-[10px] text-[#A0231C]">↳ {s.error}</p>
+                  <p className="mt-1 font-mono text-[10px] text-tx-rust-light">↳ {s.error}</p>
                 )}
               </div>
               {rp && rp.diagnosis && (
-                <div className="mt-1 ml-3 rounded-sm border-l-2 border-[#A06200] bg-[#FFF3D9] px-2 py-1.5">
-                  <p className="font-mono text-[9px] uppercase tracking-wider text-[#A06200]">
+                <div
+                  className="mt-1 ml-3 rounded-sm px-2 py-1.5"
+                  style={{
+                    borderLeft: `2px solid ${
+                      isDoomLoop ? "var(--tx-rust)" : "var(--tx-gold)"
+                    }`,
+                    background: isDoomLoop
+                      ? "rgba(196,66,10,0.14)"
+                      : "rgba(212,139,16,0.12)",
+                  }}
+                >
+                  <p
+                    className="font-mono text-[9px] font-semibold uppercase tracking-[0.12em]"
+                    style={{
+                      color: isDoomLoop ? "var(--tx-rust-light)" : "var(--tx-gold)",
+                    }}
+                  >
                     Autonomous replan
-                    {rp.reason === "doom_loop" && " · doom-loop"}
+                    {isDoomLoop && " · doom-loop"}
                   </p>
-                  <p className="mt-0.5 text-[11px] italic text-[#0B2545]">{rp.diagnosis}</p>
+                  <p
+                    className="mt-0.5 text-[11px] italic"
+                    style={{
+                      color: isDoomLoop ? "var(--tx-rust-light)" : "var(--tx-cream)",
+                    }}
+                  >
+                    {rp.diagnosis}
+                  </p>
                 </div>
               )}
             </li>
@@ -428,7 +533,7 @@ function TelemetryTab({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center gap-1.5 border-b border-[#E1E5EE] px-4 py-2">
+      <div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-2">
         {(["all", "codex", "socrata", "errors"] as const).map((f) => {
           const active = filter === f;
           return (
@@ -437,40 +542,46 @@ function TelemetryTab({
               onClick={() => setFilter(f)}
               className={`rounded-sm px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider transition-colors ${
                 active
-                  ? "bg-[#0B2545] text-white"
-                  : "text-[#1A1F2A]/55 hover:text-[#0B2545]"
+                  ? "bg-tx-gold text-tx-navy-dark"
+                  : "text-tx-cream/55 hover:text-tx-cream"
               }`}
             >
               {f}
             </button>
           );
         })}
-        <span className="ml-auto font-mono text-[10px] text-[#1A1F2A]/45">
+        <span className="ml-auto font-mono text-[10px] text-tx-cream/45">
           {filtered.length} / {events.length}
         </span>
       </div>
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto bg-[#F8F9FC] px-4 py-3 font-mono text-[11px] leading-[1.45]"
+        className="flex-1 overflow-y-auto px-4 py-3 font-mono text-[11px] leading-[1.45]"
+        style={{ background: "rgba(7,21,42,0.6)" }}
       >
         {filtered.length === 0 ? (
-          <p className="py-8 text-center text-[#1A1F2A]/45">No events yet.</p>
+          <p className="py-8 text-center text-tx-cream/45">No events yet.</p>
         ) : (
           <ol className="space-y-1.5">
             {filtered.map((e, i) => (
               <li key={i}>
-                <span className="text-[#1A1F2A]/45">
-                  {fmtClock(e.ts, start)}
-                </span>{" "}
+                <span className="text-tx-cream/45">{fmtClock(e.ts, start)}</span>{" "}
                 <span
                   className="font-semibold uppercase tracking-wider"
-                  style={{ color: levelHex(e.level) }}
+                  style={{ color: levelColor(e.level) }}
                 >
                   {e.phase}
                 </span>{" "}
-                <span className="text-[#0B2545]">{e.message}</span>
+                <span className="text-tx-cream">{e.message}</span>
                 {e.detail && (
-                  <pre className="mt-0.5 max-h-24 overflow-x-auto whitespace-pre-wrap break-all rounded bg-white px-2 py-1 text-[10px] text-[#0B2545]/85 border border-[#E1E5EE]">
+                  <pre
+                    className="mt-0.5 max-h-24 overflow-x-auto whitespace-pre-wrap break-all rounded px-2 py-1 text-[10px]"
+                    style={{
+                      background: "rgba(13,35,64,0.7)",
+                      color: "var(--tx-sky-light)",
+                      border: "0.5px solid rgba(58,127,190,0.18)",
+                    }}
+                  >
                     {e.detail}
                   </pre>
                 )}
@@ -493,9 +604,10 @@ function fmtClock(ts: number, start: number): string {
   return `${hh}:${mm}:${ss}.${ms} +${since}s`;
 }
 
-function levelHex(level: string): string {
-  if (level === "ok") return "#1E7A47";
-  if (level === "warn") return "#A06200";
-  if (level === "error") return "#A0231C";
-  return "#0B5FFF";
+// Level → CSS-var color. Brand-mapped: ok=sage, info=sky, warn=gold, error=rust.
+function levelColor(level: string): string {
+  if (level === "ok") return "var(--tx-sage)";
+  if (level === "warn") return "var(--tx-gold)";
+  if (level === "error") return "var(--tx-rust-light)";
+  return "var(--tx-sky)";
 }
