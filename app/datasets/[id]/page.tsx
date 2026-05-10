@@ -240,6 +240,31 @@ export default async function DatasetPage({
                 </div>
 
                 {/* Insight cards grid */}
+                <style>{`
+                  .insight-card {
+                    background: rgba(250,247,242,0.04);
+                    border: 0.5px solid rgba(212,139,16,0.25);
+                    backdrop-filter: blur(4px);
+                    transition: background 0.15s ease, border-color 0.15s ease;
+                  }
+                  .insight-card:hover {
+                    background: rgba(250,247,242,0.09);
+                    border-color: rgba(212,139,16,0.6);
+                  }
+                  .insight-card:hover .insight-source {
+                    opacity: 1;
+                  }
+                  .question-chip {
+                    background: rgba(58,127,190,0.10);
+                    border: 0.5px solid rgba(58,127,190,0.30);
+                    color: #3A7FBE;
+                    transition: background 0.15s ease, border-color 0.15s ease;
+                  }
+                  .question-chip:hover {
+                    background: rgba(58,127,190,0.20);
+                    border-color: rgba(58,127,190,0.60);
+                  }
+                `}</style>
                 <div className="mt-8 grid gap-4 md:grid-cols-2">
                   {di.insights.map((ins, i) => (
                     <a
@@ -247,20 +272,7 @@ export default async function DatasetPage({
                       href={ins.source}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group flex flex-col gap-3 rounded-xl p-6 transition-all"
-                      style={{
-                        background: "rgba(250,247,242,0.04)",
-                        border: "0.5px solid rgba(212,139,16,0.25)",
-                        backdropFilter: "blur(4px)",
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLAnchorElement).style.background = "rgba(250,247,242,0.08)";
-                        (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(212,139,16,0.55)";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLAnchorElement).style.background = "rgba(250,247,242,0.04)";
-                        (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(212,139,16,0.25)";
-                      }}
+                      className="insight-card flex flex-col gap-3 rounded-xl p-6"
                     >
                       {/* Icon + badge row */}
                       <div className="flex items-center gap-3">
@@ -277,8 +289,8 @@ export default async function DatasetPage({
                           Data insight
                         </span>
                         <span
-                          className="ml-auto font-mono text-[10px] uppercase tracking-wider opacity-0 transition-opacity group-hover:opacity-100"
-                          style={{ color: "#3A7FBE" }}
+                          className="insight-source ml-auto font-mono text-[10px] uppercase tracking-wider"
+                          style={{ color: "#3A7FBE", opacity: 0, transition: "opacity 0.15s" }}
                         >
                           View source ↗
                         </span>
@@ -331,23 +343,12 @@ export default async function DatasetPage({
                       <a
                         key={q}
                         href={`/q?q=${encodeURIComponent(q)}`}
-                        className="rounded-full font-mono text-[12px] transition-all"
+                        className="question-chip rounded-full font-mono text-[12px]"
                         style={{
-                          background: "rgba(58,127,190,0.10)",
-                          color: "#3A7FBE",
-                          border: "0.5px solid rgba(58,127,190,0.30)",
                           padding: "7px 16px",
                           textDecoration: "none",
                           display: "inline-block",
                           whiteSpace: "nowrap",
-                        }}
-                        onMouseEnter={(e) => {
-                          (e.currentTarget as HTMLAnchorElement).style.background = "rgba(58,127,190,0.20)";
-                          (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(58,127,190,0.55)";
-                        }}
-                        onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLAnchorElement).style.background = "rgba(58,127,190,0.10)";
-                          (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(58,127,190,0.30)";
                         }}
                       >
                         {q}
