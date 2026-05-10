@@ -35,15 +35,39 @@ export async function GET() {
     cwd,
     fileChecks,
     cacheStats: stats,
-    sqlJsAvailable: await sqlJsCheck(),
+    betterSqlite3: betterSqlite3Check(),
   });
 }
 
-async function sqlJsCheck(): Promise<{ available: boolean; error?: string }> {
+function betterSqlite3Check(): { available: boolean; error?: string; meta?: unknown } {
   try {
-    const dynamicImport = new Function("s", "return import(s)") as (s: string) => Promise<unknown>;
-    const sqlJs = (await dynamicImport("sql.js")) as { default: (config?: unknown) => Promise<unknown> };
-    return { available: typeof sqlJs.default === "function" };
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const Database = require("better-sqlite3") as new (
+      path: string,
+      opts?: { readonly?: boolean; fileMustExist?: boolean },
+    ) => {
+      prepare: (sql: string) => { all: () => unknown[] };
+      close: () => void;
+    };
+    // Try to actually open the cache file.
+    for (const p of [
+      path.join(process.cwd(), "data", "cache.db"),
+      "/var/task/data/cache.db",
+    ]) {
+      try {
+        const db = new Database(p, { readonly: true, fileMustExist: true });
+        const meta = db.prepare("SELECT dataset_id, row_count FROM cache_meta").all();
+        db.close();
+        return { available: true, meta };
+      } catch (e) {
+        // try next
+        const err = e instanceof Error ? e.message : String(e);
+        if (!err.includes("does not exist")) {
+          return { available: false, error: `${p}: ${err}` };
+        }
+      }
+    }
+    return { available: false, error: "no candidate path opened" };
   } catch (e) {
     return { available: false, error: e instanceof Error ? e.message : String(e) };
   }
