@@ -186,4 +186,4 @@ Thanks to the City of Austin, the City of Dallas, the City of San Antonio, the C
 
 ---
 
-Built by [Ravinder Jilkapally](https://www.linkedin.com/in/jravinder), [Kunal Vyas](https://www.linkedin.com/in/kunalvasavada), [Godwyn James](https://www.linkedin.com/in/goodguygoddy/), and [Raj Akula](https://www.linkedin.com/in/rajaakula/) at the [AITX × Codex Hackathon](https://aitx.ai/), May 8–10, 2026.
+Built by [Ravinder Jilkapally](https://www.linkedin.com/in/jravinder), [Kunal Vasavada](https://www.linkedin.com/in/kunalvasavada), [Godwyn James](https://www.linkedin.com/in/goodguygoddy/), and [Raj Akula](https://www.linkedin.com/in/rajaakula/) at the [AITX × Codex Hackathon](https://aitx.ai/), May 8–10, 2026.

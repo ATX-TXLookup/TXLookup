@@ -168,7 +168,7 @@ export default async function DatasetsUniversePage() {
                   />
                   <button
                     type="submit"
-                    className="rounded-md bg-[var(--ds-purple)] px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-white hover:opacity-90"
+                    className="rounded-md bg-white px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-bg)] hover:opacity-90"
                   >
                     Ask →
                   </button>
@@ -320,7 +320,7 @@ export default async function DatasetsUniversePage() {
 
                 <Link
                   href="/reports/austin-construction-2026"
-                  className="mt-5 block w-full rounded-md bg-[var(--ds-purple)] py-2.5 text-center text-[12px] font-semibold uppercase tracking-[0.1em] text-white hover:opacity-90"
+                  className="mt-5 block w-full rounded-md bg-white py-2.5 text-center text-[12px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-bg)] hover:opacity-90"
                 >
                   Read the report ↗
                 </Link>

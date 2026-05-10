@@ -102,7 +102,7 @@ export default async function HomePage() {
           className="pointer-events-none absolute inset-0 hidden md:flex items-center justify-end pr-8"
           aria-hidden
         >
-          <div className="w-[58%] max-w-[820px] opacity-[0.18]">
+          <div className="w-[58%] max-w-[820px]">
             <HeroTexasMap />
           </div>
         </div>
@@ -134,7 +134,7 @@ export default async function HomePage() {
                   />
                   <button
                     type="submit"
-                    className="rounded-md bg-[var(--ds-purple)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-white hover:opacity-90"
+                    className="rounded-md bg-white px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-bg)] hover:opacity-90"
                   >
                     Ask →
                   </button>
@@ -366,7 +366,7 @@ export default async function HomePage() {
               </div>
               <Link
                 href="/chat"
-                className="inline-flex items-center gap-2 rounded-md bg-[var(--ds-purple)] px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-white hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-bg)] hover:opacity-90"
               >
                 Open chat →
               </Link>
@@ -593,7 +593,7 @@ export default async function HomePage() {
               <div className="mt-5 flex flex-wrap gap-2">
                 <Link
                   href="/use-as-agent"
-                  className="rounded-md bg-[var(--ds-purple)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-white hover:opacity-90"
+                  className="rounded-md bg-white px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-bg)] hover:opacity-90"
                 >
                   Install pitch →
                 </Link>

@@ -34,7 +34,7 @@ const TEAM: Person[] = [
     tone: "accent",
   },
   {
-    name: "Kunal Vyas",
+    name: "Kunal Vasavada",
     role: "Dataset onboarding · Catalog correctness",
     github: "promptkv",
     linkedin: "https://www.linkedin.com/in/kunalvasavada",
@@ -87,7 +87,7 @@ export default async function AboutPage() {
           <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
             About · The team
           </p>
-          <h1 className="mt-4 max-w-[24ch] text-[44px] font-bold leading-[1.04] tracking-[-0.025em] text-[var(--ds-text)] md:text-[64px]">
+          <h1 className="mt-4 max-w-[28ch] text-[32px] font-semibold leading-[1.15] tracking-[-0.015em] text-[var(--ds-text)] md:text-[44px]">
             Four people. Seven agents. {discovery.totalKnown.toLocaleString()} datasets.
           </h1>
           <p className="mt-6 max-w-[64ch] text-[16px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
@@ -111,7 +111,7 @@ export default async function AboutPage() {
           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-purple)]">
             The roster
           </p>
-          <h2 className="mt-3 max-w-[28ch] text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[44px]">
+          <h2 className="mt-3 max-w-[36ch] text-[24px] font-semibold leading-[1.2] tracking-[-0.01em] text-[var(--ds-text)] md:text-[30px]">
             Builders, not just demoers.
           </h2>
           <p className="mt-4 max-w-[60ch] text-[15px] leading-relaxed text-[var(--ds-text-mute)] md:text-[16px]">
@@ -191,7 +191,7 @@ export default async function AboutPage() {
           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-good)]">
             By the numbers
           </p>
-          <h2 className="mt-3 max-w-[28ch] text-[28px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[36px]">
+          <h2 className="mt-3 max-w-[36ch] text-[22px] font-semibold leading-[1.2] tracking-[-0.01em] text-[var(--ds-text)] md:text-[28px]">
             What landed in 48 hours.
           </h2>
 
@@ -212,7 +212,7 @@ export default async function AboutPage() {
                 className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5"
               >
                 <p
-                  className="text-[40px] font-bold tabular-nums tracking-tight md:text-[56px]"
+                  className="text-[28px] font-semibold tabular-nums tracking-tight md:text-[36px]"
                   style={{ color: TONE_COLOR[s.tone] }}
                 >
                   {s.value}
@@ -233,7 +233,7 @@ export default async function AboutPage() {
           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
             Acknowledgements
           </p>
-          <h2 className="mt-3 max-w-[40ch] text-[24px] font-bold leading-[1.2] tracking-[-0.02em] text-[var(--ds-text)] md:text-[32px]">
+          <h2 className="mt-3 max-w-[48ch] text-[20px] font-semibold leading-[1.25] tracking-[-0.005em] text-[var(--ds-text)] md:text-[26px]">
             None of this exists without the open-data movement.
           </h2>
           <p className="mt-4 max-w-[64ch] text-[15px] leading-relaxed text-[var(--ds-text-mute)]">
@@ -242,7 +242,7 @@ export default async function AboutPage() {
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
               href="/q"
-              className="inline-flex items-center gap-2 rounded-md bg-[var(--ds-purple)] px-4 py-2.5 text-[13px] font-semibold text-white hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2.5 text-[13px] font-semibold text-[var(--ds-bg)] hover:opacity-90"
             >
               Try the agent →
             </Link>

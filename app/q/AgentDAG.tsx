@@ -365,11 +365,13 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
   // Geometry tuned to fit the right-column sidebar (~380-420px) without
   // overflowing or shrinking text below readability. Was sized for desktop
   // SVG which made boxes balloon outside the sidebar viewport.
-  const NODE_W = 110;
-  const NODE_H = 38;
-  const COL_W = 132;
-  const ROW_H = 60;
-  const PAD_X = 16;
+  // Nodes widened to 150px so two-word labels like "critic · plan" and
+  // "revise · answer" stop truncating at the 16-char ceiling.
+  const NODE_W = 150;
+  const NODE_H = 42;
+  const COL_W = 174;
+  const ROW_H = 64;
+  const PAD_X = 14;
   const PAD_Y = 18;
   const cols = 3;
   const innerW = cols * COL_W;
@@ -395,12 +397,25 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
 
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" aria-hidden>
         <defs>
-          <marker id="dag-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <marker id="dag-arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill="#3F3F46" />
+          </marker>
+          <marker id="dag-arrow-done" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#10B981" />
+          </marker>
+          <marker id="dag-arrow-fail" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#EF4444" />
+          </marker>
+          <marker id="dag-arrow-run" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#5B8DEF" />
           </marker>
           <marker id="dag-arrow-warn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill="#F59E0B" />
           </marker>
+          <style>{`
+            @keyframes dag-flow { to { stroke-dashoffset: -16; } }
+            .dag-flow-active { stroke-dasharray: 6 4; animation: dag-flow 0.8s linear infinite; }
+          `}</style>
         </defs>
 
         {built.edges.map((e, i) => {
@@ -416,16 +431,39 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
             const arcX = Math.max(x1, x2) + COL_W * 0.8;
             const path = `M ${x1} ${y1} L ${x1} ${y1 - 8} L ${arcX} ${y1 - 8} L ${arcX} ${y2 + 8} L ${x2} ${y2 + 8} L ${x2} ${y2}`;
             return (
-              <path key={i} d={path} fill="none" stroke="#F59E0B" strokeWidth={1.25} strokeDasharray="3 3" markerEnd="url(#dag-arrow-warn)" />
+              <path key={i} d={path} fill="none" stroke="#F59E0B" strokeWidth={1.5} strokeDasharray="4 4" markerEnd="url(#dag-arrow-warn)" />
             );
           }
 
-          const midY = (y1 + y2) / 2;
+          // Stroke + marker keyed to the destination node's status so the
+          // connector tells the same story the node does. Curved bezier
+          // (cubic) instead of axis-aligned L-shape feels more like a flow.
+          const dy = y2 - y1;
+          const ctrl = Math.max(20, Math.min(60, Math.abs(dy) * 0.55));
           const path =
             x1 === x2
               ? `M ${x1} ${y1} L ${x2} ${y2}`
-              : `M ${x1} ${y1} L ${x1} ${midY} L ${x2} ${midY} L ${x2} ${y2}`;
-          return <path key={i} d={path} fill="none" stroke="#3F3F46" strokeWidth={1.25} markerEnd="url(#dag-arrow)" />;
+              : `M ${x1} ${y1} C ${x1} ${y1 + ctrl}, ${x2} ${y2 - ctrl}, ${x2} ${y2}`;
+          const tone =
+            to.status === "done"
+              ? { stroke: "#10B981", marker: "url(#dag-arrow-done)" }
+              : to.status === "fail"
+                ? { stroke: "#EF4444", marker: "url(#dag-arrow-fail)" }
+                : to.status === "running"
+                  ? { stroke: "#5B8DEF", marker: "url(#dag-arrow-run)" }
+                  : { stroke: "#3F3F46", marker: "url(#dag-arrow-gray)" };
+          return (
+            <path
+              key={i}
+              d={path}
+              fill="none"
+              stroke={tone.stroke}
+              strokeWidth={1.5}
+              strokeOpacity={to.status === "running" ? 1 : 0.85}
+              markerEnd={tone.marker}
+              className={to.status === "running" ? "dag-flow-active" : undefined}
+            />
+          );
         })}
 
         {positioned.map((n) => {
@@ -437,51 +475,67 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
 
           const tip = docsForNode(n.label, n.agent);
           if (n.shape === "diamond") {
-            const r = 22;
+            // Diamond widened so "critic · answer" (15 chars) and the score
+            // line both fit without truncation. Kept the rhombus shape so it
+            // stays visually distinct from the rectangular tool nodes.
+            const r = 34;
+            const maxDiamondChars = 20;
+            const diamondLabel =
+              n.label.length > maxDiamondChars
+                ? n.label.slice(0, maxDiamondChars - 1) + "…"
+                : n.label;
             return (
               <g key={n.id} style={{ cursor: "help" }}>
                 <title>{`${n.label} — ${tip}`}</title>
                 <polygon
-                  points={`${x},${y - r} ${x + r * 1.2},${y} ${x},${y + r} ${x - r * 1.2},${y}`}
+                  points={`${x},${y - r} ${x + r * 1.4},${y} ${x},${y + r} ${x - r * 1.4},${y}`}
                   fill={fill}
                   stroke={ring}
                   strokeWidth={1.5}
                 />
-                <text x={x} y={y - 1} textAnchor="middle" fontSize={8.5} fontFamily="JetBrains Mono, monospace" fill={agentTone} fontWeight={700}>
-                  {(n.label.length > 13 ? n.label.slice(0, 12) + "…" : n.label)}
+                <text x={x} y={y - 2} textAnchor="middle" fontSize={9.5} fontFamily="JetBrains Mono, monospace" fill={agentTone} fontWeight={700}>
+                  {diamondLabel}
                 </text>
                 {n.sub && (
-                  <text x={x} y={y + 10} textAnchor="middle" fontSize={8} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA">
+                  <text x={x} y={y + 11} textAnchor="middle" fontSize={8.5} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA">
                     {n.sub}
                   </text>
                 )}
                 {/* (i) icon — top-right corner of the diamond's bbox */}
-                <circle cx={x + r * 1.2 - 4} cy={y - r + 4} r={4} fill="#15171C" stroke="#71717A" strokeWidth={0.75} />
-                <text x={x + r * 1.2 - 4} y={y - r + 6.5} textAnchor="middle" fontSize={6.5} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={700}>i</text>
+                <circle cx={x + r * 1.4 - 5} cy={y - r + 5} r={4} fill="#15171C" stroke="#71717A" strokeWidth={0.75} />
+                <text x={x + r * 1.4 - 5} y={y - r + 7.5} textAnchor="middle" fontSize={6.5} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={700}>i</text>
               </g>
             );
           }
           if (n.shape === "pill" || n.shape === "round") {
-            const w = NODE_W * 0.85;
+            // Pill widened to match rectangle nodes so "revise · answer" and
+            // similar two-word labels stop truncating.
+            const w = NODE_W;
             const h = NODE_H;
+            const maxPillChars = Math.floor((w - 30) / 6.3);
+            const pillLabel =
+              n.label.length > maxPillChars
+                ? n.label.slice(0, maxPillChars - 1) + "…"
+                : n.label;
             return (
               <g key={n.id} style={{ cursor: "help" }}>
                 <title>{`${n.label} — ${tip}`}</title>
                 <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={h / 2} fill={fill} stroke={ring} strokeWidth={1.5} />
-                <circle cx={x - w / 2 + 9} cy={y} r={2.5} fill={agentTone} />
-                <text x={x - w / 2 + 16} y={y + 3.5} fontSize={9.5} fontFamily="JetBrains Mono, monospace" fill="#F5F5F7" fontWeight={500}>
-                  {(n.label.length > 12 ? n.label.slice(0, 11) + "…" : n.label)}
+                <circle cx={x - w / 2 + 11} cy={y} r={3} fill={agentTone} />
+                <text x={x - w / 2 + 20} y={y + 4} fontSize={10.5} fontFamily="JetBrains Mono, monospace" fill="#F5F5F7" fontWeight={500}>
+                  {pillLabel}
                 </text>
                 {/* (i) icon — top-right of the pill */}
-                <circle cx={x + w / 2 - 6} cy={y - h / 2 + 6} r={4} fill="#15171C" stroke="#71717A" strokeWidth={0.75} />
-                <text x={x + w / 2 - 6} y={y - h / 2 + 8.5} textAnchor="middle" fontSize={6.5} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={700}>i</text>
+                <circle cx={x + w / 2 - 7} cy={y - h / 2 + 7} r={4} fill="#15171C" stroke="#71717A" strokeWidth={0.75} />
+                <text x={x + w / 2 - 7} y={y - h / 2 + 9.5} textAnchor="middle" fontSize={6.5} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={700}>i</text>
               </g>
             );
           }
           const w = NODE_W;
           const h = NODE_H;
-          // Truncate strictly to width (rough char width ≈ 5.5px at 9.5px font).
-          const maxLabelChars = Math.floor((w - 18) / 5.5);
+          // Truncate strictly to width. Char width ≈ 6.3px at 10.5px JetBrains
+          // Mono. Subtract 20px for left padding + (i) icon + source pill.
+          const maxLabelChars = Math.floor((w - 24) / 6.3);
           const labelDisplay =
             n.label.length > maxLabelChars
               ? n.label.slice(0, maxLabelChars - 1) + "…"
@@ -495,12 +549,12 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
           return (
             <g key={n.id} style={{ cursor: "help" }}>
               <title>{`${n.label} — ${tip}`}</title>
-              <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={4} fill={fill} stroke={ring} strokeWidth={1.5} />
-              <rect x={x - w / 2} y={y - h / 2} width={2.5} height={h} fill={agentTone} />
-              <text x={x - w / 2 + 7} y={y - 4} fontSize={9.5} fontFamily="JetBrains Mono, monospace" fill="#F5F5F7" fontWeight={600}>
+              <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={6} fill={fill} stroke={ring} strokeWidth={1.5} />
+              <rect x={x - w / 2} y={y - h / 2} width={3} height={h} fill={agentTone} rx={1.5} />
+              <text x={x - w / 2 + 10} y={y - 3} fontSize={10.5} fontFamily="JetBrains Mono, monospace" fill="#F5F5F7" fontWeight={600}>
                 {labelDisplay}
               </text>
-              <text x={x - w / 2 + 7} y={y + 8} fontSize={8} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA">
+              <text x={x - w / 2 + 10} y={y + 10} fontSize={8.5} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA">
                 {subDisplayClipped}
               </text>
               {/* (i) icon — bottom-right corner. Don't overlap the source pill which is top-right. */}

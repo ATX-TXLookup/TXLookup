@@ -515,6 +515,11 @@ export async function POST(req: NextRequest) {
         }
 
         const results: ToolEnvelope[] = [];
+        const stepTrace: Array<{
+          tool: string;
+          status: "completed" | "failed";
+          duration_ms?: number;
+        }> = [];
         let citation: unknown = null;
         const artifacts: string[] = [];
         let replanCount = 0;
@@ -637,8 +642,27 @@ export async function POST(req: NextRequest) {
           }
 
           const stepStart = Date.now();
-          const r = await executeStep(step);
+          // Pull the most recent successful data step's rows so render_to_miro
+          // can fall back when the planner forgets the `records` arg.
+          const lastDataRecords = (() => {
+            for (let j = results.length - 1; j >= 0; j--) {
+              const env = results[j];
+              if (env.status !== "completed") continue;
+              const res = env.result as
+                | { rows?: Array<Record<string, unknown>>; records?: Array<Record<string, unknown>> }
+                | null;
+              if (Array.isArray(res?.rows) && res!.rows!.length > 0) return res!.rows;
+              if (Array.isArray(res?.records) && res!.records!.length > 0) return res!.records;
+            }
+            return undefined;
+          })();
+          const r = await executeStep(step, {
+            priorSteps: stepTrace,
+            lastDataRecords,
+            query,
+          });
           const duration_ms = Date.now() - stepStart;
+          stepTrace.push({ tool: step.tool, status: r.status, duration_ms });
 
           // Issue #90 + #97 — Socrata wrapper may flag the source on the
           // result envelope (`_source: "cache" | "live" | "cache-fallback"`).

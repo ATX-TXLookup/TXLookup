@@ -680,6 +680,9 @@ export function AgentRunner({
     ? buildRelatedAngles(state.citation.dataset_id, query)
     : [];
 
+  // Miro view link — surfaces only when render_to_miro produced an artifact.
+  const miroLink = state.artifacts.find((a) => a.includes("miro.com")) ?? null;
+
   // PR #68 / issue #67 — multi-agent surfaces. Pull the reporter composition
   // out of the latest reporter step so the answer card can render the
   // composed article instead of the plain synthesizer answer.
@@ -734,7 +737,7 @@ export function AgentRunner({
           <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
             <div className="px-6 py-10 md:px-10 md:py-12">
               <div className="grid gap-8 md:grid-cols-12 md:gap-10">
-                <div className="md:col-span-8">
+                <div className={state.citation ? "md:col-span-8" : "md:col-span-12"}>
                   <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
                     Insight
                   </p>
@@ -746,30 +749,22 @@ export function AgentRunner({
                       <ReporterComposition result={reporterPayload} />
                     </div>
                   ) : (
-                    <p className="mt-3 max-w-[58ch] text-[28px] font-normal leading-snug tracking-tight text-[var(--ds-text)] md:text-[32px]">
+                    <p className="mt-3 max-w-[60ch] text-[20px] font-normal leading-[1.5] tracking-normal text-[var(--ds-text)] md:text-[24px]">
                       {state.answer}
                     </p>
                   )}
 
-                  {/* Action row — primary CTA inverted (white on dark) */}
+                  {/* Action row — answer actions only. Data-source actions
+                      (Open dataset, API endpoint) live in the Primary Source
+                      aside on the right to avoid duplication. */}
                   <div className="mt-7 flex flex-wrap items-center gap-3">
-                    {state.citation && (
+                    {!miroLink && state.phase === "done" && (
                       <Link
-                        href={`/datasets/${state.citation.dataset_id}`}
-                        className="inline-flex items-center rounded-md bg-[var(--ds-purple)] px-5 py-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-white hover:opacity-90"
+                        href={`/q?q=${encodeURIComponent(query + " — render this to a Miro board")}`}
+                        className="inline-flex items-center rounded-md bg-white px-5 py-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-[var(--ds-bg)] hover:opacity-90"
                       >
-                        Open dataset →
+                        Render to Miro ↗
                       </Link>
-                    )}
-                    {state.citation?.api_url && (
-                      <a
-                        href={state.citation.api_url}
-                        target="_blank"
-                        rel="noopener"
-                        className="inline-flex items-center rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-5 py-2 text-[13px] font-semibold text-[var(--ds-text)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
-                      >
-                        API endpoint →
-                      </a>
                     )}
                     <button
                       type="button"
@@ -821,28 +816,27 @@ export function AgentRunner({
                     )}
                   </div>
 
-                  {/* By the numbers — standout figures from the answer */}
-                  {numbers.length > 0 && (
-                    <div className="mt-8 border-t border-[var(--ds-border)] pt-6">
+                  {/* By the numbers — standout figures from the answer.
+                      Hidden when fewer than 2 stats survive filtering, since
+                      a lone figure (often a date or duration) looks like a
+                      garbage extraction. */}
+                  {numbers.length >= 2 && (
+                    <div className="mt-8 border-t border-[var(--ds-border)] pt-5">
                       <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
                         By the numbers
                       </p>
-                      <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-3 md:grid-cols-3">
+                      <ul className="mt-3 flex flex-wrap items-baseline gap-x-6 gap-y-2">
                         {numbers.slice(0, 3).map((n, i) => (
-                          <div
-                            key={i}
-                            className="pl-3"
-                            style={{ borderLeft: "3px solid var(--ds-warn)" }}
-                          >
-                            <div className="text-[32px] font-normal leading-none tabular-nums text-[var(--ds-text)]">
+                          <li key={i} className="flex items-baseline gap-2">
+                            <span className="text-[22px] font-semibold leading-none tabular-nums text-[var(--ds-text)]">
                               {n.value}
-                            </div>
-                            <div className="mt-1.5 font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-mute)]">
+                            </span>
+                            <span className="text-[13px] leading-none text-[var(--ds-text-mute)]">
                               {n.label}
-                            </div>
-                          </div>
+                            </span>
+                          </li>
                         ))}
-                      </div>
+                      </ul>
                     </div>
                   )}
                 </div>
@@ -850,8 +844,8 @@ export function AgentRunner({
                 {/* Citation aside — Stitch screen 2 pattern: header + name +
                     dataset id + 3 mini text buttons (VIEW SCHEMA / RAW JSON /
                     DOCS) + a primary OPEN DATASET button. */}
+                {state.citation && (
                 <aside className="md:col-span-4">
-                  {state.citation && (
                     <div className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5">
                       <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
                         Primary source
@@ -868,7 +862,7 @@ export function AgentRunner({
 
                       <Link
                         href={`/datasets/${state.citation.dataset_id}`}
-                        className="mt-5 inline-flex w-full items-center justify-center rounded-md bg-[var(--ds-purple)] px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-white hover:opacity-90"
+                        className="mt-5 inline-flex w-full items-center justify-center rounded-md bg-white px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-bg)] hover:opacity-90"
                       >
                         Open dataset →
                       </Link>
@@ -900,8 +894,8 @@ export function AgentRunner({
                         </a>
                       </div>
                     </div>
-                  )}
                 </aside>
+                )}
               </div>
 
               {/* DEEPER ANALYSIS row — Stitch screen 2 pattern. Comparative
@@ -936,6 +930,37 @@ export function AgentRunner({
         {/* Reasoning trace + Self-corrections live in the right-column DAG /
             Steps / Telemetry tabs. SupportChips / AnalystFindings /
             ReporterComposition render inline above where applicable. */}
+
+        {/* Live Miro board — only when render_to_miro produced a board link. */}
+        {state.phase === "done" && miroLink && (
+          <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
+            <div className="px-6 py-6 md:px-10 md:py-8">
+              <div className="flex items-baseline justify-between gap-3">
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-purple)]">
+                  Miro board
+                </p>
+                <a
+                  href={miroLink}
+                  target="_blank"
+                  rel="noopener"
+                  className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--ds-purple)] hover:underline"
+                >
+                  Open ↗
+                </a>
+              </div>
+              <div className="mt-3 overflow-hidden rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)]">
+                <iframe
+                  src={miroLink.replace("/app/board/", "/app/live-embed/") + (miroLink.includes("?") ? "&" : "?") + "embedMode=view_only_without_ui&moveToViewport=&embedId=txlookup-q"}
+                  title="TXLookup Miro board"
+                  loading="lazy"
+                  allow="fullscreen; clipboard-read; clipboard-write"
+                  allowFullScreen
+                  className="block h-[480px] w-full border-0"
+                />
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Related angles — only after a successful answer */}
         {state.phase === "done" && state.answer && relatedAngles.length > 0 && (
@@ -995,7 +1020,7 @@ export function AgentRunner({
                 </p>
                 <Link
                   href="/"
-                  className="mt-5 inline-flex items-center rounded-md bg-[var(--ds-purple)] px-5 py-2 text-[13px] font-semibold text-white hover:opacity-90"
+                  className="mt-5 inline-flex items-center rounded-md bg-white px-5 py-2 text-[13px] font-semibold text-[var(--ds-bg)] hover:opacity-90"
                 >
                   ← Home
                 </Link>
@@ -1122,6 +1147,29 @@ type KeyNumber = { value: string; label: string };
 function extractKeyNumbers(text: string): KeyNumber[] {
   const out: KeyNumber[] = [];
   const seen = new Set<string>();
+  // Track labels we've already taken — prevents "3,699 permits / 1,784
+  // violations / 3,564 permits" repeating the same label twice.
+  const seenLabel = new Set<string>();
+
+  // Allow-list of count-nouns the figure must label. Anything else (dates,
+  // street addresses, IH 35, "involving rear") is rejected to avoid dressing
+  // up incidental numbers as metrics.
+  const COUNT_WORDS = new Set([
+    "permits","permit","violations","violation","complaints","complaint",
+    "cases","case","calls","call","incidents","incident","records","record",
+    "rows","row","tickets","ticket","inspections","inspection","filings",
+    "filing","reports","report","collisions","collision","crashes","crash",
+    "datasets","dataset","stops","stop","arrests","arrest","accidents",
+    "accident","injuries","injury","fatalities","fatality","deaths","death",
+    "applications","application","requests","request","alerts","alert",
+    "events","event","entries","entry","items","item","results","result",
+    "responses","response","citations","citation","fines","fine","points",
+    "point","sources","source","matches","match","hits","hit","pages","page",
+  ]);
+  // Things that indicate the trailing word is NOT a count noun.
+  const MONTHS =
+    /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i;
+
   // Order matters — match richer patterns first.
   const patterns: { re: RegExp; format: (m: RegExpExecArray) => KeyNumber }[] = [
     {
@@ -1132,8 +1180,10 @@ function extractKeyNumbers(text: string): KeyNumber[] {
       re: /\$([\d,]+(?:\.\d+)?[KMB]?)\s*(?:in\s+)?([a-z]+(?:\s+[a-z]+){0,2})?/gi,
       format: (m) => ({ value: `$${m[1]}`, label: (m[2] ?? "spend").trim() }),
     },
+    // Bare numbers — require either a comma (clear thousands) OR a known
+    // count-noun follower. Plain "35 on April" no longer qualifies.
     {
-      re: /([\d,]{2,}(?:\.\d+)?)\s+([a-z]+(?:\s+[a-z]+){0,2})/gi,
+      re: /(\d{1,3}(?:,\d{3})+|\d{2,})\s+([a-z]+(?:\s+[a-z]+){0,2})/gi,
       format: (m) => ({ value: m[1], label: m[2] }),
     },
   ];
@@ -1146,9 +1196,34 @@ function extractKeyNumbers(text: string): KeyNumber[] {
         .replace(/\s+/g, " ")
         .trim();
       if (!trimmedLabel || trimmedLabel.length < 3) continue;
+      // Reject month-words, year-like 4-digit values, and labels whose first
+      // word isn't a count noun (and the value isn't a comma-thousands or %).
+      const numericRaw = k.value.replace(/[$,%KMB]/gi, "");
+      const numericVal = Number(numericRaw);
+      if (
+        Number.isFinite(numericVal) &&
+        numericVal >= 1900 &&
+        numericVal <= 2099 &&
+        !k.value.includes(",") &&
+        !k.value.includes("%")
+      ) {
+        // Looks like a year. Skip.
+        continue;
+      }
+      if (MONTHS.test(trimmedLabel)) continue;
+      const firstWord = trimmedLabel.split(/\s+/)[0]?.toLowerCase() ?? "";
+      const isPercent = k.value.includes("%");
+      const isMoney = k.value.startsWith("$");
+      const isThousands = /\d,\d/.test(k.value);
+      if (!isPercent && !isMoney && !isThousands && !COUNT_WORDS.has(firstWord)) {
+        continue;
+      }
       const key = k.value.toLowerCase();
       if (seen.has(key)) continue;
+      const labelKey = trimmedLabel.toLowerCase();
+      if (seenLabel.has(labelKey)) continue;
       seen.add(key);
+      seenLabel.add(labelKey);
       out.push({ value: k.value, label: trimmedLabel.slice(0, 28) });
     }
     if (out.length >= 3) break;

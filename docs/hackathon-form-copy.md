@@ -77,7 +77,7 @@ The 11 deeply-curated datasets:
 
 ## Team
 - **Ravinder Jilkapally** (jravinder · jravinderreddy@gmail.com) — agent loop, replanner, observatory
-- **Kunal Vyas** (promptkv) — dataset onboarding, catalog correctness
+- **Kunal Vasavada** (promptkv) — dataset onboarding, catalog correctness
 - **Godwyn James** (goodguygoddy) — doom-loop wiring, instrumentation
 - **Raj Akula** (rajakula1) — external-runtime validation, MCP integration
 

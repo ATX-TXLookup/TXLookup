@@ -231,7 +231,7 @@ export default async function DeveloperPage() {
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link
                   href="/use-as-agent"
-                  className="inline-flex items-center gap-2 rounded-md bg-[var(--ds-purple)] px-3.5 py-1.5 text-[12px] font-semibold text-white hover:opacity-90"
+                  className="inline-flex items-center gap-2 rounded-md bg-white px-3.5 py-1.5 text-[12px] font-semibold text-[var(--ds-bg)] hover:opacity-90"
                 >
                   Install pitch →
                 </Link>

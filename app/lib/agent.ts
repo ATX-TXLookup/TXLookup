@@ -5,6 +5,7 @@
 import OpenAI from "openai";
 
 import { CATALOG, PORTAL_LABELS, discover, findById } from "./catalog";
+import { searchDiscovery } from "./catalog-discovered";
 import { describeDataset, sodaQuery } from "./socrata";
 import { callSpecialist, isSpecialistName } from "./specialists";
 
@@ -27,7 +28,7 @@ const TOOL_LIST = `1. discover_datasets({query: string, city?: string}) — retu
 3. summarize_data({datasetId: string, where: string, dimensions: string[]}) — group + count, returns rows {col, count}
 4. fetch_data({datasetId: string, where: string, order?: string, limit?: number}) — returns rows. DO NOT pass a "select" arg — that's not supported.
 5. cite_dataset({datasetId: string}) — returns the citation block for the answer
-6. render_to_miro({title: string, summary: string, records?: object[]}) — A2A handoff to Miro. Creates a real Miro board and returns {board_id, view_link} as an artifact. Use ONLY when the user explicitly asks for a Miro board, whiteboard, visual collaboration, or "render this to Miro". Always emit it AFTER a data step (summarize_data or fetch_data) so the records arg has real numbers — never as the only step.`;
+6. render_to_miro({title: string, summary: string, records: object[]}) — A2A handoff to Miro. Renders a real Miro board with the multi-agent topology, this query's step trace, the answer summary, and a horizontal bar chart of "records". Returns {board_id, view_link} as an artifact. Use ONLY when the user explicitly asks for a Miro board, whiteboard, visual collaboration, or "render this to Miro". MUST emit AFTER a summarize_data or fetch_data step. The "records" argument is REQUIRED — pass the rows from the prior data step (top 8–12 rows). Each row should be a small object with one label field (e.g. zip, district, type) and one numeric field (e.g. count, total). Without records the board has no chart.`;
 
 const TOOL_NAMES = `"discover_datasets" | "get_dataset_schema" | "summarize_data" | "fetch_data" | "cite_dataset" | "render_to_miro"`;
 
@@ -211,6 +212,8 @@ write a tight 2-4 sentence answer in plain English with concrete numbers.
 - Use specific counts and dates from the tool results.
 - Do NOT invent numbers.
 - Do NOT include a citation block — that's added separately.
+- Do NOT use Markdown of any kind: no [text](url) links, no **bold**, no _italics_, no \`code\`, no headings, no lists. The UI renders this as plain text.
+- Do NOT include URLs at all. The Miro board, dataset, and source links are surfaced in dedicated UI sections below the answer — never paste a URL into the answer text.
 - Lead with the headline finding, not a recap of the question.
 `;
 
@@ -442,13 +445,62 @@ export type ToolEnvelope = {
   artifacts?: string[];
 };
 
-export async function executeStep(step: PlanStep): Promise<ToolEnvelope> {
+export type ExecuteContext = {
+  priorSteps?: Array<{
+    tool: string;
+    status: "completed" | "failed";
+    duration_ms?: number;
+  }>;
+  // Last successful summarize_data / fetch_data rows. render_to_miro falls
+  // back to these when the planner skips the `records` arg, so the bar chart
+  // still fills.
+  lastDataRecords?: Array<Record<string, unknown>>;
+  // The user's original natural-language question — rendered as the frame
+  // title on the Miro board so each query gets a clear container label.
+  query?: string;
+};
+
+export async function executeStep(
+  step: PlanStep,
+  context?: ExecuteContext,
+): Promise<ToolEnvelope> {
   try {
     switch (step.tool) {
       case "discover_datasets": {
         const args = step.args as { query: string; city?: string };
-        const ranked = discover(args.query ?? "", args.city);
-        return { status: "completed", result: ranked.slice(0, 5), error: null };
+        const curated = discover(args.query ?? "", args.city).slice(0, 3);
+        // Merge in the top 2 hits from the discovered 6,061-dataset universe
+        // so the planner isn't limited to the 11 curated rows. Normalize the
+        // discovered shape to match CatalogDataset's key fields so downstream
+        // tools (get_dataset_schema, summarize_data) work uniformly.
+        const discovered = await searchDiscovery(args.query ?? "", 2).catch(
+          () => [],
+        );
+        const merged = [
+          ...curated.map((d) => ({
+            id: d.id,
+            title: d.title,
+            agency: d.agency,
+            city: d.city,
+            portal: d.portal,
+            blurb: d.blurb,
+            keyColumns: d.keyColumns,
+            source: "curated" as const,
+          })),
+          ...discovered
+            .filter((d) => !curated.some((c) => c.id === d.id))
+            .map((d) => ({
+              id: d.id,
+              title: d.name,
+              agency: "—",
+              city: d.portal.replace(/^data\./, "").split(".")[0],
+              portal: d.portal,
+              blurb: (d.description ?? "").slice(0, 240),
+              keyColumns: [],
+              source: "discovered" as const,
+            })),
+        ];
+        return { status: "completed", result: merged, error: null };
       }
       case "get_dataset_schema": {
         const args = step.args as { datasetId: string; portal?: string };
@@ -524,8 +576,13 @@ export async function executeStep(step: PlanStep): Promise<ToolEnvelope> {
       }
       case "render_to_miro": {
         // A2A handoff — the TXLookup agent calls out to the Miro agent
-        // (over Miro's REST API) to render a visual board with the answer.
-        // Returns the board URL as an artifact so the user can open it.
+        // (over Miro's REST API) to render the answer as a structured board.
+        // Layout (top → bottom): title sticky, multi-agent topology row
+        // (Planner → Analyst → Reporter → Critic → Support), this query's
+        // step trace mirroring the /q DAG panel, summary sticky, horizontal
+        // bar chart of records (rectangle widths proportional to count),
+        // and an attribution card. If MIRO_BOARD_ID is set we append to that
+        // shared board with a fresh y-offset so demos don't overlap.
         const args = step.args as {
           title: string;
           summary: string;
@@ -538,39 +595,474 @@ export async function executeStep(step: PlanStep): Promise<ToolEnvelope> {
             error: "MIRO_API_TOKEN not set — agent-to-agent handoff to Miro unavailable in this deploy.",
           };
         }
+        const miroHeaders = {
+          Authorization: `Bearer ${process.env.MIRO_API_TOKEN}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        };
+        const title = (args.title || "TXLookup answer").slice(0, 60);
+        const summary = (args.summary || "").slice(0, 1000);
+        const priorSteps = context?.priorSteps ?? [];
         try {
-          const r = await fetch("https://api.miro.com/v2/boards", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${process.env.MIRO_API_TOKEN}`,
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: (args.title || "TXLookup answer").slice(0, 60),
-              description: (args.summary || "").slice(0, 300),
-              policy: { sharingPolicy: { access: "private" } },
-            }),
-          });
-          if (!r.ok) {
-            return {
-              status: "failed",
-              result: null,
-              error: `Miro API HTTP ${r.status}`,
-            };
+          // 1. Resolve the target board.
+          //    If MIRO_BOARD_ID is set AND the board still exists, we APPEND
+          //    to it — avoids the free-tier 3-board limit and gives the demo
+          //    a persistent board judges can revisit.
+          //    If MIRO_BOARD_ID is missing, points to a deleted board, or is
+          //    inaccessible to this token, we fall back to creating a new
+          //    board so the render still produces something visible.
+          const existingBoardId = process.env.MIRO_BOARD_ID?.trim();
+          let boardId: string | null = null;
+          let viewLink: string;
+
+          if (existingBoardId) {
+            const existsResp = await fetch(
+              `https://api.miro.com/v2/boards/${existingBoardId}`,
+              { headers: miroHeaders },
+            );
+            if (existsResp.ok) {
+              boardId = existingBoardId;
+            }
           }
-          const board = (await r.json()) as { id: string; viewLink?: string };
-          const viewLink =
-            board.viewLink ?? `https://miro.com/app/board/${board.id}/`;
+
+          if (boardId) {
+            viewLink = `https://miro.com/app/board/${boardId}/`;
+          } else {
+            const boardResp = await fetch("https://api.miro.com/v2/boards", {
+              method: "POST",
+              headers: miroHeaders,
+              body: JSON.stringify({
+                name: title,
+                description: summary.slice(0, 300),
+              }),
+            });
+            if (!boardResp.ok) {
+              const detail = await boardResp.text().catch(() => "");
+              return {
+                status: "failed",
+                result: null,
+                error: `Miro API HTTP ${boardResp.status}${detail ? `: ${detail.slice(0, 400)}` : ""}`,
+              };
+            }
+            const board = (await boardResp.json()) as {
+              id: string;
+              viewLink?: string;
+            };
+            boardId = board.id;
+            viewLink =
+              board.viewLink ?? `https://miro.com/app/board/${boardId}/`;
+          }
+          // Each query gets its own Frame on the shared board — the frame is
+          // a labeled container Miro renders with a header strip, which gives
+          // judges a clean visual divider between runs. Stack frames vertically
+          // by Date.now() so consecutive runs never overlap (frames are 2800px
+          // tall and we use ms-resolution offset).
+          const FRAME_W = 1700;
+          const FRAME_H = 2800;
+          const frameY = existingBoardId
+            ? (Date.now() % 10_000_000) // ~115 day window, plenty
+            : 0;
+
+          // 2. Create a Frame for this query and parent every item to it.
+          //    Items inside a frame use board-relative coordinates, but the
+          //    frame visually groups them and labels them with a header.
+          let itemsCreated = 1; // the board itself
+          const failed: Array<{ kind: string; error: string }> = [];
+
+          let frameId: string | null = null;
+          try {
+            const fResp = await fetch(
+              `https://api.miro.com/v2/boards/${boardId}/frames`,
+              {
+                method: "POST",
+                headers: miroHeaders,
+                body: JSON.stringify({
+                  data: {
+                    title: (context?.query || title).slice(0, 80),
+                    type: "freeform",
+                    format: "custom",
+                  },
+                  position: { x: 0, y: frameY, origin: "center" },
+                  geometry: { width: FRAME_W, height: FRAME_H },
+                }),
+              },
+            );
+            if (!fResp.ok) {
+              const detail = await fResp.text().catch(() => "");
+              throw new Error(`HTTP ${fResp.status}${detail ? `: ${detail.slice(0, 200)}` : ""}`);
+            }
+            const fJson = (await fResp.json()) as { id: string };
+            frameId = fJson.id;
+            itemsCreated++;
+          } catch (err) {
+            failed.push({
+              kind: "frame",
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+
+          // Miro v2: when an item has a parent, its position is interpreted
+          // FRAME-relative (not board-relative). So we add frameY only when
+          // there's no parent (fallback path). With a parent, y is used raw.
+          const parent = frameId ? { parent: { id: frameId } } : {};
+          const yOffset = frameId ? 0 : frameY;
+
+          const addSticky = async (
+            content: string,
+            color: string,
+            x: number,
+            y: number,
+            width = 220,
+          ) => {
+            try {
+              const r = await fetch(
+                `https://api.miro.com/v2/boards/${boardId}/sticky_notes`,
+                {
+                  method: "POST",
+                  headers: miroHeaders,
+                  body: JSON.stringify({
+                    data: { content: content.slice(0, 1500), shape: "rectangle" },
+                    style: { fillColor: color },
+                    position: { x, y: y + yOffset, origin: "center" },
+                    geometry: { width },
+                    ...parent,
+                  }),
+                },
+              );
+              if (!r.ok) throw new Error(`HTTP ${r.status}`);
+              itemsCreated++;
+            } catch (err) {
+              failed.push({
+                kind: "sticky",
+                error: err instanceof Error ? err.message : String(err),
+              });
+            }
+          };
+
+          const addShape = async (
+            shape: string,
+            content: string,
+            x: number,
+            y: number,
+            width: number,
+            height: number,
+            fillColor = "#ffffff",
+            borderColor = "#1a1a1a",
+            textColor = "#1a1a1a",
+          ) => {
+            try {
+              const r = await fetch(
+                `https://api.miro.com/v2/boards/${boardId}/shapes`,
+                {
+                  method: "POST",
+                  headers: miroHeaders,
+                  body: JSON.stringify({
+                    data: { shape, content: content.slice(0, 600) },
+                    style: {
+                      fillColor,
+                      borderColor,
+                      borderWidth: "2",
+                      color: textColor,
+                      fontSize: "14",
+                      textAlign: "center",
+                    },
+                    position: { x, y: y + yOffset, origin: "center" },
+                    geometry: { width, height },
+                    ...parent,
+                  }),
+                },
+              );
+              if (!r.ok) {
+                const detail = await r.text().catch(() => "");
+                throw new Error(`HTTP ${r.status}${detail ? `: ${detail.slice(0, 200)}` : ""}`);
+              }
+              itemsCreated++;
+            } catch (err) {
+              failed.push({
+                kind: "shape",
+                error: err instanceof Error ? err.message : String(err),
+              });
+            }
+          };
+
+          const addCard = async (
+            cardTitle: string,
+            description: string,
+            x: number,
+            y: number,
+          ) => {
+            try {
+              const r = await fetch(
+                `https://api.miro.com/v2/boards/${boardId}/cards`,
+                {
+                  method: "POST",
+                  headers: miroHeaders,
+                  body: JSON.stringify({
+                    data: {
+                      title: cardTitle.slice(0, 120),
+                      description: description.slice(0, 1000),
+                    },
+                    position: { x, y: y + yOffset, origin: "center" },
+                    ...parent,
+                  }),
+                },
+              );
+              if (!r.ok) throw new Error(`HTTP ${r.status}`);
+              itemsCreated++;
+            } catch (err) {
+              failed.push({
+                kind: "card",
+                error: err instanceof Error ? err.message : String(err),
+              });
+            }
+          };
+
+          // Layout coords below are RELATIVE to the frame center (0, 0).
+          // The add* helpers translate to board coords by adding frameY.
+          const work: Array<Promise<void>> = [];
+
+          // ── ROW 0 — title sticky (yellow, full width) ──────────────────
+          work.push(addSticky(title, "yellow", 0, -1300, 720));
+
+          // ── ROW 1 — multi-agent topology (mirrors /q DAG tab) ──────────
+          work.push(
+            addSticky(
+              "Multi-agent topology",
+              "gray",
+              -700,
+              -1100,
+              260,
+            ),
+          );
+          const topology = [
+            { label: "Planner", fill: "#dbeafe", border: "#2563eb" },
+            { label: "Analyst", fill: "#dcfce7", border: "#16a34a" },
+            { label: "Reporter", fill: "#ede9fe", border: "#7c3aed" },
+            { label: "Critic", fill: "#ffe4e6", border: "#e11d48" },
+            { label: "Support", fill: "#fef3c7", border: "#d97706" },
+          ];
+          const topoSpacing = 280;
+          const topoY = -950;
+          topology.forEach((node, i) => {
+            const x = -((topology.length - 1) * topoSpacing) / 2 + i * topoSpacing;
+            work.push(
+              addShape(
+                "round_rectangle",
+                `<strong>${node.label}</strong>`,
+                x,
+                topoY,
+                220,
+                100,
+                node.fill,
+                node.border,
+              ),
+            );
+            if (i < topology.length - 1) {
+              work.push(
+                addShape(
+                  "right_arrow",
+                  "",
+                  x + topoSpacing / 2,
+                  topoY,
+                  topoSpacing - 230,
+                  40,
+                  "#1a1a1a",
+                  "#1a1a1a",
+                  "#ffffff",
+                ),
+              );
+            }
+          });
+
+          // ── ROW 2 — this query's step trace (mirrors /q Steps tab) ─────
+          if (priorSteps.length > 0) {
+            work.push(
+              addSticky(
+                "Plan execution — this query",
+                "gray",
+                -700,
+                -750,
+                340,
+              ),
+            );
+            const steps = priorSteps.slice(0, 8);
+            const stepSpacing = Math.min(280, 1400 / Math.max(steps.length, 1));
+            const stepY = -600;
+            steps.forEach((s, i) => {
+              const x =
+                -((steps.length - 1) * stepSpacing) / 2 + i * stepSpacing;
+              const ok = s.status === "completed";
+              const fill = ok ? "#f0fdf4" : "#fef2f2";
+              const border = ok ? "#16a34a" : "#dc2626";
+              const label = `${i + 1}. ${s.tool}${
+                s.duration_ms ? `<br>${Math.round(s.duration_ms)}ms` : ""
+              }`;
+              work.push(
+                addShape(
+                  "rectangle",
+                  label,
+                  x,
+                  stepY,
+                  Math.max(180, stepSpacing - 60),
+                  90,
+                  fill,
+                  border,
+                ),
+              );
+              if (i < steps.length - 1) {
+                work.push(
+                  addShape(
+                    "right_arrow",
+                    "",
+                    x + stepSpacing / 2,
+                    stepY,
+                    Math.max(40, stepSpacing - Math.max(180, stepSpacing - 60)),
+                    30,
+                    "#94a3b8",
+                    "#94a3b8",
+                    "#ffffff",
+                  ),
+                );
+              }
+            });
+          }
+
+          // ── ROW 3 — answer summary ────────────────────────────────────
+          if (summary) {
+            work.push(
+              addSticky(
+                "Answer",
+                "gray",
+                -700,
+                -380,
+                160,
+              ),
+            );
+            work.push(addSticky(summary, "light_yellow", 0, -230, 720));
+          }
+
+          // ── ROW 4 — horizontal bar chart of records ───────────────────
+          // Prefer the planner's explicit records arg; fall back to the most
+          // recent successful data step's rows so the chart still fills when
+          // the planner forgets the arg.
+          const explicitRecords = (args.records ?? []).slice(0, 12);
+          const fallbackRecords = (context?.lastDataRecords ?? []).slice(0, 12);
+          const records =
+            explicitRecords.length > 0 ? explicitRecords : fallbackRecords;
+          if (records.length > 0) {
+            work.push(
+              addSticky(
+                explicitRecords.length > 0
+                  ? "By the numbers"
+                  : "By the numbers (auto-derived from last data step)",
+                "gray",
+                -700,
+                40,
+                340,
+              ),
+            );
+            // Pick the first numeric field as the bar value, the first
+            // non-numeric field as the label.
+            const firstRow = records[0];
+            const numericKey =
+              Object.entries(firstRow).find(
+                ([, v]) => typeof v === "number",
+              )?.[0] ??
+              Object.entries(firstRow).find(
+                ([, v]) => !isNaN(Number(v)),
+              )?.[0] ??
+              null;
+            const labelKey =
+              Object.entries(firstRow).find(
+                ([k, v]) => k !== numericKey && typeof v !== "number",
+              )?.[0] ?? Object.keys(firstRow)[0];
+
+            const values = records.map((r) =>
+              Number(numericKey ? r[numericKey] : 0) || 0,
+            );
+            const maxVal = Math.max(...values, 1);
+            const maxBarPx = 700;
+            const rowH = 60;
+            const palette = [
+              "#3b82f6",
+              "#16a34a",
+              "#7c3aed",
+              "#e11d48",
+              "#d97706",
+            ];
+
+            records.forEach((rec, i) => {
+              const y = 180 + i * rowH;
+              const labelText = String(rec[labelKey] ?? `Row ${i + 1}`);
+              const valNum = Number(numericKey ? rec[numericKey] : 0) || 0;
+              const barPx = Math.max(40, Math.round((valNum / maxVal) * maxBarPx));
+              const color = palette[i % palette.length];
+
+              // Label sticky on the left.
+              work.push(
+                addSticky(
+                  `${labelText}${
+                    numericKey ? `\n${valNum.toLocaleString()}` : ""
+                  }`,
+                  "light_blue",
+                  -640,
+                  y,
+                  180,
+                ),
+              );
+              // Bar shape on the right — width proportional to value.
+              work.push(
+                addShape(
+                  "rectangle",
+                  numericKey ? valNum.toLocaleString() : "",
+                  -440 + barPx / 2,
+                  y,
+                  barPx,
+                  44,
+                  color,
+                  color,
+                  "#ffffff",
+                ),
+              );
+            });
+          }
+
+          // ── Attribution card ──────────────────────────────────────────
+          const citationY = 180 + records.length * 60 + 120;
+          work.push(
+            addCard(
+              "Generated by TXLookup",
+              `An autonomous data agent for Texas/Austin civic data.\n\nSource of truth: Socrata SODA + CKAN portals across 6,061 indexed datasets.\n\nLive: txlookup.vercel.app\nCode (MIT): github.com/ATX-TXLookup/TXLookup`,
+              0,
+              citationY,
+            ),
+          );
+
+          // Wait for the fan-out to finish so the result envelope reflects
+          // what actually landed on the board.
+          await Promise.all(work);
+
+          // Anchor the artifact URL to the new frame so opening the board (or
+          // the embedded iframe) auto-pans to this query's content. Without
+          // this, the board opens at its default viewport and the new frame
+          // is somewhere far off-screen on the shared board.
+          const anchoredLink = frameId
+            ? `${viewLink}${viewLink.includes("?") ? "&" : "?"}moveToWidget=${frameId}`
+            : viewLink;
+
           return {
             status: "completed",
             result: {
-              board_id: board.id,
-              view_link: viewLink,
-              title: args.title,
+              board_id: boardId,
+              frame_id: frameId,
+              view_link: anchoredLink,
+              title,
               records_passed: args.records?.length ?? 0,
+              items_created: itemsCreated,
+              items_failed: failed.length,
+              failure_samples: failed.slice(0, 3).map((f) => `${f.kind}: ${f.error}`),
             },
-            artifacts: [viewLink],
+            artifacts: [anchoredLink],
             error: null,
           };
         } catch (e: unknown) {
@@ -795,7 +1287,36 @@ export async function synthesize(
     temperature: 0.2,
   });
   return {
-    answer: completion.choices[0]?.message?.content ?? "",
+    answer: stripMarkdown(completion.choices[0]?.message?.content ?? ""),
     usage: readUsage(completion.usage),
   };
+}
+
+// Defense-in-depth: even though the synthesizer prompt says no Markdown, the
+// LLM occasionally leaks `[label](url)` links and `**bold**`. The answer card
+// renders this string as plain text, so strip Markdown decorations rather
+// than relying on the prompt alone.
+function stripMarkdown(s: string): string {
+  return s
+    // [label](url) → label
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1")
+    // **bold** / __bold__ → bold
+    .replace(/(\*\*|__)(.+?)\1/g, "$2")
+    // *italic* / _italic_ → italic (only when surrounding non-space chars)
+    .replace(/(^|\s)([*_])(\S(?:.*?\S)?)\2(?=$|\s|[.,;:!?])/g, "$1$3")
+    // `code` → code
+    .replace(/`([^`]+)`/g, "$1")
+    // Leading "# Heading " on a line → "Heading"
+    .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+    // Bullet markers "- " or "* " at line start → drop the marker
+    .replace(/^\s{0,3}[-*]\s+/gm, "")
+    // Blockquote "> " at line start → drop the marker
+    .replace(/^\s{0,3}>\s+/gm, "")
+    // Bare URLs anywhere in the answer — replace with empty (links surface in
+    // the dedicated UI sections below the insight, never in the prose).
+    .replace(/https?:\/\/\S+/g, "")
+    // Tidy double spaces left by removals.
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\s+([.,;:!?])/g, "$1")
+    .trim();
 }
