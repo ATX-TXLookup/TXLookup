@@ -8,6 +8,7 @@
 import { NextRequest } from "next/server";
 
 import {
+  criticize,
   executeStep,
   reasonAndPlan,
   replan,
@@ -53,6 +54,9 @@ type Event =
       // calls; specialist name for delegate_to results. UI Flow tab will
       // color-code by this in a follow-up PR.
       agent?: string;
+      // Issue #90 — origin of the data (cache hit / live fetch / fallback).
+      // Only set on Socrata-touching tool steps.
+      tool_source?: "cache" | "live" | "cache-fallback";
       // Full structured result envelope, ONLY emitted for delegate_to steps
       // where the UI needs to render the specialist payload (chips,
       // findings, composed report). The 240-char `preview` field above is
@@ -79,6 +83,55 @@ type Event =
       diagnosis?: string;
       thinking?: string;
       usage?: TokenUsage;
+    }
+  | {
+      // Issue #90 — critic verdict on the plan or the answer.
+      phase: "critique";
+      target: "plan" | "answer";
+      score: number;
+      approve: boolean;
+      issues: string[];
+    }
+  | {
+      // Issue #90 — orchestrator is re-running a phase the critic rejected.
+      phase: "revising";
+      target: "plan" | "answer";
+      reason: string;
+    }
+  | {
+      // Issue #90 — fan-out to N parallel branches (delegate_to_parallel).
+      phase: "parallel_dispatch";
+      step: number;
+      branches: Array<{ id: string; tool: string; args: unknown }>;
+    }
+  | {
+      // Issue #90 — all branches in a parallel_dispatch have settled.
+      phase: "parallel_join";
+      step: number;
+      branch_ids: string[];
+      results_count: number;
+    }
+  | {
+      // Issue #90 — specialist handoff (delegate_to). Surfaces the agent name
+      // and the input summary for the DAG before the actual work runs.
+      phase: "delegate_start";
+      step: number;
+      agent: string;
+      input_summary: string;
+    }
+  | {
+      phase: "delegate_done";
+      step: number;
+      agent: string;
+      status: "completed" | "failed" | "needs_input";
+      output_summary: string;
+    }
+  | {
+      // Issue #90 + #97 — Socrata fetched live, served from cache, or fell
+      // back to live after a cache miss.
+      phase: "tool_source";
+      step: number;
+      source: "cache" | "live" | "cache-fallback";
     }
   | { phase: "completing"; message: string }
   | {
@@ -330,6 +383,46 @@ export async function POST(req: NextRequest) {
           usage: planned.usage,
         });
 
+        // Issue #90 — critic on the plan. If the critic rejects, re-run the
+        // planner ONCE with a corrective system prompt sourced from the
+        // critic's issues list, then continue regardless of the second verdict
+        // (bounded retries — critic is advisory, not blocking).
+        try {
+          const planCritique = await criticize(
+            "plan",
+            currentPlan,
+            query,
+          );
+          usageTotal = addUsage(usageTotal, planCritique.usage);
+          send({
+            phase: "critique",
+            target: "plan",
+            score: planCritique.critique.score,
+            approve: planCritique.critique.approve,
+            issues: planCritique.critique.issues,
+          });
+          if (!planCritique.critique.approve) {
+            send({
+              phase: "revising",
+              target: "plan",
+              reason: planCritique.critique.issues.join("; ") || "low score",
+            });
+            const corrective = `The critic flagged your previous plan. Address these issues and re-emit:\n${planCritique.critique.issues.map((s) => `- ${s}`).join("\n")}`;
+            const revised = await reasonAndPlan(query, undefined, corrective);
+            usageTotal = addUsage(usageTotal, revised.usage);
+            currentPlan = revised.plan;
+            send({
+              phase: "planning",
+              plan: currentPlan,
+              thinking: (currentPlan.intent as { thinking?: string })?.thinking,
+              usage: revised.usage,
+            });
+          }
+        } catch (e) {
+          // Critic failure is never fatal.
+          console.warn("[agent] plan critique failed:", e);
+        }
+
         const results: ToolEnvelope[] = [];
         let citation: unknown = null;
         const artifacts: string[] = [];
@@ -419,9 +512,102 @@ export async function POST(req: NextRequest) {
             rationale: step.rationale,
           });
 
+          // Issue #90 — surface delegate / parallel dispatch as DAG-friendly
+          // events BEFORE the work runs, so the visualization can light up
+          // the right nodes immediately rather than waiting for completion.
+          if (step.tool === "delegate_to") {
+            const sa = step.args as {
+              specialist?: string;
+              input?: Record<string, unknown>;
+            };
+            send({
+              phase: "delegate_start",
+              step: i + 1,
+              agent: sa.specialist ?? "unknown",
+              input_summary: JSON.stringify(sa.input ?? {}).slice(0, 180),
+            });
+          } else if (step.tool === "delegate_to_parallel") {
+            const sa = step.args as {
+              branches?: Array<{
+                specialist?: string;
+                input?: Record<string, unknown>;
+              }>;
+            };
+            const branches = (sa.branches ?? []).map((b, bi) => ({
+              id: `s${i + 1}.b${bi + 1}`,
+              tool: `delegate_to(${b.specialist ?? "unknown"})`,
+              args: b.input ?? {},
+            }));
+            send({
+              phase: "parallel_dispatch",
+              step: i + 1,
+              branches,
+            });
+          }
+
           const stepStart = Date.now();
           const r = await executeStep(step);
           const duration_ms = Date.now() - stepStart;
+
+          // Issue #90 + #97 — Socrata wrapper may flag the source on the
+          // result envelope (`_source: "cache" | "live" | "cache-fallback"`).
+          // The cache PR isn't necessarily landed yet, so this is best-effort:
+          // if absent, we stub a "live" tag for any tool that obviously hits
+          // Socrata so the DAG still has a source pill to render.
+          // TODO(#97): drop the stub once the cache layer is merged.
+          const SOCRATA_TOOLS = new Set([
+            "summarize_data",
+            "fetch_data",
+            "get_dataset_schema",
+          ]);
+          if (SOCRATA_TOOLS.has(step.tool)) {
+            const declared =
+              r.result &&
+              typeof r.result === "object" &&
+              "_source" in (r.result as Record<string, unknown>)
+                ? String((r.result as { _source: unknown })._source)
+                : null;
+            const source =
+              declared === "cache" ||
+              declared === "live" ||
+              declared === "cache-fallback"
+                ? (declared as "cache" | "live" | "cache-fallback")
+                : "live";
+            send({ phase: "tool_source", step: i + 1, source });
+          }
+
+          if (step.tool === "delegate_to") {
+            send({
+              phase: "delegate_done",
+              step: i + 1,
+              agent:
+                typeof r.result === "object" &&
+                r.result !== null &&
+                "agent" in (r.result as Record<string, unknown>)
+                  ? String((r.result as { agent: unknown }).agent)
+                  : "unknown",
+              status: r.status as "completed" | "failed" | "needs_input",
+              output_summary: JSON.stringify(r.result).slice(0, 180),
+            });
+          } else if (step.tool === "delegate_to_parallel") {
+            const branches =
+              r.result &&
+              typeof r.result === "object" &&
+              "branches" in (r.result as Record<string, unknown>)
+                ? ((r.result as { branches: unknown[] }).branches as Array<{
+                    specialist?: string;
+                  }>)
+                : [];
+            const branchIds = branches.map(
+              (_, bi) => `s${i + 1}.b${bi + 1}`,
+            );
+            send({
+              phase: "parallel_join",
+              step: i + 1,
+              branch_ids: branchIds,
+              results_count: branches.length,
+            });
+          }
           results.push(r);
           if (r.status === "completed" && DATA_TOOLS.has(step.tool)) {
             anyDataStepSucceeded = true;
@@ -445,6 +631,29 @@ export async function POST(req: NextRequest) {
           // preview — additive, byte-identical preview for backwards compat.
           const resultJson =
             step.tool === "delegate_to" ? r.result : undefined;
+          // Mirror the same source detection used for the standalone
+          // tool_source event, so the DAG node can read it off step_done too.
+          const declaredSource =
+            r.result &&
+            typeof r.result === "object" &&
+            "_source" in (r.result as Record<string, unknown>)
+              ? String((r.result as { _source: unknown })._source)
+              : null;
+          const stepToolSource = ((): "cache" | "live" | "cache-fallback" | undefined => {
+            const SOCRATA = new Set([
+              "summarize_data",
+              "fetch_data",
+              "get_dataset_schema",
+            ]);
+            if (!SOCRATA.has(step.tool)) return undefined;
+            if (
+              declaredSource === "cache" ||
+              declaredSource === "live" ||
+              declaredSource === "cache-fallback"
+            )
+              return declaredSource;
+            return "live";
+          })();
           send({
             phase: "step_done",
             step: i + 1,
@@ -454,6 +663,9 @@ export async function POST(req: NextRequest) {
             duration_ms,
             agent: stepAgent,
             ...(resultJson !== undefined ? { result_json: resultJson } : {}),
+            ...(stepToolSource !== undefined
+              ? { tool_source: stepToolSource }
+              : {}),
           });
 
           // Replan on a failure if we have budget left.
@@ -575,8 +787,52 @@ export async function POST(req: NextRequest) {
         }
 
         send({ phase: "completing", message: "Synthesizing answer..." });
-        const synth = await synthesize(query, currentPlan, results);
+        let synth = await synthesize(query, currentPlan, results);
         usageTotal = addUsage(usageTotal, synth.usage);
+
+        // Issue #90 — critic on the answer. Same pattern as the plan critic:
+        // re-run synth ONCE with a corrective prompt sourced from the
+        // critic's issues, then ship whatever comes out.
+        try {
+          const ctxSummary = currentPlan.steps
+            .map((s, i) => {
+              const r = results[i];
+              if (!r) return null;
+              return `${s.tool}(${JSON.stringify(s.args).slice(0, 80)}) → ${r.status}`;
+            })
+            .filter(Boolean)
+            .join("\n");
+          const ansCritique = await criticize(
+            "answer",
+            synth.answer,
+            query,
+            ctxSummary,
+          );
+          usageTotal = addUsage(usageTotal, ansCritique.usage);
+          send({
+            phase: "critique",
+            target: "answer",
+            score: ansCritique.critique.score,
+            approve: ansCritique.critique.approve,
+            issues: ansCritique.critique.issues,
+          });
+          if (!ansCritique.critique.approve) {
+            send({
+              phase: "revising",
+              target: "answer",
+              reason: ansCritique.critique.issues.join("; ") || "low score",
+            });
+            // Re-run synth — synthesize() doesn't take a corrective prompt
+            // arg today, so we re-run vanilla and accept it. Adding a
+            // corrective synth path is an issue-#90 follow-up.
+            const revised = await synthesize(query, currentPlan, results);
+            usageTotal = addUsage(usageTotal, revised.usage);
+            synth = revised;
+          }
+        } catch (e) {
+          console.warn("[agent] answer critique failed:", e);
+        }
+
         finalPlan = currentPlan;
 
         const durationMs = Date.now() - startedAt;

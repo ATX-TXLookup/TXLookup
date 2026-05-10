@@ -16,6 +16,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { ObsEvent } from "./AgentObservatory";
+import { AgentDAG, type DagEvent } from "./AgentDAG";
 
 type SidebarStep = {
   step: number;
@@ -55,6 +56,9 @@ type Phase =
 
 type Props = {
   events: ObsEvent[];
+  // Issue #90 — raw SSE events for the live DAG. Carries critique scores,
+  // parallel branch ids, source pills the obs-event mapping flattens away.
+  dagEvents: DagEvent[];
   steps: SidebarStep[];
   replans: SidebarReplan[];
   status: "idle" | "running" | "done" | "error";
@@ -68,10 +72,13 @@ type Props = {
   startedAt: number | null;
 };
 
-type Tab = "status" | "flow" | "execution" | "telemetry";
+type Tab = "status" | "dag" | "flow" | "execution" | "telemetry";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "status", label: "Status" },
+  // Issue #90 — DAG tab is the marquee view: every tool / delegate / critic
+  // pass / parallel branch as a node that lights up live.
+  { id: "dag", label: "DAG" },
   { id: "flow", label: "Flow" },
   { id: "execution", label: "Execution" },
   { id: "telemetry", label: "Telemetry" },
@@ -155,7 +162,9 @@ const AGENT_LEGEND: Array<keyof typeof AGENT_TONES> = [
 ];
 
 export function AgentSidebar(props: Props) {
-  const [tab, setTab] = useState<Tab>("status");
+  // Default to the DAG tab — issue #90's marquee view. Status / Flow /
+  // Execution / Telemetry are still one click away.
+  const [tab, setTab] = useState<Tab>("dag");
 
   return (
     <aside
@@ -192,6 +201,7 @@ export function AgentSidebar(props: Props) {
         {/* Tab content */}
         <div className="flex-1 overflow-y-auto">
           {tab === "status" && <StatusTab {...props} />}
+          {tab === "dag" && <AgentDAG events={props.dagEvents} />}
           {tab === "flow" && <FlowTab steps={props.steps} replans={props.replans} />}
           {tab === "execution" && <ExecutionTab steps={props.steps} replans={props.replans} />}
           {tab === "telemetry" && <TelemetryTab events={props.events} startedAt={props.startedAt} />}

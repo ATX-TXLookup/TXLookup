@@ -18,6 +18,7 @@ import {
 } from "../lib/analytics-events";
 import { ObsEvent } from "./AgentObservatory";
 import { AgentSidebar } from "./AgentSidebar";
+import type { DagEvent } from "./AgentDAG";
 import { SupportChips, type SupportResult } from "./components/SupportChips";
 import {
   AnalystFindings,
@@ -85,6 +86,9 @@ type AgentState = {
   artifacts: string[];
   error: string | null;
   events: ObsEvent[];
+  // Issue #90 — raw SSE events fed to the DAG visualization. Carries the
+  // structured fields (score, branches, source) the obs-event mapping drops.
+  dagEvents: DagEvent[];
   startedAt: number | null;
   usageTotal: TokenUsage | null;
   durationMs: number | null;
@@ -102,6 +106,7 @@ const initial: AgentState = {
   artifacts: [],
   error: null,
   events: [],
+  dagEvents: [],
   startedAt: null,
   usageTotal: null,
   durationMs: null,
@@ -129,7 +134,28 @@ type SseEvent = {
     | "replanned"
     | "completing"
     | "done"
-    | "error";
+    | "error"
+    // Issue #90 — orchestrator + critic + parallel + cache-source events.
+    | "critique"
+    | "revising"
+    | "parallel_dispatch"
+    | "parallel_join"
+    | "delegate_start"
+    | "delegate_done"
+    | "tool_source";
+  // Issue #90 — extra fields for the new event kinds. All optional so older
+  // streams parse cleanly.
+  target?: "plan" | "answer";
+  score?: number;
+  approve?: boolean;
+  issues?: string[];
+  branches?: Array<{ id: string; tool: string; args: unknown }>;
+  branch_ids?: string[];
+  results_count?: number;
+  input_summary?: string;
+  output_summary?: string;
+  source?: "cache" | "live" | "cache-fallback";
+  tool_source?: "cache" | "live" | "cache-fallback";
   message?: string;
   thinking?: string;
   diagnosis?: string;
@@ -276,6 +302,62 @@ function eventForObservatory(ev: SseEvent): ObsEvent | null {
         message: "Agent error",
         detail: ev.error ?? undefined,
       };
+    // Issue #90 — surface the new event kinds in the telemetry log too, so
+    // they're not invisible outside the DAG tab.
+    case "critique":
+      return {
+        ts,
+        phase: "critique",
+        level: ev.approve ? "ok" : "warn",
+        message: `Critic on ${ev.target} → score ${typeof ev.score === "number" ? ev.score.toFixed(2) : "?"} (${ev.approve ? "approve" : "revise"})`,
+        detail: ev.issues?.length ? ev.issues.join("\n") : undefined,
+      };
+    case "revising":
+      return {
+        ts,
+        phase: "revising",
+        level: "warn",
+        message: `Revising ${ev.target} after critic feedback`,
+        detail: ev.error ?? undefined,
+      };
+    case "parallel_dispatch":
+      return {
+        ts,
+        phase: "parallel_dispatch",
+        level: "info",
+        message: `Parallel fan-out · ${ev.branches?.length ?? 0} branches`,
+        detail: ev.branches?.map((b) => `${b.id}: ${b.tool}`).join("\n"),
+      };
+    case "parallel_join":
+      return {
+        ts,
+        phase: "parallel_join",
+        level: "info",
+        message: `Parallel join · ${ev.results_count ?? 0} results`,
+      };
+    case "delegate_start":
+      return {
+        ts,
+        phase: "delegate_start",
+        level: "info",
+        message: `Delegating → ${ev.agent}`,
+        detail: ev.input_summary,
+      };
+    case "delegate_done":
+      return {
+        ts,
+        phase: "delegate_done",
+        level: ev.status === "completed" ? "ok" : "warn",
+        message: `Delegate ${ev.agent} → ${ev.status}`,
+        detail: ev.output_summary,
+      };
+    case "tool_source":
+      return {
+        ts,
+        phase: "tool_source",
+        level: "info",
+        message: `Source → ${ev.source}`,
+      };
     default:
       return null;
   }
@@ -312,6 +394,7 @@ export function AgentRunner({
           detail: `query: ${query}`,
         },
       ],
+      dagEvents: [],
     });
 
     const ctrl = new AbortController();
@@ -367,9 +450,15 @@ export function AgentRunner({
               const obs = eventForObservatory(ev);
               setState((s) => {
                 const eventsNext = obs ? [...s.events, obs] : s.events;
+                // Issue #90 — every raw SSE event feeds the DAG's
+                // event-sourced state machine.
+                const dagNext: DagEvent[] = [
+                  ...s.dagEvents,
+                  { ...ev, ts: Date.now() } as DagEvent,
+                ];
                 switch (ev.phase) {
                   case "reasoning":
-                    return { ...s, phase: "reasoning", events: eventsNext };
+                    return { ...s, phase: "reasoning", events: eventsNext, dagEvents: dagNext };
                   case "planning":
                     return {
                       ...s,
@@ -383,7 +472,7 @@ export function AgentRunner({
                         rationale: p.rationale,
                         status: "pending" as const,
                       })),
-                      events: eventsNext,
+                      events: eventsNext, dagEvents: dagNext,
                     };
                   case "executing":
                     return {
@@ -391,7 +480,7 @@ export function AgentRunner({
                       phase: "executing",
                       currentStep: ev.step ?? s.currentStep,
                       totalSteps: ev.total ?? s.totalSteps,
-                      events: eventsNext,
+                      events: eventsNext, dagEvents: dagNext,
                     };
                   case "step_done": {
                     const idx = (ev.step ?? 1) - 1;
@@ -431,11 +520,11 @@ export function AgentRunner({
                         resultPayload: ev.result_json,
                       });
                     }
-                    return { ...s, steps: next, events: eventsNext };
+                    return { ...s, steps: next, events: eventsNext, dagEvents: dagNext };
                   }
                   case "doom_loop":
                     // The corrective replan event will follow; just log here.
-                    return { ...s, events: eventsNext };
+                    return { ...s, events: eventsNext, dagEvents: dagNext };
                   case "replanning":
                     return {
                       ...s,
@@ -449,7 +538,7 @@ export function AgentRunner({
                           reason: ev.reason,
                         },
                       ],
-                      events: eventsNext,
+                      events: eventsNext, dagEvents: dagNext,
                     };
                   case "replanned": {
                     // The route rebuilds currentPlan = [...prefix, ...replanSteps]
@@ -483,11 +572,11 @@ export function AgentRunner({
                       steps: [...s.steps.slice(0, failedIdx), ...newSteps],
                       totalSteps: failedIdx + newSteps.length,
                       replans,
-                      events: eventsNext,
+                      events: eventsNext, dagEvents: dagNext,
                     };
                   }
                   case "completing":
-                    return { ...s, phase: "completing", events: eventsNext };
+                    return { ...s, phase: "completing", events: eventsNext, dagEvents: dagNext };
                   case "done":
                     return {
                       ...s,
@@ -497,17 +586,20 @@ export function AgentRunner({
                       artifacts: ev.artifacts ?? [],
                       usageTotal: ev.usage_total ?? null,
                       durationMs: ev.duration_ms ?? null,
-                      events: eventsNext,
+                      events: eventsNext, dagEvents: dagNext,
                     };
                   case "error":
                     return {
                       ...s,
                       phase: "error",
                       error: ev.error ?? "unknown error",
-                      events: eventsNext,
+                      events: eventsNext, dagEvents: dagNext,
                     };
                   default:
-                    return s;
+                    // Issue #90 — even unknown phases (critique, parallel_*,
+                    // delegate_*, tool_source) need to land in dagEvents so
+                    // the DAG can render them. Telemetry already got obs.
+                    return { ...s, events: eventsNext, dagEvents: dagNext };
                 }
               });
             }
@@ -1191,9 +1283,10 @@ export function AgentRunner({
           )}
       </div>
 
-      {/* Right column — 4-tab agent sidebar */}
+      {/* Right column — 5-tab agent sidebar (DAG added in #90) */}
       <AgentSidebar
         events={state.events}
+        dagEvents={state.dagEvents}
         steps={state.steps}
         replans={state.replans}
         status={obsStatus}
