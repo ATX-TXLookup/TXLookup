@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TXLookup · Hackathon Pitch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0E1014;
+    --bg-elev:   #15171C;
+    --bg-deep:   #0A0B0E;
+    --border:    #23262E;
+    --text:      #F5F5F7;
+    --mute:      #A1A1AA;
+    --dim:       #71717A;
+    --accent:    #5B8DEF;
+    --warm:      #F97316;
+    --good:      #10B981;
+    --warn:      #F59E0B;
+    --bad:       #EF4444;
+    --purple:    #A855F7;
+    --gold:      #D48B10;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── deck container ── */
+  #deck {
+    width: 100vw; height: 100vh;
+    position: relative;
+  }
+
+  /* ── individual slide ── */
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.35s ease;
+    overflow: hidden;
+  }
+  .slide.active {
+    opacity: 1; pointer-events: auto;
+  }
+
+  /* ── slide chrome ── */
+  .slide-chrome {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 40px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .chrome-brand {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--dim);
+  }
+  .chrome-brand span { color: var(--accent); }
+  .chrome-counter {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px; color: var(--dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── slide body ── */
+  .slide-body {
+    flex: 1; display: grid;
+    padding: 0 40px 32px;
+    gap: 0;
+    min-height: 0;
+  }
+
+  /* ── layout: split (graphic | content) ── */
+  .layout-split { grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .layout-center { grid-template-columns: 1fr; justify-items: center; align-items: center; }
+  .layout-top-graphic { grid-template-rows: 1fr 1fr; }
+
+  /* ── eyebrow ── */
+  .eyebrow {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.18em;
+    color: var(--warm);
+    margin-bottom: 16px;
+  }
+
+  /* ── headline ── */
+  h1 {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-style: italic;
+    font-size: clamp(36px, 4.5vw, 64px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 28px;
+  }
+  h1 em { color: var(--accent); font-style: normal; }
+
+  /* ── bullet list ── */
+  .bullets { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+  .bullets li {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: clamp(14px, 1.5vw, 18px);
+    line-height: 1.5;
+    color: var(--mute);
+  }
+  .bullets li .dot {
+    flex-shrink: 0;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 9px;
+  }
+  .bullets li strong { color: var(--text); font-weight: 600; }
+  .bullets li .tag {
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    padding: 2px 8px; border-radius: 4px;
+    background: rgba(239,68,68,0.12);
+    color: var(--bad);
+    border: 0.5px solid rgba(239,68,68,0.25);
+    margin-left: 4px;
+    white-space: nowrap;
+  }
+  .bullets li .tag.green {
+    background: rgba(16,185,129,0.12);
+    color: var(--good);
+    border-color: rgba(16,185,129,0.25);
+  }
+
+  /* ── stat callout ── */
+  .stat-row {
+    display: flex; gap: 24px; margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 14px 20px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    min-width: 120px;
+  }
+  .stat-num {
+    font-family: 'Geist Mono', monospace;
+    font-size: 28px; font-weight: 600;
+    color: var(--accent); line-height: 1;
+  }
+  .stat-label {
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--dim);
+  }
+
+  /* ── graphic panel ── */
+  .graphic-panel {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    padding: 16px;
+    height: 100%;
+    min-height: 0;
+  }
+  .graphic-panel svg { max-width: 100%; max-height: 100%; }
+
+  /* ── agent lane diagram ── */
+  .lane-diagram {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column; gap: 0;
+    justify-content: center;
+    padding: 12px 0;
+  }
+  .lane {
+    display: flex; align-items: center; gap: 12px;
+    height: 44px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+  }
+  .lane:last-child { border-bottom: none; }
+  .lane-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .lane-name { font-weight: 600; width: 120px; flex-shrink: 0; }
+  .lane-sub { color: var(--dim); flex: 1; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .lane-badge {
+    font-size: 10px; padding: 2px 8px; border-radius: 4px;
+    background: rgba(91,141,239,0.12);
+    color: var(--accent);
+    border: 0.5px solid rgba(91,141,239,0.25);
+  }
+
+  /* ── integration cards (slide 3) ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    width: 100%;
+  }
+  .card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+  }
+  .card-num {
+    font-family: 'Geist Mono', monospace;
+    font-size: 24px; font-weight: 600;
+    color: var(--accent); margin-bottom: 8px;
+  }
+  .card-title {
+    font-size: 15px; font-weight: 700;
+    color: var(--text); margin-bottom: 6px;
+  }
+  .card-body {
+    font-size: 13px; line-height: 1.55;
+    color: var(--mute);
+  }
+  .card.highlight {
+    border-color: rgba(91,141,239,0.4);
+    background: rgba(91,141,239,0.06);
+  }
+
+  /* ── portal nodes (slide 3 map) ── */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; r: 8; }
+    50%       { opacity: 0.5; r: 11; }
+  }
+  .node-active { animation: pulse 2s ease-in-out infinite; }
+
+  /* ── nav ── */
+  #nav {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 8px 16px;
+    z-index: 100;
+  }
+  #nav button {
+    background: none; border: none; cursor: pointer;
+    color: var(--mute); font-size: 16px; padding: 2px 8px;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+  }
+  #nav button:hover { color: var(--text); background: var(--border); }
+  #nav button:disabled { color: var(--dim); cursor: default; background: none; }
+  #slide-num {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px; color: var(--dim);
+    min-width: 48px; text-align: center;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── footer note ── */
+  .slide-footer {
+    padding: 10px 40px 18px;
+    display: flex; align-items: center; gap-6: 6;
+    flex-shrink: 0;
+  }
+  .slide-footer span {
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px; color: var(--dim);
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .live-dot {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--good); margin-right: 6px;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+  }
+
+  /* animated playhead on agent diagram */
+  @keyframes playhead {
+    from { transform: translateX(0); }
+    to   { transform: translateX(100%); }
+  }
+  #playhead { animation: playhead 7.5s linear infinite; }
+  @keyframes fadein-row {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .event-row { animation: fadein-row 0.3s ease both; }
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       SLIDE 1 — THE PROBLEM
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="slide active" id="s1">
+    <div class="slide-chrome">
+      <div class="chrome-brand">TX<span>Lookup</span> · AITX × Codex Hackathon 2026</div>
+      <div class="chrome-counter">01 / 03</div>
+    </div>
+
+    <div class="slide-body layout-split" style="padding-top:32px;">
+
+      <!-- LEFT: Texas map graphic -->
+      <div class="graphic-panel">
+        <svg viewBox="0 0 600 580" aria-hidden="true" style="width:100%;height:100%;max-height:420px;">
+          <defs>
+            <radialGradient id="glow1" cx="50%" cy="55%" r="50%">
+              <stop offset="0%" stop-color="#5B8DEF" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#5B8DEF" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="blur1">
+              <feGaussianBlur stdDeviation="3"/>
+            </filter>
+          </defs>
+          <!-- ambient glow -->
+          <ellipse cx="310" cy="350" rx="260" ry="200" fill="url(#glow1)"/>
+          <!-- TX silhouette -->
+          <path d="M 90 215 L 130 200 L 200 195 L 280 175 L 330 165 L 380 158 L 410 155 L 440 158 L 470 162 L 470 200 L 480 215 L 510 230 L 540 250 L 565 280 L 580 320 L 575 360 L 555 395 L 530 425 L 500 460 L 470 495 L 440 520 L 405 540 L 365 558 L 320 555 L 285 545 L 250 520 L 215 480 L 195 440 L 165 410 L 140 380 L 110 340 L 95 300 L 90 260 Z"
+            fill="#15171C" stroke="#23262E" stroke-width="1.5"/>
+          <!-- subtle grid -->
+          <g stroke="#23262E" stroke-width="0.5" fill="none" opacity="0.6">
+            <line x1="150" x2="550" y1="300" y2="300"/>
+            <line x1="150" x2="550" y1="400" y2="400"/>
+            <line x1="250" x2="250" y1="200" y2="500"/>
+            <line x1="350" x2="350" y1="200" y2="500"/>
+            <line x1="450" x2="450" y1="200" y2="500"/>
+          </g>
+
+          <!-- connection lines to Austin (hub) -->
+          <g stroke="#5B8DEF" stroke-width="0.8" stroke-dasharray="4 3" opacity="0.35">
+            <line x1="365" y1="380" x2="410" y2="240"/> <!-- Austin ↔ Dallas -->
+            <line x1="365" y1="380" x2="340" y2="450"/> <!-- Austin ↔ SA -->
+            <line x1="365" y1="380" x2="480" y2="400"/> <!-- Austin ↔ Houston -->
+            <line x1="365" y1="380" x2="270" y2="320"/> <!-- Austin ↔ TX state -->
+          </g>
+
+          <!-- portals -->
+          <!-- Austin — active (green) -->
+          <circle cx="365" cy="380" r="8" fill="#10B981" opacity="0.25" class="node-active"/>
+          <circle cx="365" cy="380" r="5" fill="#10B981"/>
+          <text x="378" y="376" font-family="'Geist Mono',monospace" font-size="10" fill="#10B981" font-weight="600">Austin</text>
+          <text x="378" y="388" font-family="'Geist Mono',monospace" font-size="8" fill="#71717A">6 datasets</text>
+
+          <!-- Dallas — active -->
+          <circle cx="410" cy="240" r="8" fill="#10B981" opacity="0.25" class="node-active" style="animation-delay:0.4s"/>
+          <circle cx="410" cy="240" r="5" fill="#10B981"/>
+          <text x="423" y="236" font-family="'Geist Mono',monospace" font-size="10" fill="#10B981" font-weight="600">Dallas</text>
+          <text x="423" y="248" font-family="'Geist Mono',monospace" font-size="8" fill="#71717A">2 datasets</text>
+
+          <!-- TX State — queued (blue) -->
+          <circle cx="270" cy="320" r="5" fill="#5B8DEF" opacity="0.7"/>
+          <text x="283" y="316" font-family="'Geist Mono',monospace" font-size="10" fill="#5B8DEF" font-weight="600">TX State</text>
+          <text x="283" y="328" font-family="'Geist Mono',monospace" font-size="8" fill="#71717A">1 dataset</text>
+
+          <!-- San Antonio — scout (gray) -->
+          <circle cx="340" cy="450" r="5" fill="#71717A" opacity="0.7"/>
+          <text x="353" y="446" font-family="'Geist Mono',monospace" font-size="10" fill="#71717A">San Antonio</text>
+          <text x="353" y="458" font-family="'Geist Mono',monospace" font-size="8" fill="#4B4F57">scout-pending</text>
+
+          <!-- Houston — scout -->
+          <circle cx="480" cy="400" r="5" fill="#71717A" opacity="0.7"/>
+          <text x="493" y="396" font-family="'Geist Mono',monospace" font-size="10" fill="#71717A">Houston</text>
+          <text x="493" y="408" font-family="'Geist Mono',monospace" font-size="8" fill="#4B4F57">scout-pending</text>
+
+          <!-- El Paso — scout -->
+          <circle cx="85" cy="220" r="4" fill="#71717A" opacity="0.5"/>
+          <text x="96" y="224" font-family="'Geist Mono',monospace" font-size="9" fill="#4B4F57">El Paso</text>
+
+          <!-- legend -->
+          <g transform="translate(92, 500)">
+            <circle cx="6" cy="6" r="4" fill="#10B981"/>
+            <text x="14" y="10" font-family="'Geist Mono',monospace" font-size="9" fill="#71717A">online</text>
+            <circle cx="62" cy="6" r="4" fill="#5B8DEF"/>
+            <text x="70" y="10" font-family="'Geist Mono',monospace" font-size="9" fill="#71717A">queued</text>
+            <circle cx="124" cy="6" r="4" fill="#71717A"/>
+            <text x="132" y="10" font-family="'Geist Mono',monospace" font-size="9" fill="#71717A">scout</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- RIGHT: content -->
+      <div style="display:flex;flex-direction:column;justify-content:center;padding:16px 0;">
+        <div class="eyebrow">The Problem</div>
+        <h1>Public data is <em>accessible.</em><br/>Not useful.</h1>
+        <ul class="bullets">
+          <li>
+            <span class="dot" style="background:#EF4444;"></span>
+            <div>
+              <strong>You get an API and a schema.</strong>
+              Then you're on your own — no context, no plain-language layer, no answer.
+              <span class="tag">raw JSON</span>
+            </div>
+          </li>
+          <li>
+            <span class="dot" style="background:#F59E0B;"></span>
+            <div>
+              <strong>Cross-agency data joins feel like root canal surgery.</strong>
+              Permits + 311 + code violations = three portals, three schemas, one nightmare.
+            </div>
+          </li>
+          <li>
+            <span class="dot" style="background:#EF4444;"></span>
+            <div>
+              <strong>Every city starts from scratch.</strong>
+              Austin solved it → Houston rebuilds it → Dallas rebuilds it again.
+              No shared intelligence layer.
+            </div>
+          </li>
+          <li>
+            <span class="dot" style="background:#A855F7;"></span>
+            <div>
+              <strong>This is a universal problem.</strong>
+              130+ TX datasets. Thousands nationally. All behind the same friction wall.
+            </div>
+          </li>
+        </ul>
+
+        <div class="stat-row">
+          <div class="stat">
+            <div class="stat-num">130+</div>
+            <div class="stat-label">TX datasets</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">3M+</div>
+            <div class="stat-label">rows per portal</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">0</div>
+            <div class="stat-label">plain-english layer</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span><span class="live-dot"></span>live data from data.austintexas.gov · data.texas.gov · dallasopendata.com</span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       SLIDE 2 — THE SOLUTION
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="slide" id="s2">
+    <div class="slide-chrome">
+      <div class="chrome-brand">TX<span>Lookup</span> · AITX × Codex Hackathon 2026</div>
+      <div class="chrome-counter">02 / 03</div>
+    </div>
+
+    <div class="slide-body layout-split" style="padding-top:32px;">
+
+      <!-- LEFT: agent topology diagram -->
+      <div class="graphic-panel" style="flex-direction:column;padding:0;overflow:hidden;">
+        <!-- header bar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;width:100%;">
+          <span style="font-family:'Geist Mono',monospace;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.14em;color:var(--dim);">Agent topology · live</span>
+          <span style="font-family:'Geist Mono',monospace;font-size:10px;color:var(--good);"><span class="live-dot"></span>running</span>
+        </div>
+        <!-- SVG diagram -->
+        <svg id="topo-svg" viewBox="0 0 560 280" style="width:100%;flex:1;min-height:0;" preserveAspectRatio="xMidYMid meet">
+          <!-- lane backgrounds -->
+          <rect x="0" y="0"   width="560" height="56" fill="#15171C"/>
+          <rect x="0" y="56"  width="560" height="56" fill="#0E1014"/>
+          <rect x="0" y="112" width="560" height="56" fill="#15171C"/>
+          <rect x="0" y="168" width="560" height="56" fill="#0E1014"/>
+          <rect x="0" y="224" width="560" height="56" fill="#15171C"/>
+          <!-- lane dividers -->
+          <line x1="0" x2="560" y1="56"  y2="56"  stroke="#23262E" stroke-width="0.5"/>
+          <line x1="0" x2="560" y1="112" y2="112" stroke="#23262E" stroke-width="0.5"/>
+          <line x1="0" x2="560" y1="168" y2="168" stroke="#23262E" stroke-width="0.5"/>
+          <line x1="0" x2="560" y1="224" y2="224" stroke="#23262E" stroke-width="0.5"/>
+          <!-- label divider -->
+          <line x1="120" x2="120" y1="0" y2="280" stroke="#23262E" stroke-width="0.5"/>
+
+          <!-- lane labels -->
+          <text x="12" y="33" font-family="'Geist Mono',monospace" font-size="9" font-weight="600" fill="#2563EB">ORCHESTRATOR</text>
+          <text x="12" y="89" font-family="'Geist Mono',monospace" font-size="9" font-weight="600" fill="#10B981">DATA ANALYST</text>
+          <text x="12" y="145" font-family="'Geist Mono',monospace" font-size="9" font-weight="600" fill="#F59E0B">CRITIC</text>
+          <text x="12" y="201" font-family="'Geist Mono',monospace" font-size="9" font-weight="600" fill="#A855F7">REPORTER</text>
+          <text x="12" y="257" font-family="'Geist Mono',monospace" font-size="9" font-weight="600" fill="#EC4899">SUPPORT</text>
+
+          <!-- timeline axis -->
+          <line x1="130" x2="550" y1="275" y2="275" stroke="#23262E" stroke-width="0.5"/>
+          <!-- time labels -->
+          <text x="130" y="280" font-family="'Geist Mono',monospace" font-size="7" fill="#71717A">0s</text>
+          <text x="270" y="280" font-family="'Geist Mono',monospace" font-size="7" fill="#71717A">3.5s</text>
+          <text x="408" y="280" font-family="'Geist Mono',monospace" font-size="7" fill="#71717A">6s</text>
+          <text x="522" y="280" font-family="'Geist Mono',monospace" font-size="7" fill="#71717A">7.5s</text>
+
+          <!-- event dots: orchestrator lane (y=28) -->
+          <!-- reason t=0 x≈130 -->
+          <circle cx="130" cy="28" r="3.5" fill="#2563EB"/>
+          <text x="135" y="24" font-family="'Geist Mono',monospace" font-size="7.5" fill="#A1A1AA">reason</text>
+          <!-- plan t=600 x≈173 -->
+          <circle cx="173" cy="28" r="3.5" fill="#2563EB"/>
+          <text x="178" y="24" font-family="'Geist Mono',monospace" font-size="7.5" fill="#A1A1AA">plan</text>
+          <!-- delegate t=1100 x≈209 -->
+          <circle cx="209" cy="28" r="3.5" fill="#2563EB"/>
+          <!-- cite t=7100 x≈538 -->
+          <circle cx="535" cy="28" r="3.5" fill="#5B8DEF"/>
+          <text x="520" y="22" font-family="'Geist Mono',monospace" font-size="7.5" fill="#5B8DEF">cite ✓</text>
+
+          <!-- delegate arrow: orchestrator → analyst -->
+          <line x1="209" y1="32" x2="209" y2="80" stroke="#2563EB" stroke-width="0.8" stroke-dasharray="3 2" opacity="0.6"/>
+          <polygon points="206,76 212,76 209,82" fill="#2563EB" opacity="0.6"/>
+
+          <!-- event dots: analyst lane (y=84) -->
+          <circle cx="209" cy="84" r="3.5" fill="#10B981"/>
+          <!-- query_a t=1400 x≈229 -->
+          <circle cx="229" cy="84" r="3.5" fill="#10B981"/>
+          <text x="233" y="79" font-family="'Geist Mono',monospace" font-size="7.5" fill="#A1A1AA">query_a</text>
+          <!-- query_b t=1600 x≈242 -->
+          <circle cx="242" cy="84" r="3.5" fill="#10B981"/>
+          <text x="246" y="93" font-family="'Geist Mono',monospace" font-size="7.5" fill="#A1A1AA">query_b</text>
+          <!-- done t=2900 x≈335 -->
+          <circle cx="335" cy="84" r="3.5" fill="#10B981"/>
+          <!-- retry after critic t=4400 x≈428 -->
+          <circle cx="428" cy="84" r="3.5" fill="#F59E0B"/>
+          <text x="432" y="79" font-family="'Geist Mono',monospace" font-size="7.5" fill="#F59E0B">retry</text>
+          <!-- done again t=5200 x≈488 -->
+          <circle cx="488" cy="84" r="3.5" fill="#10B981"/>
+
+          <!-- analyst → critic -->
+          <line x1="335" y1="88" x2="335" y2="136" stroke="#10B981" stroke-width="0.8" stroke-dasharray="3 2" opacity="0.5"/>
+          <polygon points="332,132 338,132 335,138" fill="#10B981" opacity="0.5"/>
+
+          <!-- critic lane (y=140) -->
+          <circle cx="335" cy="140" r="3.5" fill="#F59E0B"/>
+          <text x="339" y="135" font-family="'Geist Mono',monospace" font-size="7.5" fill="#F59E0B">critique</text>
+          <!-- replan arrow back to analyst -->
+          <path d="M 395 140 C 420 120, 430 90, 428 90" stroke="#F59E0B" stroke-width="0.8" fill="none" stroke-dasharray="3 2" opacity="0.6"/>
+          <polygon points="425,90 431,90 428,84" fill="#F59E0B" opacity="0.6"/>
+          <!-- approve -->
+          <circle cx="500" cy="140" r="3.5" fill="#10B981"/>
+          <text x="504" y="135" font-family="'Geist Mono',monospace" font-size="7.5" fill="#10B981">approve</text>
+
+          <!-- approve → reporter -->
+          <line x1="500" y1="144" x2="500" y2="192" stroke="#A855F7" stroke-width="0.8" stroke-dasharray="3 2" opacity="0.5"/>
+          <polygon points="497,188 503,188 500,194" fill="#A855F7" opacity="0.5"/>
+
+          <!-- reporter lane (y=196) -->
+          <circle cx="500" cy="196" r="3.5" fill="#A855F7"/>
+          <text x="504" y="191" font-family="'Geist Mono',monospace" font-size="7.5" fill="#A855F7">compose</text>
+          <!-- done -->
+          <circle cx="535" cy="196" r="3.5" fill="#A855F7"/>
+
+          <!-- animated playhead -->
+          <g id="playhead-group" style="overflow:hidden;">
+            <rect id="playhead" x="130" y="0" width="1.5" height="270" fill="#5B8DEF" opacity="0.4"/>
+          </g>
+
+          <!-- end label -->
+          <text x="520" y="41" font-family="'Geist Mono',monospace" font-size="8" fill="#10B981" font-weight="600">7.3s ✓</text>
+        </svg>
+
+        <!-- event log strip -->
+        <div id="event-log" style="background:var(--bg-deep);border-top:1px solid var(--border);padding:8px 14px;font-family:'Geist Mono',monospace;font-size:10px;color:var(--dim);flex-shrink:0;height:38px;overflow:hidden;display:flex;align-items:center;gap:8px;">
+          <span style="color:var(--accent);">▶</span>
+          <span id="event-text">orchestrator · parsing · domain=permits geo=78704</span>
+        </div>
+      </div>
+
+      <!-- RIGHT: solution copy -->
+      <div style="display:flex;flex-direction:column;justify-content:center;padding:16px 0;">
+        <div class="eyebrow">The Solution</div>
+        <h1>Agentic data flow.<br/><em>Outcome-focused</em> portal.</h1>
+        <ul class="bullets">
+          <li>
+            <span class="dot" style="background:var(--good);"></span>
+            <div>
+              <strong>Installable intelligence layer</strong> over any Socrata portal — one deploy, full agentic pipeline.
+              <span class="tag green">open source</span>
+            </div>
+          </li>
+          <li>
+            <span class="dot" style="background:var(--accent);"></span>
+            <div>
+              <strong>5 specialized agents</strong> — Orchestrator, Data Analyst, Critic, Reporter, Support — reason, query, self-correct, and cite in parallel.
+            </div>
+          </li>
+          <li>
+            <span class="dot" style="background:var(--warn);"></span>
+            <div>
+              <strong>Cross-dataset insights in one answer.</strong>
+              Permits + code violations + 311 hotspots → single sourced response.
+            </div>
+          </li>
+          <li>
+            <span class="dot" style="background:var(--purple);"></span>
+            <div>
+              <strong>Pre-harvested findings per dataset</strong> — answers before you even ask. Updated every refresh cycle.
+            </div>
+          </li>
+        </ul>
+
+        <div class="stat-row">
+          <div class="stat">
+            <div class="stat-num">9</div>
+            <div class="stat-label">datasets live</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">7.3s</div>
+            <div class="stat-label">avg answer time</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">100%</div>
+            <div class="stat-label">cited sources</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="slide-footer">
+      <span><span class="live-dot"></span>agent online · 7 specialists · Austin · Dallas · TX State</span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       SLIDE 3 — AGENTIC INTEGRATION
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="slide" id="s3">
+    <div class="slide-chrome">
+      <div class="chrome-brand">TX<span>Lookup</span> · AITX × Codex Hackathon 2026</div>
+      <div class="chrome-counter">03 / 03</div>
+    </div>
+
+    <div class="slide-body" style="display:flex;flex-direction:column;gap:20px;padding-top:28px;padding-bottom:0;">
+
+      <div>
+        <div class="eyebrow">Agentic Integration</div>
+        <h1 style="font-size:clamp(28px,3.2vw,52px);margin-bottom:8px;">
+          One stack. <em>Any Socrata portal.</em> Everywhere.
+        </h1>
+        <p style="font-size:15px;color:var(--mute);max-width:72ch;line-height:1.6;">
+          TXLookup isn't a TX-only tool — it's the installable intelligence layer that any Socrata-powered
+          city, county, or state can deploy. The dataset scout auto-discovers new datasets every 6 hours.
+        </p>
+      </div>
+
+      <div class="card-grid" style="flex:1;align-content:start;">
+        <div class="card highlight">
+          <div class="card-num">01</div>
+          <div class="card-title">Bring your own portal</div>
+          <div class="card-body">Point TXLookup at any Socrata endpoint. Full agent pipeline, insight cards, and the /q search layer — without rebuilding anything.</div>
+        </div>
+        <div class="card">
+          <div class="card-num">02</div>
+          <div class="card-title">Install as a Claude skill / MCP server</div>
+          <div class="card-body">Ship as a Claude Code skill or FastMCP server. Any Claude user or agent can invoke it — no custom UI required. Anthropic Agents Track ✓</div>
+        </div>
+        <div class="card">
+          <div class="card-num">03</div>
+          <div class="card-title">Dataset scout · 6h auto-discovery</div>
+          <div class="card-body">GitHub Action scans portals every 6 hours, ingests new datasets into SQLite cache, and surfaces them in the agent catalog automatically.</div>
+        </div>
+        <div class="card">
+          <div class="card-num">04</div>
+          <div class="card-title">Cross-city intelligence</div>
+          <div class="card-body">Austin + Dallas + TX State today. San Antonio, Houston, El Paso in the scout queue. One query can span all connected portals simultaneously.</div>
+        </div>
+      </div>
+
+      <!-- portal progress strip -->
+      <div style="border:1px solid var(--border);border-radius:8px;padding:14px 20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:8px;background:var(--bg-elev);">
+        <span style="font-family:'Geist Mono',monospace;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.14em;color:var(--dim);white-space:nowrap;">Portal rollout</span>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
+          <span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--good);display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--good);"></span>Austin (6 datasets)</span>
+          <span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--good);display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--good);"></span>Dallas (2 datasets)</span>
+          <span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--accent);display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);"></span>TX State (1 dataset)</span>
+          <span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--dim);display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--dim);"></span>San Antonio · scout</span>
+          <span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--dim);display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--dim);"></span>Houston · scout</span>
+          <span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--dim);display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--dim);"></span>El Paso · scout</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="slide-footer">
+      <span>github.com/ATX-TXLookup/TXLookup · Apache 2.0 · Agents Track + Open Data Track</span>
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- Navigation -->
+<div id="nav">
+  <button id="btn-prev" onclick="go(-1)" disabled>←</button>
+  <span id="slide-num">1 / 3</span>
+  <button id="btn-next" onclick="go(1)">→</button>
+</div>
+
+<script>
+  const SLIDES = ['s1','s2','s3'];
+  let cur = 0;
+
+  function go(dir) {
+    const next = cur + dir;
+    if (next < 0 || next >= SLIDES.length) return;
+    document.getElementById(SLIDES[cur]).classList.remove('active');
+    cur = next;
+    document.getElementById(SLIDES[cur]).classList.add('active');
+    document.getElementById('slide-num').textContent = (cur+1) + ' / ' + SLIDES.length;
+    document.getElementById('btn-prev').disabled = cur === 0;
+    document.getElementById('btn-next').disabled = cur === SLIDES.length - 1;
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
+  });
+
+  // Animate the playhead on the agent diagram
+  const EVENTS = [
+    { t: 0,    text: 'orchestrator · reason · parsing domain=permits geo=78704' },
+    { t: 600,  text: 'orchestrator · plan · parallel(query_a, query_b) → critic → reporter' },
+    { t: 1100, text: 'orchestrator → data_analyst · delegate_parallel × 2' },
+    { t: 1400, text: 'data_analyst · query_a · 3syk-w9eu group by zip · 412 rows' },
+    { t: 1600, text: 'data_analyst · query_b · 3syk-w9eu group by month · 12 rows' },
+    { t: 2900, text: 'data_analyst → orchestrator · step_done · branch a · 870ms' },
+    { t: 3400, text: 'orchestrator → critic · review · 2 result sets' },
+    { t: 3700, text: 'critic · critique · query_b missing 2024 window — replan' },
+    { t: 4300, text: 'critic → orchestrator · replan flagged · retrying query_b' },
+    { t: 4400, text: 'data_analyst · query_b retry · with 2024-01-01 floor · 700ms' },
+    { t: 5500, text: 'critic → orchestrator · approve · all rows in window ✓' },
+    { t: 5900, text: 'orchestrator → reporter · delegate · compose + cite' },
+    { t: 6000, text: 'reporter · composing · 2 findings + 1 chart' },
+    { t: 7100, text: 'orchestrator · cite(3syk-w9eu, refreshed 2026-05-09)' },
+    { t: 7300, text: 'done · 7.3s end-to-end · report ready ✓' },
+  ];
+  const TOTAL = 7400;
+  const CYCLE = TOTAL + 1200;
+  const SVG_LEFT = 130, SVG_RIGHT = 550;
+  const SVG_TRACK = SVG_RIGHT - SVG_LEFT;
+
+  let startTime = null;
+  const playhead = document.getElementById('playhead');
+  const eventText = document.getElementById('event-text');
+
+  function animatePlayhead(ts) {
+    if (!startTime) startTime = ts;
+    const elapsed = (ts - startTime) % CYCLE;
+    const t = Math.min(elapsed, TOTAL);
+    const x = SVG_LEFT + (t / TOTAL) * SVG_TRACK;
+    if (playhead) playhead.setAttribute('x', x.toString());
+
+    // update event log
+    let activeEvt = EVENTS[0];
+    for (const e of EVENTS) { if (e.t <= t) activeEvt = e; else break; }
+    if (eventText && eventText.textContent !== activeEvt.text) {
+      eventText.textContent = activeEvt.text;
+    }
+    requestAnimationFrame(animatePlayhead);
+  }
+  requestAnimationFrame(animatePlayhead);
+</script>
+</body>
+</html>
