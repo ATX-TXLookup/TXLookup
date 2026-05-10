@@ -17,14 +17,20 @@ const config: Config = {
     extend: {
       colors: {
         // BRAND.md §3 — TXLookup brand tokens (used by app/v2/)
-        "tx-navy":  "#0D2340",
-        "tx-rust":  "#C4420A",
-        "tx-gold":  "#D48B10",
-        "tx-sky":   "#3A7FBE",
-        "tx-sage":  "#3B6D3B",
-        "tx-cream": "#FAF7F2",
-        "tx-ink":   "#1A1510",
-        "tx-muted": "#6B6660",
+        "tx-navy":       "#0D2340",
+        "tx-navy-dark":  "#07152A",  // darker footer / utility-bar variant
+        "tx-rust":       "#C4420A",
+        "tx-rust-dark":  "#A3350A",  // rust hover/active
+        "tx-rust-light": "#F5E8DF",  // BRAND.md §3 light surface variant
+        "tx-gold":       "#D48B10",
+        "tx-gold-dark":  "#B8770D",  // gold hover/active
+        "tx-gold-light": "#FDF3DC",  // BRAND.md §3 — insight-badge bg
+        "tx-sky":        "#3A7FBE",
+        "tx-sky-light":  "#DFF0FA",  // BRAND.md §3
+        "tx-sage":       "#3B6D3B",
+        "tx-cream":      "#FAF7F2",
+        "tx-ink":        "#1A1510",
+        "tx-muted":      "#6B6660",
 
         // Primary (ember)
         primary: {

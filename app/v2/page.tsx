@@ -143,10 +143,10 @@ export default async function V2HomePage() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#FAF7F2] text-[#1A1510] font-body">
+    <main className="min-h-screen bg-tx-cream text-tx-ink font-body">
 
       {/* ── Top utility bar ── */}
-      <div className="bg-[#0D2340] text-white">
+      <div className="bg-tx-navy text-white">
         <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-6 py-2 text-[13px] md:px-10">
           <span>An open-source agent for Texas public data. Live counts on this page are computed from Socrata at request time.</span>
           <span className="hidden font-mono text-[11px] uppercase tracking-wider text-white/70 md:inline">
@@ -156,7 +156,7 @@ export default async function V2HomePage() {
       </div>
 
       {/* ── Header ── */}
-      <header className="border-b border-[#1A1510]/10 bg-[#FAF7F2]">
+      <header className="border-b border-tx-ink/10 bg-tx-cream">
         <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-6 px-6 py-4 md:px-10 md:py-5">
           <Link href="/v2" className="flex items-center">
             <Image
@@ -169,24 +169,24 @@ export default async function V2HomePage() {
             />
           </Link>
           <nav className="flex items-center gap-7 font-display text-sm font-semibold">
-            <Link href="#search" className="hover:text-[#C4420A]">
+            <Link href="#search" className="hover:text-tx-rust">
               Search
             </Link>
-            <Link href="#datasets" className="hidden hover:text-[#C4420A] md:inline">
+            <Link href="#datasets" className="hidden hover:text-tx-rust md:inline">
               Datasets
             </Link>
-            <Link href="#topics" className="hidden hover:text-[#C4420A] md:inline">
+            <Link href="#topics" className="hidden hover:text-tx-rust md:inline">
               Topics
             </Link>
             <a
               href="https://github.com/ATX-TXLookup/TXLookup/blob/main/docs/usage.md"
-              className="hidden hover:text-[#C4420A] md:inline"
+              className="hidden hover:text-tx-rust md:inline"
             >
               Use as a tool
             </a>
             <a
               href="https://github.com/ATX-TXLookup/TXLookup"
-              className="rounded-sm bg-[#0D2340] px-4 py-2 font-medium text-white hover:bg-[#C4420A]"
+              className="rounded-sm bg-tx-navy px-4 py-2 font-medium text-white hover:bg-tx-rust"
             >
               GitHub ↗
             </a>
@@ -197,25 +197,25 @@ export default async function V2HomePage() {
       {/* ── Hero ── */}
       <section
         id="search"
-        className="border-b border-[#1A1510]/10"
+        className="border-b border-tx-ink/10"
         style={{
-          background: "#0D2340",
+          background: "var(--tx-navy)",
           backgroundImage:
             "radial-gradient(circle at 80% 30%, rgba(58,127,190,0.18) 0%, transparent 55%), radial-gradient(circle at 10% 80%, rgba(196,66,10,0.12) 0%, transparent 50%)",
         }}
       >
         <div className="mx-auto max-w-[1320px] px-6 py-16 md:px-10 md:py-24">
           <div className="mx-auto max-w-[860px] text-center">
-            <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[#3A7FBE]">
+            <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-tx-sky">
               The Texas Open Data Agent
             </p>
             {/* BRAND.md: DM Serif Display 48px white on navy */}
-            <h1 className="mt-4 font-display text-[40px] font-normal leading-[1.05] tracking-tight text-[#FAF7F2] md:text-[60px]">
+            <h1 className="mt-4 font-display text-[40px] font-normal leading-[1.05] tracking-tight text-tx-cream md:text-[60px]">
               Ask Texas a question.
               <br />
-              <span className="italic text-[#D48B10]">Get the answer with the source attached.</span>
+              <span className="italic text-tx-gold">Get the answer with the source attached.</span>
             </h1>
-            <p className="mx-auto mt-6 max-w-[60ch] text-base leading-relaxed text-[#FAF7F2]/70 md:text-lg">
+            <p className="mx-auto mt-6 max-w-[60ch] text-base leading-relaxed text-tx-cream/70 md:text-lg">
               TXLookup searches Austin, Dallas, San Antonio, and Houston
               open-data portals — plus state filings — in plain English. Every
               answer cites the source dataset and when it was last refreshed.
@@ -243,24 +243,24 @@ export default async function V2HomePage() {
               type="text"
               required
               placeholder="e.g. restaurants near 78704 with failing inspections this year"
-              className="flex-1 rounded-sm bg-transparent px-4 py-3 font-mono text-base text-[#FAF7F2] placeholder:text-[#FAF7F2]/40 focus:outline-none md:text-lg"
-              style={{ caretColor: "#D48B10" }}
+              className="flex-1 rounded-sm bg-transparent px-4 py-3 font-mono text-base text-tx-cream placeholder:text-tx-cream/40 focus:outline-none md:text-lg"
+              style={{ caretColor: "var(--tx-gold)" }}
             />
             <button
               type="submit"
-              className="rounded-sm bg-[#C4420A] px-7 py-3 font-display text-base font-semibold text-white hover:bg-[#A3350A] md:text-lg"
+              className="rounded-sm bg-tx-rust px-7 py-3 font-display text-base font-semibold text-white hover:bg-tx-rust-dark md:text-lg"
             >
               Search
             </button>
           </form>
 
           <div className="mx-auto mt-5 flex max-w-[820px] flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-            <span className="font-medium text-[#FAF7F2]/60">Try:</span>
+            <span className="font-medium text-tx-cream/60">Try:</span>
             {sampleQuestions.map((q) => (
               <a
                 key={q}
                 href={`/q?q=${encodeURIComponent(q)}`}
-                className="text-[#3A7FBE] hover:text-[#D48B10] hover:underline"
+                className="text-tx-sky hover:text-tx-gold hover:underline"
               >
                 {q}
               </a>
@@ -270,29 +270,29 @@ export default async function V2HomePage() {
       </section>
 
       {/* ── Live ticker + sparkline ── */}
-      <section className="border-b border-[#1A1510]/10 bg-[#FAF7F2]">
+      <section className="border-b border-tx-ink/10 bg-tx-cream">
         <div className="mx-auto max-w-[1320px] px-6 py-10 md:px-10">
           <div className="flex items-baseline justify-between">
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[#C4420A]">
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
               Live · Austin civic data
             </p>
-            <p className="font-mono text-[11px] uppercase tracking-wider text-[#1A1510]/55">
+            <p className="font-mono text-[11px] uppercase tracking-wider text-tx-ink/55">
               recomputed every 5 minutes
             </p>
           </div>
-          <div className="mt-5 grid gap-px border border-[#1A1510]/10 bg-[#1A1510]/10 md:grid-cols-4">
+          <div className="mt-5 grid gap-px border border-tx-ink/10 bg-tx-ink/10 md:grid-cols-4">
             {tickers.map((t) => (
-              <div key={t.label} className="bg-[#FAF7F2] px-5 py-4">
-                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#1A1510]/55">
+              <div key={t.label} className="bg-tx-cream px-5 py-4">
+                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-tx-ink/55">
                   {t.label}
                 </div>
                 <div
                   className="mt-2 font-display text-2xl font-bold tabular-nums"
-                  style={{ color: t.warn ? "#C4420A" : "#0D2340" }}
+                  style={{ color: t.warn ? "var(--tx-rust)" : "var(--tx-navy)" }}
                 >
                   {t.value}
                 </div>
-                <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-[#1A1510]/55">
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-tx-ink/55">
                   {t.sub}
                 </div>
               </div>
@@ -302,27 +302,27 @@ export default async function V2HomePage() {
           {/* Sparkline */}
           <div className="mt-6 flex items-end justify-between gap-3">
             <div className="flex-1">
-              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#1A1510]/55">
+              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-tx-ink/55">
                 Austin permits issued — last 7 days
               </p>
-              <div className="mt-3 flex h-[80px] items-end gap-2 border-b border-[#1A1510]/15">
+              <div className="mt-3 flex h-[80px] items-end gap-2 border-b border-tx-ink/15">
                 {permitsSpark.length > 0 ? (
                   permitsSpark.map((d) => (
                     <div key={d.day} className="flex flex-1 flex-col items-center justify-end">
                       <div
-                        className="w-full bg-[#D48B10]"
+                        className="w-full bg-tx-gold"
                         style={{ height: `${(d.count / maxSpark) * 70}px` }}
                         title={`${d.day}: ${d.count} permits`}
                       />
                     </div>
                   ))
                 ) : (
-                  <p className="font-mono text-[11px] text-[#1A1510]/55">
+                  <p className="font-mono text-[11px] text-tx-ink/55">
                     Live data temporarily unavailable. Source remains queryable on the dataset page.
                   </p>
                 )}
               </div>
-              <div className="mt-2 flex justify-between font-mono text-[10px] uppercase tracking-wider text-[#1A1510]/55">
+              <div className="mt-2 flex justify-between font-mono text-[10px] uppercase tracking-wider text-tx-ink/55">
                 {permitsSpark.length > 0 && (
                   <>
                     <span>{permitsSpark[0]?.day}</span>
@@ -333,7 +333,7 @@ export default async function V2HomePage() {
             </div>
             <Link
               href="/datasets/3syk-w9eu"
-              className="rounded-sm border border-[#C4420A]/40 px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#C4420A] hover:border-[#C4420A]"
+              className="rounded-sm border border-tx-rust/40 px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-wider text-tx-rust hover:border-tx-rust"
             >
               Browse permits →
             </Link>
@@ -342,20 +342,20 @@ export default async function V2HomePage() {
       </section>
 
       {/* ── Topics ── */}
-      <section id="topics" className="border-b border-[#1A1510]/10 bg-[#FDF3DC]">
+      <section id="topics" className="border-b border-tx-ink/10 bg-tx-gold-light">
         <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
           <div className="flex items-end justify-between">
             <div>
-              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[#C4420A]">
+              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
                 Browse by topic
               </p>
-              <h2 className="mt-2 font-display text-3xl font-normal tracking-tight text-[#0D2340] md:text-4xl">
+              <h2 className="mt-2 font-display text-3xl font-normal tracking-tight text-tx-navy md:text-4xl">
                 Pick a subject.
               </h2>
             </div>
             <Link
               href="#datasets"
-              className="hidden text-sm font-medium text-[#C4420A] hover:underline md:inline"
+              className="hidden text-sm font-medium text-tx-rust hover:underline md:inline"
             >
               See all datasets →
             </Link>
@@ -365,12 +365,12 @@ export default async function V2HomePage() {
               <a
                 key={t.name}
                 href={`/q?q=${encodeURIComponent(t.name + " in Austin")}`}
-                className="group flex flex-col rounded-md border border-[#1A1510]/10 bg-[#FAF7F2] px-4 py-4 transition-colors hover:border-[#C4420A]"
+                className="group flex flex-col rounded-md border border-tx-ink/10 bg-tx-cream px-4 py-4 transition-colors hover:border-tx-rust"
               >
-                <span className="font-display text-base font-semibold text-[#0D2340] group-hover:text-[#C4420A]">
+                <span className="font-display text-base font-semibold text-tx-navy group-hover:text-tx-rust">
                   {t.name}
                 </span>
-                <span className="mt-1 font-mono text-[11px] uppercase tracking-wider text-[#1A1510]/55">
+                <span className="mt-1 font-mono text-[11px] uppercase tracking-wider text-tx-ink/55">
                   {t.count} datasets
                 </span>
               </a>
@@ -380,20 +380,20 @@ export default async function V2HomePage() {
       </section>
 
       {/* ── Datasets grid ── */}
-      <section id="datasets" className="scroll-mt-24 border-b border-[#1A1510]/10 bg-[#FAF7F2]">
+      <section id="datasets" className="scroll-mt-24 border-b border-tx-ink/10 bg-tx-cream">
         <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
           <div className="flex items-end justify-between">
             <div>
-              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[#C4420A]">
+              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
                 Popular datasets
               </p>
-              <h2 className="mt-2 font-display text-3xl font-normal tracking-tight text-[#0D2340] md:text-4xl">
+              <h2 className="mt-2 font-display text-3xl font-normal tracking-tight text-tx-navy md:text-4xl">
                 What the agent knows about today.
               </h2>
             </div>
             <a
               href="https://github.com/ATX-TXLookup/TXLookup/blob/main/config/datasets.yaml"
-              className="hidden text-sm font-medium text-[#C4420A] hover:underline md:inline"
+              className="hidden text-sm font-medium text-tx-rust hover:underline md:inline"
             >
               View catalog →
             </a>
@@ -406,37 +406,37 @@ export default async function V2HomePage() {
                 <Link
                   key={d.id}
                   href={`/datasets/${d.id}`}
-                  className="group flex flex-col rounded-md border border-[#1A1510]/10 bg-[#FAF7F2] p-6 transition-all hover:border-[#C4420A] hover:shadow-[0_8px_24px_-12px_rgba(196,66,10,0.18)]"
+                  className="group flex flex-col rounded-md border border-tx-ink/10 bg-tx-cream p-6 transition-all hover:border-tx-rust hover:shadow-[0_8px_24px_-12px_rgba(196,66,10,0.18)]"
                 >
                   <div className="flex items-baseline justify-between">
                     {/* BRAND.md: gold insight badge */}
                     <span
                       className="rounded-full font-mono text-[10px] font-semibold uppercase tracking-wider"
                       style={{
-                        background: "#FDF3DC",
-                        color: "#D48B10",
+                        background: "var(--tx-gold-light)",
+                        color: "var(--tx-gold)",
                         border: "0.5px solid rgba(212,139,16,0.3)",
                         padding: "3px 10px",
                       }}
                     >
                       Austin
                     </span>
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-[#1A1510]/55">
+                    <span className="font-mono text-[11px] uppercase tracking-wider text-tx-ink/55">
                       {meta.lastRefreshed
                         ? `Refreshed ${meta.lastRefreshed}`
                         : `Updated ${d.cadence.toLowerCase()}`}
                     </span>
                   </div>
-                  <h3 className="mt-4 font-display text-xl font-normal leading-tight text-[#0D2340] group-hover:text-[#C4420A]">
+                  <h3 className="mt-4 font-display text-xl font-normal leading-tight text-tx-navy group-hover:text-tx-rust">
                     {d.title}
                   </h3>
-                  <p className="mt-1 text-sm text-[#1A1510]/65">{d.agency}</p>
-                  <p className="mt-4 flex-1 text-sm leading-relaxed text-[#1A1510]/80">
+                  <p className="mt-1 text-sm text-tx-ink/65">{d.agency}</p>
+                  <p className="mt-4 flex-1 text-sm leading-relaxed text-tx-ink/80">
                     {d.blurb}
                   </p>
-                  <div className="mt-5 flex items-baseline justify-between border-t border-[#1A1510]/10 pt-3">
-                    <span className="font-mono text-xs text-[#1A1510]/55">{d.id}</span>
-                    <span className="font-display text-xs font-semibold text-[#C4420A]">
+                  <div className="mt-5 flex items-baseline justify-between border-t border-tx-ink/10 pt-3">
+                    <span className="font-mono text-xs text-tx-ink/55">{d.id}</span>
+                    <span className="font-display text-xs font-semibold text-tx-rust">
                       {d.rowsLabel} rows →
                     </span>
                   </div>
@@ -445,7 +445,7 @@ export default async function V2HomePage() {
             })}
           </div>
 
-          <p className="mt-6 text-sm text-[#1A1510]/60">
+          <p className="mt-6 text-sm text-tx-ink/60">
             Dallas, San Antonio, and Houston portals are queryable via the same
             Socrata client. Datasets being onboarded.
           </p>
@@ -453,12 +453,12 @@ export default async function V2HomePage() {
       </section>
 
       {/* ── How it works ── */}
-      <section className="border-b border-[#1A1510]/10 bg-[#FAF7F2]">
+      <section className="border-b border-tx-ink/10 bg-tx-cream">
         <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
-          <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[#C4420A]">
+          <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
             How it works
           </p>
-          <h2 className="mt-2 max-w-[24ch] font-display text-3xl font-normal tracking-tight text-[#0D2340] md:text-4xl">
+          <h2 className="mt-2 max-w-[24ch] font-display text-3xl font-normal tracking-tight text-tx-navy md:text-4xl">
             Four steps from question to cited answer.
           </h2>
 
@@ -486,13 +486,13 @@ export default async function V2HomePage() {
               },
             ].map((s) => (
               <div key={s.n}>
-                <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[#3A7FBE]">
+                <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-sky">
                   Step {s.n}
                 </span>
-                <h3 className="mt-3 font-display text-2xl font-normal tracking-tight text-[#0D2340]">
+                <h3 className="mt-3 font-display text-2xl font-normal tracking-tight text-tx-navy">
                   {s.title}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#1A1510]/75">{s.body}</p>
+                <p className="mt-2 text-sm leading-relaxed text-tx-ink/75">{s.body}</p>
               </div>
             ))}
           </div>
@@ -500,11 +500,11 @@ export default async function V2HomePage() {
       </section>
 
       {/* ── For builders — dark navy section ── */}
-      <section className="border-b border-[#1A1510]/10 bg-[#0D2340] text-white">
+      <section className="border-b border-tx-ink/10 bg-tx-navy text-white">
         <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
           <div className="grid gap-12 md:grid-cols-12">
             <div className="md:col-span-5">
-              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[#D48B10]">
+              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
                 For builders
               </p>
               <h2 className="mt-2 font-display text-3xl font-normal leading-tight tracking-tight md:text-4xl">
@@ -519,7 +519,7 @@ export default async function V2HomePage() {
               <div className="mt-7 flex flex-wrap gap-3">
                 <a
                   href="https://github.com/ATX-TXLookup/TXLookup/blob/main/docs/usage.md"
-                  className="rounded-sm bg-[#D48B10] px-5 py-2.5 font-display text-sm font-semibold text-[#0D2340] hover:bg-[#B8770D]"
+                  className="rounded-sm bg-tx-gold px-5 py-2.5 font-display text-sm font-semibold text-tx-navy hover:bg-tx-gold-dark"
                 >
                   Read docs →
                 </a>
@@ -536,9 +536,9 @@ export default async function V2HomePage() {
               <div
                 className="rounded-md p-5 font-mono text-xs leading-relaxed md:p-7 md:text-sm"
                 style={{
-                  background: "#07152A",
+                  background: "var(--tx-navy-dark)",
                   border: "0.5px solid rgba(58,127,190,0.2)",
-                  color: "#DFF0FA",
+                  color: "var(--tx-sky-light)",
                 }}
               >
                 <p className="text-white/45"># Install in Claude Code</p>
@@ -546,7 +546,7 @@ export default async function V2HomePage() {
                 <p>&nbsp;&nbsp;&nbsp;&nbsp;"python /path/to/TXLookup/mcp/server.py"</p>
                 <p className="mt-5 text-white/45"># Then ask</p>
                 <p className="mt-1">$ claude</p>
-                <p style={{ color: "#D48B10" }}>&gt; mcp__txlookup__discover_datasets("food trucks 78702")</p>
+                <p style={{ color: "var(--tx-gold)" }}>&gt; mcp__txlookup__discover_datasets("food trucks 78702")</p>
                 <p className="mt-1 text-white">→ 3syk-w9eu (Austin Issued Construction Permits)</p>
                 <p className="mt-5 text-white/45">
                   # Five tools: discover · describe · query · summarize · cite
@@ -561,7 +561,7 @@ export default async function V2HomePage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="bg-[#07152A] text-white/85">
+      <footer className="bg-tx-navy-dark text-white/85">
         <div className="mx-auto max-w-[1320px] px-6 py-12 md:px-10 md:py-14">
           <div className="grid gap-10 md:grid-cols-12">
             <div className="md:col-span-5">
