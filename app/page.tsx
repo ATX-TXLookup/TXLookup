@@ -31,18 +31,33 @@ import {
   austinOpenCodeViolations,
   austinPermits7dTotal,
   austinPermitsLast7Days,
+  dallas311Last30d,
+  dallasPoliceActiveCalls,
+  texasFranchisePermitsActive,
 } from "@/app/lib/homepage-data";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
 
 export default async function HomePage() {
-  const [permitsSpark, permits7d, inspectionsByZip, requests30d, openViolations] = await Promise.all([
+  const [
+    permitsSpark,
+    permits7d,
+    inspectionsByZip,
+    requests30d,
+    openViolations,
+    dallas311,
+    dallasActiveCalls,
+    txFranchise,
+  ] = await Promise.all([
     austinPermitsLast7Days(),
     austinPermits7dTotal(),
     austinInspections30dByZip(),
     austin311Last30d(),
     austinOpenCodeViolations(),
+    dallas311Last30d(),
+    dallasPoliceActiveCalls(),
+    texasFranchisePermitsActive(),
   ]);
 
   const totalPermits7d = permitsSpark.reduce((s, d) => s + d.count, 0);
@@ -294,50 +309,112 @@ export default async function HomePage() {
       {/* MULTI-AGENT TOPOLOGY */}
       <AgentTopologyShowcase />
 
-      {/* AUSTIN BY THE NUMBERS */}
+      {/* TEXAS BY THE NUMBERS — multi-city, multi-domain (not just permits) */}
       <section className="border-b border-[var(--ds-border)]">
         <div className="mx-auto max-w-[1200px] px-6 py-20 md:px-8 md:py-28">
           <SectionHeader
-            eyebrow="Live · Austin"
+            eyebrow="Live · across Texas"
             eyebrowTone="good"
             headline={
               <>
-                The corpus, right{" "}
-                <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">now.</span>
+                Three cities. Three domains.{" "}
+                <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">All real-time.</span>
               </>
             }
-            sub="Live counts pulled from Socrata at request time. Recomputed every 5 minutes."
+            sub="Pulled live from each portal at request time. Recomputed every 5 minutes. The corpus answers in any domain — not just permits — and not just Austin."
           />
 
           <div className="mt-12 grid gap-10 md:grid-cols-3 md:gap-14">
             <StatCallout
-              tone="good"
-              value={permits7d > 0 ? `+${permits7d.toLocaleString()}` : "—"}
-              label="Permits issued · last 7 days"
-              caption="Source: City of Austin Issued Construction Permits (3syk-w9eu)"
-            />
-            <StatCallout
               tone="warm"
               value={inspectionsByZip[0] ? inspectionsByZip[0].zip : "—"}
-              label={inspectionsByZip[0] ? `Top inspection zip · ${inspectionsByZip[0].count} in 30d` : "Top inspection zip · 30d"}
-              caption="Source: Austin Food Establishment Inspection Scores (ecmv-9xxi)"
+              label={
+                inspectionsByZip[0]
+                  ? `Top Austin inspection zip · ${inspectionsByZip[0].count} in 30d`
+                  : "Top Austin inspection zip · 30d"
+              }
+              caption="Austin · Food Establishment Inspections (ecmv-9xxi)"
             />
             <StatCallout
-              tone={openViolations > 5000 ? "bad" : "warn"}
-              value={openViolations > 0 ? openViolations.toLocaleString() : "—"}
-              label="Open code violations"
-              caption="Source: Austin Code Violation Cases (6wtj-zbtb)"
+              tone="purple"
+              value={dallas311 > 0 ? dallas311.toLocaleString() : "—"}
+              label="Dallas 311 requests · last 30 days"
+              caption="Dallas · Open Data Portal (gc4d-8a49)"
+            />
+            <StatCallout
+              tone="good"
+              value={txFranchise > 0 ? txFranchise.toLocaleString() : "—"}
+              label="TX active franchise tax permits"
+              caption="Texas state · Comptroller (9cir-efmm)"
             />
           </div>
 
-          <div className="mt-12 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5">
-            <div className="flex items-baseline justify-between">
-              <p className="ds-eyebrow text-[var(--ds-text-dim)]">Permits issued · last 7 days</p>
-              <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
-                {totalPermits7d.toLocaleString()} total
+          <div className="mt-12 grid gap-3 md:grid-cols-3">
+            <div className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4">
+              <p className="ds-eyebrow text-[var(--ds-text-dim)]">Austin · 311 · 30d</p>
+              <p className="mt-1 text-[20px] font-bold tabular-nums text-[var(--ds-text)]">
+                {requests30d > 0 ? requests30d.toLocaleString() : "—"}
               </p>
+              <Link
+                href="/datasets/xwdj-i9he"
+                className="mt-2 inline-block font-mono text-[10px] uppercase tracking-wider text-[var(--ds-accent)] hover:text-[var(--ds-text)]"
+              >
+                xwdj-i9he →
+              </Link>
             </div>
-            <div className="mt-4 flex h-[80px] items-end gap-1.5">
+            <div className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4">
+              <p className="ds-eyebrow text-[var(--ds-text-dim)]">Dallas · police active calls</p>
+              <p className="mt-1 text-[20px] font-bold tabular-nums text-[var(--ds-text)]">
+                {dallasActiveCalls > 0 ? dallasActiveCalls.toLocaleString() : "—"}
+              </p>
+              <Link
+                href="/datasets/9fxf-t2tr"
+                className="mt-2 inline-block font-mono text-[10px] uppercase tracking-wider text-[var(--ds-accent)] hover:text-[var(--ds-text)]"
+              >
+                9fxf-t2tr →
+              </Link>
+            </div>
+            <div
+              className={
+                "rounded-md border p-4 " +
+                (openViolations > 5000
+                  ? "border-[rgba(239,68,68,0.4)] bg-[rgba(239,68,68,0.06)]"
+                  : "border-[var(--ds-border)] bg-[var(--ds-bg-elev)]")
+              }
+            >
+              <p className="ds-eyebrow text-[var(--ds-text-dim)]">Austin · open code violations</p>
+              <p
+                className="mt-1 text-[20px] font-bold tabular-nums"
+                style={{ color: openViolations > 5000 ? "var(--ds-bad)" : "var(--ds-text)" }}
+              >
+                {openViolations > 0 ? openViolations.toLocaleString() : "—"}
+              </p>
+              <Link
+                href="/datasets/6wtj-zbtb"
+                className="mt-2 inline-block font-mono text-[10px] uppercase tracking-wider text-[var(--ds-accent)] hover:text-[var(--ds-text)]"
+              >
+                6wtj-zbtb →
+              </Link>
+            </div>
+          </div>
+
+          {/* Permits sparkline — secondary, not the headline */}
+          <div className="mt-6 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5">
+            <div className="flex items-baseline justify-between">
+              <div>
+                <p className="ds-eyebrow text-[var(--ds-text-dim)]">Austin permits · 7-day pulse</p>
+                <p className="mt-1 text-[18px] font-semibold tabular-nums text-[var(--ds-text)]">
+                  {permits7d > 0 ? `+${permits7d.toLocaleString()}` : "—"}
+                </p>
+              </div>
+              <Link
+                href="/datasets/3syk-w9eu"
+                className="font-mono text-[11px] uppercase tracking-wider text-[var(--ds-accent)] hover:text-[var(--ds-text)]"
+              >
+                3syk-w9eu →
+              </Link>
+            </div>
+            <div className="mt-4 flex h-[60px] items-end gap-1.5">
               {permitsSpark.length > 0 ? (
                 permitsSpark.map((d) => {
                   const max = Math.max(1, ...permitsSpark.map((x) => x.count));
@@ -346,7 +423,7 @@ export default async function HomePage() {
                       <div
                         className="w-full rounded-sm"
                         style={{
-                          height: `${(d.count / max) * 72}px`,
+                          height: `${(d.count / max) * 52}px`,
                           background: "linear-gradient(180deg, var(--ds-accent) 0%, rgba(91,141,239,0.3) 100%)",
                         }}
                         title={`${d.day}: ${d.count}`}
@@ -361,37 +438,6 @@ export default async function HomePage() {
             <div className="mt-2 flex items-baseline justify-between font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
               <span>{permitsSpark[0]?.day}</span>
               <span>{permitsSpark[permitsSpark.length - 1]?.day}</span>
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-3 md:grid-cols-2">
-            <div className="flex items-center justify-between rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4">
-              <div>
-                <p className="ds-eyebrow text-[var(--ds-text-dim)]">311 requests · 30d</p>
-                <p className="mt-1 text-[20px] font-bold tabular-nums text-[var(--ds-text)]">
-                  {requests30d > 0 ? requests30d.toLocaleString() : "—"}
-                </p>
-              </div>
-              <Link
-                href="/datasets/xwdj-i9he"
-                className="font-mono text-[11px] uppercase tracking-wider text-[var(--ds-accent)] hover:text-[var(--ds-text)]"
-              >
-                xwdj-i9he →
-              </Link>
-            </div>
-            <div className="flex items-center justify-between rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4">
-              <div>
-                <p className="ds-eyebrow text-[var(--ds-text-dim)]">9 datasets curated</p>
-                <p className="mt-1 text-[20px] font-bold tabular-nums text-[var(--ds-text)]">
-                  Austin · Dallas · TX state
-                </p>
-              </div>
-              <Link
-                href="/datasets"
-                className="font-mono text-[11px] uppercase tracking-wider text-[var(--ds-accent)] hover:text-[var(--ds-text)]"
-              >
-                universe →
-              </Link>
             </div>
           </div>
         </div>

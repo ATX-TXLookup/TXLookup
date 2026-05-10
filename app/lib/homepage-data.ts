@@ -133,3 +133,29 @@ export function formatTicker(value: number, deltaPct?: number): string {
   const sign = deltaPct >= 0 ? "+" : "−";
   return `${value.toLocaleString()} ${sign}${Math.abs(deltaPct).toFixed(0)}%`;
 }
+
+// ─── Multi-city tickers — proves the universality story on the homepage ───
+// (Dallas + TX state. San Antonio / Houston still on the scout's queue.)
+
+/** Dallas 311 service requests opened in the last 30d (raw count). */
+export async function dallas311Last30d(): Promise<number> {
+  const since = new Date(Date.now() - 30 * 86400_000).toISOString().slice(0, 10);
+  // Dallas 311 schema uses `created_date` per the catalog (gc4d-8a49).
+  const url = `https://www.dallasopendata.com/resource/gc4d-8a49.json?$select=count(*) AS count&$where=created_date >= '${since}'`;
+  const rows = (await soda(encodeURI(url))) as { count?: string }[] | null;
+  return Number(rows?.[0]?.count ?? 0);
+}
+
+/** Dallas Police active calls — instantaneous count (9fxf-t2tr). */
+export async function dallasPoliceActiveCalls(): Promise<number> {
+  const url = `https://www.dallasopendata.com/resource/9fxf-t2tr.json?$select=count(*) AS count`;
+  const rows = (await soda(encodeURI(url))) as { count?: string }[] | null;
+  return Number(rows?.[0]?.count ?? 0);
+}
+
+/** Active TX franchise tax permit holders — total registered. */
+export async function texasFranchisePermitsActive(): Promise<number> {
+  const url = `https://data.texas.gov/resource/9cir-efmm.json?$select=count(*) AS count`;
+  const rows = (await soda(encodeURI(url))) as { count?: string }[] | null;
+  return Number(rows?.[0]?.count ?? 0);
+}
