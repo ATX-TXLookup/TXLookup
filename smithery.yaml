@@ -1,0 +1,88 @@
+# Smithery deploy spec — picked up by smithery.ai when this repo is added
+# via the web UI. Mirrors mcp/manifest.json's transport block plus a Smithery-
+# specific "startCommand" the runner uses to spin the server.
+#
+# To submit: sign in at https://smithery.ai → Add Server → point at
+#   github.com/ATX-TXLookup/TXLookup
+# Smithery scans this file, validates the schema, and lists the server.
+#
+# Reference: https://smithery.ai/docs/build/project-config
+
+name: txlookup
+displayName: "TXLookup — Texas civic data agent"
+description: >-
+  Sourced answers from Texas open civic data, in 7 seconds. Multi-agent MCP
+  over Texas/Austin Socrata portals (data.texas.gov, data.austintexas.gov,
+  datahub.austintexas.gov, dallasopendata.com) — building permits, food
+  inspections, 311 service requests, code complaints, traffic fatalities,
+  franchise tax. Bounded discovery + scoped queries + citation-enforced
+  summaries. Includes a pattern-based doom-loop guard and replan-on-failure
+  path so the agent stays on intent even when SoQL fails.
+homepage: https://txlookup.vercel.app
+repository: https://github.com/ATX-TXLookup/TXLookup
+license: MIT
+keywords:
+  - texas
+  - civic-data
+  - open-data
+  - socrata
+  - permits
+  - 311
+  - inspections
+  - agent
+  - rag
+  - data-journalism
+categories:
+  - data
+  - civic
+  - research
+
+# How Smithery should run the server.
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required:
+      - openaiApiKey
+    properties:
+      openaiApiKey:
+        type: string
+        title: OpenAI API key
+        description: Required — used by the planner / data analyst / reporter.
+      socrataKeyId:
+        type: string
+        title: Socrata key ID (optional)
+        description: Recommended — pairs with secret for higher rate limits.
+      socrataKeySecret:
+        type: string
+        title: Socrata key secret (optional)
+        description: Pair with key ID for HTTP Basic auth.
+  commandFunction: |
+    config => ({
+      command: "python",
+      args: ["-m", "mcp.server"],
+      env: {
+        OPENAI_API_KEY: config.openaiApiKey,
+        SOCRATA_KEY_ID: config.socrataKeyId || "",
+        SOCRATA_KEY_SECRET: config.socrataKeySecret || ""
+      }
+    })
+
+# Tool surface — Smithery surfaces these in the directory listing.
+tools:
+  - name: discover_datasets
+    description: Find a relevant Texas civic dataset for a question. Returns up to 5 candidates from the curated catalog.
+  - name: get_dataset_schema
+    description: Inspect a dataset's columns, types, and field-name aliases before constructing a SoQL query.
+  - name: fetch_data
+    description: Run a bounded SoQL query against Socrata. Hard-capped at 5000 rows. Cache fallback on 429.
+  - name: summarize_data
+    description: Compute a small statistical summary (count / sum / avg / top-N) over a dataset slice.
+  - name: cite_dataset
+    description: Emit a citation envelope (portal + dataset_id + URL) for the synthesizer.
+  - name: replan_step
+    description: Re-prompt the planner with a structured failure detail to produce a fresh plan that preserves user intent.
+  - name: render_to_miro
+    description: Push a result to a Miro board via Miro REST. Returns the board view URL.
+  - name: delegate_to
+    description: Hand off to a specialist agent — data_analyst, reporter, or support.
