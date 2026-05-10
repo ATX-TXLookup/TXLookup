@@ -687,21 +687,10 @@ export function AgentRunner({
     | ReporterResult
     | undefined;
 
-  // Brand step-indicator data (Reason · Plan · Tool · Complete).
-  const phaseToActiveStep = (() => {
-    if (state.phase === "reasoning") return 0;
-    if (state.phase === "planning") return 1;
-    if (state.phase === "executing" || state.phase === "replanning") return 2;
-    if (state.phase === "completing") return 3;
-    if (state.phase === "done") return 3;
-    return -1;
-  })();
-  const stepLabels = [
-    { n: "01", title: "Reason" },
-    { n: "02", title: "Plan" },
-    { n: "03", title: "Tool" },
-    { n: "04", title: "Complete" },
-  ];
+  // The 4-step "How the agent works" poster used to render here. Removed —
+  // the right-column DAG tab is the canonical visualization of the loop, and
+  // showing the same 4-step linear story on every search felt naive (the
+  // multi-agent reality is non-linear: parallel + critic-revision + scout).
 
   return (
     <div className="grid md:grid-cols-[1fr_420px]">
@@ -729,85 +718,6 @@ export function AgentRunner({
             <h2 className="mt-3 max-w-[58ch] font-display text-2xl font-normal leading-tight tracking-tight text-tx-navy md:text-[28px]">
               {query}
             </h2>
-          </div>
-        </section>
-
-        {/* ── 4-step indicator (Reason · Plan · Tool · Complete) ── */}
-        <section className="border-b border-tx-ink/10 bg-tx-cream">
-          <div className="px-6 py-6 md:px-10">
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
-              How the agent works
-            </p>
-            <div className="mt-4 grid gap-3 md:grid-cols-4">
-              {stepLabels.map((s, i) => {
-                const isDone =
-                  state.phase === "done"
-                    ? true
-                    : i < phaseToActiveStep;
-                const isActive =
-                  i === phaseToActiveStep && state.phase !== "done" && state.phase !== "error";
-                const isReplanning = isActive && state.phase === "replanning";
-                // Color tokens per brief: sage=done, rust=active, gold=replan,
-                // navy/muted=upcoming. Card body stays cream for hierarchy.
-                const accent = isReplanning
-                  ? "var(--tx-gold)"
-                  : isActive
-                    ? "var(--tx-rust)"
-                    : isDone
-                      ? "var(--tx-sage)"
-                      : "var(--tx-border)";
-                const numberColor = isReplanning
-                  ? "var(--tx-gold)"
-                  : isActive
-                    ? "var(--tx-rust)"
-                    : isDone
-                      ? "var(--tx-sage)"
-                      : "var(--tx-muted)";
-                return (
-                  <div
-                    key={s.n}
-                    className="rounded-[10px] bg-tx-cream p-4 transition-colors"
-                    style={{
-                      border: `0.5px solid ${accent}`,
-                      borderLeftWidth: isActive || isReplanning ? "4px" : "0.5px",
-                      borderLeftColor: accent,
-                    }}
-                  >
-                    <div className="flex items-baseline gap-2">
-                      <span
-                        className="font-mono text-[11px] font-semibold tracking-[0.18em]"
-                        style={{ color: numberColor }}
-                      >
-                        STEP {s.n}
-                      </span>
-                      {isActive && (
-                        <span
-                          className="ml-auto inline-flex h-1.5 w-1.5 rounded-full"
-                          style={{
-                            backgroundColor: accent,
-                            animation: "pulse 1.4s ease-in-out infinite",
-                          }}
-                        />
-                      )}
-                      {isDone && !isActive && (
-                        <span
-                          className="ml-auto font-mono text-[10px] uppercase tracking-wider"
-                          style={{ color: "var(--tx-sage)" }}
-                        >
-                          ✓ done
-                        </span>
-                      )}
-                    </div>
-                    <p
-                      className="mt-2 font-display text-xl font-normal leading-tight tracking-tight"
-                      style={{ color: isActive || isDone ? "var(--tx-navy)" : "var(--tx-muted)" }}
-                    >
-                      {s.title}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
           </div>
         </section>
 
