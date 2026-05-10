@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 
+import { Shell } from "@/app/components/ds";
 import { CATALOG, type CatalogDataset } from "@/app/lib/catalog";
 import { listRuns } from "@/app/lib/run-archive";
 import { AdminConsole } from "./AdminConsole";
@@ -51,23 +52,7 @@ export default async function AdminPage() {
   ]);
 
   return (
-    <main className="min-h-screen bg-[#F4F6FB] text-[#1A1F2A] font-body">
-      <header className="border-b border-[#1A1F2A]/10 bg-[#0B2545] text-white">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-6 px-6 py-4 md:px-10">
-          <div className="flex items-center gap-3">
-            <span aria-hidden="true" className="block h-7 w-7 rounded-sm bg-white/90" />
-            <div className="flex flex-col leading-tight">
-              <span className="font-display text-[18px] font-extrabold tracking-tight">TXLookup · Admin</span>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-white/65">ops console · run archive · #59</span>
-            </div>
-          </div>
-          <nav className="flex items-center gap-5 font-display text-sm font-semibold">
-            <Link href="/" className="text-white/85 hover:text-white">Public site</Link>
-            <Link href="/q" className="text-white/85 hover:text-white">Search UI</Link>
-          </nav>
-        </div>
-      </header>
-
+    <Shell active="/admin">
       <section className="border-b border-[#1A1F2A]/10 bg-white">
         <div className="mx-auto max-w-[1320px] px-6 py-8 md:px-10">
           <div className="flex items-baseline justify-between gap-4">
@@ -108,13 +93,6 @@ export default async function AdminPage() {
       </section>
 
       <AdminConsole runs={runs} />
-
-      <footer className="bg-[#06182F] text-white/85">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between px-6 py-6 text-sm md:px-10">
-          <p className="font-mono text-[11px] uppercase tracking-wider">admin · gated by basic-auth</p>
-          <Link href="/" className="hover:text-white">← Public</Link>
-        </div>
-      </footer>
-    </main>
+    </Shell>
   );
 }
