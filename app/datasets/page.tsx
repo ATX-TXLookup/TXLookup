@@ -259,17 +259,7 @@ export default async function DatasetsUniversePage() {
         </div>
       </section>
 
-      <footer className="bg-[var(--ds-bg-deep)] text-white">
-        <div className="mx-auto max-w-[1320px] px-6 py-6 md:px-10">
-          <p className="text-[13px] text-white/60">
-            All data sourced from public Texas open-data portals · Attribution enforced ·{" "}
-            <Link href="/" className="text-white/85 hover:text-[var(--ds-warn)]">
-              ← Back to TXLookup
-            </Link>
-          </p>
-        </div>
-      </footer>
-    </main>
+    </Shell>
   );
 }
 
