@@ -756,7 +756,7 @@ export function AgentRunner({
                     {state.citation && (
                       <Link
                         href={`/datasets/${state.citation.dataset_id}`}
-                        className="inline-flex items-center rounded-md bg-[var(--ds-text)] px-5 py-2 font-body text-sm font-bold text-[var(--ds-bg)] hover:opacity-90"
+                        className="inline-flex items-center rounded-md bg-[var(--ds-purple)] px-5 py-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-white hover:opacity-90"
                       >
                         Open dataset →
                       </Link>
@@ -766,7 +766,7 @@ export function AgentRunner({
                         href={state.citation.api_url}
                         target="_blank"
                         rel="noopener"
-                        className="inline-flex items-center rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-5 py-2 font-body text-sm font-bold text-[var(--ds-text)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
+                        className="inline-flex items-center rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-5 py-2 text-[13px] font-semibold text-[var(--ds-text)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
                       >
                         API endpoint →
                       </a>
@@ -778,7 +778,7 @@ export function AgentRunner({
                           navigator.clipboard.writeText(state.answer ?? "");
                         }
                       }}
-                      className="inline-flex items-center rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-5 py-2 font-body text-sm font-bold text-[var(--ds-text)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
+                      className="inline-flex items-center rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-5 py-2 text-[13px] font-semibold text-[var(--ds-text)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
                     >
                       Copy insight
                     </button>
@@ -793,7 +793,7 @@ export function AgentRunner({
                           navigator.clipboard.writeText(window.location.href);
                         }
                       }}
-                      className="inline-flex items-center rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-5 py-2 font-body text-sm font-bold text-[var(--ds-text)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
+                      className="inline-flex items-center rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-5 py-2 text-[13px] font-semibold text-[var(--ds-text)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
                     >
                       Share
                     </button>
@@ -995,7 +995,7 @@ export function AgentRunner({
                 </p>
                 <Link
                   href="/"
-                  className="mt-5 inline-flex items-center rounded-md bg-[var(--ds-text)] px-5 py-2 font-body text-sm font-bold text-[var(--ds-bg)] hover:opacity-90"
+                  className="mt-5 inline-flex items-center rounded-md bg-[var(--ds-text)] px-5 py-2 text-[13px] font-semibold text-[var(--ds-bg)] hover:opacity-90"
                 >
                   ← Home
                 </Link>

@@ -35,7 +35,7 @@ export function SupportChips({ result }: { result: SupportResult }) {
         Pick one
       </p>
       {result.message && (
-        <p className="mt-2 max-w-[60ch] font-display text-lg font-normal leading-snug tracking-tight text-tx-navy">
+        <p className="mt-2 max-w-[60ch] text-lg font-normal leading-snug tracking-tight text-tx-navy">
           {result.message}
         </p>
       )}
@@ -47,7 +47,7 @@ export function SupportChips({ result }: { result: SupportResult }) {
             onClick={() => {
               router.push(`/q?q=${encodeURIComponent(a.query)}`);
             }}
-            className="rounded-md bg-tx-rust px-4 py-1.5 font-body text-sm font-bold text-white hover:bg-tx-rust-dark"
+            className="rounded-md bg-tx-rust px-4 py-1.5 text-sm font-bold text-white hover:bg-tx-rust-dark"
           >
             {a.label}
           </button>
