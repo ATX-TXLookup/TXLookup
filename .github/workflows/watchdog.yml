@@ -1,0 +1,35 @@
+name: Watchdog (keep deploy warm + detect stuckness)
+
+# Runs every 10 minutes. Hits the deploy with a demo-mode agent call to:
+#   1. Keep Vercel function warm (avoids cold-start latency for the next user)
+#   2. Detect when the deploy is broken (5xx, hang, missing route)
+#   3. Detect stuck GH Actions runs on main (>15min in_progress)
+#
+# When something fails, the job fails red — visible in the Actions tab. We
+# do NOT auto-revert or auto-rerun deploys; humans decide what to do.
+
+on:
+  schedule:
+    # Every 10 minutes (cron syntax: m h dom mon dow)
+    - cron: "*/10 * * * *"
+  workflow_dispatch: # allow manual trigger from the Actions tab
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run watchdog against prod
+        id: watchdog
+        env:
+          TXLOOKUP_BASIC_AUTH: ${{ secrets.TXLOOKUP_BASIC_AUTH }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/watchdog.sh
+          ./scripts/watchdog.sh https://txlookup.vercel.app
