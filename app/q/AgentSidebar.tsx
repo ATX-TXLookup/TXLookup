@@ -635,55 +635,53 @@ function TelemetryTab({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-2">
+      <div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-2.5">
         {(["all", "codex", "socrata", "errors"] as const).map((f) => {
           const active = filter === f;
           return (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`rounded-sm px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider transition-colors ${
+              className={`rounded-md px-2.5 py-1 text-[11px] font-medium capitalize transition-colors ${
                 active
-                  ? "bg-tx-gold text-tx-navy-dark"
-                  : "text-tx-cream/55 hover:text-tx-cream"
+                  ? "bg-white/10 text-white"
+                  : "text-white/55 hover:text-white"
               }`}
             >
               {f}
             </button>
           );
         })}
-        <span className="ml-auto font-mono text-[10px] text-tx-cream/45">
+        <span className="ml-auto font-mono text-[10px] text-white/45">
           {filtered.length} / {events.length}
         </span>
       </div>
-      <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto px-4 py-3 font-mono text-[11px] leading-[1.45]"
-        style={{ background: "rgba(7,21,42,0.6)" }}
-      >
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 leading-relaxed">
         {filtered.length === 0 ? (
-          <p className="py-8 text-center text-tx-cream/45">No events yet.</p>
+          <p className="py-8 text-center text-[12px] text-white/45">No events yet.</p>
         ) : (
-          <ol className="space-y-1.5">
+          <ol className="space-y-3">
             {filtered.map((e, i) => (
-              <li key={i}>
-                <span className="text-tx-cream/45">{fmtClock(e.ts, start)}</span>{" "}
-                <span
-                  className="font-semibold uppercase tracking-wider"
-                  style={{ color: levelColor(e.level) }}
-                >
-                  {e.phase}
-                </span>{" "}
-                <span className="text-tx-cream">{e.message}</span>
-                {e.detail && (
-                  <pre
-                    className="mt-0.5 max-h-24 overflow-x-auto whitespace-pre-wrap break-all rounded px-2 py-1 text-[10px]"
-                    style={{
-                      background: "rgba(13,35,64,0.7)",
-                      color: "var(--tx-sky-light)",
-                      border: "0.5px solid rgba(58,127,190,0.18)",
-                    }}
+              <li
+                key={i}
+                className="rounded-md border border-white/8 bg-black/20 p-3"
+              >
+                <div className="flex items-baseline justify-between gap-3">
+                  <span
+                    className="text-[10px] font-semibold uppercase tracking-[0.16em]"
+                    style={{ color: levelColor(e.level) }}
                   >
+                    {e.phase.replace(/_/g, " ")}
+                  </span>
+                  <span className="font-mono text-[10px] tabular-nums text-white/45">
+                    {fmtClock(e.ts, start)}
+                  </span>
+                </div>
+                <p className="mt-1.5 text-[12.5px] leading-snug text-white/85">
+                  {e.message}
+                </p>
+                {e.detail && (
+                  <pre className="mt-2 max-h-28 overflow-x-auto whitespace-pre-wrap break-all rounded bg-black/30 px-2.5 py-1.5 font-mono text-[10.5px] leading-relaxed text-white/65">
                     {e.detail}
                   </pre>
                 )}

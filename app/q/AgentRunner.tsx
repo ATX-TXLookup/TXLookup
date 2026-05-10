@@ -885,8 +885,12 @@ export function AgentRunner({
           </section>
         ) : null}
 
-        {/* ── Plan-step list — visible during execution + after ── */}
-        {state.steps.length > 0 && state.phase !== "error" && (
+        {/* Reasoning trace + Self-corrections moved to right-column tabs.
+            User feedback: 'move this to the right column'. The DAG /
+            Execution / Telemetry tabs already render this.
+            We keep ONLY the SupportChips inline render below the answer
+            card so vague-query clarification chips remain visible.        */}
+        {false && state.steps.length > 0 && state.phase !== "error" && (
           <section className="border-b border-tx-ink/10 bg-tx-cream">
             <div className="px-6 py-8 md:px-10 md:py-10">
               <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
@@ -1016,8 +1020,8 @@ export function AgentRunner({
           </section>
         )}
 
-        {/* ── Replan-diagnoses panel — gold-light surface with rust-light for doom-loop ── */}
-        {state.replans.length > 0 && (
+        {/* Self-corrections moved to right-column DAG / Execution tab. */}
+        {false && state.replans.length > 0 && (
           <section className="border-b border-tx-ink/10 bg-tx-cream">
             <div className="px-6 py-8 md:px-10 md:py-10">
               <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-gold-dark">
