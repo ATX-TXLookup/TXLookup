@@ -143,6 +143,90 @@ export default async function ArchitecturePage() {
         </div>
       </section>
 
+      {/* WHY AGENTS — what each one contributes that you'd otherwise do by hand */}
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1200px] px-6 py-14 md:px-8 md:py-20">
+          <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-purple)]">
+            Why agents
+          </p>
+          <h2 className="mt-3 max-w-[28ch] text-3xl font-bold tracking-tight text-[var(--ds-text)] md:text-4xl">
+            Each agent does the work you used to do by hand.
+          </h2>
+          <p className="mt-5 max-w-[68ch] text-[15.5px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
+            The legacy path was: visit a portal, find a dataset, download a 200k-row CSV, open it in a spreadsheet, filter by hand, build a chart. TXLookup replaces every step with a specialist agent powered by OpenAI Codex / GPT-4o. You ask in plain English. The agents do the rest.
+          </p>
+
+          <ul className="mt-10 grid gap-4 md:grid-cols-2">
+            {[
+              {
+                name: "Planner",
+                tone: "var(--ds-accent)",
+                youDid: "Pick the right dataset, learn its schema, write SoQL.",
+                agentDoes: "Reads catalog metadata, picks the dataset, drafts a structured plan with bounded tool calls.",
+              },
+              {
+                name: "Data analyst",
+                tone: "var(--ds-good)",
+                youDid: "Hand-write group-by + window math + null handling.",
+                agentDoes: "Runs the bounded query, computes deltas / top-N / YoY with quality flags (null rate, top concentration, sample factor).",
+              },
+              {
+                name: "Reporter",
+                tone: "var(--ds-purple)",
+                youDid: "Skim the spreadsheet, paraphrase, hope you didn't misread.",
+                agentDoes: "Composes a plain-English answer grounded in the analyst's findings — no hallucinated numbers.",
+              },
+              {
+                name: "Critic",
+                tone: "var(--ds-warn)",
+                youDid: "Hope the answer is right. No way to check.",
+                agentDoes: "Reviews plan + answer for groundedness, scope, citation. Forces a corrective revision on reject.",
+              },
+              {
+                name: "Support",
+                tone: "var(--ds-warm)",
+                youDid: "Re-Google when a column name is unfamiliar.",
+                agentDoes: "Handles meta-questions and disambiguation (\"south austin\" → which zip?). No SoQL fired.",
+              },
+              {
+                name: "Scout + ingestor",
+                tone: "var(--ds-text-mute)",
+                youDid: "Notice when a portal added a new dataset. (Most people don't.)",
+                agentDoes: "Cron-driven. Scout indexes new portal datasets every 6h. Ingestor refreshes the local-mirror cache so pages stay fast and survive throttling.",
+              },
+            ].map((a) => (
+              <li
+                key={a.name}
+                className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="inline-block h-2 w-2 rounded-full" style={{ background: a.tone }} aria-hidden />
+                  <h3 className="text-[16px] font-bold tracking-tight text-[var(--ds-text)]">{a.name}</h3>
+                </div>
+                <div className="mt-3 grid gap-2.5">
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+                      What you used to do
+                    </p>
+                    <p className="mt-0.5 text-[13px] leading-relaxed text-[var(--ds-text-mute)]">{a.youDid}</p>
+                  </div>
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: a.tone }}>
+                      What this agent does
+                    </p>
+                    <p className="mt-0.5 text-[13px] leading-relaxed text-[var(--ds-text)]">{a.agentDoes}</p>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-8 max-w-[64ch] text-[14.5px] leading-relaxed text-[var(--ds-text-mute)]">
+            <span className="font-semibold text-[var(--ds-text)]">The user-facing change:</span> if you can search Google or read a news article, you can ask civic data a question. Same data the experts use — reachable from a single search box, with citations on every claim.
+          </p>
+        </div>
+      </section>
+
       {/* Layered diagram */}
       <section className="border-b border-[var(--ds-border)]">
         <div className="mx-auto max-w-[1200px] px-6 py-14 md:px-8 md:py-20">
