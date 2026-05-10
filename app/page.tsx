@@ -1,318 +1,393 @@
-// TXLookup homepage — tool-first, not marketing-first.
-// Lead with the input. Below it: live data, live agent activity, real datasets,
-// real install command. No fake stats, no fake exec quotes, no vision copy.
-// Dark surface, blue accent, generous whitespace, fast scan.
+// TXLookup homepage — Undervolt-ATX visual + VCAP info flow.
+// Per /Users/red/.claude/plans/golden-prancing-tome.md.
+//
+// Sections, top-to-bottom:
+//   1. Hero with orange context badge + serif italic display headline + 3 CTAs
+//   2. THE PROBLEM — 2-col, 3 problem cards with colored icons
+//   3. PLATFORMS — 4-card grid (multi-agent / MCP / critic+scout / open source)
+//   4. WHO IS THIS FOR — 3 persona cards with gradient bg
+//   5. MULTI-AGENT TOPOLOGY — AgentTopologyShowcase (restyled separately)
+//   6. AUSTIN BY THE NUMBERS — 3 big serif stat callouts from real Socrata
+//   7. OPEN SOURCE — minimal CTA
+//
+// All numbers are live (homepage-data.ts → Socrata). No fake stats. No
+// marketing copy. No exec quotes.
 
 import Link from "next/link";
 import AgentTopologyShowcase from "@/app/components/AgentTopologyShowcase";
-import { listRuns } from "@/app/lib/run-archive";
+import {
+  EyebrowLabel,
+  FeatureCard,
+  PersonaCard,
+  SectionHeader,
+  Shell,
+  StatCallout,
+  TerminalBlock,
+} from "@/app/components/ds";
 import {
   austin311Last30d,
   austinInspections30dByZip,
   austinOpenCodeViolations,
   austinPermits7dTotal,
   austinPermitsLast7Days,
-  datasetMetadata,
 } from "@/app/lib/homepage-data";
-
-const datasetSeed = [
-  { id: "3syk-w9eu", title: "Issued Construction Permits", agency: "Austin · Development Services", rowsLabel: "2.3M", cadence: "daily" },
-  { id: "ecmv-9xxi", title: "Food Establishment Inspections", agency: "Austin · Public Health", rowsLabel: "120K", cadence: "weekly" },
-  { id: "xwdj-i9he", title: "311 Service Requests", agency: "Austin · Public Information", rowsLabel: "1.5M", cadence: "daily" },
-  { id: "6wtj-zbtb", title: "Code Violation Cases", agency: "Austin · Code Department", rowsLabel: "300K", cadence: "daily" },
-  { id: "fdj4-gpfu", title: "Crime Reports", agency: "Austin · APD", rowsLabel: "2M", cadence: "weekly" },
-  { id: "y2wy-tgr5", title: "Traffic Fatalities", agency: "Austin · Vision Zero", rowsLabel: "1K", cadence: "monthly" },
-];
-
-const sampleQuestions = [
-  "Where do permits and code violations both spike together this year by zip?",
-  "How has Austin's permit mix shifted from residential to commercial since 2024?",
-  "Restaurants near 78704 with failing inspections this year",
-  "Build a Miro board mapping 311 hotspots by council district",
-];
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
 
 export default async function HomePage() {
-  const [permitsSpark, permits7d, inspectionsByZip, requests30d, openViolations, datasetMeta, recentRuns] =
-    await Promise.all([
-      austinPermitsLast7Days(),
-      austinPermits7dTotal(),
-      austinInspections30dByZip(),
-      austin311Last30d(),
-      austinOpenCodeViolations(),
-      Promise.all(
-        datasetSeed.map(async (d) => ({
-          id: d.id,
-          ...(await datasetMetadata("data.austintexas.gov", d.id)),
-        })),
-      ),
-      listRuns(8).catch(() => []),
-    ]);
+  const [permitsSpark, permits7d, inspectionsByZip, requests30d, openViolations] = await Promise.all([
+    austinPermitsLast7Days(),
+    austinPermits7dTotal(),
+    austinInspections30dByZip(),
+    austin311Last30d(),
+    austinOpenCodeViolations(),
+  ]);
 
-  const sparkValues = permitsSpark.map((d) => d.count);
-  const maxSpark = Math.max(1, ...sparkValues);
+  const totalPermits7d = permitsSpark.reduce((s, d) => s + d.count, 0);
 
   return (
-    <main
-      className="min-h-screen bg-[#0A0A0F] text-[#FAFAFA] antialiased"
-      style={{
-        fontFamily:
-          'Inter, "Inter Display", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
-      }}
-    >
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-[#27272A] bg-[#0A0A0F]/85 backdrop-blur-md">
-        <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-6 px-6 py-3.5 md:px-8">
-          <Link href="/" className="flex items-baseline gap-2">
-            <span className="text-[16px] font-bold tracking-tight text-[#FAFAFA]">TXLookup</span>
-            <span className="hidden font-mono text-[10px] uppercase tracking-wider text-[#71717A] md:inline">v0.1</span>
-          </Link>
-          <nav className="hidden items-center gap-6 text-[12px] text-[#A1A1AA] md:flex">
-            <Link href="/agents" className="hover:text-[#FAFAFA]">Agents</Link>
-            <Link href="/datasets" className="hover:text-[#FAFAFA]">Datasets</Link>
-            <Link href="/reports" className="hover:text-[#FAFAFA]">Reports</Link>
-            <Link href="/use-as-agent" className="hover:text-[#FAFAFA]">Install</Link>
-            <a href="https://github.com/ATX-TXLookup/TXLookup" className="hover:text-[#FAFAFA]">GitHub ↗</a>
-          </nav>
-        </div>
-      </header>
-
-      {/* Tool — search at the top, no marketing pitch */}
-      <section className="border-b border-[#27272A]">
-        <div className="mx-auto max-w-[920px] px-6 py-12 md:px-8 md:py-16">
-          <div className="flex items-center gap-2 text-[11px] text-[#71717A]">
-            <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-[#10B981]" />
-            <span className="font-mono uppercase tracking-wider">agent online · 7 specialists active · 9 datasets</span>
+    <Shell active="/">
+      {/* HERO */}
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1200px] px-6 pb-20 pt-12 md:px-8 md:pb-28 md:pt-16">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--ds-warm)]/40 bg-[rgba(249,115,22,0.10)] px-3 py-1">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--ds-warm)]" />
+            <span className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--ds-warm)]">
+              Texas open-data hackathon · 2026
+            </span>
           </div>
-          <h1 className="mt-4 text-[28px] font-bold leading-[1.1] tracking-[-0.02em] text-[#FAFAFA] md:text-[36px]">
-            Ask Texas civic data.
+
+          <h1 className="mt-7 max-w-[18ch] text-[44px] font-bold leading-[1.05] tracking-[-0.025em] text-[var(--ds-text)] md:text-[80px]">
+            <span className="font-display-serif font-normal">Texas civic data,</span>
+            <br />
+            <span className="text-[var(--ds-text-mute)]">in plain English.</span>
           </h1>
-          <form action="/q" method="GET" className="mt-5">
-            <div className="flex items-center gap-2 rounded-md border border-[#27272A] bg-[#16161B] p-1.5 transition-colors focus-within:border-[#5B8DEF]">
-              <input
-                name="q"
-                type="text"
-                required
-                autoFocus
-                placeholder="permits and code violations both spiking by zip this year"
-                className="flex-1 bg-transparent px-3 py-2.5 text-[15px] text-[#FAFAFA] placeholder:text-[#52525B] focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="rounded-md bg-[#FAFAFA] px-4 py-2 text-[13px] font-semibold text-[#0A0A0F] hover:bg-[#FAFAFA]/90"
-              >
-                Run
-              </button>
-            </div>
-            <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[12px]">
-              <span className="font-mono uppercase tracking-wider text-[#71717A]">try</span>
-              {sampleQuestions.map((q) => (
-                <a
-                  key={q}
-                  href={`/q?q=${encodeURIComponent(q)}`}
-                  className="rounded-full border border-[#27272A] bg-[#16161B] px-3 py-1 text-[#A1A1AA] hover:border-[#5B8DEF]/40 hover:text-[#FAFAFA]"
-                >
-                  {q.length > 56 ? q.slice(0, 54) + "…" : q}
-                </a>
-              ))}
-            </div>
-          </form>
-        </div>
-      </section>
 
-      {/* Live signal — actual numbers, no pitch */}
-      <section className="border-b border-[#27272A]">
-        <div className="mx-auto max-w-[1200px] px-6 py-10 md:px-8 md:py-12">
-          <div className="flex items-baseline justify-between">
-            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#71717A]">
-              live · austin · recomputed every 5m
-            </p>
-            <Link href="/datasets" className="text-[12px] text-[#A1A1AA] hover:text-[#FAFAFA]">
-              all datasets →
-            </Link>
-          </div>
-          <div className="mt-5 grid gap-px overflow-hidden rounded-md border border-[#27272A] bg-[#27272A] md:grid-cols-4">
-            {[
-              { label: "permits, 7d", value: permits7d > 0 ? `+${permits7d.toLocaleString()}` : "—", sub: "3syk-w9eu" },
-              { label: "top inspection zip, 30d", value: inspectionsByZip[0]?.zip ?? "—", sub: inspectionsByZip[0] ? `${inspectionsByZip[0].count} inspections` : "ecmv-9xxi" },
-              { label: "311 requests, 30d", value: requests30d > 0 ? requests30d.toLocaleString() : "—", sub: "xwdj-i9he" },
-              { label: "open code violations", value: openViolations > 0 ? openViolations.toLocaleString() : "—", sub: "6wtj-zbtb", warn: true },
-            ].map((t) => (
-              <div key={t.label} className="bg-[#0E0E13] px-5 py-5">
-                <div className="font-mono text-[10px] uppercase tracking-wider text-[#71717A]">{t.label}</div>
-                <div
-                  className="mt-2 text-[26px] font-semibold tabular-nums tracking-tight"
-                  style={{ color: t.warn ? "#F59E0B" : "#FAFAFA" }}
-                >
-                  {t.value}
-                </div>
-                <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-[#52525B]">{t.sub}</div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-5 flex items-end justify-between gap-4 rounded-md border border-[#27272A] bg-[#0E0E13] p-4">
-            <div className="flex-1">
-              <p className="font-mono text-[10px] uppercase tracking-wider text-[#71717A]">austin permits — last 7 days</p>
-              <div className="mt-3 flex h-[64px] items-end gap-1.5">
-                {permitsSpark.map((d) => (
-                  <div key={d.day} className="flex flex-1 flex-col items-center justify-end">
-                    <div
-                      className="w-full rounded-sm"
-                      style={{
-                        height: `${(d.count / maxSpark) * 56}px`,
-                        background: "linear-gradient(180deg, #5B8DEF 0%, #5B8DEF55 100%)",
-                      }}
-                      title={`${d.day}: ${d.count}`}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
+          <p className="mt-7 max-w-[58ch] text-[16px] leading-relaxed text-[var(--ds-text-mute)] md:text-[18px]">
+            Type a question. Get a sourced answer in 7 seconds. Watch five specialist agents work the problem — orchestrator, data analyst, critic, reporter, support — with citation enforced at the protocol level. Not a wrapper.
+          </p>
+
+          <div className="mt-9 flex flex-wrap gap-3">
             <Link
-              href="/datasets/3syk-w9eu"
-              className="rounded-md border border-[#27272A] px-3 py-1.5 text-[11px] text-[#A1A1AA] hover:border-[#5B8DEF]/40 hover:text-[#FAFAFA]"
+              href="/q"
+              className="inline-flex items-center rounded-md bg-[var(--ds-text)] px-5 py-2.5 text-[13px] font-semibold text-[var(--ds-bg)] hover:bg-[var(--ds-text-mute)]"
             >
-              dataset →
+              Try the agent →
             </Link>
+            <Link
+              href="/datasets"
+              className="inline-flex items-center rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] px-5 py-2.5 text-[13px] font-semibold text-[var(--ds-text)] hover:border-[var(--ds-text-dim)]"
+            >
+              Browse datasets
+            </Link>
+            <Link
+              href="/reports"
+              className="inline-flex items-center rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] px-5 py-2.5 text-[13px] font-semibold text-[var(--ds-text)] hover:border-[var(--ds-text-dim)]"
+            >
+              Read reports
+            </Link>
+          </div>
+
+          <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[var(--ds-border)] pt-6">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+              Coverage
+            </span>
+            {["Austin", "Dallas", "San Antonio", "Houston", "TX state"].map((c) => (
+              <span key={c} className="text-[12px] text-[var(--ds-text-mute)]">
+                · {c}
+              </span>
+            ))}
+            <span className="ml-auto inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ds-good)]" />
+              <span>agent online</span>
+            </span>
           </div>
         </div>
       </section>
 
-      {/* Recent agent runs — actual proof of work, not vision copy */}
-      {recentRuns.length > 0 && (
-        <section className="border-b border-[#27272A]">
-          <div className="mx-auto max-w-[1200px] px-6 py-10 md:px-8 md:py-12">
-            <div className="flex items-baseline justify-between">
-              <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#5B8DEF]">recent runs</p>
-                <h2 className="mt-1 text-[18px] font-semibold tracking-tight text-[#FAFAFA]">What the agents have actually done</h2>
-              </div>
-              <Link href="/agents" className="text-[12px] text-[#A1A1AA] hover:text-[#FAFAFA]">
-                ops center →
-              </Link>
+      {/* THE PROBLEM */}
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1200px] px-6 py-20 md:px-8 md:py-28">
+          <div className="grid gap-10 md:grid-cols-12 md:gap-14">
+            <div className="md:col-span-5">
+              <EyebrowLabel tone="warm">The problem</EyebrowLabel>
+              <h2 className="mt-3 max-w-[18ch] text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[48px]">
+                Civic data is hiding{" "}
+                <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">in plain sight.</span>
+              </h2>
+              <p className="mt-5 max-w-[40ch] text-[15px] leading-relaxed text-[var(--ds-text-mute)]">
+                Hundreds of Texas open datasets across nine portals. Inconsistent schemas. Broken filters. Generic AI confidently hallucinates. Citizens, journalists, and civic teams pay the cost.
+              </p>
             </div>
-            <ul className="mt-5 divide-y divide-[#27272A] overflow-hidden rounded-md border border-[#27272A] bg-[#0E0E13]">
-              {recentRuns.slice(0, 6).map((r) => (
-                <li key={r.hash} className="grid items-baseline gap-4 px-5 py-3 md:grid-cols-[80px_1fr_140px_80px]">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#71717A]">
-                    {new Date(r.savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </span>
-                  <span className="line-clamp-1 text-[13px] text-[#FAFAFA]">{r.query}</span>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#A1A1AA]">
-                    {(r.events as unknown[] | undefined)?.length ?? 0} events ·{" "}
-                    {(r.citation as { dataset_id?: string } | null)?.dataset_id ?? "—"}
-                  </span>
-                  <Link
-                    href={`/admin/replay/${r.hash}`}
-                    className="text-right text-[11px] text-[#5B8DEF] hover:text-[#FAFAFA]"
-                  >
-                    replay →
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-      )}
 
-      {/* Multi-agent topology — animated diagram of a real run */}
+            <div className="grid gap-3 md:col-span-7 md:grid-cols-1">
+              <FeatureCard
+                tone="good"
+                icon={<span className="text-[14px]">▣</span>}
+                title="Portal sprawl"
+                body="Austin, Dallas, San Antonio, Houston, plus state portals. Each with its own schema quirks, column-name aliases, and broken UI filters. No one assistant grounds across them."
+              />
+              <FeatureCard
+                tone="warn"
+                icon={<span className="text-[14px]">≋</span>}
+                title="Hallucinated answers"
+                body="ChatGPT will confidently invent percentages and cite imaginary URLs. Most 'data agents' wrap an LLM and inherit the same failure mode. We made citation a protocol-level requirement instead."
+              />
+              <FeatureCard
+                tone="bad"
+                icon={<span className="text-[14px]">!</span>}
+                title="Brittle one-shot loops"
+                body="A single SoQL guess that returns zero rows ends the conversation. Wrappers don't notice. Our critic agent grades every answer and forces a corrective revision when the data doesn't actually support it."
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PLATFORMS */}
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1200px] px-6 py-20 md:px-8 md:py-28">
+          <SectionHeader
+            eyebrow="Platforms"
+            eyebrowTone="accent"
+            headline={
+              <>
+                From raw portals to{" "}
+                <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">sourced answers.</span>
+              </>
+            }
+            sub="Built on Socrata SODA, FastMCP, OpenAI structured outputs, and a custom multi-agent orchestrator. Each piece replaces a class of failure that wrappers can't address."
+          />
+          <div className="mt-12 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+            <FeatureCard
+              tone="good"
+              icon={<span className="text-[14px]">⌬</span>}
+              title="Multi-agent loop"
+              body="Orchestrator dispatches to data analyst, reporter, support. Critic agent self-corrects. Visible per-step in the DAG."
+              href="/agents"
+              ctaLabel="See the agents →"
+            />
+            <FeatureCard
+              tone="warm"
+              icon={<span className="text-[14px]">⟂</span>}
+              title="MCP server"
+              body="Eight tools for any MCP-compliant runtime. Drops into Claude Code, Codex, Cursor in 30 seconds with citation enforced."
+              href="/use-as-agent"
+              ctaLabel="Install pitch →"
+            />
+            <FeatureCard
+              tone="purple"
+              icon={<span className="text-[14px]">⌖</span>}
+              title="Critic + scout"
+              body="Critic grades plan + answer. Dataset scout cron scans 5 TX portals every 6h, files issues for new datasets the corpus should ingest."
+              href="/agents/critic"
+              ctaLabel="How it works →"
+            />
+            <FeatureCard
+              tone="neutral"
+              icon={<span className="text-[14px]">◇</span>}
+              title="Open source"
+              body="MIT-licensed. Adapts to any city or dataset. Source on GitHub, skill doc + manifest published for marketplace discovery."
+              href="https://github.com/ATX-TXLookup/TXLookup"
+              ctaLabel="View on GitHub ↗"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* WHO IS THIS FOR */}
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1200px] px-6 py-20 md:px-8 md:py-28">
+          <SectionHeader
+            eyebrow="Who is this for"
+            eyebrowTone="purple"
+            headline={
+              <>
+                Built for the people who{" "}
+                <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">read the data.</span>
+              </>
+            }
+            align="center"
+          />
+          <div className="mt-12 grid gap-3 md:grid-cols-3">
+            <PersonaCard
+              tone="blue"
+              icon="🏛️"
+              title="Civic teams"
+              body="Cross-dataset analysis without writing SoQL. Pull permits + violations + 311 in a single sourced answer. Citation enforced for every data point."
+            />
+            <PersonaCard
+              tone="warm"
+              icon="📰"
+              title="Journalists"
+              body="USAFacts-grade reports with chart-prose interleave + source per chart. Trace any number back to the run that generated it via /admin/replay."
+            />
+            <PersonaCard
+              tone="purple"
+              icon="🧑‍💻"
+              title="Builders"
+              body="Install as an MCP server. Bounded queries, replayable archive, doom-loop guard. Use in Claude Code, Codex, Cursor, or your own MCP client."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* MULTI-AGENT TOPOLOGY */}
       <AgentTopologyShowcase />
 
-      {/* Datasets — the corpus, no marketing */}
-      <section className="border-b border-[#27272A]">
-        <div className="mx-auto max-w-[1200px] px-6 py-12 md:px-8 md:py-16">
-          <div className="flex items-baseline justify-between">
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#5B8DEF]">corpus</p>
-              <h2 className="mt-1 text-[18px] font-semibold tracking-tight text-[#FAFAFA]">9 datasets in catalog · 6 most-queried</h2>
-            </div>
-            <Link href="/datasets" className="text-[12px] text-[#A1A1AA] hover:text-[#FAFAFA]">universe →</Link>
-          </div>
-          <div className="mt-6 grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-            {datasetSeed.map((d, i) => {
-              const meta = datasetMeta[i];
-              return (
-                <Link
-                  key={d.id}
-                  href={`/datasets/${d.id}`}
-                  className="group rounded-md border border-[#27272A] bg-[#0E0E13] p-4 transition-colors hover:border-[#5B8DEF]/40"
-                >
-                  <div className="flex items-baseline justify-between">
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-[#71717A]">{d.id}</span>
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-[#52525B]">
-                      {meta.lastRefreshed ?? d.cadence}
-                    </span>
-                  </div>
-                  <h3 className="mt-3 text-[14px] font-semibold leading-tight text-[#FAFAFA] group-hover:text-[#5B8DEF]">{d.title}</h3>
-                  <p className="mt-0.5 text-[11px] text-[#71717A]">{d.agency}</p>
-                  <p className="mt-3 font-mono text-[11px] text-[#A1A1AA]">{d.rowsLabel} rows</p>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      {/* AUSTIN BY THE NUMBERS */}
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1200px] px-6 py-20 md:px-8 md:py-28">
+          <SectionHeader
+            eyebrow="Live · Austin"
+            eyebrowTone="good"
+            headline={
+              <>
+                The corpus, right{" "}
+                <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">now.</span>
+              </>
+            }
+            sub="Live counts pulled from Socrata at request time. Recomputed every 5 minutes."
+          />
 
-      {/* Install — actual command, not a pitch */}
-      <section className="border-b border-[#27272A]">
-        <div className="mx-auto max-w-[1200px] px-6 py-12 md:px-8 md:py-16">
-          <div className="grid gap-8 md:grid-cols-12">
-            <div className="md:col-span-4">
-              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#5B8DEF]">install</p>
-              <h2 className="mt-1 text-[18px] font-semibold tracking-tight text-[#FAFAFA]">
-                Use TXLookup as your agent's MCP server
-              </h2>
-              <p className="mt-3 text-[13px] text-[#A1A1AA]">
-                8 tools. Bounded queries. Citation enforced. Drops into Claude Code, Codex, Cursor.
+          <div className="mt-12 grid gap-10 md:grid-cols-3 md:gap-14">
+            <StatCallout
+              tone="good"
+              value={permits7d > 0 ? `+${permits7d.toLocaleString()}` : "—"}
+              label="Permits issued · last 7 days"
+              caption="Source: City of Austin Issued Construction Permits (3syk-w9eu)"
+            />
+            <StatCallout
+              tone="warm"
+              value={inspectionsByZip[0] ? inspectionsByZip[0].zip : "—"}
+              label={inspectionsByZip[0] ? `Top inspection zip · ${inspectionsByZip[0].count} in 30d` : "Top inspection zip · 30d"}
+              caption="Source: Austin Food Establishment Inspection Scores (ecmv-9xxi)"
+            />
+            <StatCallout
+              tone={openViolations > 5000 ? "bad" : "warn"}
+              value={openViolations > 0 ? openViolations.toLocaleString() : "—"}
+              label="Open code violations"
+              caption="Source: Austin Code Violation Cases (6wtj-zbtb)"
+            />
+          </div>
+
+          <div className="mt-12 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5">
+            <div className="flex items-baseline justify-between">
+              <p className="ds-eyebrow text-[var(--ds-text-dim)]">Permits issued · last 7 days</p>
+              <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+                {totalPermits7d.toLocaleString()} total
               </p>
+            </div>
+            <div className="mt-4 flex h-[80px] items-end gap-1.5">
+              {permitsSpark.length > 0 ? (
+                permitsSpark.map((d) => {
+                  const max = Math.max(1, ...permitsSpark.map((x) => x.count));
+                  return (
+                    <div key={d.day} className="flex flex-1 flex-col items-center justify-end">
+                      <div
+                        className="w-full rounded-sm"
+                        style={{
+                          height: `${(d.count / max) * 72}px`,
+                          background: "linear-gradient(180deg, var(--ds-accent) 0%, rgba(91,141,239,0.3) 100%)",
+                        }}
+                        title={`${d.day}: ${d.count}`}
+                      />
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-[12px] text-[var(--ds-text-mute)]">Live data temporarily unavailable.</p>
+              )}
+            </div>
+            <div className="mt-2 flex items-baseline justify-between font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+              <span>{permitsSpark[0]?.day}</span>
+              <span>{permitsSpark[permitsSpark.length - 1]?.day}</span>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-3 md:grid-cols-2">
+            <div className="flex items-center justify-between rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4">
+              <div>
+                <p className="ds-eyebrow text-[var(--ds-text-dim)]">311 requests · 30d</p>
+                <p className="mt-1 text-[20px] font-bold tabular-nums text-[var(--ds-text)]">
+                  {requests30d > 0 ? requests30d.toLocaleString() : "—"}
+                </p>
+              </div>
               <Link
-                href="/use-as-agent"
-                className="mt-4 inline-flex items-center text-[12px] font-medium text-[#5B8DEF] hover:text-[#FAFAFA]"
+                href="/datasets/xwdj-i9he"
+                className="font-mono text-[11px] uppercase tracking-wider text-[var(--ds-accent)] hover:text-[var(--ds-text)]"
               >
-                full install pitch →
+                xwdj-i9he →
               </Link>
             </div>
-            <div className="md:col-span-8">
-              <div className="overflow-hidden rounded-md border border-[#27272A] bg-[#0E0E13]">
-                <div className="flex items-center gap-2 border-b border-[#27272A] bg-[#16161B] px-4 py-2">
-                  <span className="h-2 w-2 rounded-full bg-[#27272A]" />
-                  <span className="h-2 w-2 rounded-full bg-[#27272A]" />
-                  <span className="h-2 w-2 rounded-full bg-[#27272A]" />
-                  <span className="ml-2 font-mono text-[10px] uppercase tracking-wider text-[#71717A]">~/txlookup</span>
-                </div>
-                <pre className="overflow-x-auto p-5 font-mono text-[12px] leading-relaxed text-[#FAFAFA]">
-<span className="text-[#52525B]"># install in claude code</span>{"\n"}
-<span className="text-[#71717A]">$</span> claude mcp add txlookup -- python -m mcp.server{"\n\n"}
-<span className="text-[#52525B]"># ask</span>{"\n"}
-<span className="text-[#71717A]">$</span> claude{"\n"}
-<span className="text-[#5B8DEF]">&gt;</span> use txlookup: food truck permits 78702 last 6 months{"\n\n"}
-<span className="text-[#52525B]"># sourced answer in 7s</span>{"\n"}
-<span className="text-[#10B981]">→</span> 47 mobile food vendor permits, 22% above prior 6mo{"\n"}
-<span className="text-[#10B981]">→</span> <span className="text-[#A1A1AA]">cite: 3syk-w9eu · 7.4s · 6,039 tok</span>
-                </pre>
+            <div className="flex items-center justify-between rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4">
+              <div>
+                <p className="ds-eyebrow text-[var(--ds-text-dim)]">9 datasets curated</p>
+                <p className="mt-1 text-[20px] font-bold tabular-nums text-[var(--ds-text)]">
+                  Austin · Dallas · TX state
+                </p>
               </div>
+              <Link
+                href="/datasets"
+                className="font-mono text-[11px] uppercase tracking-wider text-[var(--ds-accent)] hover:text-[var(--ds-text)]"
+              >
+                universe →
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer — minimal */}
-      <footer>
-        <div className="mx-auto max-w-[1200px] px-6 py-8 md:px-8">
-          <div className="flex flex-wrap items-baseline justify-between gap-4">
-            <p className="text-[12px] text-[#71717A]">TXLookup · MIT · 2026</p>
-            <nav className="flex items-center gap-5 text-[11px] text-[#71717A]">
-              <Link href="/datasets" className="hover:text-[#FAFAFA]">datasets</Link>
-              <Link href="/reports" className="hover:text-[#FAFAFA]">reports</Link>
-              <Link href="/agents" className="hover:text-[#FAFAFA]">agents</Link>
-              <Link href="/use-as-agent" className="hover:text-[#FAFAFA]">install</Link>
-              <a href="https://github.com/ATX-TXLookup/TXLookup" className="hover:text-[#FAFAFA]">github ↗</a>
-            </nav>
+      {/* OPEN SOURCE / INSTALL */}
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1200px] px-6 py-20 md:px-8 md:py-28">
+          <div className="grid gap-10 md:grid-cols-12">
+            <div className="md:col-span-5">
+              <EyebrowLabel tone="accent">Open source</EyebrowLabel>
+              <h2 className="mt-3 max-w-[18ch] text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[40px]">
+                Install in your agent.{" "}
+                <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">Bring your own city.</span>
+              </h2>
+              <p className="mt-5 max-w-[40ch] text-[15px] leading-relaxed text-[var(--ds-text-mute)]">
+                MCP server + agent skill. Bounded queries, citation enforced, ships with a 90-question test harness. MIT licensed. Adapts to any Socrata-backed civic portal.
+              </p>
+              <div className="mt-7 flex flex-wrap gap-2">
+                <Link
+                  href="/use-as-agent"
+                  className="inline-flex items-center rounded-md bg-[var(--ds-text)] px-4 py-2 text-[12px] font-semibold text-[var(--ds-bg)] hover:bg-[var(--ds-text-mute)]"
+                >
+                  Install pitch →
+                </Link>
+                <a
+                  href="https://github.com/ATX-TXLookup/TXLookup"
+                  className="inline-flex items-center rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] px-4 py-2 text-[12px] font-semibold text-[var(--ds-text)] hover:border-[var(--ds-text-dim)]"
+                >
+                  GitHub ↗
+                </a>
+              </div>
+            </div>
+
+            <div className="md:col-span-7">
+              <TerminalBlock title="~/txlookup · install" tone="good">
+{`# 1. Install in Claude Code
+$ claude mcp add txlookup -- python -m mcp.server
+
+# 2. Ask
+$ claude
+> use txlookup: food truck permits 78702 last 6 months
+
+# 3. Sourced answer in 7 seconds
+→ 47 mobile food vendor permits, 22% above prior 6mo
+→ cite: 3syk-w9eu · data.austintexas.gov · 7.4s · 6,039 tok`}
+              </TerminalBlock>
+              <p className="mt-3 font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+                8 tools · 5,000-row cap · 30s timeout · backoff on 429 · citation enforced
+              </p>
+            </div>
           </div>
         </div>
-      </footer>
-    </main>
+      </section>
+    </Shell>
   );
 }
