@@ -582,6 +582,60 @@ export async function executeStep(step: PlanStep): Promise<ToolEnvelope> {
           };
         }
       }
+      case "delegate_to_parallel": {
+        // Issue #90 — fan-out N specialist calls in parallel, await all,
+        // return a merged envelope with per-branch results. The orchestrator
+        // SSE layer wraps this in parallel_dispatch / parallel_join events
+        // so the DAG can render the fork visually.
+        const args = step.args as {
+          branches?: Array<{
+            specialist?: string;
+            input?: Record<string, unknown>;
+          }>;
+        };
+        const branches = Array.isArray(args.branches) ? args.branches : [];
+        if (branches.length === 0) {
+          return {
+            status: "failed",
+            result: null,
+            error: "delegate_to_parallel: branches[] is empty",
+          };
+        }
+        const settled = await Promise.all(
+          branches.map(async (b) => {
+            const name = (b.specialist ?? "").trim();
+            if (!isSpecialistName(name)) {
+              return {
+                specialist: name,
+                status: "failed" as const,
+                result: null,
+                error: `unknown specialist "${name}"`,
+              };
+            }
+            const env = await callSpecialist(name, b.input ?? {});
+            return {
+              specialist: name,
+              status:
+                env.status === "needs_input"
+                  ? ("completed" as const)
+                  : env.status,
+              result: env.result,
+              error: env.error,
+            };
+          }),
+        );
+        const anyFailed = settled.some((s) => s.status === "failed");
+        return {
+          status: anyFailed ? "failed" : "completed",
+          result: { parallel: true, branches: settled },
+          error: anyFailed
+            ? settled
+                .filter((s) => s.status === "failed")
+                .map((s) => `${s.specialist}: ${s.error}`)
+                .join("; ")
+            : null,
+        };
+      }
       case "delegate_to": {
         // Multi-agent step (issue #67). The orchestrator hands off to a
         // specialist registered in app/lib/specialists.ts. Specialists are
@@ -629,6 +683,89 @@ export async function executeStep(step: PlanStep): Promise<ToolEnvelope> {
       status: "failed",
       result: null,
       error: e instanceof Error ? e.message : String(e),
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Critic — lightweight LLM judge on the plan and on the final answer.
+// Issue #90: orchestrator + critic loop. Emits a small JSON verdict the
+// orchestrator uses to decide whether to re-run the failed phase ONCE with
+// a corrective system prompt sourced from the critic's `issues` list.
+// ---------------------------------------------------------------------------
+
+export type Critique = {
+  score: number; // 0..1
+  issues: string[];
+  approve: boolean;
+};
+
+const CRITIC_PLAN_PROMPT = `You are TXLookup's plan critic. Given the user's question
+and a proposed JSON plan, judge whether the plan will produce a grounded,
+on-topic answer. Score 0..1 (1 = ship it). Return STRICT JSON:
+{"score": number, "issues": [string], "approve": boolean}
+- approve = true iff score >= 0.7 AND no critical issues.
+- Critical issues: missing where-clause for a scoped query, wrong dataset for the
+  question, missing cite_dataset, plan that obviously can't answer the question.
+- Be terse — issues should be one-line actionable strings the planner can fix.
+Empty issues list is fine when approve=true.`;
+
+const CRITIC_ANSWER_PROMPT = `You are TXLookup's answer critic. Given the user's
+question and the synthesizer's draft answer (plus a short context summary of
+what the tools returned), judge whether the answer is grounded and on-topic.
+Score 0..1. Return STRICT JSON: {"score": number, "issues": [string], "approve": boolean}
+- approve = true iff score >= 0.7 AND no critical issues.
+- Critical issues: invented numbers not in tool results, off-topic, hedging
+  without a number, missing the user's specific scope.
+- Terse one-line issues only.`;
+
+export async function criticize(
+  target: "plan" | "answer",
+  payload: unknown,
+  query: string,
+  context?: string,
+  model = "gpt-4o-mini",
+): Promise<{ critique: Critique; usage: TokenUsage }> {
+  const sys =
+    target === "plan" ? CRITIC_PLAN_PROMPT : CRITIC_ANSWER_PROMPT;
+  const userBody =
+    target === "plan"
+      ? `Question: ${query}\n\nProposed plan:\n${JSON.stringify(payload, null, 2)}`
+      : `Question: ${query}\n\nDraft answer:\n${String(payload)}\n\nTool context:\n${(context ?? "").slice(0, 1500)}`;
+  try {
+    const completion = await client().chat.completions.create({
+      model,
+      messages: [
+        { role: "system", content: sys },
+        { role: "user", content: userBody },
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0,
+    });
+    const text = completion.choices[0]?.message?.content ?? "{}";
+    const parsed = JSON.parse(text) as Partial<Critique>;
+    const score = typeof parsed.score === "number" ? parsed.score : 0;
+    const issues = Array.isArray(parsed.issues)
+      ? parsed.issues.map((s) => String(s)).slice(0, 6)
+      : [];
+    const approve =
+      typeof parsed.approve === "boolean"
+        ? parsed.approve
+        : score >= 0.7 && issues.length === 0;
+    return {
+      critique: { score, issues, approve },
+      usage: readUsage(completion.usage),
+    };
+  } catch (e) {
+    // Critic failure is never fatal — default to approve so the loop
+    // proceeds. Surface the issue so the SSE stream can show it.
+    return {
+      critique: {
+        score: 0.5,
+        issues: [`critic offline: ${e instanceof Error ? e.message : String(e)}`],
+        approve: true,
+      },
+      usage: { prompt: 0, completion: 0, total: 0 },
     };
   }
 }

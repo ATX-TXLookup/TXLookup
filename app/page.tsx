@@ -8,6 +8,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import AgentTopologyShowcase from "@/app/components/AgentTopologyShowcase";
 import {
   austin311Last30d,
   austinInspections30dByZip,
@@ -454,52 +455,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── How it works ── */}
-      <section className="border-b border-tx-ink/10 bg-tx-cream">
-        <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
-          <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
-            How it works
-          </p>
-          <h2 className="mt-2 max-w-[24ch] font-display text-3xl font-normal tracking-tight text-tx-navy md:text-4xl">
-            Four steps from question to cited answer.
-          </h2>
-
-          <div className="mt-10 grid gap-8 md:grid-cols-4">
-            {[
-              {
-                n: "01",
-                title: "Reason",
-                body: "Codex parses the question and identifies the relevant data domain, geography, and time range.",
-              },
-              {
-                n: "02",
-                title: "Plan",
-                body: "Codex emits a structured tool sequence — discover, describe, query, summarize, cite.",
-              },
-              {
-                n: "03",
-                title: "Tool",
-                body: "Bounded SoQL queries run through the TXLookup MCP server against live Socrata endpoints.",
-              },
-              {
-                n: "04",
-                title: "Complete",
-                body: "Codex synthesizes the records into a plain-English answer with mandatory citation. Replans if a step fails.",
-              },
-            ].map((s) => (
-              <div key={s.n}>
-                <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-sky">
-                  Step {s.n}
-                </span>
-                <h3 className="mt-3 font-display text-2xl font-normal tracking-tight text-tx-navy">
-                  {s.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-tx-ink/75">{s.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ── How it works (multi-agent topology, replaces 4-step poster) ── */}
+      <AgentTopologyShowcase />
 
       {/* ── For builders — dark navy section ── */}
       <section className="border-b border-tx-ink/10 bg-tx-navy text-white">
