@@ -14,7 +14,6 @@
 // native binary. Writer (the ingestor) uses better-sqlite3 in CI.
 
 import { createHash } from "crypto";
-import { promises as fs } from "fs";
 import path from "path";
 
 // Per-dataset cache TTL in seconds. Defaults to 1 hour.
@@ -29,69 +28,54 @@ const TTL: Record<string, number> = {
 };
 const DEFAULT_TTL = 3600;
 
-const CACHE_DB_PATH = path.join(process.cwd(), "data", "cache.db");
+// Try multiple paths so this works in dev (cwd = repo root) AND on Vercel
+// serverless (cwd = /var/task; data/ is bundled via outputFileTracingIncludes).
+const CACHE_DB_CANDIDATES = [
+  path.join(process.cwd(), "data", "cache.db"),
+  "/var/task/data/cache.db",
+  path.resolve(__dirname, "../../data/cache.db"),
+];
 
-// sql.js initializer — one-shot per cold start.
-type SqlJsDB = {
-  exec: (sql: string) => Array<{ columns: string[]; values: unknown[][] }>;
-  prepare: (sql: string) => SqlJsStatement;
+// better-sqlite3 reader — opened once per cold start in readonly mode.
+type BetterDB = {
+  prepare: (sql: string) => {
+    get: (...params: unknown[]) => unknown;
+    all: (...params: unknown[]) => unknown[];
+  };
+  close: () => void;
 };
-type SqlJsStatement = {
-  bind: (params: unknown[]) => boolean;
-  step: () => boolean;
-  getAsObject: () => Record<string, unknown>;
-  free: () => void;
-};
 
-let _dbPromise: Promise<SqlJsDB | null> | null = null;
+let _db: BetterDB | null | undefined = undefined;
 
-function getDb(): Promise<SqlJsDB | null> {
-  if (_dbPromise) return _dbPromise;
-  _dbPromise = (async () => {
-    try {
-      // Hide from webpack's static analyzer so the build doesn't fail when
-      // sql.js isn't installed in dev. Cast through unknown to avoid TS noise.
-      const dynamicImport = new Function("s", "return import(s)") as (s: string) => Promise<unknown>;
-      const sqlJs = (await dynamicImport("sql.js")) as { default: (config?: unknown) => Promise<{ Database: new (data?: Uint8Array) => SqlJsDB }> };
-      const SQL = await sqlJs.default({
-        locateFile: (file: string) => `/_next/static/${file}`,
-      });
-      // Try to read the bundled cache.db; if it doesn't exist, return null
-      // (cache disabled gracefully — falls through to live Socrata).
-      let buf: Uint8Array | undefined;
+function getDb(): BetterDB | null {
+  if (_db !== undefined) return _db;
+  try {
+    // require so webpack/Next leaves better-sqlite3 as an external native
+    // dependency. Configured via serverComponentsExternalPackages in
+    // next.config.mjs.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const Database = require("better-sqlite3") as new (
+      path: string,
+      opts?: { readonly?: boolean; fileMustExist?: boolean },
+    ) => BetterDB;
+
+    for (const p of CACHE_DB_CANDIDATES) {
       try {
-        const bytes = await fs.readFile(CACHE_DB_PATH);
-        buf = new Uint8Array(bytes);
+        const db = new Database(p, { readonly: true, fileMustExist: true });
+        _db = db;
+        return _db;
       } catch {
-        // No cache file yet. Return an empty DB so writes work but reads
-        // always miss. The ingestor commits a real cache.db later.
+        // try next path
       }
-      const db = new SQL.Database(buf);
-      // Initialize schema on a fresh DB.
-      db.exec(`
-        CREATE TABLE IF NOT EXISTS cache_meta (
-          dataset_id TEXT PRIMARY KEY,
-          last_ingested INTEGER NOT NULL,
-          row_count INTEGER NOT NULL,
-          schema_hash TEXT
-        );
-        CREATE TABLE IF NOT EXISTS cache_query (
-          query_hash TEXT PRIMARY KEY,
-          dataset_id TEXT NOT NULL,
-          payload TEXT NOT NULL,
-          row_count INTEGER NOT NULL,
-          fetched_at INTEGER NOT NULL,
-          ttl_seconds INTEGER NOT NULL
-        );
-        CREATE INDEX IF NOT EXISTS idx_cache_query_ds ON cache_query(dataset_id);
-      `);
-      return db;
-    } catch (e) {
-      console.warn("[cache] sql.js unavailable — cache disabled, falling through to live:", e instanceof Error ? e.message : e);
-      return null;
     }
-  })();
-  return _dbPromise;
+    console.warn("[cache] cache.db not found in any candidate path:", CACHE_DB_CANDIDATES);
+    _db = null;
+    return null;
+  } catch (e) {
+    console.warn("[cache] better-sqlite3 unavailable:", e instanceof Error ? e.message : e);
+    _db = null;
+    return null;
+  }
 }
 
 function normalizeQuery(datasetId: string, params: Record<string, unknown> | undefined): string {
@@ -121,19 +105,16 @@ export async function cacheLookup<T = unknown>(
   datasetId: string,
   params: Record<string, unknown> | undefined,
 ): Promise<CacheLookup<T>> {
-  const db = await getDb();
+  const db = getDb();
   if (!db) return { hit: false, source: "miss", age_seconds: null, rows: [] };
 
   const queryHash = hashQuery(datasetId, params);
-  const stmt = db.prepare("SELECT payload, fetched_at, ttl_seconds FROM cache_query WHERE query_hash = ?");
   try {
-    stmt.bind([queryHash]);
-    if (!stmt.step()) {
-      stmt.free();
-      return { hit: false, source: "miss", age_seconds: null, rows: [] };
-    }
-    const row = stmt.getAsObject() as { payload: string; fetched_at: number; ttl_seconds: number };
-    stmt.free();
+    const row = db
+      .prepare("SELECT payload, fetched_at, ttl_seconds FROM cache_query WHERE query_hash = ?")
+      .get(queryHash) as { payload: string; fetched_at: number; ttl_seconds: number } | undefined;
+    if (!row) return { hit: false, source: "miss", age_seconds: null, rows: [] };
+
     const ageSeconds = Math.floor(Date.now() / 1000) - Number(row.fetched_at);
     const ttl = Number(row.ttl_seconds) || DEFAULT_TTL;
     let rows: T[];
@@ -145,12 +126,9 @@ export async function cacheLookup<T = unknown>(
     if (ageSeconds <= ttl) {
       return { hit: true, source: "cache", age_seconds: ageSeconds, rows };
     }
-    // Stale — return rows but signal source: stale so caller can decide
-    // whether to refresh in background.
     return { hit: false, source: "stale", age_seconds: ageSeconds, rows };
   } catch (e) {
     console.warn("[cache] lookup error:", e instanceof Error ? e.message : e);
-    try { stmt.free(); } catch {}
     return { hit: false, source: "miss", age_seconds: null, rows: [] };
   }
 }
@@ -161,16 +139,16 @@ export async function cacheStats(): Promise<{
   total_queries: number;
   oldest_seconds: number | null;
 }> {
-  const db = await getDb();
+  const db = getDb();
   if (!db) return { enabled: false, dataset_count: 0, total_queries: 0, oldest_seconds: null };
   try {
-    const rDs = db.exec("SELECT COUNT(*) FROM cache_meta");
-    const rQ = db.exec("SELECT COUNT(*), MIN(fetched_at) FROM cache_query");
-    const dsCount = (rDs[0]?.values[0]?.[0] as number) ?? 0;
-    const qCount = (rQ[0]?.values[0]?.[0] as number) ?? 0;
-    const minFetched = (rQ[0]?.values[0]?.[1] as number) ?? null;
-    const oldest = minFetched !== null ? Math.floor(Date.now() / 1000) - Number(minFetched) : null;
-    return { enabled: true, dataset_count: dsCount, total_queries: qCount, oldest_seconds: oldest };
+    const ds = db.prepare("SELECT COUNT(*) AS c FROM cache_meta").get() as { c: number };
+    const q = db
+      .prepare("SELECT COUNT(*) AS c, MIN(fetched_at) AS m FROM cache_query")
+      .get() as { c: number; m: number | null };
+    const oldest =
+      q.m !== null ? Math.floor(Date.now() / 1000) - Number(q.m) : null;
+    return { enabled: true, dataset_count: ds.c, total_queries: q.c, oldest_seconds: oldest };
   } catch {
     return { enabled: false, dataset_count: 0, total_queries: 0, oldest_seconds: null };
   }
