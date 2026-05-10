@@ -53,6 +53,12 @@ type Event =
       // calls; specialist name for delegate_to results. UI Flow tab will
       // color-code by this in a follow-up PR.
       agent?: string;
+      // Full structured result envelope, ONLY emitted for delegate_to steps
+      // where the UI needs to render the specialist payload (chips,
+      // findings, composed report). The 240-char `preview` field above is
+      // kept byte-identical for backwards compat — `result_json` is purely
+      // additive and consumers that don't know about it ignore it.
+      result_json?: unknown;
     }
   | {
       phase: "doom_loop";
@@ -433,6 +439,12 @@ export async function POST(req: NextRequest) {
             "agent" in (r.result as Record<string, unknown>)
               ? String((r.result as { agent: unknown }).agent)
               : "orchestrator";
+          // For delegate_to steps the UI needs the full specialist envelope
+          // (chips, findings, composed report) which won't fit in the 240-char
+          // preview. Surface it as `result_json` alongside the truncated
+          // preview — additive, byte-identical preview for backwards compat.
+          const resultJson =
+            step.tool === "delegate_to" ? r.result : undefined;
           send({
             phase: "step_done",
             step: i + 1,
@@ -441,6 +453,7 @@ export async function POST(req: NextRequest) {
             error: r.error,
             duration_ms,
             agent: stepAgent,
+            ...(resultJson !== undefined ? { result_json: resultJson } : {}),
           });
 
           // Replan on a failure if we have budget left.
@@ -532,6 +545,7 @@ export async function POST(req: NextRequest) {
             error: supportEnv.error,
             duration_ms: Date.now() - fallbackStart,
             agent: "support",
+            result_json: supportEnv.result,
           });
           finalPlan = currentPlan;
           send({

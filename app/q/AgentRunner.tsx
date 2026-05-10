@@ -18,6 +18,15 @@ import {
 } from "../lib/analytics-events";
 import { ObsEvent } from "./AgentObservatory";
 import { AgentSidebar } from "./AgentSidebar";
+import { SupportChips, type SupportResult } from "./components/SupportChips";
+import {
+  AnalystFindings,
+  type AnalystResult,
+} from "./components/AnalystFindings";
+import {
+  ReporterComposition,
+  type ReporterResult,
+} from "./components/ReporterComposition";
 
 type Citation = {
   portal: string;
@@ -41,6 +50,10 @@ type StepLog = {
   // Responsible agent for this step (PR #68 SSE step_done.agent):
   // "orchestrator" | "support" | "data_analyst" | "reporter".
   agent?: string;
+  // Full structured result envelope from delegate_to specialists. Carried
+  // on the `result_json` field of step_done; used by SupportChips /
+  // AnalystFindings / ReporterComposition surfaces.
+  resultPayload?: unknown;
 };
 
 type ReplanLog = {
@@ -144,9 +157,14 @@ type SseEvent = {
   kind?: "identical" | "sequence";
   detail?: string;
   reason?: "step_failed" | "doom_loop";
-  // Responsible agent (PR #68): present on `step_done`. Drives Flow-tab
-  // color-coding in AgentSidebar.
+  // Responsible agent on `step_done` (PR #68 / issue #67) — drives both
+  // Flow-tab color coding (AgentSidebar) and the per-specialist render
+  // branches (SupportChips / AnalystFindings / ReporterComposition).
   agent?: string;
+  // Full specialist envelope on `step_done` for delegate_to steps. The
+  // 240-char `preview` truncates mid-payload for reporter, so the route
+  // ships the whole result here for the UI's render branches.
+  result_json?: unknown;
 };
 
 function eventForObservatory(ev: SseEvent): ObsEvent | null {
@@ -385,10 +403,33 @@ export function AgentRunner({
                         preview: ev.preview,
                         error: ev.error,
                         durationMs: ev.duration_ms,
-                        // Pipe the responsible agent through so AgentSidebar's
-                        // Flow tab can color-code rows by agent (PR #68).
+                        // Pipe responsible agent + full specialist envelope
+                        // through so AgentSidebar Flow tab can color-code rows
+                        // (PR #68) and SupportChips / AnalystFindings /
+                        // ReporterComposition can render below the step
+                        // (PR #82, issue #67).
                         agent: ev.agent ?? next[idx].agent,
+                        resultPayload:
+                          ev.result_json !== undefined
+                            ? ev.result_json
+                            : next[idx].resultPayload,
                       };
+                    } else if (idx >= next.length) {
+                      // Failure-fallback path: the route emits a synthetic
+                      // step_done past the original plan length when it
+                      // hands off to support after exhausting replans.
+                      // Materialize a row so SupportChips still renders.
+                      next.push({
+                        step: idx + 1,
+                        tool: "delegate_to",
+                        args: {},
+                        status: ev.status === "completed" ? "completed" : "failed",
+                        preview: ev.preview,
+                        error: ev.error,
+                        durationMs: ev.duration_ms,
+                        agent: ev.agent,
+                        resultPayload: ev.result_json,
+                      });
                     }
                     return { ...s, steps: next, events: eventsNext };
                   }
@@ -544,6 +585,16 @@ export function AgentRunner({
     ? buildRelatedAngles(state.citation.dataset_id, query)
     : [];
 
+  // PR #68 / issue #67 — multi-agent surfaces. Pull the reporter composition
+  // out of the latest reporter step so the answer card can render the
+  // composed article instead of the plain synthesizer answer.
+  const reporterStep = [...state.steps]
+    .reverse()
+    .find((s) => s.agent === "reporter" && isReporterResult(s.resultPayload));
+  const reporterPayload = reporterStep?.resultPayload as
+    | ReporterResult
+    | undefined;
+
   // Brand step-indicator data (Reason · Plan · Tool · Complete).
   const phaseToActiveStep = (() => {
     if (state.phase === "reasoning") return 0;
@@ -677,10 +728,19 @@ export function AgentRunner({
                   <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
                     Insight
                   </p>
-                  {/* DM Serif Display, navy ink, italic gold for emphasis */}
-                  <p className="mt-3 max-w-[58ch] font-display text-[28px] font-normal leading-snug tracking-tight text-tx-navy md:text-[32px]">
-                    {state.answer}
-                  </p>
+                  {/* When the reporter specialist composed a structured
+                      article, render that in place of the plain synthesizer
+                      paragraph (PR #68). Otherwise fall back to the simple
+                      DM Serif headline. */}
+                  {reporterPayload ? (
+                    <div className="mt-3">
+                      <ReporterComposition result={reporterPayload} />
+                    </div>
+                  ) : (
+                    <p className="mt-3 max-w-[58ch] font-display text-[28px] font-normal leading-snug tracking-tight text-tx-navy md:text-[32px]">
+                      {state.answer}
+                    </p>
+                  )}
 
                   {/* Action row — primary CTA in rust per BRAND §7 */}
                   <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -923,6 +983,29 @@ export function AgentRunner({
                           {s.preview}
                         </p>
                       )}
+                      {/* Multi-agent render branches (PR #68 / issue #67):
+                          delegate_to specialists ship their full structured
+                          envelope on step_done.result_json. Render the
+                          matching surface inline below the step card.
+                          Reporter's composition replaces the synthesizer
+                          answer up top, so we skip it here. */}
+                      {s.agent === "support" &&
+                        isSupportResult(s.resultPayload) &&
+                        Array.isArray(
+                          (s.resultPayload as SupportResult).next_actions,
+                        ) &&
+                        ((s.resultPayload as SupportResult).next_actions
+                          ?.length ?? 0) > 0 && (
+                          <SupportChips
+                            result={s.resultPayload as SupportResult}
+                          />
+                        )}
+                      {s.agent === "data_analyst" &&
+                        isAnalystResult(s.resultPayload) && (
+                          <AnalystFindings
+                            result={s.resultPayload as AnalystResult}
+                          />
+                        )}
                     </li>
                   );
                 })}
@@ -1124,6 +1207,32 @@ export function AgentRunner({
         startedAt={state.startedAt}
       />
     </div>
+  );
+}
+
+// Type guards for the multi-agent specialist envelopes (PR #68 / issue #67).
+// Each one only requires the minimum shape the matching render branch reads,
+// so a partially-malformed payload still routes safely (the render branch's
+// own optional-chaining handles missing optional fields).
+function isSupportResult(v: unknown): v is SupportResult {
+  return (
+    typeof v === "object" &&
+    v !== null &&
+    (v as { agent?: unknown }).agent === "support"
+  );
+}
+function isAnalystResult(v: unknown): v is AnalystResult {
+  return (
+    typeof v === "object" &&
+    v !== null &&
+    (v as { agent?: unknown }).agent === "data_analyst"
+  );
+}
+function isReporterResult(v: unknown): v is ReporterResult {
+  return (
+    typeof v === "object" &&
+    v !== null &&
+    (v as { agent?: unknown }).agent === "reporter"
   );
 }
 
