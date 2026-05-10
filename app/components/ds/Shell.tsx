@@ -12,6 +12,7 @@ const NAV = [
   { href: "/agents", label: "Agents" },
   { href: "/use-as-agent", label: "Install" },
   { href: "/docs", label: "Docs" },
+  { href: "/sources", label: "Sources" },
   { href: "/developer", label: "Developer" },
   { href: "/about", label: "About" },
 ];
