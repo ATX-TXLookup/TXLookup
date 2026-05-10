@@ -132,7 +132,7 @@ export function AnalystFindings({ result }: { result: AnalystResult }) {
         Findings
       </span>
       {result.dataset?.title && (
-        <p className="mt-3 font-display text-xl font-normal leading-tight tracking-tight text-tx-navy">
+        <p className="mt-3 text-xl font-normal leading-tight tracking-tight text-tx-navy">
           {result.dataset.title}
         </p>
       )}

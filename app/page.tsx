@@ -246,6 +246,135 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* WHAT PEOPLE ASK — varied auto-click question chips, grouped by domain */}
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1240px] px-6 py-14 md:px-8 md:py-20">
+          <div className="flex items-end justify-between gap-6">
+            <div>
+              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-purple)]">
+                What people ask
+              </p>
+              <h2 className="mt-3 max-w-[24ch] text-[34px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[44px]">
+                Pick a question. Skip the typing.
+              </h2>
+              <p className="mt-3 max-w-[60ch] text-[14.5px] leading-relaxed text-[var(--ds-text-mute)]">
+                Click anything below — the agent answers in 7 seconds with a citation. No login, no setup, no SoQL.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {[
+              {
+                eyebrow: "Housing",
+                tone: "var(--ds-accent)",
+                qs: [
+                  "Where do construction permits cluster in Austin in the last 30 days?",
+                  "How has Austin's permit mix shifted from residential to commercial since 2024?",
+                  "Top 5 zips by permit count, last 12 months",
+                ],
+              },
+              {
+                eyebrow: "Public health",
+                tone: "var(--ds-good)",
+                qs: [
+                  "Restaurants near 78704 with failing inspections this year",
+                  "Repeat-offender restaurants by address last 12 months",
+                  "Average inspection score by zip — best and worst 5",
+                ],
+              },
+              {
+                eyebrow: "311 + code",
+                tone: "var(--ds-warm)",
+                qs: [
+                  "Top 311 complaint types in Austin last month",
+                  "Open code violations in 78745",
+                  "Where do permits and code violations spike together by zip?",
+                ],
+              },
+              {
+                eyebrow: "Compare cities",
+                tone: "var(--ds-purple)",
+                qs: [
+                  "Compare 311 volume between Austin and Dallas last month",
+                  "Which Texas city has the most active franchise tax holders?",
+                  "How does Houston's open-data catalog compare to Austin's?",
+                ],
+              },
+              {
+                eyebrow: "Trends + outliers",
+                tone: "var(--ds-bad)",
+                qs: [
+                  "Most-improved restaurants over the last 2 years",
+                  "Which zip is heating up fastest by composite Heat Index?",
+                  "Top 5 outliers in permit valuation this year",
+                ],
+              },
+              {
+                eyebrow: "Meta · ask the system",
+                tone: "var(--ds-text-mute)",
+                qs: [
+                  "What datasets do you have for Dallas?",
+                  "How does the agent loop work end-to-end?",
+                  "What does permit_class_mapped mean?",
+                ],
+              },
+            ].map((g) => (
+              <div
+                key={g.eyebrow}
+                className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5"
+              >
+                <p
+                  className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em]"
+                  style={{ color: g.tone }}
+                >
+                  {g.eyebrow}
+                </p>
+                <ul className="mt-4 space-y-2">
+                  {g.qs.map((q) => (
+                    <li key={q}>
+                      <a
+                        href={`/q?q=${encodeURIComponent(q)}`}
+                        className="group flex items-start justify-between gap-3 rounded border border-[var(--ds-border)] bg-[var(--ds-bg)] px-3.5 py-2.5 text-[13.5px] leading-snug text-[var(--ds-text)] transition-colors hover:border-[var(--ds-purple)] hover:bg-[var(--ds-bg-elev)]"
+                      >
+                        <span>{q}</span>
+                        <span
+                          className="shrink-0 font-mono text-[11px] opacity-50 transition-opacity group-hover:opacity-100"
+                          style={{ color: g.tone }}
+                          aria-hidden
+                        >
+                          →
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Bridge to /chat for the conversational surface */}
+          <div className="mt-8 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-purple)]">
+                  Conversational
+                </p>
+                <p className="mt-2 max-w-[48ch] text-[14.5px] leading-relaxed text-[var(--ds-text-mute)]">
+                  Want to chat about the data instead? <Link href="/chat" className="text-[var(--ds-text)] underline decoration-[var(--ds-purple)] underline-offset-4 hover:text-[var(--ds-purple)]">Open <code className="font-mono text-[12.5px]">/chat</code></Link> — same agent, multi-turn. Ask what we have, what a column means, which dataset fits.
+                </p>
+              </div>
+              <Link
+                href="/chat"
+                className="inline-flex items-center gap-2 rounded-md bg-[var(--ds-purple)] px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-white hover:opacity-90"
+              >
+                Open chat →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* TOPIC GRID — numbered, larger, links to dataset detail pages */}
       <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
         <div className="mx-auto max-w-[1240px] px-6 py-14 md:px-8 md:py-20">

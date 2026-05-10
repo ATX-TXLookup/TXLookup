@@ -69,14 +69,14 @@ export function ReporterComposition({ result }: { result: ReporterResult }) {
 
       {/* Headline — DM Serif, navy */}
       {result.title && (
-        <h2 className="mt-3 max-w-[58ch] font-display text-[28px] font-normal leading-tight tracking-tight text-tx-navy md:text-[36px]">
+        <h2 className="mt-3 max-w-[58ch] text-[28px] font-normal leading-tight tracking-tight text-tx-navy md:text-[36px]">
           {result.title}
         </h2>
       )}
 
       {/* Dek — italic gold, DM Serif */}
       {result.dek && (
-        <p className="mt-4 max-w-[58ch] font-display text-lg italic text-tx-gold md:text-xl">
+        <p className="mt-4 max-w-[58ch] text-lg italic text-tx-gold md:text-xl">
           {result.dek}
         </p>
       )}
@@ -101,12 +101,12 @@ export function ReporterComposition({ result }: { result: ReporterResult }) {
           {sections.map((sec, i) => (
             <section key={`sec-${i}`}>
               {sec.heading && (
-                <h3 className="font-display text-2xl font-normal tracking-tight text-tx-navy md:text-[26px]">
+                <h3 className="text-2xl font-normal tracking-tight text-tx-navy md:text-[26px]">
                   {sec.heading}
                 </h3>
               )}
               {sec.prose && (
-                <p className="mt-3 max-w-[68ch] font-body text-base leading-[1.7] text-tx-ink/85 md:text-lg">
+                <p className="mt-3 max-w-[68ch] text-base leading-[1.7] text-tx-ink/85 md:text-lg">
                   {sec.prose}
                 </p>
               )}
@@ -118,7 +118,7 @@ export function ReporterComposition({ result }: { result: ReporterResult }) {
                       className="pl-3"
                       style={{ borderLeft: "3px solid var(--tx-gold)" }}
                     >
-                      <div className="font-display text-2xl font-normal leading-none tabular-nums text-tx-navy md:text-[28px]">
+                      <div className="text-2xl font-normal leading-none tabular-nums text-tx-navy md:text-[28px]">
                         {k.value !== undefined && k.value !== null
                           ? String(k.value)
                           : "—"}
