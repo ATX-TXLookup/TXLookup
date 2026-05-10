@@ -1,32 +1,41 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Public_Sans } from "next/font/google";
+import { DM_Serif_Display, IBM_Plex_Mono, Syne } from "next/font/google";
 import "./globals.css";
 
 import { Analytics } from "./components/Analytics";
 
-// Public Sans — the US Web Design System font. Civic-portal authoritative.
-const publicSans = Public_Sans({
+// Brand fonts per BRAND.md §4.
+// Variable names (--font-display, --font-inter, --font-jetbrains-mono)
+// stay the same as before so the existing Tailwind classes
+// (font-display, font-body, font-mono) keep working — they now point
+// at brand fonts everywhere instead of Public Sans / Inter / JetBrains Mono.
+
+// Display / H1 — DM Serif Display (regular + italic for emphasis)
+const dmSerifDisplay = DM_Serif_Display({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["400", "500", "600", "700", "900"],
+  weight: ["400"],
+  style: ["normal", "italic"],
 });
 
-const inter = Inter({
+// UI / Headings / Body — Syne (400 / 700 / 800)
+const syne = Syne({
   subsets: ["latin"],
   variable: "--font-inter",
-  weight: ["400", "500", "600"],
+  weight: ["400", "700", "800"],
 });
 
-const jetbrainsMono = JetBrains_Mono({
+// Queries / Code — IBM Plex Mono (400 / 600)
+const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   variable: "--font-jetbrains-mono",
-  weight: ["400", "500"],
+  weight: ["400", "600"],
 });
 
 export const metadata: Metadata = {
-  title: "TXLookup — Texas open data, in plain English",
+  title: "TXLookup — Ask Texas anything.",
   description:
-    "Ask a question about Texas public data. The agent finds the dataset, queries it, cites the source, and gives you a real answer.",
+    "Every Texas public dataset. Any question. One real answer — sourced, cited, plain-spoken.",
 };
 
 export default function RootLayout({
@@ -37,7 +46,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${publicSans.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${dmSerifDisplay.variable} ${syne.variable} ${ibmPlexMono.variable}`}
     >
       <body>
         <Analytics />

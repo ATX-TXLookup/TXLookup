@@ -16,7 +16,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // BRAND.md §3 — TXLookup brand tokens (used by app/v2/)
+        // BRAND.md §3 — TXLookup brand tokens (canonical UI palette).
         "tx-navy":       "#0D2340",
         "tx-navy-dark":  "#07152A",  // darker footer / utility-bar variant
         "tx-rust":       "#C4420A",
