@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { findById, type CatalogDataset } from "../../lib/catalog";
+import { getInsights, type DatasetInsights } from "../../lib/insights";
 
 type Dataset = CatalogDataset;
 
@@ -197,6 +198,168 @@ export default async function DatasetPage({
           </div>
         </div>
       </section>
+
+      {/* ── Insights panel ── */}
+      {(() => {
+        const di: DatasetInsights | null = getInsights(ds.id);
+        if (!di) return null;
+        return (
+          <>
+            {/* What we found */}
+            <section
+              className="border-b border-[#1A1510]/10"
+              style={{
+                background: "#0D2340",
+                backgroundImage:
+                  "radial-gradient(circle at 90% 20%, rgba(212,139,16,0.12) 0%, transparent 55%), radial-gradient(circle at 5% 80%, rgba(58,127,190,0.10) 0%, transparent 50%)",
+              }}
+            >
+              <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
+                {/* Section header */}
+                <div className="flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <p
+                      className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em]"
+                      style={{ color: "#C4420A" }}
+                    >
+                      Pre-harvested · live Socrata data
+                    </p>
+                    <h2
+                      className="mt-2 font-display text-3xl font-extrabold tracking-tight md:text-4xl"
+                      style={{ color: "#FAF7F2" }}
+                    >
+                      What we found.
+                    </h2>
+                  </div>
+                  <span
+                    className="font-mono text-[11px] uppercase tracking-wider"
+                    style={{ color: "rgba(250,247,242,0.4)" }}
+                  >
+                    {di.insights.length} insights · updated {ds.cadence}
+                  </span>
+                </div>
+
+                {/* Insight cards grid */}
+                <div className="mt-8 grid gap-4 md:grid-cols-2">
+                  {di.insights.map((ins, i) => (
+                    <a
+                      key={i}
+                      href={ins.source}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex flex-col gap-3 rounded-xl p-6 transition-all"
+                      style={{
+                        background: "rgba(250,247,242,0.04)",
+                        border: "0.5px solid rgba(212,139,16,0.25)",
+                        backdropFilter: "blur(4px)",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLAnchorElement).style.background = "rgba(250,247,242,0.08)";
+                        (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(212,139,16,0.55)";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLAnchorElement).style.background = "rgba(250,247,242,0.04)";
+                        (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(212,139,16,0.25)";
+                      }}
+                    >
+                      {/* Icon + badge row */}
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl leading-none">{ins.icon}</span>
+                        <span
+                          className="rounded-full font-mono text-[10px] font-semibold uppercase tracking-wider"
+                          style={{
+                            background: "rgba(212,139,16,0.15)",
+                            color: "#D48B10",
+                            border: "0.5px solid rgba(212,139,16,0.35)",
+                            padding: "3px 10px",
+                          }}
+                        >
+                          Data insight
+                        </span>
+                        <span
+                          className="ml-auto font-mono text-[10px] uppercase tracking-wider opacity-0 transition-opacity group-hover:opacity-100"
+                          style={{ color: "#3A7FBE" }}
+                        >
+                          View source ↗
+                        </span>
+                      </div>
+
+                      {/* Headline */}
+                      <p
+                        className="font-display text-lg font-bold leading-snug tracking-tight"
+                        style={{ color: "#FAF7F2" }}
+                      >
+                        {ins.headline}
+                      </p>
+
+                      {/* Detail */}
+                      <p
+                        className="text-sm leading-relaxed"
+                        style={{ color: "rgba(250,247,242,0.60)" }}
+                      >
+                        {ins.detail}
+                      </p>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* Try asking */}
+            <section
+              className="border-b border-[#1A1510]/10"
+              style={{ background: "#FDF3DC" }}
+            >
+              <div className="mx-auto max-w-[1320px] px-6 py-10 md:px-10">
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="shrink-0">
+                    <p
+                      className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em]"
+                      style={{ color: "#C4420A" }}
+                    >
+                      Suggested queries
+                    </p>
+                    <p
+                      className="mt-1 font-display text-base font-bold"
+                      style={{ color: "#0D2340" }}
+                    >
+                      Try asking →
+                    </p>
+                  </div>
+                  <div className="flex flex-1 flex-wrap gap-2">
+                    {di.questions.map((q) => (
+                      <a
+                        key={q}
+                        href={`/q?q=${encodeURIComponent(q)}`}
+                        className="rounded-full font-mono text-[12px] transition-all"
+                        style={{
+                          background: "rgba(58,127,190,0.10)",
+                          color: "#3A7FBE",
+                          border: "0.5px solid rgba(58,127,190,0.30)",
+                          padding: "7px 16px",
+                          textDecoration: "none",
+                          display: "inline-block",
+                          whiteSpace: "nowrap",
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLAnchorElement).style.background = "rgba(58,127,190,0.20)";
+                          (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(58,127,190,0.55)";
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLAnchorElement).style.background = "rgba(58,127,190,0.10)";
+                          (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(58,127,190,0.30)";
+                        }}
+                      >
+                        {q}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </section>
+          </>
+        );
+      })()}
 
       {/* Schema */}
       <section className="border-b border-[#1A1F2A]/10 bg-[#F4F6FB]">
