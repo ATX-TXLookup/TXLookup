@@ -843,44 +843,88 @@ export function AgentRunner({
                   )}
                 </div>
 
-                {/* Citation aside */}
+                {/* Citation aside — Stitch screen 2 pattern: header + name +
+                    dataset id + 3 mini text buttons (VIEW SCHEMA / RAW JSON /
+                    DOCS) + a primary OPEN DATASET button. */}
                 <aside className="md:col-span-4">
                   {state.citation && (
-                    <div className="rounded-[10px] bg-[var(--ds-bg-elev)] p-5 border border-[var(--ds-border)]">
-                      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
+                    <div className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5">
+                      <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
                         Primary source
                       </p>
-                      <p className="mt-3 text-sm font-bold text-[var(--ds-text)]">
-                        {state.citation.portal}
-                      </p>
-                      <p className="mt-1 text-lg font-normal leading-tight text-[var(--ds-text)]">
+                      <p className="mt-3 text-[18px] font-bold leading-tight text-[var(--ds-text)]">
                         {state.citation.dataset_name}
                       </p>
-                      <p className="mt-2 font-mono text-[11px] text-[var(--ds-text-mute)]">
+                      <p className="mt-1 text-[13px] text-[var(--ds-text-mute)]">
+                        {state.citation.portal}
+                      </p>
+                      <p className="mt-2 font-mono text-[11px] text-[var(--ds-text-dim)]">
                         {state.citation.dataset_id}
                       </p>
-                      <div className="mt-5 flex flex-col gap-2">
+
+                      <Link
+                        href={`/datasets/${state.citation.dataset_id}`}
+                        className="mt-5 inline-flex w-full items-center justify-center rounded-md bg-[var(--ds-purple)] px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-white hover:opacity-90"
+                      >
+                        Open dataset →
+                      </Link>
+
+                      <div className="mt-3 grid grid-cols-3 gap-1 border-t border-[var(--ds-border)] pt-3">
                         <Link
-                          href={`/datasets/${state.citation.dataset_id}`}
-                          className="inline-flex items-center rounded-md bg-[var(--ds-text)] px-4 py-2 font-body text-sm font-bold text-[var(--ds-bg)] hover:opacity-90"
+                          href={`/datasets/${state.citation.dataset_id}#schema`}
+                          className="rounded-sm border border-[var(--ds-border)] px-2 py-1.5 text-center font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-mute)] hover:border-[var(--ds-text-dim)] hover:text-[var(--ds-text)]"
                         >
-                          Open dataset →
+                          View schema
                         </Link>
                         {state.citation.api_url && (
                           <a
                             href={state.citation.api_url}
                             target="_blank"
                             rel="noopener"
-                            className="text-sm font-bold text-[var(--ds-accent)] hover:text-[var(--ds-warm)]"
+                            className="rounded-sm border border-[var(--ds-border)] px-2 py-1.5 text-center font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-mute)] hover:border-[var(--ds-text-dim)] hover:text-[var(--ds-text)]"
                           >
-                            API endpoint →
+                            Raw JSON
                           </a>
                         )}
+                        <a
+                          href={`https://${state.citation.portal_host}/d/${state.citation.dataset_id}`}
+                          target="_blank"
+                          rel="noopener"
+                          className="rounded-sm border border-[var(--ds-border)] px-2 py-1.5 text-center font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-mute)] hover:border-[var(--ds-text-dim)] hover:text-[var(--ds-text)]"
+                        >
+                          Docs
+                        </a>
                       </div>
                     </div>
                   )}
                 </aside>
               </div>
+
+              {/* DEEPER ANALYSIS row — Stitch screen 2 pattern. Comparative
+                  follow-ups derived from the citation's dataset.            */}
+              {state.citation && (
+                <div className="mt-10 border-t border-[var(--ds-border)] pt-7">
+                  <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-text-dim)]">
+                    Deeper analysis
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {[
+                      { label: "Compare to next zip", q: `Compare ${state.citation.dataset_name.toLowerCase()} between this zip and the next-most-active zip` },
+                      { label: "Historical trend", q: `Show ${state.citation.dataset_name.toLowerCase()} trend over the last 24 months by quarter` },
+                      { label: "Cross-dataset join", q: `Join ${state.citation.dataset_name.toLowerCase()} with code violations by zip for the same period` },
+                      { label: "Top outliers", q: `Top 5 outliers in ${state.citation.dataset_name.toLowerCase()} this year` },
+                    ].map((a) => (
+                      <Link
+                        key={a.label}
+                        href={`/q?q=${encodeURIComponent(a.q)}&dataset=${state.citation!.dataset_id}`}
+                        className="inline-flex items-center rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-text)] hover:border-[var(--ds-accent)]/50 hover:text-[var(--ds-accent)]"
+                      >
+                        {a.label} →
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </section>
         ) : null}
