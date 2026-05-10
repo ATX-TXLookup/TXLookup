@@ -64,6 +64,39 @@ CATALOG = [
         "title": "Austin Crash Report Data",
         "key_columns": ["crash_fatal_fl", "death_cnt", "tot_injry_cnt", "rpt_street_name", "crash_speed_limit", "crash_timestamp", "pedestrian_death_count", "bicycle_death_count", "collsn_desc"],
     },
+    # --- Texas state datasets (in catalog.ts since the Texas-state expansion;
+    # adding them here closes a coverage gap caught while picking up #42) ---
+    {
+        "id": "9cir-efmm",
+        "portal": "data.texas.gov",
+        "title": "Active Franchise Tax Permit Holders",
+        "key_columns": ["taxpayer_name", "taxpayer_city", "taxpayer_state", "taxpayer_zip", "taxpayer_organizational_type", "taxpayer_county_code", "responsibility_beginning_date"],
+    },
+    {
+        "id": "2zpi-yjjs",
+        "portal": "data.texas.gov",
+        "title": "Texas State Expenditures By County 2024",
+        "key_columns": ["fiscal_year", "agency_name", "county", "major_spending_category", "amount"],
+    },
+    {
+        "id": "naix-2893",
+        "portal": "data.texas.gov",
+        "title": "Mixed Beverage Gross Receipts",
+        "key_columns": ["location_name", "taxpayer_city", "total_receipts", "liquor_receipts", "beer_receipts", "wine_receipts", "obligation_end_date_yyyymmdd"],
+    },
+    # --- Dallas datasets (new, this PR — addresses #42's "add 3 more datasets") ---
+    {
+        "id": "9fxf-t2tr",
+        "portal": "www.dallasopendata.com",
+        "title": "Dallas Police Active Calls",
+        "key_columns": ["division", "nature_of_call", "priority", "date", "block", "location", "beat", "status"],
+    },
+    {
+        "id": "gc4d-8a49",
+        "portal": "www.dallasopendata.com",
+        "title": "Dallas 311 Service Requests",
+        "key_columns": ["service_request_type", "department", "city_council_district", "status", "created_date", "priority"],
+    },
 ]
 
 
