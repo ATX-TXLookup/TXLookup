@@ -144,7 +144,7 @@ export default async function DatasetsUniversePage() {
                 <span className="font-semibold text-[var(--ds-text)]">
                   {discovery.totalKnown.toLocaleString()} datasets indexed
                 </span>{" "}
-                across {discovery.portals.length || 6} Texas open-data portals — Austin, Austin Hub, Dallas, San Antonio, Houston, TX state. {summaries.length} are deeply curated (full schema, hand-picked SoQL, locally mirrored). The rest are answered on demand: the agent reads catalog metadata, plans a SoQL query, runs it. <span className="text-[var(--ds-good)]">Not a shadow database</span> — a smart layer over the source-of-truth portals.
+                across {discovery.portals.length || 6} Texas open-data portals — Austin, Austin Hub, Dallas, San Antonio, Houston, TX state. {summaries.length} are deeply curated (full schema, hand-picked SoQL, locally mirrored). The rest are answered on demand: the agent reads catalog metadata, plans a SoQL query, runs it. <span className="text-[var(--ds-good)]">A live layer over the source-of-truth portals.</span>
               </p>
 
               {/* Per-portal indexed counts */}

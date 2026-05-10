@@ -16,6 +16,9 @@ import { HeroTexasMap } from "@/app/components/HeroTexasMap";
 import { FeatureCard, Shell, TerminalBlock } from "@/app/components/ds";
 import { DataSourceBadge } from "@/app/components/ds/DataSourceBadge";
 import { loadDiscovery } from "@/app/lib/catalog-discovered";
+import { CATALOG } from "@/app/lib/catalog";
+
+const CATALOG_LENGTH = CATALOG.length;
 import {
   austin311Last30d,
   austinInspections30dByZip,
@@ -92,19 +95,30 @@ export default async function HomePage() {
 
   return (
     <Shell active="/">
-      {/* HERO — tight: headline left, search right (or stacked on mobile) */}
-      <section className="border-b border-[var(--ds-border)]">
-        <div className="mx-auto max-w-[1240px] px-6 py-12 md:px-8 md:py-16">
+      {/* HERO — tight: headline left, search right; subtle Texas map backdrop */}
+      <section className="relative overflow-hidden border-b border-[var(--ds-border)]">
+        {/* Decorative map backdrop — low opacity, behind everything */}
+        <div
+          className="pointer-events-none absolute inset-0 hidden md:flex items-center justify-end pr-8"
+          aria-hidden
+        >
+          <div className="w-[58%] max-w-[820px] opacity-[0.18]">
+            <HeroTexasMap />
+          </div>
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--ds-bg)] via-[var(--ds-bg)]/85 to-transparent" aria-hidden />
+
+        <div className="relative mx-auto max-w-[1240px] px-6 py-12 md:px-8 md:py-16">
           <div className="grid items-end gap-8 md:grid-cols-12 md:gap-12">
             <div className="md:col-span-7">
               <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
                 TXLookup · Civic-data agent · v0.1
               </p>
               <h1 className="mt-4 max-w-[16ch] text-[60px] font-bold leading-[1.0] tracking-[-0.03em] text-[var(--ds-text)] md:text-[104px]">
-                Redefining civic transparency.
+                Texas civic data, in plain English.
               </h1>
               <p className="mt-7 max-w-[58ch] text-[20px] leading-[1.55] text-[var(--ds-text-mute)] md:text-[22px]">
-                <span className="font-semibold text-[var(--ds-text)]">{discovery.totalKnown.toLocaleString()} Texas datasets indexed</span> across {discovery.portals.length} open-data portals — Austin, Dallas, San Antonio, Houston, TX state. <span className="text-[var(--ds-text)]">9 are deeply curated</span> (full schema, locally mirrored). Everything else is answered on demand by an agent that reads catalog metadata, plans a query, runs it live. <span className="text-[var(--ds-good)]">Not a shadow database — a smart layer over the source-of-truth portals.</span>
+                <span className="font-semibold text-[var(--ds-text)]">{discovery.totalKnown.toLocaleString()} Texas datasets indexed</span> across {discovery.portals.length} open-data portals — Austin, Dallas, San Antonio, Houston, TX state. <span className="text-[var(--ds-text)]">{CATALOG_LENGTH} are deeply curated</span> (full schema, locally mirrored). The rest are answered live: an agent reads catalog metadata, plans a query, runs it on the source-of-truth portal. <span className="text-[var(--ds-good)]">A smart layer over public data — every claim citable, every step replayable.</span>
               </p>
             </div>
             <div className="md:col-span-5">
@@ -158,10 +172,10 @@ export default async function HomePage() {
               <h2 className="mt-3 max-w-[18ch] text-[36px] font-bold leading-[1.08] tracking-[-0.025em] text-[var(--ds-text)] md:text-[52px]">
                 Texas publishes everything.
                 <br />
-                <span className="text-[var(--ds-text-mute)]">Almost no one queries it.</span>
+                <span className="text-[var(--ds-text-mute)]">Hard to navigate, until now.</span>
               </h2>
               <p className="mt-5 max-w-[48ch] text-[15.5px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
-                The state and its cities run six open-data portals. Together they expose <span className="font-semibold text-[var(--ds-text)]">{discovery.totalKnown.toLocaleString()} datasets</span> covering permits, inspections, 311 calls, code violations, traffic fatalities, franchise tax, contracts, library checkouts — millions of rows refreshed daily. It&rsquo;s all public. Almost none of it is reachable to a citizen, journalist, or analyst without writing SoQL by hand.
+                The state and its cities run six open-data portals. Together they expose <span className="font-semibold text-[var(--ds-text)]">{discovery.totalKnown.toLocaleString()} datasets</span> covering permits, inspections, 311 calls, code violations, traffic fatalities, franchise tax, contracts, library checkouts — millions of rows refreshed daily. All of it public. To use it directly you have to write SoQL by hand against six different APIs.
               </p>
             </div>
 
@@ -193,7 +207,7 @@ export default async function HomePage() {
                     eyebrow: "Data fluency",
                     n: "<1%",
                     nLabel: "of Texans use the portals",
-                    body: "Most residents do not know data.austintexas.gov exists. Of those who find it, almost none can derive a useful answer without help.",
+                    body: "Most residents have never visited data.austintexas.gov. Reaching a useful answer takes specialist skills.",
                     tone: "var(--ds-purple)",
                   },
                 ].map((f) => (
@@ -225,7 +239,7 @@ export default async function HomePage() {
 
               <p className="mt-6 max-w-[64ch] text-[15px] leading-relaxed text-[var(--ds-text)]">
                 <span className="font-semibold text-[var(--ds-warm)]">TXLookup is the layer between you and {discovery.totalKnown.toLocaleString()} datasets.</span>{" "}
-                <span className="text-[var(--ds-text-mute)]">A multi-agent system that reads the schema, writes the query, runs it on the source-of-truth portal, and hands you a sourced answer in plain English. No shadow database. Every claim citable. Every step replayable.</span>
+                <span className="text-[var(--ds-text-mute)]">A multi-agent system that reads the schema, writes the query, runs it on the source-of-truth portal, and hands you a sourced answer in plain English. Live queries. Every claim citable. Every step replayable.</span>
               </p>
             </div>
           </div>
