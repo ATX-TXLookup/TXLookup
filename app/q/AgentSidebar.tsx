@@ -207,8 +207,99 @@ export function AgentSidebar(props: Props) {
           {tab === "steps" && <ExecutionTab steps={props.steps} replans={props.replans} />}
           {tab === "telemetry" && <TelemetryTab events={props.events} startedAt={props.startedAt} />}
         </div>
+
+        {/* Floating "New Query" action — in-result search affordance per the
+            Stitch Query-Pro design. Stays on screen so the user can fire a
+            follow-up without bouncing back to /q. */}
+        <NewQueryFooter />
       </div>
     </aside>
+  );
+}
+
+function NewQueryFooter() {
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      // Defer focus so the transition has rendered.
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }, [open]);
+
+  const STARTERS = [
+    "Where do permits cluster in 78702 last 30 days?",
+    "Top 311 complaint types in Austin",
+    "Failing inspections by zip this year",
+    "Active code violations in 78745",
+  ];
+
+  function fire(question: string) {
+    const url = `/q?q=${encodeURIComponent(question)}`;
+    window.location.assign(url);
+  }
+
+  return (
+    <div className="border-t border-white/10 bg-black/20 p-4">
+      {!open ? (
+        <button
+          onClick={() => setOpen(true)}
+          className="flex w-full items-center justify-center gap-2 rounded-md border border-white/15 bg-white/[0.04] px-4 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-tx-cream transition-colors hover:border-tx-gold/60 hover:bg-white/[0.08]"
+        >
+          <span aria-hidden className="text-base leading-none">+</span>
+          <span>NEW QUERY</span>
+        </button>
+      ) : (
+        <div className="space-y-3">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (q.trim()) fire(q.trim());
+            }}
+          >
+            <div className="flex items-center gap-2 rounded-md border border-white/15 bg-black/30 p-1.5 transition-colors focus-within:border-tx-gold/70">
+              <input
+                ref={inputRef}
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Ask another question…"
+                className="flex-1 bg-transparent px-2 py-1.5 text-[13px] text-tx-cream placeholder:text-tx-cream/40 focus:outline-none"
+              />
+              <button
+                type="submit"
+                disabled={!q.trim()}
+                className="rounded bg-tx-gold/90 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-tx-navy-dark transition-opacity disabled:opacity-30"
+              >
+                Ask →
+              </button>
+            </div>
+          </form>
+          <div className="flex flex-wrap gap-1.5">
+            {STARTERS.map((s) => (
+              <button
+                key={s}
+                onClick={() => fire(s)}
+                className="rounded-full border border-white/12 bg-white/[0.03] px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-tx-cream/70 transition-colors hover:border-tx-gold/60 hover:bg-white/[0.08] hover:text-tx-cream"
+                title={s}
+              >
+                {s.length > 28 ? s.slice(0, 26) + "…" : s}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => {
+              setOpen(false);
+              setQ("");
+            }}
+            className="font-mono text-[10px] uppercase tracking-wider text-tx-cream/50 hover:text-tx-cream"
+          >
+            ← Close
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 

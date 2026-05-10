@@ -15,6 +15,7 @@ import AgentTopologyShowcase from "@/app/components/AgentTopologyShowcase";
 import { HeroTexasMap } from "@/app/components/HeroTexasMap";
 import { FeatureCard, Shell, TerminalBlock } from "@/app/components/ds";
 import { DataSourceBadge } from "@/app/components/ds/DataSourceBadge";
+import { loadDiscovery } from "@/app/lib/catalog-discovered";
 import {
   austin311Last30d,
   austinInspections30dByZip,
@@ -55,6 +56,7 @@ export default async function HomePage() {
     dallas311Res,
     dallasActiveCallsRes,
     txFranchiseRes,
+    discovery,
   ] = await Promise.all([
     austinPermitsLast7Days(),
     austinPermits7dTotal(),
@@ -64,6 +66,7 @@ export default async function HomePage() {
     dallas311Last30d(),
     dallasPoliceActiveCalls(),
     texasFranchisePermitsActive(),
+    loadDiscovery(),
   ]);
 
   // Unwrap StatResult shape into legacy plain values for the renderer below.
@@ -101,7 +104,7 @@ export default async function HomePage() {
                 Redefining civic transparency.
               </h1>
               <p className="mt-7 max-w-[58ch] text-[20px] leading-[1.55] text-[var(--ds-text-mute)] md:text-[22px]">
-                Public records, scoring methods, multi-agent reasoning, and shared access — bridging the gap between civic data and answers anyone can use. Curated across Austin · Dallas · TX state. Growing every 6 hours via the dataset scout.
+                <span className="font-semibold text-[var(--ds-text)]">{discovery.totalKnown.toLocaleString()} Texas datasets indexed</span> across {discovery.portals.length} open-data portals — Austin, Dallas, San Antonio, Houston, TX state. <span className="text-[var(--ds-text)]">9 are deeply curated</span> (full schema, locally mirrored). Everything else is answered on demand by an agent that reads catalog metadata, plans a query, runs it live. <span className="text-[var(--ds-good)]">Not a shadow database — a smart layer over the source-of-truth portals.</span>
               </p>
             </div>
             <div className="md:col-span-5">
