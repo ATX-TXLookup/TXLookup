@@ -13,6 +13,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { findById, type CatalogDataset } from "../../lib/catalog";
+import DatasetInsightCard from "../../components/DatasetInsightCard";
+import { getLiveInsight } from "../../lib/dataset-insights";
+import { REPORTS } from "../../../config/reports";
+
+function findReportSlugForDataset(datasetId: string): string | null {
+  const r = REPORTS.find((r) => r.dataset_ids.includes(datasetId));
+  return r ? r.slug : null;
+}
 
 type Dataset = CatalogDataset;
 
@@ -77,10 +85,12 @@ export default async function DatasetPage({
   const ds = findById(id);
   if (!ds) notFound();
 
-  const [meta, sample] = await Promise.all([
+  const [meta, sample, liveInsight] = await Promise.all([
     fetchMetadata(ds.portal, ds.id),
     fetchSample(ds.portal, ds.id),
+    getLiveInsight(ds.id),
   ]);
+  const reportSlug = findReportSlugForDataset(ds.id);
 
   const lastRefreshed = meta?.rowsUpdatedAt
     ? new Date(meta.rowsUpdatedAt * 1000).toISOString().replace("T", " ").slice(0, 16) + " UTC"
@@ -304,6 +314,16 @@ export default async function DatasetPage({
           </div>
         </div>
       </section>
+
+      {/* ── Per-dataset insight card (issue #88) ── */}
+      <DatasetInsightCard
+        datasetId={ds.id}
+        title={ds.title}
+        portal={ds.portal}
+        sampleQuestions={ds.sample_questions}
+        liveInsight={liveInsight}
+        reportSlug={reportSlug}
+      />
 
       {/* ── Sample rows ── */}
       <section className="border-b border-tx-ink/10 bg-white">
