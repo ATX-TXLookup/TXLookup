@@ -78,7 +78,7 @@ test("data_analyst — unknown dataset_id fails clearly", async () => {
 
 // Pure-function test for the delta math — doesn't hit Socrata.
 import deltaPkg from "../app/lib/specialists.ts";
-const { computeDeltas } = deltaPkg;
+const { computeDeltas, nullRate, topConcentration, sampleFactor } = deltaPkg;
 
 test("computeDeltas — basic +/- and zero-prior cases", () => {
   const current = [
@@ -118,6 +118,57 @@ test("computeDeltas — sort puts biggest absolute pct change first", () => {
   );
   // B: +100% — biggest pct change
   assert.equal(deltas[0].key, "B");
+});
+
+test("nullRate — counts null/undefined/empty/dash/'null'/'none' (case-insensitive)", () => {
+  const rows = [
+    { zip: "78704" },
+    { zip: null },
+    { zip: undefined },
+    { zip: "" },
+    { zip: "-" },
+    { zip: "  " },
+    { zip: "NULL" },
+    { zip: "none" },
+    { zip: "78745" },
+    { zip: "78702" },
+  ];
+  // 7 of 10 are null-ish.
+  const r = nullRate(rows, "zip");
+  assert.ok(Math.abs(r - 0.7) < 0.001, `expected ~0.7, got ${r}`);
+});
+
+test("nullRate — empty array returns 0 (not NaN)", () => {
+  assert.equal(nullRate([], "zip"), 0);
+});
+
+test("topConcentration — top-2 dominance", () => {
+  // top-2 = 100, 80; total = 100+80+10+5+5 = 200; 180/200 = 0.9
+  const rows = [
+    { x: "a", n: 100 },
+    { x: "b", n: 80 },
+    { x: "c", n: 10 },
+    { x: "d", n: 5 },
+    { x: "e", n: 5 },
+  ];
+  const c = topConcentration(rows, "n", 2);
+  assert.ok(Math.abs(c - 0.9) < 0.001, `expected ~0.9, got ${c}`);
+});
+
+test("topConcentration — uniform distribution near 1/k", () => {
+  const rows = Array.from({ length: 10 }, (_, i) => ({ x: String(i), n: 100 }));
+  const c = topConcentration(rows, "n", 2);
+  // 200 / 1000 = 0.2
+  assert.ok(Math.abs(c - 0.2) < 0.001);
+});
+
+test("sampleFactor — floors at 0.4, ramps up, full at 100+", () => {
+  assert.equal(sampleFactor(0), 0.4);
+  assert.equal(sampleFactor(40), 0.4); // 40/100=0.4 → floor still 0.4
+  assert.ok(Math.abs(sampleFactor(50) - 0.5) < 0.001);
+  assert.ok(Math.abs(sampleFactor(80) - 0.8) < 0.001);
+  assert.equal(sampleFactor(100), 1);
+  assert.equal(sampleFactor(500), 1);
 });
 
 test("support specialist — catalog meta query returns pre-canned summary (no LLM)", async () => {
