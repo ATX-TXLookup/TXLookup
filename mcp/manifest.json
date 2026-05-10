@@ -1,0 +1,153 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schemas/server-manifest.json",
+  "name": "txlookup",
+  "display_name": "TXLookup — Texas civic data agent",
+  "version": "0.1.0",
+  "description": "MCP server for Texas open civic data. Bounded discovery, scoped queries, citation-enforced summaries across Austin / Dallas / SA / Houston / TX state Socrata portals. Plus a multi-agent orchestrator (data analyst + reporter + support + critic + dataset scout).",
+  "tagline": "Sourced answers from Texas public data, in 7 seconds.",
+  "homepage": "https://txlookup.vercel.app",
+  "repository": "https://github.com/ATX-TXLookup/TXLookup",
+  "license": "MIT",
+  "maintainer": {
+    "name": "ATX-TXLookup",
+    "url": "https://github.com/ATX-TXLookup"
+  },
+  "keywords": [
+    "texas",
+    "civic-data",
+    "open-data",
+    "socrata",
+    "permits",
+    "311",
+    "inspections",
+    "agent",
+    "rag",
+    "data-journalism"
+  ],
+  "categories": ["data", "civic", "research"],
+  "transport": {
+    "stdio": {
+      "command": "python",
+      "args": ["-m", "mcp.server"],
+      "env": {
+        "OPENAI_API_KEY": "<your-openai-key-here>",
+        "SOCRATA_KEY_ID": "<optional — higher rate limits>",
+        "SOCRATA_KEY_SECRET": "<optional — pair with KEY_ID>"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "discover_datasets",
+      "description": "Find a relevant Texas civic dataset for a question. Returns up to 5 candidates from the curated catalog.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "Plain-English question or topic (e.g. 'food truck permits 78702')" },
+          "city": { "type": "string", "enum": ["Austin", "Dallas", "San Antonio", "Houston", "TX"], "description": "Optional city filter" }
+        },
+        "required": ["query"]
+      },
+      "examples": [
+        { "input": { "query": "construction permits", "city": "Austin" }, "output_summary": "Returns 3syk-w9eu (Issued Construction Permits)" }
+      ]
+    },
+    {
+      "name": "get_dataset_schema",
+      "description": "Inspect a dataset's columns, types, and field-name aliases before constructing a SoQL query. Always run this BEFORE fetch_data on a dataset you haven't queried recently.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "dataset_id": { "type": "string", "description": "Socrata 4x4 ID (e.g. '3syk-w9eu')" },
+          "portal": { "type": "string", "description": "Optional portal hostname override" }
+        },
+        "required": ["dataset_id"]
+      }
+    },
+    {
+      "name": "fetch_data",
+      "description": "Fetch up to 100 rows from a Texas Socrata dataset. SoQL `where` clause required for any scoped query (zip, date range). Cache-first: cached rows return in <50ms; live fetch falls back automatically when cache is cold.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "dataset_id": { "type": "string" },
+          "where": { "type": "string", "description": "SoQL WHERE clause, e.g. \"original_zip='78702' AND issue_date >= '2026-01-01'\"" },
+          "select": { "type": "string", "description": "SoQL SELECT clause (no '*' — Socrata rejects)" },
+          "order": { "type": "string" },
+          "limit": { "type": "integer", "default": 100, "maximum": 100 }
+        },
+        "required": ["dataset_id"]
+      },
+      "safety": [
+        "Hard limit 100 rows per call",
+        "Returns _source: cache | live | cache-fallback so caller can audit provenance",
+        "Mandatory dataset citation enforced downstream by cite_dataset"
+      ]
+    },
+    {
+      "name": "ask_data",
+      "description": "End-to-end agent loop. Plain-English question → reason → plan → tool dispatch (with replan on failure + doom-loop guard + critic-driven revision) → cited synthesized answer. Wraps the multi-agent orchestrator (data analyst + reporter + critic).",
+      "input_schema": {
+        "type": "object",
+        "properties": { "query": { "type": "string" } },
+        "required": ["query"]
+      },
+      "examples": [
+        { "input": { "query": "Where do permits and code violations both spike together this year by zip?" }, "output_summary": "Composes 2 parallel data_analyst branches → critic approves → reporter composes → cite_dataset" }
+      ]
+    },
+    {
+      "name": "get_task_status",
+      "description": "Poll status of a long-running ask_data task started in async mode.",
+      "input_schema": {
+        "type": "object",
+        "properties": { "task_id": { "type": "string" } },
+        "required": ["task_id"]
+      }
+    },
+    {
+      "name": "create_miro_board",
+      "description": "Create a Miro board for visualizing agent results. Returns board ID + URL.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" }
+        },
+        "required": ["name"]
+      }
+    },
+    {
+      "name": "add_to_miro",
+      "description": "Post a structured payload (frame + sticky grid + chart card) to an existing Miro board.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "board_id": { "type": "string" },
+          "items": { "type": "array" }
+        },
+        "required": ["board_id", "items"]
+      }
+    },
+    {
+      "name": "list_known_tools",
+      "description": "Self-introspection: returns this tool catalog. Useful for agents that load the server dynamically.",
+      "input_schema": { "type": "object", "properties": {} }
+    }
+  ],
+  "skill_doc": "https://github.com/ATX-TXLookup/TXLookup/blob/main/skills/txlookup/SKILL.md",
+  "examples": {
+    "claude_code_install": "claude mcp add txlookup -- python -m mcp.server",
+    "codex_install": "codex --add-mcp 'name=txlookup,command=python,args=[-m,mcp.server]'",
+    "cursor_install": "Add to Cursor MCP settings: { \"txlookup\": { \"command\": \"python\", \"args\": [\"-m\", \"mcp.server\"] } }",
+    "smoke_test": "echo '{\"query\":\"food truck permits in 78702 last 6 months\"}' | python -c 'import json,sys; from mcp.server import ask_data; import asyncio; print(asyncio.run(ask_data(json.load(sys.stdin)[\"query\"])))'"
+  },
+  "moats": [
+    "Citation-enforced: tool loop CANNOT terminate without cite_dataset",
+    "Composed multi-agent reasoning (specialist + critic + parallel) visible per-step",
+    "Doom-loop pattern detection (3+ identical OR [A,B,A,B] cycle) — patentable",
+    "Always-on dataset scout grows the corpus on a 6h cron",
+    "Run-archive: every accepted answer replayable + scored",
+    "SQLite cache enables cross-dataset SQL JOINs Socrata can't express"
+  ]
+}
