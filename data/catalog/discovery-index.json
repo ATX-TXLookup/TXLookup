@@ -1,0 +1,41 @@
+{
+  "fetched_at": "2026-05-10T13:50:30.185Z",
+  "portals": [
+    {
+      "slug": "austin",
+      "host": "data.austintexas.gov",
+      "total_known": 2387,
+      "fetched": 1500
+    },
+    {
+      "slug": "austin-hub",
+      "host": "datahub.austintexas.gov",
+      "total_known": 1333,
+      "fetched": 1333
+    },
+    {
+      "slug": "dallas",
+      "host": "www.dallasopendata.com",
+      "total_known": 1044,
+      "fetched": 1044
+    },
+    {
+      "slug": "tx-state",
+      "host": "data.texas.gov",
+      "total_known": 1051,
+      "fetched": 1051
+    },
+    {
+      "slug": "san-antonio",
+      "host": "data.sanantonio.gov",
+      "total_known": 163,
+      "fetched": 163
+    },
+    {
+      "slug": "houston",
+      "host": "data.houstontx.gov",
+      "total_known": 83,
+      "fetched": 83
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { CATALOG } from "@/app/lib/catalog";
 import { sodaQuery } from "@/app/lib/socrata";
 import { Shell } from "@/app/components/ds";
+import { loadDiscovery } from "@/app/lib/catalog-discovered";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 600;
@@ -98,6 +99,9 @@ function StatusPill({ status, category }: { status: DatasetSummary["status"]; ca
 }
 
 export default async function DatasetsUniversePage() {
+  // Discovery — full list of indexed Texas datasets across 6 portals.
+  const discovery = await loadDiscovery();
+
   const summaries: DatasetSummary[] = await Promise.all(
     CATALOG.map(async (d) => {
       const portal = d.portal;
@@ -134,11 +138,24 @@ export default async function DatasetsUniversePage() {
             {/* LEFT — Hero + Search + Filters + Dataset rows */}
             <div className="md:col-span-8">
               <h1 className="max-w-[20ch] text-[44px] font-bold leading-[1.05] tracking-[-0.025em] text-[var(--ds-text)] md:text-[64px]">
-                Explore the Data Ledger.
+                The Texas civic-data universe.
               </h1>
-              <p className="mt-4 text-[16px] text-[var(--ds-text-mute)] md:text-[18px]">
-                {summaries.length} datasets live and queryable. Last scout tick: 4m ago.
+              <p className="mt-4 max-w-[64ch] text-[15.5px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
+                <span className="font-semibold text-[var(--ds-text)]">
+                  {discovery.totalKnown.toLocaleString()} datasets indexed
+                </span>{" "}
+                across {discovery.portals.length || 6} Texas open-data portals — Austin, Austin Hub, Dallas, San Antonio, Houston, TX state. Of those, {summaries.length} are deeply curated for the demo (full schema knowledge, hand-picked SoQL, locally mirrored). For everything else the agent reads the catalog metadata, plans a query, and runs it live. <span className="text-[var(--ds-good)]">No shadow database.</span> The agent leverages the source-of-truth portals smartly.
               </p>
+
+              {/* Per-portal indexed counts */}
+              <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--ds-text-dim)]">
+                {discovery.portals.map((p) => (
+                  <span key={p.portal}>
+                    <span className="text-[var(--ds-text-mute)]">{p.portal.replace(/^www\./, "").replace(".gov", "")}</span>
+                    <span className="ml-1 text-[var(--ds-good)]">{p.total_known.toLocaleString()}</span>
+                  </span>
+                ))}
+              </div>
 
               {/* Search */}
               <form action="/q" method="GET" className="mt-8">
@@ -231,6 +248,61 @@ export default async function DatasetsUniversePage() {
                   </li>
                 ))}
               </ul>
+
+              {/* DISCOVERY BROWSER — popular datasets across the universe */}
+              {discovery.popular.length > 0 && (
+                <div className="mt-14">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-purple)]">
+                      Beyond the curated · {discovery.totalKnown.toLocaleString()} indexed total
+                    </p>
+                    <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+                      glossary · titles + tags + categories
+                    </p>
+                  </div>
+                  <h2 className="mt-3 max-w-[36ch] text-[28px] font-bold leading-[1.15] tracking-[-0.02em] text-[var(--ds-text)] md:text-[36px]">
+                    Browse the universe.{" "}
+                    <span className="text-[var(--ds-text-mute)]">
+                      Ask any of these — the agent figures out the rest.
+                    </span>
+                  </h2>
+                  <p className="mt-3 max-w-[64ch] text-[14.5px] leading-relaxed text-[var(--ds-text-mute)]">
+                    The catalog metadata for every indexed dataset is stored locally as a searchable corpus — titles, descriptions, tags, categories. When you pick one, the agent reads the schema live, plans a SoQL query, and runs it. The 9 above are pre-cached for &lt;1s answers; the 6,000+ below are answered on demand.
+                  </p>
+                  <ul className="mt-7 grid gap-2 md:grid-cols-2">
+                    {discovery.popular.slice(0, 24).map((d) => (
+                      <li key={`${d.portal}-${d.id}`}>
+                        <Link
+                          href={`/q?q=${encodeURIComponent(`Tell me about ${d.name}`)}&dataset=${encodeURIComponent(d.id)}`}
+                          className="group flex h-full flex-col gap-1.5 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-3.5 transition-colors hover:border-[var(--ds-accent)]/60"
+                        >
+                          <div className="flex items-baseline justify-between gap-2">
+                            <span className="line-clamp-1 text-[14px] font-medium text-[var(--ds-text)] group-hover:text-[var(--ds-accent)]">
+                              {d.name || "(untitled)"}
+                            </span>
+                            <span className="shrink-0 font-mono text-[9.5px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+                              {d.portal.replace(/^www\./, "").split(".")[0]}
+                            </span>
+                          </div>
+                          {d.category && (
+                            <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+                              {d.category}
+                            </span>
+                          )}
+                          {d.description && (
+                            <span className="line-clamp-2 text-[12.5px] text-[var(--ds-text-mute)]">
+                              {d.description}
+                            </span>
+                          )}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-5 font-mono text-[11px] text-[var(--ds-text-dim)]">
+                    Showing top 24 by page views. Many more available — drop a keyword in the search box above and the agent will route to the right one.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* RIGHT — Featured Analysis sidebar */}
