@@ -321,12 +321,15 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
     );
   }
 
-  const NODE_W = 154;
-  const NODE_H = 44;
-  const COL_W = 188;
-  const ROW_H = 80;
-  const PAD_X = 24;
-  const PAD_Y = 24;
+  // Geometry tuned to fit the right-column sidebar (~380-420px) without
+  // overflowing or shrinking text below readability. Was sized for desktop
+  // SVG which made boxes balloon outside the sidebar viewport.
+  const NODE_W = 110;
+  const NODE_H = 38;
+  const COL_W = 132;
+  const ROW_H = 60;
+  const PAD_X = 16;
+  const PAD_Y = 18;
   const cols = 3;
   const innerW = cols * COL_W;
   const W = PAD_X * 2 + innerW;
@@ -392,20 +395,20 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
           const agentTone = AGENT_COLOR[n.agent];
 
           if (n.shape === "diamond") {
-            const r = 28;
+            const r = 22;
             return (
               <g key={n.id}>
                 <polygon
-                  points={`${x},${y - r} ${x + r * 1.1},${y} ${x},${y + r} ${x - r * 1.1},${y}`}
+                  points={`${x},${y - r} ${x + r * 1.2},${y} ${x},${y + r} ${x - r * 1.2},${y}`}
                   fill={fill}
                   stroke={ring}
                   strokeWidth={1.5}
                 />
-                <text x={x} y={y - 2} textAnchor="middle" fontSize={10} fontFamily="JetBrains Mono, monospace" fill={agentTone} fontWeight={600}>
-                  {n.label}
+                <text x={x} y={y - 1} textAnchor="middle" fontSize={8.5} fontFamily="JetBrains Mono, monospace" fill={agentTone} fontWeight={700}>
+                  {(n.label.length > 13 ? n.label.slice(0, 12) + "…" : n.label)}
                 </text>
                 {n.sub && (
-                  <text x={x} y={y + 11} textAnchor="middle" fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA">
+                  <text x={x} y={y + 10} textAnchor="middle" fontSize={8} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA">
                     {n.sub}
                   </text>
                 )}
@@ -413,37 +416,49 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
             );
           }
           if (n.shape === "pill" || n.shape === "round") {
-            const w = NODE_W * 0.78;
+            const w = NODE_W * 0.85;
             const h = NODE_H;
             return (
               <g key={n.id}>
                 <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={h / 2} fill={fill} stroke={ring} strokeWidth={1.5} />
-                <circle cx={x - w / 2 + 11} cy={y} r={3} fill={agentTone} />
-                <text x={x - w / 2 + 19} y={y + 4} fontSize={11} fontFamily="JetBrains Mono, monospace" fill="#F5F5F7" fontWeight={500}>
-                  {n.label}
+                <circle cx={x - w / 2 + 9} cy={y} r={2.5} fill={agentTone} />
+                <text x={x - w / 2 + 16} y={y + 3.5} fontSize={9.5} fontFamily="JetBrains Mono, monospace" fill="#F5F5F7" fontWeight={500}>
+                  {(n.label.length > 12 ? n.label.slice(0, 11) + "…" : n.label)}
                 </text>
               </g>
             );
           }
           const w = NODE_W;
           const h = NODE_H;
+          // Truncate strictly to width (rough char width ≈ 5.5px at 9.5px font).
+          const maxLabelChars = Math.floor((w - 18) / 5.5);
+          const labelDisplay =
+            n.label.length > maxLabelChars
+              ? n.label.slice(0, maxLabelChars - 1) + "…"
+              : n.label;
+          const subDisplay = n.sub ?? n.agent;
+          const maxSubChars = Math.floor((w - 14) / 5.0);
+          const subDisplayClipped =
+            subDisplay && subDisplay.length > maxSubChars
+              ? subDisplay.slice(0, maxSubChars - 1) + "…"
+              : subDisplay;
           return (
             <g key={n.id}>
-              <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={5} fill={fill} stroke={ring} strokeWidth={1.5} />
-              <rect x={x - w / 2} y={y - h / 2} width={3} height={h} fill={agentTone} />
-              <text x={x - w / 2 + 12} y={y - 3} fontSize={11} fontFamily="JetBrains Mono, monospace" fill="#F5F5F7" fontWeight={500}>
-                {n.label.length > 18 ? n.label.slice(0, 17) + "…" : n.label}
+              <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={4} fill={fill} stroke={ring} strokeWidth={1.5} />
+              <rect x={x - w / 2} y={y - h / 2} width={2.5} height={h} fill={agentTone} />
+              <text x={x - w / 2 + 7} y={y - 4} fontSize={9.5} fontFamily="JetBrains Mono, monospace" fill="#F5F5F7" fontWeight={600}>
+                {labelDisplay}
               </text>
-              <text x={x - w / 2 + 12} y={y + 11} fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA">
-                {n.sub ?? n.agent}
+              <text x={x - w / 2 + 7} y={y + 8} fontSize={8} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA">
+                {subDisplayClipped}
               </text>
               {n.source && (() => {
                 const p = SOURCE_COLOR[n.source];
                 return (
                   <g>
-                    <rect x={x + w / 2 - 50} y={y - h / 2 + 6} width={42} height={14} rx={2} fill={p.bg} />
-                    <text x={x + w / 2 - 29} y={y - h / 2 + 16} textAnchor="middle" fontSize={8} fontFamily="JetBrains Mono, monospace" fill={p.fg} fontWeight={700}>
-                      {p.label}
+                    <rect x={x + w / 2 - 32} y={y - h / 2 + 4} width={28} height={11} rx={2} fill={p.bg} />
+                    <text x={x + w / 2 - 18} y={y - h / 2 + 12.5} textAnchor="middle" fontSize={7} fontFamily="JetBrains Mono, monospace" fill={p.fg} fontWeight={700}>
+                      {p.label.slice(0, 5)}
                     </text>
                   </g>
                 );
