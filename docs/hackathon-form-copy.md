@@ -56,7 +56,7 @@ https://github.com/ATX-TXLookup/TXLookup
 Next.js 14 App Router · TypeScript · Python 3.11+ async · OpenAI Codex (planner / analyst / reporter / support synthesizer) · Featherless (fallback inference) · Socrata SODA API (data) · Miro MCP (board generation, $500 bounty) · MCP transport (stdio) · SQLite + JSON local mirror · GitHub Actions (4 crons: deploy, scout 6h, ingestor 6h, watchdog 10m) · Vercel Hobby tier
 
 ## Datasets used
-**6,061 Texas civic datasets indexed across 6 portals** (catalog metadata from each portal's API — Socrata for Austin/Dallas/TX state, CKAN for San Antonio/Houston). Of those, **11 are deeply curated** for the demo (full schema knowledge, hand-picked SoQL, locally mirrored every 6h). Everything else is answered on demand — agent reads the schema live, plans a query, runs it. a smart layer over the source-of-truth portals.
+**6,061 Texas civic datasets indexed across 6 portals** (catalog metadata from each portal's API — Socrata for Austin/Dallas/TX state, CKAN for San Antonio/Houston). Of those, **11 are deeply curated** for the demo (full schema knowledge, hand-picked SoQL, locally mirrored every 6h). Everything else is answered on demand — agent reads the schema live, plans a query, runs it. A smart layer over the source-of-truth portals.
 
 Indexed totals: data.austintexas.gov (2,387) · datahub.austintexas.gov (1,333) · TX state data.texas.gov (1,051) · dallasopendata.com (1,044) · data.sanantonio.gov (163) · data.houstontx.gov (83).
 
@@ -76,10 +76,20 @@ The 11 deeply-curated datasets:
 **Innovation & Execution (25 pts)** — Pattern-based doom-loop (not retry-counter); intent-preserving replan-on-failure; demo-mode fixture replay (insurance for stage demo); A2A handoff via render_to_miro; skill document as cross-runtime policy; per-step duration_ms + token usage emitted; visible "Local mirror" trust badge per stat.
 
 ## Team
-- **Ravinder Jilkapally** (jravinder · jravinderreddy@gmail.com) — agent loop, replanner, observatory
-- **Kunal Vyas** (promptkv) — dataset onboarding, catalog correctness
-- **Godwyn James** (goodguygoddy) — doom-loop wiring, instrumentation
-- **Raj Akula** (rajakula1) — external-runtime validation, MCP integration
+> Public copy — emails kept in `docs/team-contacts.local.md` (gitignored). Paste emails into the form directly from there.
+
+- **Ravinder Jilkapally** — Agent loop, replanner, observatory
+  - GitHub: [jravinder](https://github.com/jravinder)
+  - LinkedIn: https://www.linkedin.com/in/jravinder
+- **Kunal Vyas** — Dataset onboarding, catalog correctness
+  - GitHub: [promptkv](https://github.com/promptkv)
+  - LinkedIn: https://www.linkedin.com/in/kunalvasavada
+- **Godwyn James** — Doom-loop wiring, instrumentation
+  - GitHub: [goodguygoddy](https://github.com/goodguygoddy)
+  - LinkedIn: https://www.linkedin.com/in/goodguygoddy/
+- **Raj Akula** — External-runtime validation, MCP integration
+  - GitHub: [rajakula1](https://github.com/rajakula1)
+  - LinkedIn: https://www.linkedin.com/in/rajaakula/
 
 ## What was novel / patentable
 A doom-loop-aware autonomous data agent with intent-preserving replan-on-failure. Specifically: pattern-based fingerprint loop detection (identical-3x AND `[A,B,A,B]` cycle predicates) + structured-failure replanning that preserves the original user intent across plan rewrites. Filed under DeepInvent — see `docs/deepinvent-submission.md`.

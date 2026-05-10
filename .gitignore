@@ -16,3 +16,6 @@ log.md
 data/runs/
 .env.local
 .env.*.local
+
+# Local-only team contact info (emails are PII — never commit)
+docs/team-contacts.local.md
