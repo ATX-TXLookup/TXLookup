@@ -21,15 +21,15 @@ export default async function ReplayPage({
 
   return (
     <Shell active="/admin">
-      <section className="border-b border-[#1A1F2A]/10 bg-[#F4F6FB]">
+      <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
         <div className="mx-auto max-w-[1320px] px-6 py-8 md:px-10">
-          <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-accent)]">
             Replay · {hash}
           </p>
-          <h1 className="mt-2 max-w-[68ch] font-display text-2xl font-extrabold leading-tight tracking-tight text-[#0B2545] md:text-3xl">
+          <h1 className="mt-2 max-w-[68ch] text-2xl font-extrabold leading-tight tracking-tight text-[var(--ds-text)] md:text-3xl">
             {run.query}
           </h1>
-          <p className="mt-2 font-mono text-[11px] uppercase tracking-wider text-[#1A1F2A]/55">
+          <p className="mt-2 font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-mute)]">
             saved {new Date(run.savedAt).toISOString().slice(0, 19).replace("T", " ")} · status: {run.status} · {run.durationMs}ms · {run.tokenTotal.toLocaleString()} tok
           </p>
         </div>

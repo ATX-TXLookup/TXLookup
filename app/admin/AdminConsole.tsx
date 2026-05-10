@@ -9,9 +9,9 @@ import { useEffect, useRef, useState } from "react";
 import type { SavedRun } from "@/app/lib/run-archive";
 
 function pill(status: SavedRun["status"]): string {
-  if (status === "good") return "bg-[#E5F5EC] text-[#1E7A47] border-[#1E7A47]/30";
-  if (status === "bad") return "bg-[#FBE9E7] text-[#A0231C] border-[#A0231C]/30";
-  return "bg-[#F4F6FB] text-[#1A1F2A]/65 border-[#1A1F2A]/15";
+  if (status === "good") return "bg-[var(--ds-bg-elev)] text-[var(--ds-good)] border-[var(--ds-good)]/40";
+  if (status === "bad") return "bg-[var(--ds-bg-elev)] text-[var(--ds-bad)] border-[var(--ds-bad)]/40";
+  return "bg-[var(--ds-bg-elev)] text-[var(--ds-text-mute)] border-[var(--ds-border)]";
 }
 
 function timeAgo(ms: number): string {
@@ -126,41 +126,41 @@ export function AdminConsole({ runs: initialRuns }: { runs: SavedRun[] }) {
   }
 
   const phaseColor = (p: string) =>
-    p === "error" ? "text-[#A0231C]"
-      : p === "done" ? "text-[#1E7A47]"
-      : p === "replanning" || p === "doom_loop" ? "text-[#A06200]"
-      : "text-[#0B5FFF]";
+    p === "error" ? "text-[var(--ds-bad)]"
+      : p === "done" ? "text-[var(--ds-good)]"
+      : p === "replanning" || p === "doom_loop" ? "text-[var(--ds-warn)]"
+      : "text-[var(--ds-accent)]";
 
   return (
     <>
-      <section className="border-b border-[#1A1F2A]/10 bg-[#F4F6FB]">
+      <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
         <div className="mx-auto max-w-[1320px] px-6 py-8 md:px-10">
-          <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">Run a question</p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-accent)]">Run a question</p>
           <form onSubmit={run} className="mt-3 flex flex-col gap-3 md:flex-row md:items-start">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="e.g. How many active food inspection violations in 78704?"
-              className="flex-1 rounded-sm border border-[#1A1F2A]/15 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0B5FFF]"
+              className="flex-1 rounded-sm border border-[var(--ds-border)] bg-[var(--ds-bg)] px-3 py-2 text-sm text-[var(--ds-text)] placeholder:text-[var(--ds-text-dim)] focus:outline-none focus:ring-1 focus:ring-[var(--ds-accent)]"
             />
-            <label className="flex items-center gap-2 text-sm text-[#1A1F2A]/75">
+            <label className="flex items-center gap-2 text-sm text-[var(--ds-text-mute)]">
               <input type="checkbox" checked={fallback} onChange={(e) => setFallback(e.target.checked)} />
               <span className="font-mono text-[11px] uppercase tracking-wider">fallback</span>
             </label>
             <button
               type="submit"
               disabled={running || !query.trim()}
-              className="rounded-sm bg-[#0B5FFF] px-5 py-2 font-display text-sm font-semibold text-white hover:bg-[#0B2545] disabled:cursor-not-allowed disabled:bg-[#1A1F2A]/30"
+              className="rounded-sm bg-[var(--ds-text)] px-5 py-2 text-sm font-semibold text-[var(--ds-bg)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {running ? "Running…" : "Run"}
             </button>
           </form>
           {live.length > 0 && (
-            <div className="mt-4 max-h-[260px] overflow-auto rounded-sm border border-[#1A1F2A]/15 bg-white p-3 font-mono text-[11px] leading-relaxed text-[#1A1F2A]/85">
+            <div className="mt-4 max-h-[260px] overflow-auto rounded-sm border border-[var(--ds-border)] bg-[var(--ds-bg)] p-3 font-mono text-[11px] leading-relaxed text-[var(--ds-text)]">
               {live.map((ev, i) => (
                 <div key={i} className="grid grid-cols-[auto_auto_1fr] gap-2">
-                  <span className="text-[#1A1F2A]/45">{new Date(ev.ts).toISOString().slice(11, 19)}</span>
+                  <span className="text-[var(--ds-text-dim)]">{new Date(ev.ts).toISOString().slice(11, 19)}</span>
                   <span className={phaseColor(ev.phase)}>{ev.phase}</span>
                   <span className="truncate">{ev.text}</span>
                 </div>
@@ -170,16 +170,16 @@ export function AdminConsole({ runs: initialRuns }: { runs: SavedRun[] }) {
         </div>
       </section>
 
-      <section className="bg-white">
+      <section className="bg-[var(--ds-bg)]">
         <div className="mx-auto max-w-[1320px] px-6 py-8 md:px-10">
           <div className="flex items-baseline justify-between gap-4">
-            <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">Run archive · {runs.length}</p>
-            <button onClick={refresh} className="font-mono text-[10px] uppercase tracking-wider text-[#0B5FFF] hover:underline">refresh</button>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-accent)]">Run archive · {runs.length}</p>
+            <button onClick={refresh} className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-accent)] hover:underline">refresh</button>
           </div>
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-full border-collapse text-sm">
-              <thead className="border-b border-[#1A1F2A]/15 bg-[#F4F6FB]">
-                <tr className="text-left font-mono text-[11px] uppercase tracking-wider text-[#1A1F2A]/65">
+              <thead className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
+                <tr className="text-left font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-mute)]">
                   <th className="px-3 py-2 font-semibold">query</th>
                   <th className="px-3 py-2 font-semibold">status</th>
                   <th className="px-3 py-2 font-semibold">when</th>
@@ -190,27 +190,27 @@ export function AdminConsole({ runs: initialRuns }: { runs: SavedRun[] }) {
               </thead>
               <tbody>
                 {runs.length === 0 && (
-                  <tr><td colSpan={6} className="px-3 py-6 text-center text-sm text-[#1A1F2A]/55">No runs yet — submit a question above.</td></tr>
+                  <tr><td colSpan={6} className="px-3 py-6 text-center text-sm text-[var(--ds-text-mute)]">No runs yet — submit a question above.</td></tr>
                 )}
                 {runs.map((r) => (
-                  <tr key={r.hash} className="border-b border-[#1A1F2A]/10 align-top">
+                  <tr key={r.hash} className="border-b border-[var(--ds-border)] align-top">
                     <td className="max-w-[420px] px-3 py-2">
-                      <div className="truncate text-[#0B2545]" title={r.query}>{r.query}</div>
-                      <div className="font-mono text-[10px] text-[#1A1F2A]/45">{r.hash}</div>
+                      <div className="truncate text-[var(--ds-text)]" title={r.query}>{r.query}</div>
+                      <div className="font-mono text-[10px] text-[var(--ds-text-dim)]">{r.hash}</div>
                     </td>
                     <td className="px-3 py-2">
                       <span className={`inline-block rounded-sm border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider ${pill(r.status)}`}>{r.status}</span>
                     </td>
-                    <td className="px-3 py-2 font-mono text-[11px] text-[#1A1F2A]/65">{timeAgo(r.savedAt)}</td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums">{r.tokenTotal.toLocaleString()}</td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums">{r.durationMs}</td>
+                    <td className="px-3 py-2 font-mono text-[11px] text-[var(--ds-text-mute)]">{timeAgo(r.savedAt)}</td>
+                    <td className="px-3 py-2 text-right font-mono tabular-nums text-[var(--ds-text)]">{r.tokenTotal.toLocaleString()}</td>
+                    <td className="px-3 py-2 text-right font-mono tabular-nums text-[var(--ds-text)]">{r.durationMs}</td>
                     <td className="px-3 py-2">
                       <div className="flex items-center gap-2 text-xs">
-                        <Link href={`/admin/replay/${r.hash}`} className="text-[#0B5FFF] hover:underline">replay</Link>
-                        <span className="text-[#1A1F2A]/30">·</span>
-                        <button onClick={() => mark(r.hash, "good")} className="text-[#1E7A47] hover:underline">good</button>
-                        <span className="text-[#1A1F2A]/30">·</span>
-                        <button onClick={() => mark(r.hash, "bad")} className="text-[#A0231C] hover:underline">bad</button>
+                        <Link href={`/admin/replay/${r.hash}`} className="text-[var(--ds-accent)] hover:underline">replay</Link>
+                        <span className="text-[var(--ds-text-dim)]">·</span>
+                        <button onClick={() => mark(r.hash, "good")} className="text-[var(--ds-good)] hover:underline">good</button>
+                        <span className="text-[var(--ds-text-dim)]">·</span>
+                        <button onClick={() => mark(r.hash, "bad")} className="text-[var(--ds-bad)] hover:underline">bad</button>
                       </div>
                     </td>
                   </tr>

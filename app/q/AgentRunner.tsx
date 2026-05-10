@@ -652,13 +652,12 @@ export function AgentRunner({
     if (state.phase === "idle") return "Awaiting";
     return "In progress";
   })();
-  // Brand-aligned status dot color. Sage = done, rust = error, gold = running,
-  // navy = idle (BRAND.md §3 signal mapping).
+  // Status dot color. Good = done, bad = error, warn = running, mute = idle.
   const phaseDot = (() => {
-    if (state.phase === "done") return "var(--tx-sage)";
-    if (state.phase === "error") return "var(--tx-rust)";
-    if (state.phase === "idle") return "var(--tx-navy)";
-    return "var(--tx-gold)";
+    if (state.phase === "done") return "var(--ds-good)";
+    if (state.phase === "error") return "var(--ds-bad)";
+    if (state.phase === "idle") return "var(--ds-text-mute)";
+    return "var(--ds-warn)";
   })();
   const currentStepObj = state.steps[state.currentStep - 1];
   const currentTool = currentStepObj?.tool ?? null;
@@ -694,13 +693,13 @@ export function AgentRunner({
 
   return (
     <div className="grid md:grid-cols-[1fr_420px]">
-      {/* Left column — answer-first body, cream surface */}
-      <div className="min-w-0 bg-tx-cream">
+      {/* Left column — answer-first body, dark surface */}
+      <div className="min-w-0 bg-[var(--ds-bg)]">
         {/* Question recap with live status pill */}
-        <section className="border-b border-tx-ink/10 bg-tx-cream">
+        <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
           <div className="px-6 py-7 md:px-10">
             <div className="flex items-baseline justify-between gap-4">
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
                 {state.phase === "done" ? "Answered" : "Asked"}
               </p>
               <div className="flex items-center gap-2">
@@ -710,46 +709,45 @@ export function AgentRunner({
                   }`}
                   style={{ backgroundColor: phaseDot }}
                 />
-                <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-tx-navy">
+                <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ds-text)]">
                   {phaseDisplayLabel}
                 </span>
               </div>
             </div>
-            <h2 className="mt-3 max-w-[58ch] font-display text-2xl font-normal leading-tight tracking-tight text-tx-navy md:text-[28px]">
+            <h2 className="mt-3 max-w-[58ch] text-2xl font-normal leading-tight tracking-tight text-[var(--ds-text)] md:text-[28px]">
               {query}
             </h2>
           </div>
         </section>
 
-        {/* ── Answer card — DM Serif headline, citation aside, rust CTA ── */}
+        {/* ── Answer card — citation aside, white-on-dark CTA ── */}
         {state.phase === "done" && state.answer ? (
-          <section className="border-b border-tx-ink/10 bg-tx-cream">
+          <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
             <div className="px-6 py-10 md:px-10 md:py-12">
               <div className="grid gap-8 md:grid-cols-12 md:gap-10">
                 <div className="md:col-span-8">
-                  <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
+                  <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
                     Insight
                   </p>
                   {/* When the reporter specialist composed a structured
                       article, render that in place of the plain synthesizer
-                      paragraph (PR #68). Otherwise fall back to the simple
-                      DM Serif headline. */}
+                      paragraph (PR #68). */}
                   {reporterPayload ? (
                     <div className="mt-3">
                       <ReporterComposition result={reporterPayload} />
                     </div>
                   ) : (
-                    <p className="mt-3 max-w-[58ch] font-display text-[28px] font-normal leading-snug tracking-tight text-tx-navy md:text-[32px]">
+                    <p className="mt-3 max-w-[58ch] text-[28px] font-normal leading-snug tracking-tight text-[var(--ds-text)] md:text-[32px]">
                       {state.answer}
                     </p>
                   )}
 
-                  {/* Action row — primary CTA in rust per BRAND §7 */}
+                  {/* Action row — primary CTA inverted (white on dark) */}
                   <div className="mt-7 flex flex-wrap items-center gap-3">
                     {state.citation && (
                       <Link
                         href={`/datasets/${state.citation.dataset_id}`}
-                        className="inline-flex items-center rounded-md bg-tx-rust px-5 py-2 font-body text-sm font-bold text-white hover:bg-tx-rust-dark"
+                        className="inline-flex items-center rounded-md bg-[var(--ds-text)] px-5 py-2 font-body text-sm font-bold text-[var(--ds-bg)] hover:opacity-90"
                       >
                         Open dataset →
                       </Link>
@@ -759,7 +757,7 @@ export function AgentRunner({
                         href={state.citation.api_url}
                         target="_blank"
                         rel="noopener"
-                        className="inline-flex items-center rounded-md border border-tx-ink/15 bg-tx-cream px-5 py-2 font-body text-sm font-bold text-tx-navy hover:border-tx-rust hover:text-tx-rust"
+                        className="inline-flex items-center rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-5 py-2 font-body text-sm font-bold text-[var(--ds-text)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
                       >
                         API endpoint →
                       </a>
@@ -771,7 +769,7 @@ export function AgentRunner({
                           navigator.clipboard.writeText(state.answer ?? "");
                         }
                       }}
-                      className="inline-flex items-center rounded-md border border-tx-ink/15 bg-tx-cream px-5 py-2 font-body text-sm font-bold text-tx-navy hover:border-tx-rust hover:text-tx-rust"
+                      className="inline-flex items-center rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-5 py-2 font-body text-sm font-bold text-[var(--ds-text)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
                     >
                       Copy insight
                     </button>
@@ -786,7 +784,7 @@ export function AgentRunner({
                           navigator.clipboard.writeText(window.location.href);
                         }
                       }}
-                      className="inline-flex items-center rounded-md border border-tx-ink/15 bg-tx-cream px-5 py-2 font-body text-sm font-bold text-tx-navy hover:border-tx-rust hover:text-tx-rust"
+                      className="inline-flex items-center rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-5 py-2 font-body text-sm font-bold text-[var(--ds-text)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
                     >
                       Share
                     </button>
@@ -816,8 +814,8 @@ export function AgentRunner({
 
                   {/* By the numbers — standout figures from the answer */}
                   {numbers.length > 0 && (
-                    <div className="mt-8 border-t border-tx-ink/10 pt-6">
-                      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
+                    <div className="mt-8 border-t border-[var(--ds-border)] pt-6">
+                      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
                         By the numbers
                       </p>
                       <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-3 md:grid-cols-3">
@@ -825,12 +823,12 @@ export function AgentRunner({
                           <div
                             key={i}
                             className="pl-3"
-                            style={{ borderLeft: "3px solid var(--tx-gold)" }}
+                            style={{ borderLeft: "3px solid var(--ds-warn)" }}
                           >
-                            <div className="font-display text-[32px] font-normal leading-none tabular-nums text-tx-navy">
+                            <div className="text-[32px] font-normal leading-none tabular-nums text-[var(--ds-text)]">
                               {n.value}
                             </div>
-                            <div className="mt-1.5 font-mono text-[11px] uppercase tracking-wider text-tx-muted">
+                            <div className="mt-1.5 font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-mute)]">
                               {n.label}
                             </div>
                           </div>
@@ -840,29 +838,26 @@ export function AgentRunner({
                   )}
                 </div>
 
-                {/* Citation aside — BRAND.md card pattern */}
+                {/* Citation aside */}
                 <aside className="md:col-span-4">
                   {state.citation && (
-                    <div
-                      className="rounded-[10px] bg-tx-cream p-5"
-                      style={{ border: "0.5px solid var(--tx-border)" }}
-                    >
-                      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
+                    <div className="rounded-[10px] bg-[var(--ds-bg-elev)] p-5 border border-[var(--ds-border)]">
+                      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
                         Primary source
                       </p>
-                      <p className="mt-3 text-sm font-bold text-tx-navy">
+                      <p className="mt-3 text-sm font-bold text-[var(--ds-text)]">
                         {state.citation.portal}
                       </p>
-                      <p className="mt-1 font-display text-lg font-normal leading-tight text-tx-navy">
+                      <p className="mt-1 text-lg font-normal leading-tight text-[var(--ds-text)]">
                         {state.citation.dataset_name}
                       </p>
-                      <p className="mt-2 font-mono text-[11px] text-tx-muted">
+                      <p className="mt-2 font-mono text-[11px] text-[var(--ds-text-mute)]">
                         {state.citation.dataset_id}
                       </p>
                       <div className="mt-5 flex flex-col gap-2">
                         <Link
                           href={`/datasets/${state.citation.dataset_id}`}
-                          className="inline-flex items-center rounded-md bg-tx-rust px-4 py-2 font-body text-sm font-bold text-white hover:bg-tx-rust-dark"
+                          className="inline-flex items-center rounded-md bg-[var(--ds-text)] px-4 py-2 font-body text-sm font-bold text-[var(--ds-bg)] hover:opacity-90"
                         >
                           Open dataset →
                         </Link>
@@ -871,7 +866,7 @@ export function AgentRunner({
                             href={state.citation.api_url}
                             target="_blank"
                             rel="noopener"
-                            className="text-sm font-bold text-tx-sky hover:text-tx-rust"
+                            className="text-sm font-bold text-[var(--ds-accent)] hover:text-[var(--ds-warm)]"
                           >
                             API endpoint →
                           </a>
@@ -1103,12 +1098,12 @@ export function AgentRunner({
 
         {/* Related angles — only after a successful answer */}
         {state.phase === "done" && state.answer && relatedAngles.length > 0 && (
-          <section className="border-b border-tx-ink/10 bg-tx-cream">
+          <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
             <div className="px-6 py-8 md:px-10 md:py-10">
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
                 Related angles
               </p>
-              <h3 className="mt-2 font-display text-2xl font-normal tracking-tight text-tx-navy">
+              <h3 className="mt-2 text-2xl font-normal tracking-tight text-[var(--ds-text)]">
                 Other questions this dataset can answer.
               </h3>
               <div className="mt-5 grid gap-3 md:grid-cols-3">
@@ -1116,10 +1111,10 @@ export function AgentRunner({
                   <Link
                     key={q}
                     href={`/q?q=${encodeURIComponent(q)}`}
-                    className="group flex items-center justify-between gap-3 rounded-[10px] border border-tx-ink/10 bg-tx-cream px-4 py-3 text-sm leading-snug text-tx-navy transition-colors hover:border-tx-rust hover:text-tx-rust"
+                    className="group flex items-center justify-between gap-3 rounded-[10px] border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-4 py-3 text-sm leading-snug text-[var(--ds-text)] transition-colors hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
                   >
                     <span className="line-clamp-2">{q}</span>
-                    <span className="font-mono text-[12px] text-tx-rust opacity-0 transition-opacity group-hover:opacity-100">
+                    <span className="font-mono text-[12px] text-[var(--ds-accent)] opacity-0 transition-opacity group-hover:opacity-100">
                       →
                     </span>
                   </Link>
@@ -1129,38 +1124,37 @@ export function AgentRunner({
           </section>
         )}
 
-        {/* ── Error state — rust-light surface, rust CTA back home ── */}
+        {/* ── Error state ── */}
         {state.phase === "error" && (
-          <section className="border-b border-tx-ink/10 bg-tx-cream">
+          <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
             <div className="px-6 py-10 md:px-10 md:py-12">
               <div
-                className="rounded-[10px] p-6"
+                className="rounded-[10px] p-6 bg-[var(--ds-bg-elev)]"
                 style={{
-                  background: "var(--tx-rust-light)",
-                  border: "0.5px solid var(--tx-rust)",
+                  border: "0.5px solid var(--ds-bad)",
                   borderLeftWidth: "3px",
-                  borderLeftColor: "var(--tx-rust)",
+                  borderLeftColor: "var(--ds-bad)",
                 }}
               >
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-bad)]">
                   Agent error
                 </p>
-                <h3 className="mt-3 font-display text-2xl font-normal tracking-tight text-tx-navy md:text-3xl">
-                  The agent <span className="italic text-tx-rust">couldn’t finish</span>.
+                <h3 className="mt-3 text-2xl font-normal tracking-tight text-[var(--ds-text)] md:text-3xl">
+                  The agent <span className="italic text-[var(--ds-bad)]">couldn’t finish</span>.
                 </h3>
-                <p className="mt-3 max-w-[60ch] font-mono text-sm leading-relaxed text-tx-navy/85">
+                <p className="mt-3 max-w-[60ch] font-mono text-sm leading-relaxed text-[var(--ds-text)]/85">
                   {state.error}
                 </p>
-                <p className="mt-4 max-w-[60ch] text-sm leading-relaxed text-tx-ink/75">
+                <p className="mt-4 max-w-[60ch] text-sm leading-relaxed text-[var(--ds-text-mute)]">
                   Try a different question or{" "}
-                  <Link href="/" className="text-tx-rust underline hover:text-tx-rust-dark">
+                  <Link href="/" className="text-[var(--ds-accent)] underline hover:text-[var(--ds-warm)]">
                     start over
                   </Link>
                   . Detailed telemetry is in the right panel.
                 </p>
                 <Link
                   href="/"
-                  className="mt-5 inline-flex items-center rounded-md bg-tx-rust px-5 py-2 font-body text-sm font-bold text-white hover:bg-tx-rust-dark"
+                  className="mt-5 inline-flex items-center rounded-md bg-[var(--ds-text)] px-5 py-2 font-body text-sm font-bold text-[var(--ds-bg)] hover:opacity-90"
                 >
                   ← Home
                 </Link>
@@ -1169,22 +1163,22 @@ export function AgentRunner({
           </section>
         )}
 
-        {/* ── Working state — animated cream skeleton with mono progress line ── */}
+        {/* ── Working state — animated dark skeleton ── */}
         {state.phase !== "done" &&
           state.phase !== "error" &&
           state.phase !== "idle" &&
           state.steps.length === 0 && (
-            <section className="border-b border-tx-ink/10 bg-tx-cream">
+            <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
               <div className="px-6 py-10 md:px-10 md:py-12">
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
                   Insight
                 </p>
                 <div className="mt-4 max-w-[58ch] space-y-3">
-                  <div className="h-7 w-[90%] animate-pulse rounded bg-tx-ink/5" />
-                  <div className="h-7 w-[78%] animate-pulse rounded bg-tx-ink/5" />
-                  <div className="h-7 w-[60%] animate-pulse rounded bg-tx-ink/5" />
+                  <div className="h-7 w-[90%] animate-pulse rounded bg-[var(--ds-bg-elev)]" />
+                  <div className="h-7 w-[78%] animate-pulse rounded bg-[var(--ds-bg-elev)]" />
+                  <div className="h-7 w-[60%] animate-pulse rounded bg-[var(--ds-bg-elev)]" />
                 </div>
-                <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.16em] text-tx-muted">
+                <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ds-text-mute)]">
                   {state.phase === "reasoning" && "Codex parsing the question…"}
                   {state.phase === "planning" && "Building the tool sequence…"}
                   {state.phase === "executing" &&
@@ -1243,19 +1237,14 @@ function isReporterResult(v: unknown): v is ReporterResult {
   );
 }
 
-// Insight badge / meta-chip — BRAND.md §7 (gold-light bg, gold mono text).
+// Insight badge / meta-chip — dark-system version (elev bg, warn accent).
 function MetaChip({ label, value }: { label: string; value: string }) {
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.08em]"
-      style={{
-        background: "var(--tx-gold-light)",
-        color: "var(--tx-gold-dark)",
-        border: "0.5px solid rgba(212,139,16,0.3)",
-      }}
+      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] bg-[var(--ds-bg-elev)] border border-[var(--ds-border)]"
     >
-      <span className="text-tx-gold-dark/70">{label}</span>
-      <span className="tabular-nums text-tx-navy">{value}</span>
+      <span className="text-[var(--ds-text-mute)]">{label}</span>
+      <span className="tabular-nums text-[var(--ds-text)]">{value}</span>
     </span>
   );
 }

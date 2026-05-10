@@ -53,16 +53,16 @@ export default async function AdminPage() {
 
   return (
     <Shell active="/admin">
-      <section className="border-b border-[#1A1F2A]/10 bg-white">
+      <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
         <div className="mx-auto max-w-[1320px] px-6 py-8 md:px-10">
           <div className="flex items-baseline justify-between gap-4">
-            <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">Datasets · {CATALOG.length}</p>
-            <p className="font-mono text-[10px] uppercase tracking-wider text-[#1A1F2A]/55">live count · revalidate 60s</p>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-accent)]">Datasets · {CATALOG.length}</p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-mute)]">live count · revalidate 60s</p>
           </div>
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-full border-collapse text-sm">
-              <thead className="border-b border-[#1A1F2A]/15 bg-[#F4F6FB]">
-                <tr className="text-left font-mono text-[11px] uppercase tracking-wider text-[#1A1F2A]/65">
+              <thead className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
+                <tr className="text-left font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-mute)]">
                   <th className="px-3 py-2 font-semibold">id</th>
                   <th className="px-3 py-2 font-semibold">portal</th>
                   <th className="px-3 py-2 font-semibold">title</th>
@@ -73,17 +73,17 @@ export default async function AdminPage() {
               </thead>
               <tbody>
                 {datasetRows.map((d) => (
-                  <tr key={d.id} className="border-b border-[#1A1F2A]/10 align-top">
-                    <td className="px-3 py-2 font-mono text-xs text-[#0B2545]"><Link href={`/datasets/${d.id}`} className="hover:underline">{d.id}</Link></td>
-                    <td className="px-3 py-2 font-mono text-[11px] text-[#1A1F2A]/75">{d.portal}</td>
-                    <td className="px-3 py-2 font-semibold text-[#0B2545]">{d.title}</td>
-                    <td className="px-3 py-2 font-mono text-[11px] text-[#1A1F2A]/65">
+                  <tr key={d.id} className="border-b border-[var(--ds-border)] align-top">
+                    <td className="px-3 py-2 font-mono text-xs text-[var(--ds-text)]"><Link href={`/datasets/${d.id}`} className="hover:underline">{d.id}</Link></td>
+                    <td className="px-3 py-2 font-mono text-[11px] text-[var(--ds-text-mute)]">{d.portal}</td>
+                    <td className="px-3 py-2 font-semibold text-[var(--ds-text)]">{d.title}</td>
+                    <td className="px-3 py-2 font-mono text-[11px] text-[var(--ds-text-mute)]">
                       {d.keyColumns.slice(0, 4).join(", ")}{d.keyColumns.length > 4 && "…"}
                     </td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums text-[#0B2545]">
-                      {d.error ? <span className="text-[#A0231C]" title={d.error}>err</span> : (d.rowCount === null ? "—" : d.rowCount.toLocaleString())}
+                    <td className="px-3 py-2 text-right font-mono tabular-nums text-[var(--ds-text)]">
+                      {d.error ? <span className="text-[var(--ds-bad)]" title={d.error}>err</span> : (d.rowCount === null ? "—" : d.rowCount.toLocaleString())}
                     </td>
-                    <td className="px-3 py-2 font-mono text-[11px] text-[#1A1F2A]/55">{timeAgo(d.fetchedAt)}</td>
+                    <td className="px-3 py-2 font-mono text-[11px] text-[var(--ds-text-mute)]">{timeAgo(d.fetchedAt)}</td>
                   </tr>
                 ))}
               </tbody>
