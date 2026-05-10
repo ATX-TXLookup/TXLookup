@@ -27,12 +27,35 @@ test("isSpecialistName recognizes the three roster names", () => {
   assert.equal(isSpecialistName("nope"), false);
 });
 
-test("reporter is still a stub (returns not-yet-implemented)", async () => {
+test("all three specialists are now LIVE (no stubs left in the registry)", async () => {
+  _resetSpecialistsForTest();
+  for (const name of ["data_analyst", "reporter", "support"]) {
+    const env = await callSpecialist(name, {});
+    assert.equal(env.agent, name);
+    // Each LIVE specialist returns its own response for empty input —
+    // data_analyst/reporter fail with their own validation, support
+    // intentionally returns a friendly intro. None should return the
+    // generic "not yet implemented" stub message.
+    assert.doesNotMatch(env.error ?? "", /not yet implemented/i, `${name} should not return the stub message`);
+  }
+});
+
+test("reporter — empty input fails clearly (no crash)", async () => {
   _resetSpecialistsForTest();
   const env = await callSpecialist("reporter", {});
   assert.equal(env.agent, "reporter");
   assert.equal(env.status, "failed");
-  assert.match(env.error ?? "", /not yet implemented/i);
+  assert.match(env.error ?? "", /dataset_id|query/i);
+});
+
+test("reporter — unknown dataset_id fails clearly", async () => {
+  _resetSpecialistsForTest();
+  const env = await callSpecialist("reporter", {
+    query: "report on permits",
+    dataset_id: "phantom-id",
+  });
+  assert.equal(env.status, "failed");
+  assert.match(env.error ?? "", /unknown dataset_id/i);
 });
 
 test("data_analyst — empty input fails clearly (no crash)", async () => {

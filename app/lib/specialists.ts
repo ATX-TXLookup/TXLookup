@@ -3,14 +3,15 @@
 // The orchestrator's `delegate_to` step type (in `executeStep`) routes to the
 // matching specialist via this registry.
 //   #64 — data_analyst (statistical SoQL, yoy/qoq deltas, anomalies)  — LIVE
-//   #65 — reporter (compose_report → JSON snapshot for /reports/[slug]) — STUB
+//   #65 — reporter (compose_report → structured report envelope)      — LIVE
 //   #66 — support (disambiguation, meta-questions, no Socrata)         — LIVE
 //
 // Per the spec all three should eventually live in `agent/specialists/*.py`
-// (Python, called via MCP). For demo-day reliability the live specialists
+// (Python, called via MCP) and reporter should also persist to
+// data/reports/{slug}.json. For demo-day reliability the live specialists
 // are implemented in TS in-process here — same envelope shape, no MCP
-// roundtrip latency, no extra moving parts. Python migration is a post-demo
-// follow-up. reporter remains a stub until #65 lands.
+// roundtrip latency, no extra moving parts. Filesystem persistence + Python
+// migration are post-demo follow-ups.
 
 import OpenAI from "openai";
 import { CATALOG, findById } from "./catalog";
@@ -50,7 +51,7 @@ const NOT_YET: (name: SpecialistName) => SpecialistEnvelope = (name) => ({
   error: `specialist "${name}" is registered but not yet implemented — see the corresponding PR for the live wire-up`,
 });
 
-const reporterStub: Specialist = async () => NOT_YET("reporter");
+// (reporterStub removed — reporter is now LIVE; see implementation below)
 
 // --- Support specialist (LIVE) -------------------------------------------
 // Lightweight, no Socrata. Three jobs:
@@ -501,11 +502,285 @@ const dataAnalyst: Specialist = async (rawInput) => {
   };
 };
 
+// --- Reporter specialist (LIVE) ------------------------------------------
+// Composes a structured "report" envelope from a topic + dataset. Two-stage:
+//   1. Run 2-3 sodaQuery calls to get hero numbers (total, top zip, recent
+//      monthly trend) — same Socrata client as the rest of the system.
+//   2. Ask Codex to write category/title/dek/section prose around those
+//      numbers in a strict JSON shape. The LLM only writes prose; all
+//      numbers come from the live queries (no hallucinated counts).
+//
+// Output envelope (.result):
+//   {
+//     slug, category, title, dek,
+//     hero_stats: [{ value, label, delta? }],
+//     sections: [{ heading, prose, key_numbers, viz? }],
+//     sources: [{ portal, dataset_id, url, last_refreshed }],
+//     composed_by: { agent, composed_at },
+//     method_footer: string
+//   }
+//
+// What's deliberately out of scope (per #65, reasonable demo trade-off):
+//   - Filesystem writes to data/reports/{slug}.json — defer to follow-up.
+//   - Splicing run-archive prior runs — defer to follow-up.
+
+let _reporterClient: OpenAI | null = null;
+function reporterClient() {
+  if (!_reporterClient) {
+    if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY missing");
+    _reporterClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+  return _reporterClient;
+}
+
+type ReporterInput = {
+  query?: string;
+  dataset_id?: string;
+  slug?: string;
+  // Optional pre-computed findings from a prior data_analyst step in the
+  // same plan. When present, reporter uses these directly instead of
+  // running its own queries.
+  findings?: Array<{ text?: string; value?: unknown; baseline?: unknown; pct_change?: unknown; unit?: unknown }>;
+};
+
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+}
+
+// Pick a sensible date column for the report's recency window. Heuristic:
+// use the dataset's first key column whose name contains "date" / "time".
+function dateColumnFor(dsKeyColumns: string[]): string | null {
+  for (const c of dsKeyColumns) {
+    if (/date|time|month|year/i.test(c)) return c;
+  }
+  return null;
+}
+
+// Pick a "geography" column for top-N grouping. Heuristic: zip first, then
+// district, then anything containing "location" / "address".
+function geoColumnFor(dsKeyColumns: string[]): string | null {
+  const priority = [
+    /^original_zip$/,
+    /^zip(_code)?$/,
+    /zip/,
+    /council_district/,
+    /district/,
+    /location/,
+  ];
+  for (const re of priority) {
+    const hit = dsKeyColumns.find((c) => re.test(c));
+    if (hit) return hit;
+  }
+  return null;
+}
+
+const REPORTER_SYSTEM_PROMPT = `You are TXLookup's reporting specialist. You compose a structured civic-data
+report from REAL numbers the user supplies. You do NOT invent numbers, dates, or trends — only the prose
+that frames them.
+
+Output ONLY a JSON object with this exact shape:
+{
+  "category": string (one of: "Construction", "Public Safety", "Public Health", "311 & Code", "Transportation", "Government & Tax"),
+  "title": string (5-10 words, headline-cased),
+  "dek": string (one sentence, ≤25 words, summarizes the big finding),
+  "sections": [
+    {
+      "heading": string (3-7 words),
+      "prose": string (2-4 sentences, references the numbers from the user-provided "facts" array)
+    }
+  ]
+}
+
+Rules:
+- Sections: 2-3, no more.
+- Every prose paragraph MUST cite at least one number from the supplied facts.
+- Do NOT make up percentages, time periods, or comparisons that aren't in facts.
+- Style: civic, factual, USA Today / USAFacts tone. No marketing-speak.`;
+
+// Format a number like the rest of the system does, for the LLM prompt.
+function rNum(v: unknown): string {
+  const n = Number(v ?? 0);
+  if (!Number.isFinite(n)) return String(v ?? "?");
+  return n.toLocaleString("en-US");
+}
+
+const reporter: Specialist = async (rawInput) => {
+  const input = rawInput as ReporterInput;
+  const datasetId = (input.dataset_id ?? "").trim();
+  const query = (input.query ?? "").trim();
+
+  if (!datasetId || !query) {
+    return {
+      agent: "reporter",
+      status: "failed",
+      result: null,
+      error: "reporter: input must include dataset_id and query",
+    };
+  }
+
+  const ds = findById(datasetId);
+  if (!ds) {
+    return {
+      agent: "reporter",
+      status: "failed",
+      result: null,
+      error: `reporter: unknown dataset_id ${datasetId}`,
+    };
+  }
+
+  const slug = (input.slug ?? slugify(`${ds.title}-${query}`)).slice(0, 60);
+
+  // ---- Stage 1: collect hero numbers -------------------------------------
+  // Either reuse pre-computed findings from a prior data_analyst step, or
+  // run a few simple sodaQuery calls.
+  type Fact = { label: string; value: number | string; sub?: string; url?: string };
+  const facts: Fact[] = [];
+  const sources: Array<{ portal: string; dataset_id: string; url: string; last_refreshed?: string }> = [];
+
+  if (input.findings && Array.isArray(input.findings) && input.findings.length > 0) {
+    // Reuse — assume data_analyst already did the work.
+    for (const f of input.findings.slice(0, 5)) {
+      facts.push({
+        label: typeof f.text === "string" ? f.text.slice(0, 80) : "finding",
+        value: typeof f.value === "number" || typeof f.value === "string" ? f.value : "—",
+        sub: typeof f.unit === "string" ? f.unit : undefined,
+      });
+    }
+    sources.push({ portal: ds.portal, dataset_id: ds.id, url: `https://${ds.portal}/d/${ds.id}` });
+  } else {
+    // Compose a simple 3-query sweep: total in last 30d, top geo, total this year.
+    const dateCol = dateColumnFor(ds.keyColumns);
+    const geoCol = geoColumnFor(ds.keyColumns);
+    const isoDay = (d: number) => new Date(Date.now() - d * 86_400_000).toISOString().slice(0, 10);
+
+    // a) Total last 30 days
+    if (dateCol) {
+      const r = await sodaQuery(ds.portal, ds.id, {
+        select: "count(*) AS count",
+        where: `${dateCol} >= '${isoDay(30)}'`,
+        limit: 1,
+      });
+      if (r.status === "completed" && r.result?.records[0]) {
+        const v = Number(r.result.records[0].count ?? 0);
+        facts.push({ label: `${ds.title} in the last 30 days`, value: v, sub: "records", url: r.result.url });
+        sources.push({ portal: ds.portal, dataset_id: ds.id, url: r.result.url });
+      }
+    }
+
+    // b) Top geo (zip / district)
+    if (geoCol) {
+      const r = await sodaQuery(ds.portal, ds.id, {
+        select: `${geoCol}, count(*) AS count`,
+        where: dateCol ? `${dateCol} >= '${isoDay(365)}'` : undefined,
+        group: geoCol,
+        order: "count DESC",
+        limit: 5,
+      });
+      if (r.status === "completed" && r.result?.records[0]) {
+        const top = r.result.records[0];
+        const k = String(top[geoCol] ?? "—");
+        const v = Number(top.count ?? 0);
+        facts.push({ label: `Top ${geoCol.replace(/_/g, " ")} in last 12 months`, value: `${k} (${rNum(v)})`, url: r.result.url });
+        sources.push({ portal: ds.portal, dataset_id: ds.id, url: r.result.url });
+      }
+    }
+
+    // c) Total in last 365 days (year-scale baseline)
+    if (dateCol) {
+      const r = await sodaQuery(ds.portal, ds.id, {
+        select: "count(*) AS count",
+        where: `${dateCol} >= '${isoDay(365)}'`,
+        limit: 1,
+      });
+      if (r.status === "completed" && r.result?.records[0]) {
+        const v = Number(r.result.records[0].count ?? 0);
+        facts.push({ label: `${ds.title} in the last 12 months`, value: v, sub: "records", url: r.result.url });
+        sources.push({ portal: ds.portal, dataset_id: ds.id, url: r.result.url });
+      }
+    }
+  }
+
+  if (facts.length === 0) {
+    return {
+      agent: "reporter",
+      status: "failed",
+      result: null,
+      error: "reporter: no facts available — no findings provided and the dataset's hero queries returned nothing usable",
+    };
+  }
+
+  // ---- Stage 2: have Codex write the prose around the facts --------------
+  const factsLines = facts
+    .map((f, i) => `  ${i + 1}. ${f.label}: ${rNum(f.value)}${f.sub ? " " + f.sub : ""}`)
+    .join("\n");
+
+  let composed: { category?: string; title?: string; dek?: string; sections?: Array<{ heading: string; prose: string }> } = {};
+  try {
+    const completion = await reporterClient().chat.completions.create({
+      model: "gpt-4o-2024-11-20",
+      messages: [
+        { role: "system", content: REPORTER_SYSTEM_PROMPT },
+        {
+          role: "user",
+          content: `Topic: ${query}\nDataset: ${ds.title} (${ds.id}, ${ds.portal})\n\nFacts (use ONLY these numbers):\n${factsLines}`,
+        },
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.3,
+      max_tokens: 600,
+    });
+    composed = JSON.parse(completion.choices[0]?.message?.content ?? "{}");
+  } catch (e: unknown) {
+    return {
+      agent: "reporter",
+      status: "failed",
+      result: null,
+      error: `reporter: Codex composition failed — ${e instanceof Error ? e.message : String(e)}`,
+    };
+  }
+
+  const heroStats = facts.slice(0, 3).map((f) => ({
+    value: typeof f.value === "number" ? rNum(f.value) : String(f.value),
+    label: f.label,
+  }));
+
+  const sections = (composed.sections ?? []).slice(0, 3).map((s, i) => ({
+    heading: typeof s.heading === "string" ? s.heading : `Section ${i + 1}`,
+    prose: typeof s.prose === "string" ? s.prose : "",
+    key_numbers: facts.slice(i, i + 2).map((f) => ({ label: f.label, value: typeof f.value === "number" ? rNum(f.value) : String(f.value) })),
+  }));
+
+  return {
+    agent: "reporter",
+    status: "completed",
+    result: {
+      slug,
+      category: typeof composed.category === "string" ? composed.category : "General",
+      title: typeof composed.title === "string" ? composed.title : ds.title,
+      dek: typeof composed.dek === "string" ? composed.dek : `Composed report on ${query} from ${ds.title}.`,
+      hero_stats: heroStats,
+      sections,
+      sources: Array.from(
+        new Map(sources.map((s) => [s.url, s])).values(), // dedupe by url
+      ),
+      composed_by: { agent: "reporter" as const, composed_at: new Date().toISOString() },
+      method_footer: `This report was composed by the TXLookup reporter agent on ${new Date().toISOString().slice(0, 10)} from ${sources.length} live Socrata queries on ${ds.portal}.`,
+    },
+    error: null,
+    confidence: 0.75,
+    artifacts: sources.map((s) => s.url),
+  };
+};
+
 // --- Registry -------------------------------------------------------------
 
 const REGISTRY: Record<SpecialistName, Specialist> = {
   data_analyst: dataAnalyst,
-  reporter: reporterStub,
+  reporter: reporter,
   support: support,
 };
 
@@ -539,6 +814,6 @@ export function _setSpecialistForTest(
 
 export function _resetSpecialistsForTest(): void {
   REGISTRY.data_analyst = dataAnalyst;
-  REGISTRY.reporter = reporterStub;
+  REGISTRY.reporter = reporter;
   REGISTRY.support = support;
 }
