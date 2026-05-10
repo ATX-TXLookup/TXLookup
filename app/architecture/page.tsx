@@ -1,7 +1,4 @@
-import Link from "next/link";
-
-import { SiteHeader } from "@/app/components/SiteHeader";
-import { SiteFooter } from "@/app/components/SiteFooter";
+import { Shell } from "@/app/components/ds";
 
 const flows = [
   {
@@ -90,19 +87,15 @@ export const metadata = { title: "Architecture — TXLookup" };
 
 export default function ArchitecturePage() {
   return (
-    <main className="min-h-screen bg-white text-[#1A1F2A] font-body">
-      <SiteHeader activePath="/architecture" />
-
+    <Shell active="/architecture">
       {/* Hero */}
-      <section className="border-b border-[#1A1F2A]/10 bg-[#F4F6FB]">
-        <div className="mx-auto max-w-[1320px] px-6 py-16 md:px-10 md:py-20">
-          <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
-            Architecture
-          </p>
-          <h1 className="mt-4 max-w-[24ch] font-display text-[40px] font-black leading-[1.05] tracking-tight text-[#0B2545] md:text-[64px]">
-            How the system fits together.
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1200px] px-6 py-16 md:px-8 md:py-20">
+          <h1 className="max-w-[24ch] text-[40px] font-bold leading-[1.05] tracking-[-0.02em] text-[var(--ds-text)] md:text-[64px]">
+            How the system{" "}
+            <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">fits together.</span>
           </h1>
-          <p className="mt-6 max-w-[64ch] text-base leading-relaxed text-[#1A1F2A]/80 md:text-lg">
+          <p className="mt-6 max-w-[64ch] text-base leading-relaxed text-[var(--ds-text-mute)] md:text-lg">
             TXLookup is one Codex-driven agent surfaced through five flows.
             All five share a typed plan/dispatch contract, a single skill
             policy, and the same bounded Socrata client. The diagram below
@@ -113,31 +106,23 @@ export default function ArchitecturePage() {
       </section>
 
       {/* Layered diagram */}
-      <section className="border-b border-[#1A1F2A]/10 bg-white">
-        <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
-          <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
-            Layers
-          </p>
-          <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-[#0B2545] md:text-4xl">
-            Six layers, top to bottom.
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1200px] px-6 py-14 md:px-8 md:py-20">
+          <h2 className="text-3xl font-bold tracking-tight text-[var(--ds-text)] md:text-4xl">
+            Six layers,{" "}
+            <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">top to bottom.</span>
           </h2>
           <div className="mt-8 grid gap-3">
             {layers.map((layer, i) => (
               <div
                 key={layer.name}
-                className="grid items-center gap-4 rounded-md border border-[#1A1F2A]/10 bg-white px-5 py-4 md:grid-cols-[200px_1fr]"
-                style={{
-                  background:
-                    i % 2 === 0
-                      ? "linear-gradient(90deg, #F4F6FB 0%, white 30%)"
-                      : "white",
-                }}
+                className="grid items-center gap-4 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-5 py-4 md:grid-cols-[200px_1fr]"
               >
                 <div className="flex items-center gap-3">
-                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-accent)]">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className="font-display text-base font-bold text-[#0B2545]">
+                  <span className="text-base font-bold text-[var(--ds-text)]">
                     {layer.name}
                   </span>
                 </div>
@@ -145,7 +130,7 @@ export default function ArchitecturePage() {
                   {layer.items.map((it) => (
                     <span
                       key={it}
-                      className="rounded-sm border border-[#1A1F2A]/10 bg-white px-3 py-1 font-mono text-[11px] text-[#1A1F2A]/85"
+                      className="rounded-sm border border-[var(--ds-border)] bg-[var(--ds-bg)] px-3 py-1 font-mono text-[11px] text-[var(--ds-text-mute)]"
                     >
                       {it}
                     </span>
@@ -154,56 +139,54 @@ export default function ArchitecturePage() {
               </div>
             ))}
           </div>
-          <p className="mt-6 font-mono text-[11px] uppercase tracking-wider text-[#1A1F2A]/55">
+          <p className="mt-6 font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-dim)]">
             Markdown source: docs/architecture.md
           </p>
         </div>
       </section>
 
       {/* Flows */}
-      <section className="border-b border-[#1A1F2A]/10 bg-[#F4F6FB]">
-        <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
-          <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
-            Flows
-          </p>
-          <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-[#0B2545] md:text-4xl">
-            Five surfaces, one agent.
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1200px] px-6 py-14 md:px-8 md:py-20">
+          <h2 className="text-3xl font-bold tracking-tight text-[var(--ds-text)] md:text-4xl">
+            Five surfaces,{" "}
+            <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">one agent.</span>
           </h2>
           <div className="mt-10 grid gap-6 md:grid-cols-2">
             {flows.map((f) => (
               <div
                 key={f.n}
-                className="flex flex-col rounded-md border border-[#1A1F2A]/10 bg-white p-6"
+                className="flex flex-col rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-6"
               >
                 <div className="flex items-baseline gap-3">
-                  <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+                  <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-accent)]">
                     Flow {f.n}
                   </span>
-                  <span className="rounded-sm bg-[#0B2545] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-white">
+                  <span className="rounded-sm bg-[var(--ds-text)] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-[var(--ds-bg)]">
                     {f.surface}
                   </span>
                 </div>
-                <h3 className="mt-3 font-display text-xl font-bold leading-tight text-[#0B2545]">
+                <h3 className="mt-3 text-xl font-bold leading-tight text-[var(--ds-text)]">
                   {f.title}
                 </h3>
-                <ol className="mt-4 space-y-2 text-sm text-[#1A1F2A]/85">
+                <ol className="mt-4 space-y-2 text-sm text-[var(--ds-text-mute)]">
                   {f.steps.map((s, i) => (
                     <li key={i} className="flex gap-3">
-                      <span className="font-mono text-[11px] font-semibold tabular-nums text-[#1A1F2A]/55">
+                      <span className="font-mono text-[11px] font-semibold tabular-nums text-[var(--ds-text-dim)]">
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <span>{s}</span>
                     </li>
                   ))}
                 </ol>
-                <div className="mt-5 flex flex-wrap gap-2 border-t border-[#1A1F2A]/10 pt-4">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#1A1F2A]/55">
+                <div className="mt-5 flex flex-wrap gap-2 border-t border-[var(--ds-border)] pt-4">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
                     Nodes:
                   </span>
                   {f.nodes.map((n) => (
                     <span
                       key={n}
-                      className="rounded-sm border border-[#1A1F2A]/10 bg-[#F4F6FB] px-2 py-0.5 font-mono text-[10px] text-[#1A1F2A]/85"
+                      className="rounded-sm border border-[var(--ds-border)] bg-[var(--ds-bg)] px-2 py-0.5 font-mono text-[10px] text-[var(--ds-text-mute)]"
                     >
                       {n}
                     </span>
@@ -216,13 +199,10 @@ export default function ArchitecturePage() {
       </section>
 
       {/* See also */}
-      <section className="border-b border-[#1A1F2A]/10 bg-white">
-        <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
-          <p className="font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
-            Read more
-          </p>
-          <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-[#0B2545] md:text-4xl">
-            Companion docs.
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1200px] px-6 py-14 md:px-8 md:py-20">
+          <h2 className="text-3xl font-bold tracking-tight text-[var(--ds-text)] md:text-4xl">
+            Companion <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">docs.</span>
           </h2>
           <ul className="mt-8 grid gap-3 md:grid-cols-2">
             {[
@@ -249,14 +229,14 @@ export default function ArchitecturePage() {
             ].map((d) => (
               <li
                 key={d.href}
-                className="rounded-md border border-[#1A1F2A]/10 bg-white p-5 hover:border-[#0B5FFF]"
+                className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5 hover:border-[var(--ds-text-dim)]"
               >
                 <a href={d.href} className="block">
-                  <p className="font-display text-base font-bold text-[#0B2545]">
+                  <p className="text-base font-bold text-[var(--ds-text)]">
                     {d.t}
                   </p>
-                  <p className="mt-1 text-sm text-[#1A1F2A]/75">{d.d}</p>
-                  <p className="mt-2 font-mono text-[11px] uppercase tracking-wider text-[#0B5FFF]">
+                  <p className="mt-1 text-sm text-[var(--ds-text-mute)]">{d.d}</p>
+                  <p className="mt-2 font-mono text-[11px] uppercase tracking-wider text-[var(--ds-accent)]">
                     Read on GitHub →
                   </p>
                 </a>
@@ -265,8 +245,6 @@ export default function ArchitecturePage() {
           </ul>
         </div>
       </section>
-
-      <SiteFooter />
-    </main>
+    </Shell>
   );
 }

@@ -5,6 +5,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { listRuns, type SavedRun } from "@/app/lib/run-archive";
+import { Shell } from "@/app/components/ds";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -235,36 +236,32 @@ export default async function AgentDetailPage({ params }: Props) {
     : allRuns.slice(0, 12);
 
   return (
-    <main className="min-h-screen bg-[var(--ds-bg)] text-[var(--ds-text)] font-body">
-      <div className="bg-[var(--ds-bg-elev)] text-white">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-6 py-2 text-[13px] md:px-10">
-          <Link href="/agents" className="text-white/85 hover:text-[var(--ds-warn)]">
-            ← All agents
-          </Link>
-          <span className="hidden font-mono text-[11px] uppercase tracking-wider text-white/70 md:inline">
-            v0.1
-          </span>
-        </div>
-      </div>
-
+    <Shell active="/agents">
       {/* Hero */}
       <section
         className="border-b border-[var(--ds-border)]"
         style={{
-          background: "var(--tx-navy)",
           backgroundImage: `radial-gradient(circle at 80% 30%, ${agent.color}1A 0%, transparent 55%)`,
         }}
       >
         <div className="mx-auto max-w-[1100px] px-6 py-12 md:px-10 md:py-16">
-          <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em]" style={{ color: agent.color }}>
-            Agent · {agent.role}
-          </p>
-          <h1 className="mt-3 max-w-[24ch] font-display-serif text-4xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl">
-            {agent.label}
+          <div className="mb-6">
+            <Link
+              href="/agents"
+              className="font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-mute)] hover:text-[var(--ds-text)]"
+            >
+              ← All agents
+            </Link>
+          </div>
+          <h1 className="max-w-[24ch] text-4xl font-bold leading-[1.05] tracking-tight text-[var(--ds-text)] md:text-6xl">
+            <span className="font-display-serif font-normal">{agent.label}</span>
           </h1>
-          <p className="mt-5 max-w-[60ch] text-base leading-relaxed text-white/85 md:text-lg">{agent.description}</p>
+          <p className="mt-3 font-mono text-[12px] font-semibold uppercase tracking-[0.18em]" style={{ color: agent.color }}>
+            {agent.role}
+          </p>
+          <p className="mt-5 max-w-[60ch] text-base leading-relaxed text-[var(--ds-text-mute)] md:text-lg">{agent.description}</p>
           <div className="mt-6 flex flex-wrap gap-2 font-mono text-[11px] uppercase tracking-wider">
-            <span className="rounded-sm border border-white/30 px-3 py-1 text-white/85">{agent.schedule}</span>
+            <span className="rounded-sm border border-[var(--ds-border-strong)] px-3 py-1 text-[var(--ds-text-mute)]">{agent.schedule}</span>
             <span className="rounded-sm border px-3 py-1" style={{ borderColor: agent.color, color: agent.color }}>
               {agent.status}
             </span>
@@ -273,13 +270,11 @@ export default async function AgentDetailPage({ params }: Props) {
       </section>
 
       {/* How it works */}
-      <section className="border-b border-[var(--ds-border)] bg-white">
+      <section className="border-b border-[var(--ds-border)]">
         <div className="mx-auto max-w-[1100px] px-6 py-12 md:px-10 md:py-16">
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
-            How it works
-          </p>
-          <h2 className="mt-2 font-display-serif text-2xl font-bold text-[var(--ds-text)] md:text-3xl">
-            What this agent actually does, step by step.
+          <h2 className="text-2xl font-bold text-[var(--ds-text)] md:text-3xl">
+            What this agent actually does,{" "}
+            <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">step by step.</span>
           </h2>
           <ol className="mt-8 space-y-4">
             {agent.how_it_works.map((step, i) => (
@@ -295,16 +290,14 @@ export default async function AgentDetailPage({ params }: Props) {
       </section>
 
       {/* I/O contract */}
-      <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
+      <section className="border-b border-[var(--ds-border)]">
         <div className="mx-auto max-w-[1100px] px-6 py-12 md:px-10 md:py-16">
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
-            Contract
-          </p>
-          <h2 className="mt-2 font-display-serif text-2xl font-bold text-[var(--ds-text)] md:text-3xl">
-            Inputs &amp; outputs.
+          <h2 className="text-2xl font-bold text-[var(--ds-text)] md:text-3xl">
+            Inputs &amp;{" "}
+            <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">outputs.</span>
           </h2>
-          <div className="mt-8 grid gap-px bg-tx-ink/10 md:grid-cols-2">
-            <div className="bg-white p-6">
+          <div className="mt-8 grid gap-px bg-[var(--ds-border)] md:grid-cols-2">
+            <div className="bg-[var(--ds-bg-elev)] p-6">
               <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[var(--ds-warn)]">Inputs</p>
               <ul className="mt-3 space-y-2">
                 {agent.inputs.map((x, i) => (
@@ -314,7 +307,7 @@ export default async function AgentDetailPage({ params }: Props) {
                 ))}
               </ul>
             </div>
-            <div className="bg-white p-6">
+            <div className="bg-[var(--ds-bg-elev)] p-6">
               <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[var(--ds-warn)]">Outputs</p>
               <ul className="mt-3 space-y-2">
                 {agent.outputs.map((x, i) => (
@@ -329,15 +322,13 @@ export default async function AgentDetailPage({ params }: Props) {
       </section>
 
       {/* Source files */}
-      <section className="border-b border-[var(--ds-border)] bg-white">
+      <section className="border-b border-[var(--ds-border)]">
         <div className="mx-auto max-w-[1100px] px-6 py-12 md:px-10 md:py-16">
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
-            Source
-          </p>
-          <h2 className="mt-2 font-display-serif text-2xl font-bold text-[var(--ds-text)] md:text-3xl">
-            Where this agent lives in the codebase.
+          <h2 className="text-2xl font-bold text-[var(--ds-text)] md:text-3xl">
+            Where this agent lives{" "}
+            <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">in the codebase.</span>
           </h2>
-          <div className="mt-8 divide-y divide-tx-ink/10 border border-[var(--ds-border)]">
+          <div className="mt-8 divide-y divide-[var(--ds-border)] overflow-hidden rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
             {agent.source_files.map((f) => (
               <div key={f.path} className="grid gap-2 p-4 md:grid-cols-[280px_1fr]">
                 <a
@@ -346,7 +337,7 @@ export default async function AgentDetailPage({ params }: Props) {
                 >
                   {f.path}
                 </a>
-                <p className="text-sm text-[var(--ds-text)]/85">{f.description}</p>
+                <p className="text-sm text-[var(--ds-text-mute)]">{f.description}</p>
               </div>
             ))}
           </div>
@@ -354,36 +345,32 @@ export default async function AgentDetailPage({ params }: Props) {
       </section>
 
       {/* Recent runs */}
-      <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
+      <section className="border-b border-[var(--ds-border)]">
         <div className="mx-auto max-w-[1100px] px-6 py-12 md:px-10 md:py-16">
           <div className="flex items-baseline justify-between gap-4">
-            <div>
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
-                Recent activity
-              </p>
-              <h2 className="mt-2 font-display-serif text-2xl font-bold text-[var(--ds-text)] md:text-3xl">
-                Last {runs.length} runs that touched this agent.
-              </h2>
-            </div>
-            <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text)]/55">
+            <h2 className="text-2xl font-bold text-[var(--ds-text)] md:text-3xl">
+              Last {runs.length} runs{" "}
+              <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">that touched this agent.</span>
+            </h2>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
               auto-refresh 60s
             </p>
           </div>
-          <div className="mt-8 border border-[var(--ds-border)] bg-white">
+          <div className="mt-8 overflow-hidden rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
             {runs.length === 0 ? (
-              <div className="px-6 py-12 text-center font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text)]/55">
+              <div className="px-6 py-12 text-center font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-dim)]">
                 No recent runs touched {agent.label} yet.
               </div>
             ) : (
-              <ul className="divide-y divide-tx-ink/10">
+              <ul className="divide-y divide-[var(--ds-border)]">
                 {runs.map((r) => (
                   <li key={r.hash} className="grid gap-4 px-6 py-4 md:grid-cols-[100px_1fr_120px]">
-                    <p className="font-mono text-[10px] tabular-nums text-[var(--ds-text)]/55">
+                    <p className="font-mono text-[10px] tabular-nums text-[var(--ds-text-dim)]">
                       {new Date(r.savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </p>
                     <div className="min-w-0">
-                      <p className="font-display-serif text-sm font-semibold text-[var(--ds-text)] line-clamp-1">{r.query}</p>
-                      <p className="mt-1 font-mono text-[11px] text-[var(--ds-text)]/65">
+                      <p className="text-sm font-semibold text-[var(--ds-text)] line-clamp-1">{r.query}</p>
+                      <p className="mt-1 font-mono text-[11px] text-[var(--ds-text-mute)]">
                         {(r.events as unknown[] | undefined)?.length ?? 0} events ·{" "}
                         {(r.citation as { dataset_id?: string } | null)?.dataset_id ?? "no citation"}
                       </p>
@@ -401,16 +388,6 @@ export default async function AgentDetailPage({ params }: Props) {
           </div>
         </div>
       </section>
-
-      <footer className="bg-[var(--ds-bg-deep)] text-white">
-        <div className="mx-auto max-w-[1320px] px-6 py-6 md:px-10">
-          <p className="text-[13px] text-white/60">
-            <Link href="/agents" className="text-white/85 hover:text-[var(--ds-warn)]">← All agents</Link>
-            <span className="mx-3 text-white/30">·</span>
-            <Link href="/" className="text-white/85 hover:text-[var(--ds-warn)]">TXLookup home</Link>
-          </p>
-        </div>
-      </footer>
-    </main>
+    </Shell>
   );
 }
