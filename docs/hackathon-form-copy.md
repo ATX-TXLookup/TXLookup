@@ -56,7 +56,11 @@ https://github.com/ATX-TXLookup/TXLookup
 Next.js 14 App Router · TypeScript · Python 3.11+ async · OpenAI Codex (planner / analyst / reporter / support synthesizer) · Featherless (fallback inference) · Socrata SODA API (data) · Miro MCP (board generation, $500 bounty) · MCP transport (stdio) · SQLite + JSON local mirror · GitHub Actions (4 crons: deploy, scout 6h, ingestor 6h, watchdog 10m) · Vercel Hobby tier
 
 ## Datasets used
-9 curated Texas civic datasets across 3 portals:
+**6,061 Texas civic datasets indexed across 6 portals** (catalog metadata from each portal's API — Socrata for Austin/Dallas/TX state, CKAN for San Antonio/Houston). Of those, **9 are deeply curated** for the demo (full schema knowledge, hand-picked SoQL, locally mirrored every 6h). Everything else is answered on demand — agent reads the schema live, plans a query, runs it. Not a shadow database — a smart layer over the source-of-truth portals.
+
+Indexed totals: data.austintexas.gov (2,387) · datahub.austintexas.gov (1,333) · TX state data.texas.gov (1,051) · dallasopendata.com (1,044) · data.sanantonio.gov (163) · data.houstontx.gov (83).
+
+The 9 deeply-curated datasets:
 - `data.austintexas.gov` — building permits (3syk-w9eu), food inspections (ecmv-9xxi), code complaints (6wtj-zbtb), crime (fdj4-gpfu), traffic fatalities (y2wy-tgr5)
 - `datahub.austintexas.gov` — 311 service requests (xwdj-i9he)
 - `data.texas.gov` — TX franchise tax holders (9cir-efmm)
@@ -84,7 +88,7 @@ A doom-loop-aware autonomous data agent with intent-preserving replan-on-failure
 Yes. MIT-licensed. Installable as an MCP server in Claude Code, Cursor, Codex. Smithery submission via `smithery.yaml` at repo root; awesome-mcp-servers PR staged. Every dataset accessible via `npx`-style flow once published to npm/PyPI (post-hackathon).
 
 ## What's next
-Post-freeze: full historical mirroring (move from JSON to Neon/Postgres); npm package for one-line install; expand dataset scout to San Antonio + Houston portals (the cron is already multi-city); Miroverse template submission for the Miro $500 bonus; per-user saved searches.
+Post-freeze: deeply curate the next ~50 highest-pageview datasets (auto-onboarding pipeline already drafted); npm package for one-line MCP install; full historical mirroring for the curated subset (move from JSON to Neon/Postgres); Miroverse template submission for the Miro $500 bonus; per-user saved searches; expand the discovery layer to all 254 Texas counties (currently just the 5 metros + state).
 
 ---
 
