@@ -409,7 +409,14 @@ const dataAnalyst: Specialist = async (rawInput) => {
       })()
     : [];
 
-  const findings: Array<{ text: string; value?: number | string; unit?: string; baseline?: number | string; pct_change?: number }> = [];
+  const findings: Array<{
+    text: string;
+    value?: number | string;
+    unit?: string;
+    baseline?: number | string;
+    pct_change?: number; // delta-mode only — change vs prior window
+    share_pct?: number;  // single_window mode only — share of top-N total
+  }> = [];
   const caveats: string[] = [];
   let vizSpec: Record<string, unknown>;
 
@@ -419,7 +426,6 @@ const dataAnalyst: Specialist = async (rawInput) => {
     const top = deltas.slice(0, topN);
     for (const row of top) {
       const direction = row.delta >= 0 ? "rose" : "dropped";
-      const absDelta = Math.abs(row.delta);
       findings.push({
         text:
           `${row.key}: ${metricLabel} ${direction} from ${fmtNum(row.prior)} to ${fmtNum(row.current)} ` +
@@ -459,7 +465,7 @@ const dataAnalyst: Specialist = async (rawInput) => {
         text: `${k}: ${fmtNum(v)} ${metricLabel} (${share.toFixed(1)}% of top ${sorted.length})`,
         value: v,
         unit: metricLabel,
-        pct_change: share,
+        share_pct: share,
       });
     }
     vizSpec = {
