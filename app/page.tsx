@@ -147,6 +147,91 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* MOTIVATION — the problem the agent solves */}
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1240px] px-6 py-14 md:px-8 md:py-20">
+          <div className="grid gap-10 md:grid-cols-12 md:gap-14">
+            <div className="md:col-span-5">
+              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
+                The motivation
+              </p>
+              <h2 className="mt-3 max-w-[18ch] text-[36px] font-bold leading-[1.08] tracking-[-0.025em] text-[var(--ds-text)] md:text-[52px]">
+                Texas publishes everything.
+                <br />
+                <span className="text-[var(--ds-text-mute)]">Almost no one queries it.</span>
+              </h2>
+              <p className="mt-5 max-w-[48ch] text-[15.5px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
+                The state and its cities run six open-data portals. Together they expose <span className="font-semibold text-[var(--ds-text)]">{discovery.totalKnown.toLocaleString()} datasets</span> covering permits, inspections, 311 calls, code violations, traffic fatalities, franchise tax, contracts, library checkouts — millions of rows refreshed daily. It&rsquo;s all public. Almost none of it is reachable to a citizen, journalist, or analyst without writing SoQL by hand.
+              </p>
+            </div>
+
+            <div className="md:col-span-7">
+              <div className="grid gap-3 md:grid-cols-2">
+                {[
+                  {
+                    eyebrow: "Six portals",
+                    n: String(discovery.portals.length || 6),
+                    nLabel: "different APIs",
+                    body: "Austin runs Socrata. San Antonio runs CKAN. Houston runs CKAN. Dallas runs Socrata. Different IDs, different conventions, different filters.",
+                    tone: "var(--ds-accent)",
+                  },
+                  {
+                    eyebrow: "Schema drift",
+                    n: "180+",
+                    nLabel: "columns just for permits",
+                    body: "Each dataset has its own column names, types, code values. permittype vs work_class vs permit_class_mapped — same idea, three columns, three meanings.",
+                    tone: "var(--ds-warn)",
+                  },
+                  {
+                    eyebrow: "SoQL syntax",
+                    n: "Brutal",
+                    nLabel: "to hand-write",
+                    body: "$select, $where, $group, $order, $limit, date_extract_y, double-quoting strings, escaping single quotes. One typo and the whole query 400s.",
+                    tone: "var(--ds-bad)",
+                  },
+                  {
+                    eyebrow: "Data fluency",
+                    n: "<1%",
+                    nLabel: "of Texans use the portals",
+                    body: "Most residents do not know data.austintexas.gov exists. Of those who find it, almost none can derive a useful answer without help.",
+                    tone: "var(--ds-purple)",
+                  },
+                ].map((f) => (
+                  <div
+                    key={f.eyebrow}
+                    className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5"
+                  >
+                    <p
+                      className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em]"
+                      style={{ color: f.tone }}
+                    >
+                      {f.eyebrow}
+                    </p>
+                    <p
+                      className="mt-3 text-[28px] font-bold leading-none tabular-nums tracking-[-0.02em] md:text-[36px]"
+                      style={{ color: f.tone }}
+                    >
+                      {f.n}
+                    </p>
+                    <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+                      {f.nLabel}
+                    </p>
+                    <p className="mt-3 text-[13px] leading-relaxed text-[var(--ds-text-mute)]">
+                      {f.body}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <p className="mt-6 max-w-[64ch] text-[15px] leading-relaxed text-[var(--ds-text)]">
+                <span className="font-semibold text-[var(--ds-warm)]">TXLookup is the layer between you and {discovery.totalKnown.toLocaleString()} datasets.</span>{" "}
+                <span className="text-[var(--ds-text-mute)]">A multi-agent system that reads the schema, writes the query, runs it on the source-of-truth portal, and hands you a sourced answer in plain English. No shadow database. Every claim citable. Every step replayable.</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* TOPIC GRID — numbered, larger, links to dataset detail pages */}
       <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
         <div className="mx-auto max-w-[1240px] px-6 py-14 md:px-8 md:py-20">

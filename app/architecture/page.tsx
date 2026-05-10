@@ -1,4 +1,9 @@
 import { Shell } from "@/app/components/ds";
+import { loadDiscovery } from "@/app/lib/catalog-discovered";
+import { CATALOG } from "@/app/lib/catalog";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 600;
 
 const flows = [
   {
@@ -48,23 +53,37 @@ const flows = [
   },
   {
     n: "04",
+    title: "Cache-resilience layer (the local mirror)",
+    surface: "data/cache/<id>.json",
+    steps: [
+      "GitHub Actions ingestor cron fires every 6h",
+      "Pulls 5,000 most-recent rows per curated dataset to JSON",
+      "Commits data/cache/*.json (~5 MB total) to main",
+      "Vercel build bundles cache files into every serverless function",
+      "Reader: try cache → on miss, hit live Socrata → on 429/5xx, fall back to stale cache with caveat",
+      "Each visible stat tile carries a freshness badge (Mirror · Nh ago / Live · just now)",
+    ],
+    nodes: ["GitHub Actions cron", "ingestor.py", "data/cache/*.json", "app/lib/cache.ts"],
+  },
+  {
+    n: "05",
     title: "External agent installs TXLookup",
     surface: "claude mcp add txlookup …",
     steps: [
-      "Developer runs claude/codex mcp add against mcp/server.py",
-      "FastMCP advertises 5 tools: discover, describe, query, summarize, cite",
+      "Developer runs claude/codex/cursor mcp add against mcp/server.py",
+      "FastMCP advertises 8 tools (ask_data, discover_datasets, get_dataset_schema, fetch_data, get_task_status, create_miro_board, add_to_miro, list_known_tools)",
       "Skill doc (skills/txlookup/SKILL.md) teaches the runtime when to call each",
       "Tool calls land at the same data layer (agent/tools/data.py)",
       "Citations enforced — every reply includes portal + dataset_id + last_refreshed",
     ],
-    nodes: ["External agent runtime", "TXLookup MCP server", "Socrata SODA"],
+    nodes: ["External agent runtime", "TXLookup MCP server", "Socrata SODA + CKAN"],
   },
   {
-    n: "05",
+    n: "06",
     title: "Agent-to-agent (A2A) — render to Miro",
-    surface: "render_to_miro tool",
+    surface: "create_miro_board tool",
     steps: [
-      "Planner emits render_to_miro for visualizable answers",
+      "Planner emits create_miro_board for visualizable answers",
       "Executor calls Miro REST API with title + summary + records",
       "Miro returns board_id + view_link",
       "View link surfaced as an artifact alongside the answer",
@@ -76,32 +95,51 @@ const flows = [
 
 const layers = [
   { name: "User surface", items: ["Browser", "MCP-client (Claude Code, Codex, Cursor)"] },
-  { name: "Edge", items: ["Vercel — / · /q · /datasets/[id] · /api/agent (SSE)"] },
-  { name: "Agent loop", items: ["Codex (gpt-4o)", "Replanner", "Synthesizer", "Doom-loop guard"] },
-  { name: "Tool dispatch", items: ["discover · describe · query · summarize · cite · render_to_miro"] },
-  { name: "Data + I/O", items: ["Socrata SODA APIs (live)", "Local YAML catalog", "Miro REST API"] },
-  { name: "Bound + safety", items: ["Skill doc · 5000-row cap · 30s timeout · 429 backoff · citation enforced"] },
+  { name: "Edge", items: ["Vercel — / · /q · /chat · /datasets · /reports · /sources · /api/agent (SSE)"] },
+  { name: "Agent loop", items: ["7 specialists (planner · analyst · reporter · support · critic · scout · ingestor)", "Doom-loop guard", "Replanner", "Synthesizer"] },
+  { name: "Tool dispatch", items: ["8 MCP tools · discover · describe · fetch · summarize · cite · status · miro_create · miro_add"] },
+  { name: "Data + I/O", items: ["Socrata SODA (Austin / Austin Hub / Dallas / TX state)", "CKAN (San Antonio / Houston)", "data/cache/*.json local mirror", "Miro REST API"] },
+  { name: "Resilience", items: ["cache → live → stale-cache → error chain", "5,000-row cap · 30s timeout · 429 backoff", "freshness badge per visible stat"] },
+  { name: "Bound + safety", items: ["Skill doc · citation enforced · doom-loop pattern detection · replan preserves intent"] },
 ];
 
 export const metadata = { title: "Architecture — TXLookup" };
 
-export default function ArchitecturePage() {
+export default async function ArchitecturePage() {
+  const discovery = await loadDiscovery();
   return (
     <Shell active="/architecture">
       {/* Hero */}
       <section className="border-b border-[var(--ds-border)]">
         <div className="mx-auto max-w-[1200px] px-6 py-16 md:px-8 md:py-20">
-          <h1 className="max-w-[24ch] text-[40px] font-bold leading-[1.05] tracking-[-0.02em] text-[var(--ds-text)] md:text-[64px]">
-            How the system{" "}
-            <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">fits together.</span>
-          </h1>
-          <p className="mt-6 max-w-[64ch] text-base leading-relaxed text-[var(--ds-text-mute)] md:text-lg">
-            TXLookup is one Codex-driven agent surfaced through five flows.
-            All five share a typed plan/dispatch contract, a single skill
-            policy, and the same bounded Socrata client. The diagram below
-            shows the layers; the cards underneath walk through each flow
-            end-to-end.
+          <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
+            Architecture · the whole system
           </p>
+          <h1 className="mt-4 max-w-[24ch] text-[40px] font-bold leading-[1.05] tracking-[-0.02em] text-[var(--ds-text)] md:text-[64px]">
+            How the system{" "}
+            <span className="text-[var(--ds-text-mute)]">fits together.</span>
+          </h1>
+          <p className="mt-6 max-w-[68ch] text-base leading-relaxed text-[var(--ds-text-mute)] md:text-lg">
+            TXLookup is one Codex-driven multi-agent loop surfaced through six flows. All six share a typed plan/dispatch contract, a single skill policy, the same bounded Socrata + CKAN client, and a local-mirror resilience layer. The diagram below shows the layers; the cards walk through each flow end-to-end.
+          </p>
+
+          {/* Story numbers strip */}
+          <div className="mt-8 grid gap-4 md:grid-cols-4">
+            {[
+              { value: discovery.totalKnown.toLocaleString(), label: "Datasets indexed", sub: `${discovery.portals.length} portals · Socrata + CKAN`, tone: "var(--ds-accent)" },
+              { value: String(CATALOG.length), label: "Deeply curated", sub: "Schema + cached rows + glossary", tone: "var(--ds-good)" },
+              { value: "7", label: "Specialists", sub: "5 in /q loop · 2 scheduled crons", tone: "var(--ds-purple)" },
+              { value: "8", label: "MCP tools", sub: "Installable in Claude Code, Cursor, Codex", tone: "var(--ds-warm)" },
+            ].map((s) => (
+              <div key={s.label} className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4">
+                <p className="text-[28px] font-bold tabular-nums tracking-tight md:text-[36px]" style={{ color: s.tone }}>
+                  {s.value}
+                </p>
+                <p className="mt-1 text-[14px] font-medium text-[var(--ds-text)]">{s.label}</p>
+                <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">{s.sub}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -109,8 +147,8 @@ export default function ArchitecturePage() {
       <section className="border-b border-[var(--ds-border)]">
         <div className="mx-auto max-w-[1200px] px-6 py-14 md:px-8 md:py-20">
           <h2 className="text-3xl font-bold tracking-tight text-[var(--ds-text)] md:text-4xl">
-            Six layers,{" "}
-            <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">top to bottom.</span>
+            Seven layers,{" "}
+            <span className="text-[var(--ds-text-mute)]">top to bottom.</span>
           </h2>
           <div className="mt-8 grid gap-3">
             {layers.map((layer, i) => (
@@ -149,8 +187,8 @@ export default function ArchitecturePage() {
       <section className="border-b border-[var(--ds-border)]">
         <div className="mx-auto max-w-[1200px] px-6 py-14 md:px-8 md:py-20">
           <h2 className="text-3xl font-bold tracking-tight text-[var(--ds-text)] md:text-4xl">
-            Five surfaces,{" "}
-            <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">one agent.</span>
+            Six flows,{" "}
+            <span className="text-[var(--ds-text-mute)]">one agent.</span>
           </h2>
           <div className="mt-10 grid gap-6 md:grid-cols-2">
             {flows.map((f) => (
@@ -202,7 +240,7 @@ export default function ArchitecturePage() {
       <section className="border-b border-[var(--ds-border)]">
         <div className="mx-auto max-w-[1200px] px-6 py-14 md:px-8 md:py-20">
           <h2 className="text-3xl font-bold tracking-tight text-[var(--ds-text)] md:text-4xl">
-            Companion <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">docs.</span>
+            Companion <span className="text-[var(--ds-text-mute)]">docs.</span>
           </h2>
           <ul className="mt-8 grid gap-3 md:grid-cols-2">
             {[

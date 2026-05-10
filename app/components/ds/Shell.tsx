@@ -19,7 +19,8 @@ const NAV: NavGroup[] = [
     label: "Developer resources",
     items: [
       { href: "/use-as-agent", label: "Install", blurb: "Add the MCP server to Claude Code, Cursor, Codex." },
-      { href: "/docs", label: "Docs", blurb: "Architecture, tools, skill, integration." },
+      { href: "/architecture", label: "Architecture", blurb: "Dataset → Ingest → Cache → Agent → UI. The whole system." },
+      { href: "/docs", label: "Docs", blurb: "Tools, skill, integration. Long-form reference." },
       { href: "/developer", label: "Developer", blurb: "API reference + replay console." },
       { href: "/sources", label: "Sources", blurb: "Datasets, glossaries, license, attribution." },
     ],
