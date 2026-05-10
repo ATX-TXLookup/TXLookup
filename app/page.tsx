@@ -204,10 +204,10 @@ export default async function HomePage() {
                     tone: "var(--ds-bad)",
                   },
                   {
-                    eyebrow: "Data fluency",
-                    n: "<1%",
-                    nLabel: "of Texans use the portals",
-                    body: "Most residents have never visited data.austintexas.gov. Reaching a useful answer takes specialist skills.",
+                    eyebrow: "Download + sift",
+                    n: "Hours",
+                    nLabel: "of CSV manual review",
+                    body: "The current path: download a 200,000-row CSV, open it in a spreadsheet, filter by hand, hope you didn't miss a column. Most people give up before getting to an answer.",
                     tone: "var(--ds-purple)",
                   },
                 ].map((f) => (
@@ -238,8 +238,8 @@ export default async function HomePage() {
               </div>
 
               <p className="mt-6 max-w-[64ch] text-[15px] leading-relaxed text-[var(--ds-text)]">
-                <span className="font-semibold text-[var(--ds-warm)]">TXLookup is the layer between you and {discovery.totalKnown.toLocaleString()} datasets.</span>{" "}
-                <span className="text-[var(--ds-text-mute)]">A multi-agent system that reads the schema, writes the query, runs it on the source-of-truth portal, and hands you a sourced answer in plain English. Live queries. Every claim citable. Every step replayable.</span>
+                <span className="font-semibold text-[var(--ds-warm)]">A team of OpenAI-powered agents stands between you and {discovery.totalKnown.toLocaleString()} datasets.</span>{" "}
+                <span className="text-[var(--ds-text-mute)]">If you can search Google or read a news article, you can ask Texas civic data anything. The planner picks the dataset; the analyst writes the SoQL; the reporter composes the answer; the critic verifies citations. Same data the experts use — now reachable in plain English.</span>
               </p>
             </div>
           </div>
