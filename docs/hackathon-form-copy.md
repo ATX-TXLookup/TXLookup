@@ -56,11 +56,11 @@ https://github.com/ATX-TXLookup/TXLookup
 Next.js 14 App Router · TypeScript · Python 3.11+ async · OpenAI Codex (planner / analyst / reporter / support synthesizer) · Featherless (fallback inference) · Socrata SODA API (data) · Miro MCP (board generation, $500 bounty) · MCP transport (stdio) · SQLite + JSON local mirror · GitHub Actions (4 crons: deploy, scout 6h, ingestor 6h, watchdog 10m) · Vercel Hobby tier
 
 ## Datasets used
-**6,061 Texas civic datasets indexed across 6 portals** (catalog metadata from each portal's API — Socrata for Austin/Dallas/TX state, CKAN for San Antonio/Houston). Of those, **9 are deeply curated** for the demo (full schema knowledge, hand-picked SoQL, locally mirrored every 6h). Everything else is answered on demand — agent reads the schema live, plans a query, runs it. Not a shadow database — a smart layer over the source-of-truth portals.
+**6,061 Texas civic datasets indexed across 6 portals** (catalog metadata from each portal's API — Socrata for Austin/Dallas/TX state, CKAN for San Antonio/Houston). Of those, **11 are deeply curated** for the demo (full schema knowledge, hand-picked SoQL, locally mirrored every 6h). Everything else is answered on demand — agent reads the schema live, plans a query, runs it. a smart layer over the source-of-truth portals.
 
 Indexed totals: data.austintexas.gov (2,387) · datahub.austintexas.gov (1,333) · TX state data.texas.gov (1,051) · dallasopendata.com (1,044) · data.sanantonio.gov (163) · data.houstontx.gov (83).
 
-The 9 deeply-curated datasets:
+The 11 deeply-curated datasets:
 - `data.austintexas.gov` — building permits (3syk-w9eu), food inspections (ecmv-9xxi), code complaints (6wtj-zbtb), crime (fdj4-gpfu), traffic fatalities (y2wy-tgr5)
 - `datahub.austintexas.gov` — 311 service requests (xwdj-i9he)
 - `data.texas.gov` — TX franchise tax holders (9cir-efmm)
