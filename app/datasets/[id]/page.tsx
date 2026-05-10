@@ -243,16 +243,19 @@ export default async function DatasetPage({
                 <style>{`
                   .insight-card {
                     background: rgba(250,247,242,0.04);
-                    border: 0.5px solid rgba(212,139,16,0.25);
+                    border: 0.5px solid rgba(212,139,16,0.20);
+                    border-left: 2px solid rgba(212,139,16,0.45);
                     backdrop-filter: blur(4px);
                     transition: background 0.15s ease, border-color 0.15s ease;
                   }
                   .insight-card:hover {
                     background: rgba(250,247,242,0.09);
-                    border-color: rgba(212,139,16,0.6);
+                    border-color: rgba(212,139,16,0.65);
+                    border-left-color: #D48B10;
                   }
-                  .insight-card:hover .insight-source {
+                  .insight-card:hover .insight-action {
                     opacity: 1;
+                    transform: translateX(0);
                   }
                   .question-chip {
                     background: rgba(58,127,190,0.10);
@@ -269,30 +272,27 @@ export default async function DatasetPage({
                   {di.insights.map((ins, i) => (
                     <a
                       key={i}
-                      href={ins.source}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href={`/datasets/${ds.id}/findings/${i}`}
                       className="insight-card flex flex-col gap-3 rounded-xl p-6"
                     >
-                      {/* Icon + badge row */}
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl leading-none">{ins.icon}</span>
+                      {/* Number + action row */}
+                      <div className="flex items-center justify-between">
                         <span
-                          className="rounded-full font-mono text-[10px] font-semibold uppercase tracking-wider"
-                          style={{
-                            background: "rgba(212,139,16,0.15)",
-                            color: "#D48B10",
-                            border: "0.5px solid rgba(212,139,16,0.35)",
-                            padding: "3px 10px",
-                          }}
+                          className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em]"
+                          style={{ color: "#D48B10" }}
                         >
-                          Data insight
+                          Finding {String(i + 1).padStart(2, "0")}
                         </span>
                         <span
-                          className="insight-source ml-auto font-mono text-[10px] uppercase tracking-wider"
-                          style={{ color: "#3A7FBE", opacity: 0, transition: "opacity 0.15s" }}
+                          className="insight-action font-mono text-[10px] uppercase tracking-wider"
+                          style={{
+                            color: "#3A7FBE",
+                            opacity: 0,
+                            transform: "translateX(-4px)",
+                            transition: "opacity 0.15s, transform 0.15s",
+                          }}
                         >
-                          View source ↗
+                          Explore live data →
                         </span>
                       </div>
 
