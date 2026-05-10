@@ -5,6 +5,7 @@
 import Link from "next/link";
 import { CATALOG } from "@/app/lib/catalog";
 import { sodaQuery } from "@/app/lib/socrata";
+import { EyebrowLabel, Shell } from "@/app/components/ds";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 600;
@@ -96,36 +97,20 @@ export default async function DatasetsUniversePage() {
   const totalRows = summaries.reduce((sum, d) => sum + (d.row_count ?? 0), 0);
 
   return (
-    <main className="min-h-screen bg-[var(--ds-bg)] text-[var(--ds-text)] font-body">
-      <div className="bg-[var(--ds-bg-elev)] text-white">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-6 py-2 text-[13px] md:px-10">
-          <span>The corpus · grown by the dataset scout, queried by every agent.</span>
-          <span className="hidden font-mono text-[11px] uppercase tracking-wider text-white/70 md:inline">
-            v0.1 · live row counts
-          </span>
-        </div>
-      </div>
-
+    <Shell active="/datasets">
       {/* Hero */}
-      <section
-        className="border-b border-[var(--ds-border)]"
-        style={{
-          background: "var(--tx-navy)",
-          backgroundImage:
-            "radial-gradient(circle at 80% 30%, rgba(58,127,190,0.15) 0%, transparent 55%), radial-gradient(circle at 10% 80%, rgba(196,66,10,0.10) 0%, transparent 50%)",
-        }}
-      >
-        <div className="mx-auto max-w-[1320px] px-6 py-12 md:px-10 md:py-16">
-          <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-accent)]">
-            The universe
-          </p>
-          <h1 className="mt-3 max-w-[26ch] font-display-serif text-4xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl">
-            Texas civic data,<br />
-            <span className="italic text-[var(--ds-warn)]">one corpus.</span>
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1200px] px-6 pb-16 pt-12 md:px-8 md:pb-24 md:pt-16">
+          <EyebrowLabel tone="accent">The universe</EyebrowLabel>
+          <h1 className="mt-4 max-w-[24ch] text-[42px] font-bold leading-[1.05] tracking-[-0.025em] text-[var(--ds-text)] md:text-[64px]">
+            Texas civic data,{" "}
+            <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">
+              one corpus.
+            </span>
           </h1>
-          <p className="mt-5 max-w-[58ch] text-base leading-relaxed text-white/85 md:text-lg">
-            Every dataset our agents can query, in one place. Curated across Austin, Dallas, San Antonio, Houston, and the state. Pre-canned questions per dataset. Live counts at request time. Growing every 6 hours via the {" "}
-            <Link href="/agents/dataset-scout" className="text-[var(--ds-warn)] underline">
+          <p className="mt-6 max-w-[60ch] text-[16px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
+            Every dataset our agents can query, in one place. Curated across Austin, Dallas, San Antonio, Houston, and the state. Pre-canned questions per dataset. Live counts at request time. Growing every 6 hours via the{" "}
+            <Link href="/agents/dataset-scout" className="text-[var(--ds-good)] hover:underline">
               dataset scout
             </Link>
             .

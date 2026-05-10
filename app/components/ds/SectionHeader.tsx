@@ -2,13 +2,15 @@
 // Display headline is Geist 700 by default; pass `serif` to use Instrument
 // Serif italic (Undervolt-ATX hero treatment).
 
-import { EyebrowLabel } from "./EyebrowLabel";
+// SectionHeader — eyebrow + display headline + optional sub-line.
+// User dropped eyebrows globally — the `eyebrow` prop is accepted but
+// no longer rendered, to avoid having to delete every call site.
 
 type Tone = "dim" | "accent" | "warm" | "good" | "warn" | "bad" | "purple";
 
 export function SectionHeader({
-  eyebrow,
-  eyebrowTone = "accent",
+  eyebrow: _eyebrow,
+  eyebrowTone: _eyebrowTone = "accent",
   headline,
   serif = false,
   sub,
@@ -33,9 +35,8 @@ export function SectionHeader({
 
   return (
     <div className={alignClass}>
-      {eyebrow && <EyebrowLabel tone={eyebrowTone}>{eyebrow}</EyebrowLabel>}
       <h2
-        className={`mt-3 max-w-[24ch] font-bold tracking-[-0.02em] ${sizeClass} ${
+        className={`max-w-[24ch] font-bold tracking-[-0.02em] ${sizeClass} ${
           align === "center" ? "mx-auto" : ""
         } text-[var(--ds-text)]`}
       >
