@@ -88,55 +88,55 @@ export default function AgentTopologyShowcase({ replayHash = "a8f3c19d2e7b" }: {
   const playheadX = tToX(Math.min(now, TOTAL_MS));
 
   return (
-    <section className="border-b border-[#E4E5E8] bg-white">
+    <section className="border-b border-[#27272A] bg-[#0A0A0F]">
       <div className="mx-auto max-w-[1200px] px-6 py-20 md:px-8 md:py-28">
         <div className="grid gap-12 md:grid-cols-12">
           <div className="md:col-span-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#2563EB]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#5B8DEF]">
               Improvement flywheel
             </p>
-            <h2 className="mt-3 max-w-[18ch] text-[34px] font-bold leading-[1.05] tracking-tight text-[#0A0A0F] md:text-[44px]">
+            <h2 className="mt-3 max-w-[18ch] text-[34px] font-bold leading-[1.05] tracking-tight text-[#FAFAFA] md:text-[44px]">
               Five agents.<br />
               One sourced answer.
             </h2>
-            <p className="mt-6 max-w-[36ch] text-[14px] leading-relaxed text-[#6B7280]">
+            <p className="mt-6 max-w-[36ch] text-[14px] leading-relaxed text-[#A1A1AA]">
               The orchestrator dispatches parallel queries. The critic catches a window bug. The reporter composes the answer. The citation locks in. A real run, looped on autoplay.
             </p>
             <div className="mt-7 flex flex-col gap-2">
               <Link
                 href={`/admin/replay/${replayHash}`}
-                className="inline-flex w-fit items-center rounded-md bg-[#0A0A0F] px-5 py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-white hover:bg-[#0A0A0F]/85"
+                className="inline-flex w-fit items-center rounded-md bg-[#FAFAFA] px-5 py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-[#0A0A0F] hover:bg-[#FAFAFA]/90"
               >
                 Watch a real run →
               </Link>
               <Link
                 href="/agents"
-                className="inline-flex w-fit items-center text-[13px] font-medium text-[#2563EB] hover:underline"
+                className="inline-flex w-fit items-center text-[13px] font-medium text-[#5B8DEF] hover:underline"
               >
                 See every agent at work →
               </Link>
             </div>
-            <div className="mt-9 grid grid-cols-3 gap-3 border-t border-[#E4E5E8] pt-5">
+            <div className="mt-9 grid grid-cols-3 gap-3 border-t border-[#27272A] pt-5">
               {[
                 { n: "5", l: "agents" },
                 { n: "1", l: "self-correct" },
                 { n: "7.3s", l: "end-to-end" },
               ].map((s) => (
                 <div key={s.l}>
-                  <div className="text-[24px] font-bold tabular-nums tracking-tight text-[#0A0A0F]">{s.n}</div>
-                  <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[#6B7280]">{s.l}</div>
+                  <div className="text-[24px] font-bold tabular-nums tracking-tight text-[#FAFAFA]">{s.n}</div>
+                  <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[#A1A1AA]">{s.l}</div>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="md:col-span-8">
-            <div className="overflow-hidden rounded-md border border-[#E4E5E8] bg-white">
-              <div className="flex items-baseline justify-between border-b border-[#E4E5E8] px-5 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6B7280]">
+            <div className="overflow-hidden rounded-md border border-[#27272A] bg-[#0A0A0F]">
+              <div className="flex items-baseline justify-between border-b border-[#27272A] px-5 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#A1A1AA]">
                   Live replay · marquee question
                 </p>
-                <p className="font-mono text-[10px] uppercase tracking-wider text-[#9CA3AF]">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-[#71717A]">
                   cycle: {(now / 1000).toFixed(2)}s / {(TOTAL_MS / 1000).toFixed(1)}s
                 </p>
               </div>
@@ -239,7 +239,7 @@ export default function AgentTopologyShowcase({ replayHash = "a8f3c19d2e7b" }: {
               </svg>
 
               {/* Live readout */}
-              <div className="border-t border-[#E4E5E8] bg-[#F4F5F7] px-5 py-3.5">
+              <div className="border-t border-[#27272A] bg-[#16161B] px-5 py-3.5">
                 <div className="flex items-center gap-3">
                   <span
                     className="inline-block h-1.5 w-1.5 animate-pulse rounded-full"
@@ -251,12 +251,12 @@ export default function AgentTopologyShowcase({ replayHash = "a8f3c19d2e7b" }: {
                   >
                     {LANES[laneIndex(active.from)].label}
                   </span>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#9CA3AF]">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#71717A]">
                     {(active.t / 1000).toFixed(2)}s
                   </span>
                 </div>
-                <p className="mt-1.5 font-mono text-[12px] text-[#0A0A0F]">
-                  <span className="text-[#6B7280]">{active.tool}:</span> {active.text}
+                <p className="mt-1.5 font-mono text-[12px] text-[#FAFAFA]">
+                  <span className="text-[#A1A1AA]">{active.tool}:</span> {active.text}
                 </p>
               </div>
             </div>
