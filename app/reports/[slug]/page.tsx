@@ -302,11 +302,11 @@ export default async function ReportPage({
   if (!data) notFound();
   const { def, queries, generatedAt } = data;
 
-  // Flagship report gets a multi-perspective section computed from cached
-  // permits rows. Other reports skip this — keeps the bottom of the page
-  // report-specific.
+  // Flagship-grade extras computed from cached permits rows. Available for
+  // any permits-driven report — austin-construction-2026 and the
+  // austin-permits-heatmap dot map both lean on this.
   const flagshipExtras =
-    slug === "austin-construction-2026"
+    slug === "austin-construction-2026" || slug === "austin-permits-heatmap"
       ? await (await import("@/app/lib/flagship-aggregates")).computeFlagshipAggregates()
       : null;
   const generatedISO = generatedAt.slice(0, 10);

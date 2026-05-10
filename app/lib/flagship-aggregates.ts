@@ -44,11 +44,17 @@ export type StatusBreakdown = {
   source: "cache" | "miss";
 };
 
+export type ZipDensity = {
+  counts: Record<string, number>;  // zip → permit count
+  source: "cache" | "miss";
+};
+
 export type FlagshipAggregates = {
   heatmap: HeatmapPayload;
   smallMultiples: SmallMultiplesPayload;
   area: AreaPayload;
   statusBreakdown: StatusBreakdown;
+  zipDensity: ZipDensity;
   age_seconds: number | null;
 };
 
@@ -57,6 +63,7 @@ const EMPTY: FlagshipAggregates = {
   smallMultiples: { series: [], source: "miss" },
   area: { current: [], prior: [], source: "miss" },
   statusBreakdown: { buckets: [], source: "miss" },
+  zipDensity: { counts: {}, source: "miss" },
   age_seconds: null,
 };
 
@@ -173,6 +180,15 @@ export async function computeFlagshipAggregates(): Promise<FlagshipAggregates> {
     .slice(0, 6)
     .map(([label, value]) => ({ label, value, tone: TONE_FOR[label] ?? "neutral" }));
 
+  // ── Zip-density map (full counts per zip, not just top 5) ──────────────────
+  const zipCountsAll = new Map<string, number>();
+  for (const r of rows) {
+    const z = String(r.original_zip ?? "").trim();
+    if (!z) continue;
+    zipCountsAll.set(z, (zipCountsAll.get(z) ?? 0) + 1);
+  }
+  const zipCounts = Object.fromEntries(zipCountsAll);
+
   return {
     heatmap: {
       rowLabels: topClasses,
@@ -184,6 +200,7 @@ export async function computeFlagshipAggregates(): Promise<FlagshipAggregates> {
     smallMultiples: { series, source: "cache" },
     area: { current, prior, source: "cache" },
     statusBreakdown: { buckets, source: "cache" },
+    zipDensity: { counts: zipCounts, source: "cache" },
     age_seconds: lookup.age_seconds,
   };
 }
