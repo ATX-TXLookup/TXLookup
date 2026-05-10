@@ -162,24 +162,37 @@ async def fetch_data(
 
 
 # ---------------------------------------------------------------------------
-# Miro tools (stubs — issue #16 wires Miro MCP)
+# Miro tools — call the live Miro REST API via agent/tools/miro.py.
+# Requires MIRO_API_TOKEN in env. Returns {board_id, url} on success.
 # ---------------------------------------------------------------------------
 
 
 @mcp.tool()
 async def create_miro_board(name: str, description: str = "") -> dict:
-    """Create a Miro board for data visualization. Wired in issue #16."""
-    return {
-        "status": "accepted",
-        "result": {
-            "board_id": "pending",
-            "url": "https://miro.com/app/board/pending",
-            "name": name,
-            "description": description,
-        },
-        "artifacts": [],
-        "error": None,
-    }
+    """Create a real Miro board for data visualization. Returns board_id + URL."""
+    try:
+        from agent.tools.miro import create_board
+
+        result = await create_board(name=name, description=description)
+        view = result.get("view_link") or ""
+        return {
+            "status": "completed",
+            "result": {
+                "board_id": result.get("board_id"),
+                "url": view,
+                "name": name,
+                "description": description,
+            },
+            "artifacts": [view] if view else [],
+            "error": None,
+        }
+    except Exception as e:  # noqa: BLE001
+        return {
+            "status": "failed",
+            "result": None,
+            "artifacts": [],
+            "error": f"create_miro_board: {type(e).__name__}: {e}",
+        }
 
 
 @mcp.tool()
@@ -191,18 +204,45 @@ async def add_to_miro(
     y: int = 0,
     color: str = "yellow",
 ) -> dict:
-    """Add an item to a Miro board. Wired in issue #16."""
-    return {
-        "status": "accepted",
-        "result": {
-            "item_id": "pending",
-            "type": item_type,
-            "position": {"x": x, "y": y},
-            "color": color,
-        },
-        "artifacts": [],
-        "error": None,
-    }
+    """Add a sticky / card to an existing Miro board."""
+    try:
+        from agent.tools.miro import add_card, add_sticky
+
+        if item_type == "card":
+            title, _, body = content.partition("\n")
+            r = await add_card(
+                board_id=board_id,
+                title=title.strip()[:60] or "—",
+                description=body.strip()[:400],
+                x=x,
+                y=y,
+            )
+        else:
+            r = await add_sticky(
+                board_id=board_id,
+                content=content[:300],
+                color=color,
+                x=x,
+                y=y,
+            )
+        return {
+            "status": "completed",
+            "result": {
+                "item_id": r.get("id"),
+                "type": item_type,
+                "position": {"x": x, "y": y},
+                "color": color,
+            },
+            "artifacts": [],
+            "error": None,
+        }
+    except Exception as e:  # noqa: BLE001
+        return {
+            "status": "failed",
+            "result": None,
+            "artifacts": [],
+            "error": f"add_to_miro: {type(e).__name__}: {e}",
+        }
 
 
 # ---------------------------------------------------------------------------

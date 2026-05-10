@@ -27,10 +27,9 @@ const TOOL_LIST = `1. discover_datasets({query: string, city?: string}) — retu
 3. summarize_data({datasetId: string, where: string, dimensions: string[]}) — group + count, returns rows {col, count}
 4. fetch_data({datasetId: string, where: string, order?: string, limit?: number}) — returns rows. DO NOT pass a "select" arg — that's not supported.
 5. cite_dataset({datasetId: string}) — returns the citation block for the answer
+6. render_to_miro({title: string, summary: string, records?: object[]}) — A2A handoff to Miro. Creates a real Miro board and returns {board_id, view_link} as an artifact. Use ONLY when the user explicitly asks for a Miro board, whiteboard, visual collaboration, or "render this to Miro". Always emit it AFTER a data step (summarize_data or fetch_data) so the records arg has real numbers — never as the only step.`;
 
-(Miro / "render to whiteboard" is not configured in this deployment — do NOT emit render_to_miro under any circumstance. For chart/visualization requests, see the data_analyst routing rule below.)`;
-
-const TOOL_NAMES = `"discover_datasets" | "get_dataset_schema" | "summarize_data" | "fetch_data" | "cite_dataset"`;
+const TOOL_NAMES = `"discover_datasets" | "get_dataset_schema" | "summarize_data" | "fetch_data" | "cite_dataset" | "render_to_miro"`;
 
 function buildPlannerPrompt(): string {
   const today = new Date().toISOString().slice(0, 10);
