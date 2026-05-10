@@ -1,155 +1,189 @@
-# TXLookup — Open Data Agents for Texas
+# TXLookup
 
-**AITX Community × Codex Hackathon | May 8-10, 2026 | Antler VC, Austin TX**
+> **Texas civic data, accessible to anyone who can search Google.**
+> A multi-agent system that turns plain-English questions into sourced answers
+> across **6,061 Texas open-data datasets**. Free. Open source. MIT-licensed.
 
-**Tracks:** Agents + Brainforge / Vicinity Texas Open Data
-**Bounties:** Miro MCP ($500), DeepInvent Best Patentable Hack ($500 + provisional patent)
+[![Live](https://img.shields.io/badge/live-txlookup.vercel.app-10B981)](https://txlookup.vercel.app)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![MCP](https://img.shields.io/badge/ships%20as-MCP%20server-A855F7)](https://modelcontextprotocol.io/)
+[![Hackathon](https://img.shields.io/badge/built%20at-AITX%20%C3%97%20Codex%20%C2%B7%20May%202026-F59E0B)](https://txlookup.vercel.app/about)
 
-## Joining the build (5-minute version)
+---
 
-1. Make sure you have org write access to `ATX-TXLookup` (ping Ravinder with your GH handle if not)
-2. Read [`docs/setup.md`](docs/setup.md) — clone, env, smoke test (~20 min)
-3. Read [`CONTRIBUTING.md`](CONTRIBUTING.md) — how we coordinate (issues, branches, PRs)
-4. Pick your first issue: `gh issue list --repo ATX-TXLookup/TXLookup --label ready --label priority:p0`
-5. Join WhatsApp: https://chat.whatsapp.com/EcDliphWA7XA4QImK2drhy
-6. Track via the pinned 📌 Demo Tracker issue
+## What it does
 
-**Code freeze: Sunday May 10, 11:00 AM CT.** Working backward from that — see [`docs/plan.md`](docs/plan.md).
+You type a question in plain English. A team of OpenAI-powered agents picks the right dataset, writes the SoQL query, runs it on the source-of-truth portal, and hands you a sourced answer — every claim citable back to the originating portal, every step replayable.
 
-## How it works
-
-For a full end-to-end walkthrough of one question (Reason → Plan → Tool → Complete with real artifacts and real Socrata responses) see **[`docs/how-it-works.md`](docs/how-it-works.md)**. That doc also covers why TXLookup is *not* a thin LLM wrapper — the dispatcher is deterministic TypeScript, every answer cites the source, and the agent ships as a tool other agents can install.
-
-Other docs:
-- [`docs/usage.md`](docs/usage.md) — install the MCP server, tool catalog, examples
-- [`docs/agents-strategy.md`](docs/agents-strategy.md) — Codex's role in the loop
-- [`docs/architecture.md`](docs/architecture.md) — layered diagram
-- [`skills/txlookup/SKILL.md`](skills/txlookup/SKILL.md) — the agent skill (deliverable)
-
-## What It Does
-
-TXLookup connects autonomous agents to Texas and Austin open data portals. Point it at any public dataset — permits, inspections, business filings, census data, 311 calls, transit routes — and the agent ingests, analyzes, and visualizes what it finds on Miro boards.
-
-It doesn't just answer questions. It reasons about data, plans multi-step analyses, uses tools to query and transform datasets, and delivers finished visual outputs.
-
-### Example Flows
-- "Show me all restaurant health inspections in 78701 that failed in the last 6 months"
-- "Compare Austin building permit trends across zip codes and map the hotspots on Miro"
-- "Pull the latest 311 complaint data, categorize by type, and show me the top issues by neighborhood"
-- "Find which Austin startups filed with the TX Secretary of State this quarter"
-
-## Architecture (from whiteboard)
+**Live:** [txlookup.vercel.app](https://txlookup.vercel.app) · **Try it:** [Restaurants near 78704 with failing inspections this year](https://txlookup.vercel.app/q?q=Restaurants%20near%2078704%20with%20failing%20inspections%20this%20year) · **Pitch:** [/pitch](https://txlookup.vercel.app/pitch)
 
 ```
-┌─────────────────────────────────────────┐
-│               Dataset                    │
-│   (Texas Open Data, Austin Data Portal,  │
-│    data.texas.gov, Socrata APIs)         │
-└─────────────┬───────────────────────────┘
-              │
-┌─────────────▼───────────────────────────┐
-│              Ingest                      │
-│   (Fetch, parse, normalize, validate)    │
-└─────────────┬───────────────────────────┘
-              │
-┌─────────────▼───────────────────────────┐
-│                DB                        │
-│     (Supabase — structured storage)      │
-└─────────┬──────────┬────────────────────┘
-          │          │
-┌─────────▼──┐ ┌────▼─────┐ ┌───────────┐
-│   Agents   │ │   APIs   │ │    MCP    │
-│  (Context) │ │          │ │  Servers  │
-│            │ │ - Socrata│ │           │
-│ - Planner  │ │ - Search │ │ - Miro    │
-│ - Analyst  │ │ - LLM    │ │ - Data    │
-│ - Browser  │ │ - Geo    │ │ - Tools   │
-└─────────┬──┘ └────┬─────┘ └─────┬─────┘
-          │          │             │
-┌─────────▼──────────▼─────────────▼──────┐
-│                  UI                      │
-│   (Next.js — search, explore, results)   │
-│   (Miro — visual data boards)            │
-└─────────────────────────────────────────┘
+$ "Where do construction permits cluster in Austin in the last 30 days?"
+
+→ Planner picks 3syk-w9eu (Austin Construction Permits)
+→ Analyst runs $select=original_zip,count(*) $where=issue_date>='2026-04-10' $group=original_zip
+→ 412 rows, 870ms
+→ Critic verifies grounding
+→ Reporter composes answer
+→ ~7 seconds end-to-end · cited to data.austintexas.gov · replayable SODA URL
 ```
 
-## Core Loop: Reason → Plan → Tool Use → Complete
+## Why
 
-1. **Reason** — Agent receives a data question, identifies which datasets and sources are relevant
-2. **Plan** — Breaks the analysis into ordered steps: fetch data, filter, aggregate, compare, visualize
-3. **Tool Use** — Executes each step: Socrata API queries, data transforms, Miro board creation
-4. **Complete** — Delivers a finished Miro board with organized findings + text summary
+Civic data is public. Reaching it isn't.
 
-## Tech Stack
+- **6 portals**, two API styles (Socrata + CKAN). Different IDs, different conventions.
+- **Schema drift** — 180+ columns just for permits, with overlapping semantics (`permittype` vs `work_class` vs `permit_class_mapped`).
+- **Brutal SoQL** — `$where`, `$group`, `date_extract_y`, double-quoting, escape rules. One typo and the query 400s.
+- **Download + sift** — current path is "open the 200k-row CSV in a spreadsheet". Most people give up.
 
-| Layer | Tech |
-|-------|------|
-| **Frontend** | Next.js 14, React, Tailwind CSS |
-| **Agent Engine** | Python 3.11+, OpenAI Codex / GPT-4o |
-| **Data Sources** | data.texas.gov, data.austintexas.gov (Socrata SODA API) |
-| **Data Ingestion** | httpx, pandas, Socrata API client |
-| **Database** | Supabase (PostgreSQL) |
-| **MCP Server** | FastMCP — exposes agent + data tools |
-| **Visualization** | Miro MCP — boards, frames, stickies, cards |
-| **Browser** | Playwright (for data portals without APIs) |
+TXLookup is the layer between you and 6,061 datasets. If you can search Google, you can ask Texas civic data anything.
 
-## Open Data Sources
+## Architecture
 
-| Source | URL | API |
-|--------|-----|-----|
-| Texas Open Data | data.texas.gov | Socrata SODA |
-| Austin Open Data | data.austintexas.gov | Socrata SODA |
-| TX Secretary of State | sos.state.tx.us | Web scraping |
-| TX Comptroller | comptroller.texas.gov | CSV/Excel downloads |
-| US Census (TX) | data.census.gov | Census API |
+Seven specialist agents coordinate behind a single search box:
 
-### Socrata SODA API
-Most Texas/Austin open data portals run on Socrata. Query any dataset with SQL-like syntax:
-```
-https://data.austintexas.gov/resource/{dataset-id}.json?$where=zip_code='78701'&$limit=1000
-```
+| Agent | Role |
+|---|---|
+| **Planner** | Picks the dataset, drafts a structured plan with bounded tool calls. |
+| **Data analyst** | Writes SoQL, computes stats with quality flags (null rate, top concentration, sample factor). |
+| **Reporter** | Composes plain-English answer, grounded in the analyst's findings. |
+| **Critic** | Reviews plan + answer for groundedness and citation. Forces revision on reject. |
+| **Support** | Handles meta-questions and disambiguation. No SoQL fired. |
+| **Dataset scout** *(cron)* | Indexes new portal datasets every 6h. |
+| **Ingestor** *(cron)* | Refreshes the local-mirror cache so pages stay fast and survive throttling. |
 
-## Quick Start
+**The patentable bit:** a pattern-based **doom-loop guard** (identical-3x and `[A,B,A,B]` cycle predicates) plus an **intent-preserving replan path** that survives plan rewrites. See [`docs/deepinvent-submission.md`](docs/deepinvent-submission.md).
+
+Full architecture: **[txlookup.vercel.app/architecture](https://txlookup.vercel.app/architecture)** · short doc: [`docs/architecture.md`](docs/architecture.md)
+
+## Quick start
+
+### Try it without installing anything
+
+Open [txlookup.vercel.app](https://txlookup.vercel.app), click any of the **What people ask** chips, watch the agent fire.
+
+### Install the MCP server (Claude Code)
 
 ```bash
-git clone https://github.com/ATX-TXLookup/TXLookup.git
-cd TXLookup
-
-# Frontend
-npm install
-cp .env.example .env
-npm run dev
-
-# Agent runtime
-pip install -r requirements.txt
-python agent/main.py
-
-# MCP server
-python mcp/server.py
+claude mcp add txlookup -- python -m mcp.server
 ```
 
-## Judging Criteria
+### Codex
 
-| Criteria | How We Hit It |
-|----------|--------------|
-| **Reason** | Agent parses data questions, identifies relevant TX/Austin datasets |
-| **Plan** | Decomposes into data fetch → transform → analyze → visualize steps |
-| **Tool Use** | Socrata API, Playwright scraping, pandas transforms, Miro MCP |
-| **Complete** | Delivers organized Miro board with frames, color-coded findings, summary |
+```bash
+codex mcp add txlookup --command python --args -m --args mcp.server
+```
+
+### Cursor — paste into MCP settings
+
+```json
+{
+  "txlookup": {
+    "command": "python",
+    "args": ["-m", "mcp.server"]
+  }
+}
+```
+
+The server exposes **8 MCP tools**: `ask_data`, `discover_datasets`, `get_dataset_schema`, `fetch_data`, `get_task_status`, `create_miro_board`, `add_to_miro`, `list_known_tools`. Full reference at [/use-as-agent](https://txlookup.vercel.app/use-as-agent).
+
+### Run locally
+
+```bash
+git clone https://github.com/ATX-TXLookup/TXLookup
+cd TXLookup
+npm install
+pip install -r requirements.txt
+
+# .env.local — keys only, never committed
+cat > .env.local <<'EOF'
+OPENAI_API_KEY=sk-...
+SOCRATA_KEY_ID=...        # optional, higher rate limit
+SOCRATA_KEY_SECRET=...
+MIRO_API_TOKEN=eyJ...     # optional, for /q "render to Miro" path
+EOF
+
+npm run dev          # web app on :3000
+python mcp/server.py # MCP server (stdio)
+```
+
+## Datasets
+
+**11 deeply curated** (full schema knowledge, locally mirrored, hand-picked SoQL):
+
+- `3syk-w9eu` — Austin construction permits
+- `ecmv-9xxi` — Austin food-establishment inspections
+- `xwdj-i9he` — Austin 311 service requests
+- `6wtj-zbtb` — Austin code-complaint cases
+- `9cir-efmm` — TX state franchise tax holders
+- `gc4d-8a49` — Dallas 311
+- `9fxf-t2tr` — Dallas police active calls
+- `fdj4-gpfu` — Austin crime
+- `y2wy-tgr5` — Austin traffic fatalities
+- `2zpi-yjjs` — TX state expenditures
+- `naix-2893` — Austin mixed-beverage licenses
+
+**6,061 indexed** across 6 portals — every other dataset is answered live: agent reads catalog metadata, plans a query, runs it on the source portal. Full provenance ledger at [/sources](https://txlookup.vercel.app/sources).
+
+## Tech stack
+
+- **Frontend:** Next.js 14 App Router · TypeScript · Tailwind · inline-SVG charts
+- **Agent runtime:** OpenAI Codex / GPT-4o · 4 distinct LLM roles · Featherless fallback
+- **MCP server:** FastMCP · stdio transport · 8 tools
+- **Data:** Socrata SODA (Austin / Dallas / TX state) · CKAN (San Antonio / Houston) · Miro REST
+- **Cache:** Local JSON mirror (data/cache/*.json) · refreshed every 6h via GitHub Actions cron
+- **Hosting:** Vercel (Next.js serverless) · 60s function timeout · ephemeral filesystem
+
+## Project structure
+
+```
+.
+├── app/              # Next.js App Router pages (TypeScript)
+│   ├── api/agent/    # SSE streaming agent endpoint
+│   ├── q/            # the agent observatory + DAG visualization
+│   ├── chat/         # conversational support agent
+│   ├── reports/      # 5 reports + 1 cross-dataset Heat Index
+│   ├── datasets/     # universe browse + per-dataset detail
+│   ├── sources/      # citations + glossary
+│   ├── architecture/ # how the system fits together
+│   ├── about/        # team
+│   └── lib/          # cache, catalog, agent loop, specialists
+├── agent/            # Python agent runtime + tools
+│   ├── specialists/  # dataset_scout.py, ingestor.py
+│   └── tools/        # data.py (SoQL), miro.py (REST)
+├── mcp/              # FastMCP server (Python)
+│   ├── server.py
+│   └── manifest.json
+├── prompts/          # System prompts per agent role
+├── skills/txlookup/  # Cross-runtime skill doc
+├── config/           # datasets.yaml, reports.ts, models.yaml
+├── data/cache/       # local JSON mirror — committed, refreshed every 6h
+├── docs/             # how-it-works, agents-strategy, demo-script, ...
+├── tests/            # Python + TS tests (catalog integrity, doom-loop, e2e)
+└── .github/workflows # deploy / scout / ingestor / watchdog crons
+```
 
 ## Contributing
 
-Both humans and AI agents contribute to this repo. See:
-- [`AGENTS.md`](AGENTS.md) — Instructions for AI coding agents (Codex, Cursor, etc.)
-- [`CLAUDE.md`](CLAUDE.md) — Additional agent context
-- [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md) — PR template
-- [`.github/ISSUE_TEMPLATE/`](.github/ISSUE_TEMPLATE/) — Issue templates
+Issues and PRs welcome. Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a PR.
 
-## Team
+Areas where new contributors land easily:
 
-Built at the AITX Community x Codex Hackathon, May 8-10, 2026.
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for how the team coordinates work.
+1. **Add a portal** — pick a Socrata or CKAN open-data portal. Add it to `scripts/fetch-discovered-catalog.mjs`. Open a PR.
+2. **Add a dataset** — pick one from the 6,000+ indexed. Add a `CatalogDataset` entry to `app/lib/catalog.ts` and an `INGEST_SPEC` row to `agent/specialists/ingestor.py`. The deep curation kicks in automatically.
+3. **Add a report** — write a `ReportDef` in `config/reports.ts`. The default `[slug]/page.tsx` renders bar/line/stat charts. For a flagship layout, see `app/reports/[slug]/AustinConstructionReport.tsx`.
 
 ## License
 
-MIT
+MIT. See [`LICENSE`](LICENSE).
+
+All data is the property of its issuing agency, used under public-records terms. TXLookup does not claim ownership of any source data — every claim links back to its source portal.
+
+## Acknowledgements
+
+Thanks to the City of Austin, the City of Dallas, the City of San Antonio, the City of Houston, and the State of Texas for publishing every dataset behind this site openly. Thanks to AITX and Codex for hosting the hackathon. Built on top of Anthropic's Model Context Protocol, Smithery, Miro, OpenAI, Featherless, and the Socrata + CKAN open-data standards.
+
+---
+
+Built by [Ravinder Jilkapally](https://www.linkedin.com/in/jravinder), [Kunal Vyas](https://www.linkedin.com/in/kunalvasavada), [Godwyn James](https://www.linkedin.com/in/goodguygoddy/), and [Raj Akula](https://www.linkedin.com/in/rajaakula/) at the [AITX × Codex Hackathon](https://aitx.ai/), May 8–10, 2026.
