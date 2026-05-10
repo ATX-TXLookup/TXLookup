@@ -103,7 +103,7 @@ const austinRestaurants: ReportDef = {
   subtitle: "Repeat offenders in Austin Public Health inspection scores.",
   dataset_ids: ["ecmv-9xxi"],
   intro_paragraph:
-    "Austin Public Health inspects every food establishment on a rolling schedule and publishes the score. This report surfaces the lowest recent scores — useful as a leading indicator before a closure.",
+    "Austin Public Health inspects every food establishment on a rolling schedule and publishes a numeric score per visit. This report reads the inspections feed (ecmv-9xxi) and surfaces the lowest scores in the cached window.",
   socrata_queries: [
     {
       label: "Inspections logged in the last 30 days",
@@ -124,7 +124,7 @@ const austin311: ReportDef = {
   subtitle: "How quickly each part of the city gets a 311 response.",
   dataset_ids: ["xwdj-i9he"],
   intro_paragraph:
-    "Austin 311 logs every non-emergency request — potholes, graffiti, animal services. This report ranks zip codes by recent request volume.",
+    "Austin 311 logs every non-emergency service request — potholes, graffiti, animal services, brush pickup. This report reads the 311 feed (xwdj-i9he) and ranks zip codes by recent request volume.",
   socrata_queries: [
     {
       label: "311 requests in the last 30 days",
@@ -145,7 +145,7 @@ const austinCodeViolations: ReportDef = {
   subtitle: "Where the Code Department is opening cases.",
   dataset_ids: ["6wtj-zbtb"],
   intro_paragraph:
-    "Code complaint cases reflect neighborhood-level signal: short-term rentals, building issues, junk vehicles. This report tracks active cases and the 12-month opening trend.",
+    "Code complaint cases are neighborhood-level signal: short-term rentals, building issues, junk vehicles, overgrown lots. This report reads the cases feed (6wtj-zbtb) — currently active cases and the 12-month opening trend.",
   socrata_queries: [
     {
       label: "Currently active cases",
@@ -166,7 +166,7 @@ const austinPermitsHeatmap: ReportDef = {
   subtitle: "Building activity by zip code.",
   dataset_ids: ["3syk-w9eu"],
   intro_paragraph:
-    "A second view of the construction permits feed — this time leaning hard on geographic distribution. Which zip codes are heating up?",
+    "A geographic cut of the construction permits feed (3syk-w9eu) — top zips by permit count over the last 90 days. Pairs with the long-form Austin Construction in 2026 report.",
   socrata_queries: [
     {
       label: "Top 10 zip codes by permit count, last 90 days",

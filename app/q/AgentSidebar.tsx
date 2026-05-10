@@ -333,9 +333,9 @@ function StatusTab({
       case "completing":
         return "Synthesizing the answer";
       case "done":
-        return "All SLOs green";
+        return "Answer ready, citation attached";
       case "error":
-        return "Degraded — review telemetry";
+        return "Run failed — check telemetry";
       default:
         return "Idle";
     }
@@ -351,7 +351,7 @@ function StatusTab({
           : "rgba(250,247,242,0.45)";
 
   const phaseLabel = (() => {
-    if (status === "running") return "Operational · in flight";
+    if (status === "running") return "In flight";
     if (status === "done") return "Complete";
     if (status === "error") return "Error";
     return "Idle";
@@ -414,7 +414,7 @@ function StatusTab({
         }}
       >
         <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-tx-cream/55">
-          Service-level
+          Reachability
         </p>
         <ul className="mt-2 space-y-1 font-mono text-[12px] text-tx-cream/85">
           <li>
@@ -680,7 +680,7 @@ function ExecutionTab({
                     {isDoomLoop && " · doom-loop"}
                   </p>
                   <p
-                    className="mt-0.5 text-[11px] italic"
+                    className="mt-0.5 text-[11px]"
                     style={{
                       color: isDoomLoop ? "var(--tx-rust-light)" : "var(--tx-cream)",
                     }}

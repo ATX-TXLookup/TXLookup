@@ -22,7 +22,7 @@ export default function ChatPage() {
             Talk to TXLookup.
           </h1>
           <p className="mt-4 max-w-[60ch] text-[15px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
-            Ask what data we have, what a column means, or which dataset best fits your question. This chat is backed by the <span className="text-[var(--ds-text)]">support specialist</span> — the same agent the planner delegates to inside <a href="/q" className="text-[var(--ds-accent)] hover:underline">/q</a> when you ask a meta question. No SoQL fired, no Socrata hit — just answers about the system.
+            Ask what data we have, what a column means, or which dataset best fits your question. The catalog spans <span className="text-[var(--ds-text)]">6,061 Texas datasets across 6 portals</span> — 9 are deeply curated, the rest are queryable on demand. This chat is backed by the <span className="text-[var(--ds-text)]">support specialist</span>, the same agent the planner delegates to inside <a href="/q" className="text-[var(--ds-accent)] hover:underline">/q</a> for meta questions. No SoQL fired, no Socrata hit — just answers about the system.
           </p>
         </div>
       </section>

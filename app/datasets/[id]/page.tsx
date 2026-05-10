@@ -1,13 +1,7 @@
-// Dataset detail page — brand-faithful per BRAND.md (brand-guide/BRAND.md is
-// the single source of truth for all design decisions):
-//   Colors:  navy #0D2340  ·  rust CTA #C4420A  ·  gold accent #D48B10
-//            sky link #3A7FBE  ·  cream surface #FAF7F2  ·  ink #1A1510
-//   Fonts:   DM Serif Display (h1/h2)  ·  Syne (UI/body)  ·  IBM Plex Mono (queries/code)
-//   Tokens are in tailwind.config.ts (tx-navy, tx-rust, ...). CSS vars in
-//   app/globals.css (--tx-navy, --tx-rust, ...) for inline styles only.
-//
-// Functional logic (fetchMetadata, fetchSample, findById, notFound, the
-// Promise<{id}> param shape) is unchanged from the prior implementation.
+// Dataset detail page — uses the shared dark Shell + --ds-* design tokens.
+// Schema, sample rows, and last-refresh timestamp are pulled from the source
+// portal's metadata endpoint and cached for 600s. The insight card below the
+// schema renders cached aggregates if available, falling back to live SODA.
 
 import Link from "next/link";
 import { notFound } from "next/navigation";

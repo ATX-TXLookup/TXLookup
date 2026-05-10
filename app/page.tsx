@@ -140,7 +140,7 @@ export default async function HomePage() {
               </div>
               <div className="mt-3 flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ds-good)]" />
-                <span>agent online · 7 specialists · 9 datasets</span>
+                <span>agent online · 7 specialists · 9 curated · {discovery.totalKnown.toLocaleString()} indexed</span>
               </div>
             </div>
           </div>
@@ -200,11 +200,11 @@ export default async function HomePage() {
                 Local mirror · refreshed every 6h
               </p>
               <h2 className="mt-2 max-w-[20ch] text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[44px]">
-                Three cities. Three domains.{" "}
-                <span className="text-[var(--ds-text-mute)]">Always available.</span>
+                9 curated, locally mirrored.{" "}
+                <span className="text-[var(--ds-text-mute)]">The other {(discovery.totalKnown - 9).toLocaleString()} answered live.</span>
               </h2>
               <p className="mt-4 max-w-[44ch] text-[14px] leading-relaxed text-[var(--ds-text-mute)]">
-                Every dataset that powers this page is mirrored to a local SQLite store every 6 hours by an autonomous ingest agent. Pages render from the mirror in milliseconds and survive upstream throttling — each tile carries a freshness badge so you can see exactly what you're looking at.
+                The 9 datasets behind these tiles are mirrored to a local SQLite store every 6 hours by an autonomous ingestor cron. Pages render from the mirror in milliseconds and survive upstream throttling. The remaining {discovery.totalKnown.toLocaleString() }-dataset catalog across {discovery.portals.length} portals is queried on demand — each tile shows a freshness badge so the source is never ambiguous.
               </p>
               <HeroTexasMap />
             </div>
@@ -386,9 +386,9 @@ $ claude mcp add txlookup -- python -m mcp.server
 $ claude
 > use txlookup: food truck permits 78702 last 6 months
 
-# 3. sourced answer in 7 seconds
-→ 47 mobile food vendor permits, 22% above prior 6mo
-→ cite: 3syk-w9eu · 7.4s · 6,039 tok`}
+# 3. answer with citation
+→ count by month, % change vs prior 6mo
+→ cite: dataset_id · portal_url · age_seconds`}
               </TerminalBlock>
               <p className="mt-2 font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
                 8 tools · 5,000-row cap · 30s timeout · backoff on 429 · citation enforced

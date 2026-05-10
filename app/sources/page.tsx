@@ -50,7 +50,7 @@ const GLOSSARY: Record<string, string> = {
   case_type: "Violation category — Brush, Junk, Inoperable Vehicle, Substandard Structure.",
   status: "Case state — Active, Pending, Closed.",
   opened_date: "When the case was opened.",
-  priority: "Severity — Routine, High, Critical.",
+  priority: "Severity tier — numeric in Code Enforcement (lower = higher priority).",
   department: "Owning department within Code Enforcement.",
   // TX franchise (9cir-efmm)
   taxpayer_number: "Comptroller-assigned taxpayer identifier (11 digits).",
@@ -59,7 +59,7 @@ const GLOSSARY: Record<string, string> = {
   taxpayer_zip: "ZIP code of registered address.",
   taxpayer_county_code: "Numeric county code; 227 = Travis County.",
   responsibility_beginning_date: "Date the entity became responsible for franchise tax.",
-  right_to_transact_business_code: "Y = active right to transact, N = revoked / inactive.",
+  right_to_transact_business_code: "Single-letter Comptroller code — A = active right to transact business; other codes signal forfeited / revoked / inactive.",
   // Dallas 311 (gc4d-8a49)
   service_request_number: "Unique 311 case ID.",
   created_date: "When the Dallas 311 case was filed.",

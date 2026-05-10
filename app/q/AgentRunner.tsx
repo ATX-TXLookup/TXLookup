@@ -2,11 +2,9 @@
 
 // AgentRunner — the brain of the /q observatory page. Streams Server-Sent
 // Events from /api/agent and renders the answer column on the left + the
-// observatory sidebar on the right. Visual chrome is brand-faithful per
-// BRAND.md (brand-guide/BRAND.md): tx-cream surfaces, tx-navy hero, tx-rust
-// CTAs, tx-gold accents, DM Serif Display headlines, IBM Plex Mono for
-// queries / dataset IDs / errors. Functional logic (SSE handling, state
-// machine, prop shapes) is byte-identical to the pre-restyle version.
+// observatory sidebar on the right. Visual chrome uses the --ds-* dark
+// design tokens (see app/globals.css). Functional logic (SSE handling,
+// state machine, prop shapes) is unchanged from prior versions.
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -19,11 +17,6 @@ import {
 import { ObsEvent } from "./AgentObservatory";
 import { AgentSidebar } from "./AgentSidebar";
 import type { DagEvent } from "./AgentDAG";
-import { SupportChips, type SupportResult } from "./components/SupportChips";
-import {
-  AnalystFindings,
-  type AnalystResult,
-} from "./components/AnalystFindings";
 import {
   ReporterComposition,
   type ReporterResult,
@@ -940,221 +933,9 @@ export function AgentRunner({
           </section>
         ) : null}
 
-        {/* Reasoning trace + Self-corrections moved to right-column tabs.
-            User feedback: 'move this to the right column'. The DAG /
-            Execution / Telemetry tabs already render this.
-            We keep ONLY the SupportChips inline render below the answer
-            card so vague-query clarification chips remain visible.        */}
-        {false && state.steps.length > 0 && state.phase !== "error" && (
-          <section className="border-b border-tx-ink/10 bg-tx-cream">
-            <div className="px-6 py-8 md:px-10 md:py-10">
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
-                Reasoning trace
-              </p>
-              <h3 className="mt-2 font-display text-2xl font-normal tracking-tight text-tx-navy">
-                Tool sequence the agent ran.
-              </h3>
-              <ol className="mt-6 space-y-3">
-                {state.steps.map((s) => {
-                  // Replan-origin steps and doom-loop replans get distinct
-                  // accent treatments per the brief.
-                  const isFailed = s.status === "failed";
-                  const isCompleted = s.status === "completed";
-                  const isReplan = s.fromReplan === true;
-                  // Map this step's index (1-based) to its corresponding
-                  // replan record so we can detect doom-loop replans.
-                  const replanForStep = state.replans.find(
-                    (r) => r.failedStep === s.step,
-                  );
-                  const isDoomLoop = replanForStep?.reason === "doom_loop";
-                  // Card visual: failed = rust-light bg, replan = gold-light
-                  // accent on top, completed = cream + sage tick, pending = cream.
-                  const cardBg = isFailed ? "var(--tx-rust-light)" : "var(--tx-cream)";
-                  const cardBorder = isFailed
-                    ? "var(--tx-rust)"
-                    : isReplan
-                      ? "var(--tx-gold)"
-                      : isCompleted
-                        ? "var(--tx-sage)"
-                        : "var(--tx-border)";
-                  const statusColor = isFailed
-                    ? "var(--tx-rust)"
-                    : isCompleted
-                      ? "var(--tx-sage)"
-                      : "var(--tx-muted)";
-                  return (
-                    <li
-                      key={s.step}
-                      className="rounded-[10px] p-5"
-                      style={{
-                        background: cardBg,
-                        border: `0.5px solid ${cardBorder}`,
-                        borderLeftWidth: isFailed || isReplan ? "3px" : "0.5px",
-                        borderLeftColor: cardBorder,
-                      }}
-                    >
-                      <div className="flex flex-wrap items-baseline gap-2">
-                        <span className="font-mono text-[11px] font-semibold tabular-nums text-tx-muted">
-                          {String(s.step).padStart(2, "0")}
-                        </span>
-                        <span className="font-mono text-sm font-semibold text-tx-navy">
-                          {s.tool}
-                        </span>
-                        {isReplan && !isDoomLoop && (
-                          <span
-                            className="rounded-full px-3 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em]"
-                            style={{
-                              background: "var(--tx-gold-light)",
-                              color: "var(--tx-gold-dark)",
-                              border: "0.5px solid rgba(212,139,16,0.3)",
-                            }}
-                          >
-                            Replan
-                          </span>
-                        )}
-                        {isDoomLoop && (
-                          <span className="rounded-full bg-tx-rust px-3 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.08em] text-white">
-                            DOOM-LOOP
-                          </span>
-                        )}
-                        <span
-                          className="ml-auto font-mono text-[10px] uppercase tracking-wider"
-                          style={{ color: statusColor }}
-                        >
-                          {s.status}
-                          {typeof s.durationMs === "number" && s.status !== "pending" && (
-                            <span className="ml-2 normal-case tracking-normal text-tx-muted">
-                              {s.durationMs}ms
-                            </span>
-                          )}
-                        </span>
-                      </div>
-                      {s.rationale && (
-                        <p className="mt-2 max-w-[68ch] text-sm leading-relaxed text-tx-ink/80">
-                          {s.rationale}
-                        </p>
-                      )}
-                      {s.error && (
-                        <p className="mt-2 font-mono text-xs leading-relaxed text-tx-rust">
-                          ↳ {s.error}
-                        </p>
-                      )}
-                      {s.preview && !s.error && (
-                        <p className="mt-2 max-w-[68ch] font-mono text-xs leading-relaxed text-tx-muted">
-                          {s.preview}
-                        </p>
-                      )}
-                      {/* Multi-agent render branches (PR #68 / issue #67):
-                          delegate_to specialists ship their full structured
-                          envelope on step_done.result_json. Render the
-                          matching surface inline below the step card.
-                          Reporter's composition replaces the synthesizer
-                          answer up top, so we skip it here. */}
-                      {s.agent === "support" &&
-                        isSupportResult(s.resultPayload) &&
-                        Array.isArray(
-                          (s.resultPayload as SupportResult).next_actions,
-                        ) &&
-                        ((s.resultPayload as SupportResult).next_actions
-                          ?.length ?? 0) > 0 && (
-                          <SupportChips
-                            result={s.resultPayload as SupportResult}
-                          />
-                        )}
-                      {s.agent === "data_analyst" &&
-                        isAnalystResult(s.resultPayload) && (
-                          <AnalystFindings
-                            result={s.resultPayload as AnalystResult}
-                          />
-                        )}
-                    </li>
-                  );
-                })}
-              </ol>
-            </div>
-          </section>
-        )}
-
-        {/* Self-corrections moved to right-column DAG / Execution tab. */}
-        {false && state.replans.length > 0 && (
-          <section className="border-b border-tx-ink/10 bg-tx-cream">
-            <div className="px-6 py-8 md:px-10 md:py-10">
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-gold-dark">
-                Self-corrections
-              </p>
-              <h3 className="mt-2 font-display text-2xl font-normal tracking-tight text-tx-navy">
-                Why the agent <span className="italic text-tx-gold">replanned</span>.
-              </h3>
-              <ol className="mt-5 space-y-3">
-                {state.replans.map((r, i) => {
-                  const isDoomLoop = r.reason === "doom_loop";
-                  return (
-                    <li
-                      key={i}
-                      className="rounded-[10px] p-5"
-                      style={{
-                        background: isDoomLoop
-                          ? "var(--tx-rust-light)"
-                          : "var(--tx-gold-light)",
-                        border: `0.5px solid ${
-                          isDoomLoop
-                            ? "var(--tx-rust)"
-                            : "rgba(212,139,16,0.35)"
-                        }`,
-                      }}
-                    >
-                      <div className="flex flex-wrap items-baseline gap-2">
-                        {isDoomLoop ? (
-                          <span className="rounded-full bg-tx-rust px-3 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.08em] text-white">
-                            Doom-loop
-                          </span>
-                        ) : (
-                          <span
-                            className="rounded-full px-3 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em]"
-                            style={{
-                              background: "rgba(212,139,16,0.18)",
-                              color: "var(--tx-gold-dark)",
-                              border: "0.5px solid rgba(212,139,16,0.3)",
-                            }}
-                          >
-                            Replan
-                          </span>
-                        )}
-                        <span className="font-mono text-xs font-semibold text-tx-navy">
-                          step {r.failedStep} · {r.failedTool}
-                        </span>
-                      </div>
-                      {r.error && (
-                        <p
-                          className="mt-2 font-mono text-xs leading-relaxed"
-                          style={{
-                            color: isDoomLoop
-                              ? "var(--tx-rust)"
-                              : "var(--tx-gold-dark)",
-                          }}
-                        >
-                          error: {r.error}
-                        </p>
-                      )}
-                      {r.diagnosis && (
-                        <p
-                          className="mt-2 max-w-[70ch] text-sm italic leading-relaxed"
-                          style={{
-                            color: isDoomLoop
-                              ? "var(--tx-rust)"
-                              : "var(--tx-gold-dark)",
-                          }}
-                        >
-                          {r.diagnosis}
-                        </p>
-                      )}
-                    </li>
-                  );
-                })}
-              </ol>
-            </div>
-          </section>
-        )}
+        {/* Reasoning trace + Self-corrections live in the right-column DAG /
+            Steps / Telemetry tabs. SupportChips / AnalystFindings /
+            ReporterComposition render inline above where applicable. */}
 
         {/* Related angles — only after a successful answer */}
         {state.phase === "done" && state.answer && relatedAngles.length > 0 && (
@@ -1200,7 +981,7 @@ export function AgentRunner({
                   Agent error
                 </p>
                 <h3 className="mt-3 text-2xl font-normal tracking-tight text-[var(--ds-text)] md:text-3xl">
-                  The agent <span className="italic text-[var(--ds-bad)]">couldn’t finish</span>.
+                  The agent <span className="text-[var(--ds-bad)]">couldn’t finish</span>.
                 </h3>
                 <p className="mt-3 max-w-[60ch] font-mono text-sm leading-relaxed text-[var(--ds-text)]/85">
                   {state.error}
@@ -1311,24 +1092,9 @@ export function AgentRunner({
   );
 }
 
-// Type guards for the multi-agent specialist envelopes (PR #68 / issue #67).
-// Each one only requires the minimum shape the matching render branch reads,
-// so a partially-malformed payload still routes safely (the render branch's
-// own optional-chaining handles missing optional fields).
-function isSupportResult(v: unknown): v is SupportResult {
-  return (
-    typeof v === "object" &&
-    v !== null &&
-    (v as { agent?: unknown }).agent === "support"
-  );
-}
-function isAnalystResult(v: unknown): v is AnalystResult {
-  return (
-    typeof v === "object" &&
-    v !== null &&
-    (v as { agent?: unknown }).agent === "data_analyst"
-  );
-}
+// Type guard for the reporter specialist envelope (PR #68 / issue #67).
+// Only the minimum shape the matching render branch reads is required, so a
+// partially-malformed payload still routes safely.
 function isReporterResult(v: unknown): v is ReporterResult {
   return (
     typeof v === "object" &&
