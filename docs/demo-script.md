@@ -1,220 +1,160 @@
 # Demo script — 3 minutes, judging-day
 
-> Read aloud while recording. Every line is sayable in under eight seconds. Italicized lines are presenter notes — pauses, eye contact cues, and tab-switching beats. Wall-clock from "GO".
+> Read aloud while recording. Every line is sayable in under eight seconds.
+> Italicized lines are presenter notes — pauses, eye contact cues,
+> tab-switching beats. Wall-clock from "GO".
+>
+> Pair with `docs/demo-delivery.md` for the per-beat operational cheatsheet.
 
 **URL on screen:** https://txlookup.vercel.app
 
 **Setup before recording:**
-- Disable the basic-auth gate, or paste creds (`txlookup:aitx2026`) before going live.
-- Browser at 110% zoom. No extensions visible. Observatory column in frame.
-- Pre-warm one marquee question with curl thirty seconds before recording.
-- Second tab open at the Miro board. Third tab open at `?demo=1` for the contingency path.
+- Browser at 110% zoom. No extensions visible. Status panel in frame.
+- Pre-warm one marquee question with curl 30 seconds before recording.
+- Second tab open at the Miro board. Third tab open at `?demo=1` for the contingency path. Fourth tab on `/api/cache-stats` for the resilience proof.
 
 ---
 
-## 0:00 → 0:15 · What is a doom-loop (15s)
+## 0:00 → 0:25 · The hook (25s)
 
-> *(homepage on screen, ticker visible. Look at the camera.)*
+> *(Homepage on screen. Look at camera.)*
 >
-> "A doom-loop is when an agent keeps calling the same tool, over and over, getting nothing new."
->
-> *(Beat. Hold eye contact.)*
->
-> "Most agents you've used have one. Ours catches it in code, then re-plans around it. That's the patent."
-
----
-
-## 0:15 → 0:40 · The hook (25s)
-
-> *(Gesture at the homepage ticker.)*
->
-> "Texas open-data portals hold millions of public records. Permits. Inspections. Three-one-one calls. Crime."
->
-> *(Breathe.)*
->
-> "They're public. They're useful. Almost no one queries them, because hand-writing SoQL is brutal."
->
-> *(Tap the live counters on screen.)*
->
-> "TXLookup is an autonomous agent that does it for you, in plain English. Those numbers are server-rendered live from Socrata as you watch."
-
----
-
-## 0:40 → 1:05 · Sarah's question — the live agent (25s)
-
-> *(Click into "Restaurants near 78704 with failing inspections this year.")*
->
-> "Real question. A parent in 78704."
->
-> *(/q loads. Observatory column starts streaming on the right.)*
->
-> "Watch the right side. Reason. Plan. Tool. Each step has a real timestamp."
->
-> *(Pause as the planner emits its thinking line.)*
->
-> "That italic line is the planner's read of the question. Structured output, parsed and rendered — not a chatbot guess."
-
----
-
-## 1:05 → 1:35 · The replan — the wow moment (30s)
-
-> *(Wait for the yellow "Agent adjusted course" panel. If it doesn't appear live, switch to the inspection question — the fixture replan is wired.)*
->
-> "Here's the part that matters."
->
-> *(Point at the yellow panel.)*
->
-> "First attempt failed. Codex tried `score` as the column name. The real field is `score_amt`."
+> "Sifting through your city's data is hard. Unless you're a developer, a city official, or a reporter."
 >
 > *(Beat.)*
 >
-> "The replanner caught it. Diagnosed it. Emitted a corrected query. The retry succeeded."
+> "Texas publishes 6,061 datasets across 6 portals. Permits. Inspections. 311 calls. Code violations. Public. Free. Almost no normal person can use them."
 >
-> *(Slow down.)*
+> *(Gesture at the Motivation block — six portals · schema drift · brutal SoQL · download + sift.)*
 >
-> "That is not retry. The agent reasoned about its own failure, and kept the prior steps. Three triggers fire it: a step error, identical calls, or an A-B-A-B cycle."
+> "The current path is: download a CSV, open a spreadsheet, hope you didn't miss a column."
 
 ---
 
-## 1:35 → 1:55 · The answer — citation enforced (20s)
+## 0:25 → 0:50 · The product (25s)
 
-> *(Point at the answer card and the citation card under it.)*
+> *(Pull up to hero.)*
 >
-> "Eleven restaurants in 78704 failed this year. Lowest were El Patio at 64, Maya Cafe at 68."
->
-> *(Tap the citation card.)*
->
-> "Every answer carries a citation. City of Austin, dataset ID `ecmv-9xxi`, refreshed today, with the exact SODA URL. A judge can replay it."
+> "TXLookup brings the power of agentic AI to normal users."
 >
 > *(Beat.)*
 >
-> "Citation is enforced at four layers. The planner literally cannot skip it."
+> "Think of it as Google search — but with a concierge agent guiding you. You ask in plain English. A team of OpenAI-powered specialists works for you. They pick the dataset, write the query, run it on the source-of-truth portal, and hand you a sourced answer."
+>
+> *(Click into a "What people ask" chip — `Restaurants near 78704 with failing inspections this year`.)*
 
 ---
 
-## 1:55 → 2:20 · Install TXLookup as a tool (25s)
+## 0:50 → 1:35 · The agent in action (45s)
 
-> *(Scroll to the dark "Install TXLookup" code panel. Open a terminal in the next tab.)*
+> *(Page renders /q. Right panel animates: status → DAG → steps → telemetry.)*
 >
-> "Better story. TXLookup is also a tool other agents can install."
+> "Watch the right panel. Seven specialist agents."
 >
-> *(Type or paste, on screen.)*
+> *(Point at the DAG. Hover a node — info tooltip appears.)*
 >
-> "One command. `claude mcp add --transport stdio txlookup`."
+> "Planner picks the dataset. Data analyst writes the SoQL. Critic verifies. Reporter composes."
+>
+> *(Beat. The answer renders.)*
+>
+> "Seven seconds. One sourced answer. Citation attached — City of Austin, dataset `ecmv-9xxi`, refreshed today, exact SODA URL replayable."
+>
+> *(Click the purple **Open dataset** button — opens the Socrata page in a new tab. Bring back the home tab.)*
+>
+> "Every claim auditable. Every step replayable."
+
+---
+
+## 1:35 → 2:05 · How the agents coordinate (30s)
+
+> *(Tab to /architecture, scroll to the "Why agents" section.)*
+>
+> "Each agent does the work you used to do by hand. Planner reads the schema and drafts the plan. Analyst computes the stats with quality flags. Reporter composes plain English. Critic catches ungrounded answers and forces a revision. Support handles disambiguation. Two background agents — scout and ingestor — grow the corpus on a six-hour cron."
+>
+> *(Tap the doom-loop guard line.)*
+>
+> "Pattern-based doom-loop guard catches cycles in code. Replan path preserves user intent across rewrites. That's the patent."
+
+---
+
+## 2:05 → 2:30 · The corpus grows (25s)
+
+> *(Tab to /datasets — universe browse with 6,061 indexed.)*
+>
+> "Today: 11 datasets are deeply curated — full schema, locally mirrored every six hours, instant answers."
+>
+> *(Scroll to the "Beyond the curated" section.)*
+>
+> "The other six thousand are answered live: the agent reads catalog metadata, plans a query, hits the source portal, comes back."
 >
 > *(Beat.)*
 >
-> "Now any Claude Code or Codex session has bounded, cited access to Texas civic data."
->
-> *(Eye contact.)*
->
-> "We're a node in the agent graph. Not a leaf."
+> "As the data analyst agent works through more datasets, more graduate into the curated corpus. The system grows itself."
 
 ---
 
-## 2:20 → 2:40 · Visualization handoff to Miro (20s)
+## 2:30 → 2:50 · It's extensible (20s)
 
-> *(Switch to the Miro tab. Pan once so the judges see it's a real board.)*
+> *(Tab to /use-as-agent.)*
 >
-> "It doesn't stop at text. The agent has an A2A handoff to Miro."
+> "TXLookup ships as an MCP server. Eight tools. Installable in Claude Code, Cursor, Codex — one command."
 >
-> *(Gesture across the frames and stickies.)*
+> *(Show the terminal block on screen.)*
 >
-> "When a question warrants visualization, the agent calls Miro mid-loop. Frames, color-coded stickies per record, citation footer. This board was generated by the agent."
-
----
-
-## 2:40 → 3:00 · Close (20s)
-
-> *(Switch back to the homepage. Look at the camera.)*
+> ```
+> claude mcp add txlookup -- python -m mcp.server
+> ```
 >
-> "Six datasets registered today. Four cities scaffolded. Adding a dataset is a YAML edit — the MCP server reloads without a redeploy."
+> "Now your coding agent can query Texas civic data the same way ours does. Skill doc teaches any runtime when to call which tool."
 >
-> *(Beat. Slow.)*
+> *(Beat.)*
 >
-> "Agent, MCP server, skill, docs, demo — all open source, MIT, on GitHub at `ATX-TXLookup/TXLookup`."
->
-> *(Hold one second.)*
->
-> "Thanks."
+> "Texas today. Same pipeline ingests Chicago, NYC, San Francisco — anywhere there's a Socrata or CKAN portal. Open source. Anyone can extend it."
 
 ---
 
-## Time-budget summary
+## 2:50 → 3:00 · Close (10s)
 
-| Section | Duration | Cumulative |
-|---|---|---|
-| What is a doom-loop | 0:15 | 0:15 |
-| Hook | 0:25 | 0:40 |
-| Sarah's question | 0:25 | 1:05 |
-| Replan | 0:30 | 1:35 |
-| Answer + citation | 0:20 | 1:55 |
-| Install as a tool | 0:25 | 2:20 |
-| Miro A2A | 0:20 | 2:40 |
-| Close | 0:20 | 3:00 |
-
-Total: 3:00 exact.
-
----
-
-## Contingency — 30 seconds, if the internet flakes
-
-> *(If the live `/q` call stalls past two seconds, switch to the pre-loaded `?demo=1` tab. Same SSE contract, fixture replay, looks identical on screen.)*
+> *(Tab to /about. Show team. Show GitHub link.)*
 >
-> *(Calmly, no apology.)*
+> "Four people. Multi-agent loop. MIT licensed. Code at github dot com slash A-T-X dash T-X-Lookup."
 >
-> "I'll switch to the recorded path so we stay on time."
->
-> *(URL bar: `txlookup.vercel.app/q?demo=1&q=foodtruck`. Click run.)*
->
-> "Same agent, same observatory, replayed from a fixture. The replan you're about to see is the actual replan from a real run last night."
->
-> *(Let the SSE stream play. Point at the yellow panel when it appears.)*
->
-> "There's the doom-loop trigger. There's the corrected plan. Same code path — only the network calls are stubbed."
->
-> *(Resume the script at the section after the one that failed. Do not restart from the top.)*
-
-If the contingency fires, drop the Miro section to keep total runtime under 3:15.
+> *(End on the homepage with the search box visible. Beat. Cut.)*
 
 ---
 
 ## What you're demonstrating, mapped to the four judging axes
 
-| Axis | Evidence in the script |
+- **Technical (25):** working multi-agent loop · pattern-based doom-loop guard · live SSE stream · cache-resilience layer · MCP server with 8 tools
+- **Partner (25):** Codex (4 LLM roles) · Miro (live demo board) · MCP transport (3 client runtimes) · Featherless fallback · Socrata + CKAN
+- **Value (25):** plain-English in / sourced answer out · 11 deeply curated + 6,061 indexed · citation enforced · /chat conversational · /reports editorial
+- **Innovation (25):** doom-loop pattern detection (patentable) · replan preserves intent · skill doc as cross-runtime policy · cross-dataset Heat Index report · agent-authored synthesis with grounded numbers
+
+---
+
+## Recovery playbook (don't break frame)
+
+| Failure | Recovery line |
 |---|---|
-| Technical Execution and Completeness | Live ticker from real Socrata, `/q` agent loop with replan, observatory streaming, citation enforced. |
-| Partner Ecosystem and Utility | Codex as planner-replanner-synthesizer, Miro A2A handoff, MCP install snippet. |
-| Value and Impact | Sarah persona — real parent question, real failing-inspection answer, sourced. |
-| Innovation | Replan-on-failure as a first-class user-visible feature, doom-loop detection, four-layer citation enforcement, A2A render to Miro. |
+| `/q` stalls past 10s | Switch URL to `?demo=1`. "Same flow, fixture replay. Watch the agents fire." |
+| Vercel 5xx | Switch to `demo-walkthrough.mp4`. "Here's it running 30 minutes ago." |
+| OpenAI 429 | The cache-fallback in `sodaQuery` returns stale rows with a "served from local mirror" caveat. The answer still renders. |
+| Question hits a non-curated dataset | "That one wasn't in our deeply-curated 11 — agent figured it out from the indexed catalog." Frame as a feature. |
+| Miro board doesn't load | Skip it. End on `/about` instead. |
 
 ---
 
-## Recording tips
+## Hard rules
 
-- Pre-warm the cache with curl thirty seconds before recording.
-- If a live step blanks, switch to `?demo=1` mid-recording — same contract, fixture replay.
-- Mute system notifications.
-- Record at 1080p, 30 fps, no narration overlay.
-- Re-record after viewing once. The first take always has a stumble.
-- Cut to the Miro board at the timestamp above. The tab switch shows the cross-system handoff is real.
+- Never wait silently. If a load takes more than 10 seconds, switch to `?demo=1` and don't apologize.
+- Never speak through a click. Click. Beat. Say the line.
+- Don't promise live numbers. Every stat tile carries its own freshness badge.
+- Don't read JSON aloud. The story is the multi-agent loop, not the network.
 
----
+## After the demo
 
-## Backup phrases if a step glitches
-
-- "This is the live agent — that's why you can see the small delay."
-- "The yellow box is the replan path catching a real failure."
-- "Notice the timestamp — that's wall-clock, not animated."
-- "The citation block updates in real time as the agent runs the citation tool."
-
----
-
-## Post-record checklist
-
-- [ ] Re-watch end-to-end, eye on the right-rail observatory.
-- [ ] Confirm the answer has a populated citation card.
-- [ ] Confirm the URL bar shows `https://txlookup.vercel.app` clearly.
-- [ ] Trim head and tail to exactly 3:00.
-- [ ] Upload to YouTube as unlisted, capture the URL for the submission form.
-- [ ] Test the YouTube URL in an incognito window to confirm it plays.
+- Capture: the `?demo=1` URL with the question that fired (judges will replay).
+- Capture: the Miro board URL.
+- Capture: `/api/cache-stats` JSON (proves the resilience layer is real).
+- Submit form: paste from `docs/hackathon-form-copy.md` field by field.
+- DeepInvent: upload `docs/deepinvent-submission.md` text.
