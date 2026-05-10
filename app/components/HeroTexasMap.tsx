@@ -1,0 +1,171 @@
+"use client";
+
+// HeroTexasMap — small inline-SVG Texas with civic-data nodes per major
+// city/portal. Used as the hero visual. Active portal pulses; inactive
+// portals are dimmed but visible (we WILL ingest them).
+//
+// The shape values come from data/geo/tx-counties-simplified.json — we
+// reuse the simplified TX outline but draw it as a single silhouette
+// instead of per-county.
+
+import { useMemo } from "react";
+
+type Portal = {
+  id: string;
+  name: string;
+  city: string;
+  x: number; // viewBox coords
+  y: number;
+  datasets: number;
+  status: "active" | "queued" | "scout";
+};
+
+const PORTALS: Portal[] = [
+  { id: "austin",   name: "data.austintexas.gov", city: "Austin",      x: 365, y: 380, datasets: 6, status: "active" },
+  { id: "dallas",   name: "dallasopendata.com",   city: "Dallas",      x: 410, y: 240, datasets: 2, status: "active" },
+  { id: "sa",       name: "data.sanantonio.gov",  city: "San Antonio", x: 340, y: 450, datasets: 0, status: "scout" },
+  { id: "houston",  name: "data.houstontx.gov",   city: "Houston",     x: 480, y: 400, datasets: 0, status: "scout" },
+  { id: "tx-state", name: "data.texas.gov",       city: "TX state",    x: 270, y: 320, datasets: 1, status: "queued" },
+  { id: "elpaso",   name: "(future)",             city: "El Paso",     x:  85, y: 220, datasets: 0, status: "scout" },
+];
+
+// Simplified Texas outline in path form (rough hand-drawn polygon).
+const TX_OUTLINE =
+  "M 90 215 L 130 200 L 200 195 L 280 175 L 330 165 L 380 158 L 410 155 L 440 158 L 470 162 L 470 200 L 480 215 L 510 230 L 540 250 L 565 280 L 580 320 L 575 360 L 555 395 L 530 425 L 500 460 L 470 495 L 440 520 L 405 540 L 365 558 L 320 555 L 285 545 L 250 520 L 215 480 L 195 440 L 165 410 L 140 380 L 110 340 L 95 300 L 90 260 Z";
+
+const STATUS_COLOR: Record<Portal["status"], { ring: string; fill: string; label: string }> = {
+  active: { ring: "#10B981", fill: "#10B981", label: "online" },
+  queued: { ring: "#5B8DEF", fill: "#5B8DEF", label: "queued" },
+  scout:  { ring: "#71717A", fill: "#71717A", label: "scout-pending" },
+};
+
+export function HeroTexasMap() {
+  // Compute total datasets shown for caption
+  const totalDatasets = useMemo(
+    () => PORTALS.reduce((s, p) => s + p.datasets, 0),
+    [],
+  );
+  const activeCount = PORTALS.filter((p) => p.status === "active").length;
+
+  return (
+    <div className="relative">
+      <svg viewBox="0 0 600 600" className="w-full" aria-hidden>
+        <defs>
+          <radialGradient id="tx-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#5B8DEF" stopOpacity={0.18} />
+            <stop offset="100%" stopColor="#5B8DEF" stopOpacity={0} />
+          </radialGradient>
+          <filter id="tx-soft" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="3" />
+          </filter>
+        </defs>
+
+        {/* Soft ambient glow behind the state */}
+        <ellipse cx={310} cy={350} rx={260} ry={210} fill="url(#tx-glow)" />
+
+        {/* Texas silhouette */}
+        <path
+          d={TX_OUTLINE}
+          fill="#15171C"
+          stroke="#23262E"
+          strokeWidth={1}
+        />
+
+        {/* Subtle inner grid lines (county-ish) */}
+        <g stroke="#23262E" strokeWidth={0.5} fill="none">
+          <line x1={150} x2={550} y1={300} y2={300} />
+          <line x1={150} x2={550} y1={400} y2={400} />
+          <line x1={250} x2={250} y1={200} y2={500} />
+          <line x1={350} x2={350} y1={200} y2={500} />
+          <line x1={450} x2={450} y1={200} y2={500} />
+        </g>
+
+        {/* City / portal nodes */}
+        {PORTALS.map((p) => {
+          const c = STATUS_COLOR[p.status];
+          const r = p.status === "active" ? 7 : p.status === "queued" ? 5 : 4;
+          return (
+            <g key={p.id}>
+              {p.status === "active" && (
+                <>
+                  <circle cx={p.x} cy={p.y} r={r * 2.6} fill={c.fill} opacity={0.25}>
+                    <animate attributeName="r" values={`${r * 2};${r * 4.5};${r * 2}`} dur="2.4s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="0.35;0;0.35" dur="2.4s" repeatCount="indefinite" />
+                  </circle>
+                </>
+              )}
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={r}
+                fill={c.fill}
+                stroke="#0E1014"
+                strokeWidth={2}
+              />
+              {/* Label */}
+              <text
+                x={p.x + r + 6}
+                y={p.y + 3}
+                fontSize={10}
+                fontFamily="JetBrains Mono, monospace"
+                fill="#F5F5F7"
+                fontWeight={600}
+              >
+                {p.city}
+              </text>
+              <text
+                x={p.x + r + 6}
+                y={p.y + 14}
+                fontSize={8}
+                fontFamily="JetBrains Mono, monospace"
+                fill="#A1A1AA"
+              >
+                {p.datasets > 0 ? `${p.datasets} dataset${p.datasets === 1 ? "" : "s"}` : c.label}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Top-right meta */}
+        <g transform="translate(440, 55)">
+          <rect width={140} height={60} rx={6} fill="#15171C" stroke="#23262E" strokeWidth={1} />
+          <text x={12} y={20} fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" letterSpacing="1.5">
+            CORPUS · LIVE
+          </text>
+          <text x={12} y={42} fontSize={20} fontFamily="Inter, sans-serif" fontWeight={700} fill="#F5F5F7">
+            {totalDatasets}
+          </text>
+          <text x={48} y={42} fontSize={11} fontFamily="JetBrains Mono, monospace" fill="#71717A">
+            datasets
+          </text>
+          <text x={12} y={54} fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#10B981">
+            ● {activeCount} portals online
+          </text>
+        </g>
+
+        {/* Bottom-left meta */}
+        <g transform="translate(20, 540)">
+          <text fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#71717A" letterSpacing="1.5">
+            DATASET SCOUT · NEXT TICK 5H 47M
+          </text>
+        </g>
+      </svg>
+
+      {/* Legend */}
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="block h-2 w-2 rounded-full bg-[#10B981]" />
+          <span>online</span>
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="block h-2 w-2 rounded-full bg-[#5B8DEF]" />
+          <span>queued</span>
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="block h-2 w-2 rounded-full bg-[#71717A]" />
+          <span>scout-pending</span>
+        </span>
+      </div>
+    </div>
+  );
+}

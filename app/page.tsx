@@ -15,6 +15,7 @@
 
 import Link from "next/link";
 import AgentTopologyShowcase from "@/app/components/AgentTopologyShowcase";
+import { HeroTexasMap } from "@/app/components/HeroTexasMap";
 import {
   EyebrowLabel,
   FeatureCard,
@@ -48,27 +49,33 @@ export default async function HomePage() {
 
   return (
     <Shell active="/">
-      {/* HERO */}
+      {/* HERO — text left, Texas map right */}
       <section className="border-b border-[var(--ds-border)]">
         <div className="mx-auto max-w-[1200px] px-6 pb-20 pt-12 md:px-8 md:pb-28 md:pt-16">
+        <div className="grid items-center gap-12 md:grid-cols-12 md:gap-14">
+        <div className="md:col-span-7">
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--ds-warm)]/40 bg-[rgba(249,115,22,0.10)] px-3 py-1">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--ds-warm)]" />
             <span className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--ds-warm)]">
-              Texas open-data hackathon · 2026
+              Any civic dataset · sourced · cited · always-on scout
             </span>
           </div>
 
-          <h1 className="mt-7 max-w-[18ch] text-[44px] font-bold leading-[1.05] tracking-[-0.025em] text-[var(--ds-text)] md:text-[80px]">
-            <span className="font-display-serif font-normal">Texas civic data,</span>
+          <h1 className="mt-6 max-w-[18ch] text-[42px] font-bold leading-[1.04] tracking-[-0.025em] text-[var(--ds-text)] md:text-[68px]">
+            <span className="font-display-serif font-normal">Any civic dataset.</span>
             <br />
-            <span className="text-[var(--ds-text-mute)]">in plain English.</span>
+            <span className="text-[var(--ds-text-mute)]">Any question. Sourced.</span>
           </h1>
 
-          <p className="mt-7 max-w-[58ch] text-[16px] leading-relaxed text-[var(--ds-text-mute)] md:text-[18px]">
-            Type a question. Get a sourced answer in 7 seconds. Watch five specialist agents work the problem — orchestrator, data analyst, critic, reporter, support — with citation enforced at the protocol level. Not a wrapper.
+          <p className="mt-6 max-w-[58ch] text-[16px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
+            Point us at a Socrata portal — Austin, Dallas, San Antonio, Houston, the state, or your own city. The dataset scout discovers schema. The ingestor populates a local cache. Five specialist agents — orchestrator, data analyst, critic, reporter, support — work the question with citation enforced at the protocol level.
+          </p>
+          <p className="mt-3 max-w-[58ch] text-[15px] leading-relaxed text-[var(--ds-text-mute)]">
+            Not a wrapper. The agent acquires the corpus on its own and{" "}
+            <span className="text-[var(--ds-good)]">turns any portal into knowledge.</span>
           </p>
 
-          <div className="mt-9 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/q"
               className="inline-flex items-center rounded-md bg-[var(--ds-text)] px-5 py-2.5 text-[13px] font-semibold text-[var(--ds-bg)] hover:bg-[var(--ds-text-mute)]"
@@ -79,29 +86,80 @@ export default async function HomePage() {
               href="/datasets"
               className="inline-flex items-center rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] px-5 py-2.5 text-[13px] font-semibold text-[var(--ds-text)] hover:border-[var(--ds-text-dim)]"
             >
-              Browse datasets
+              Browse the corpus
             </Link>
             <Link
-              href="/reports"
+              href="/use-as-agent"
               className="inline-flex items-center rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] px-5 py-2.5 text-[13px] font-semibold text-[var(--ds-text)] hover:border-[var(--ds-text-dim)]"
             >
-              Read reports
+              Bring your own portal
             </Link>
           </div>
+        </div>
+        <div className="md:col-span-5">
+          <HeroTexasMap />
+        </div>
+        </div>
+        </div>
+      </section>
 
-          <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[var(--ds-border)] pt-6">
-            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
-              Coverage
-            </span>
-            {["Austin", "Dallas", "San Antonio", "Houston", "TX state"].map((c) => (
-              <span key={c} className="text-[12px] text-[var(--ds-text-mute)]">
-                · {c}
-              </span>
-            ))}
-            <span className="ml-auto inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ds-good)]" />
-              <span>agent online</span>
-            </span>
+      {/* BRING YOUR OWN DATASET — the universality moat */}
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1200px] px-6 py-20 md:px-8 md:py-28">
+          <SectionHeader
+            eyebrow="The selling point"
+            eyebrowTone="good"
+            headline={
+              <>
+                Any dataset. Any portal.{" "}
+                <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">
+                  Knowledge in 24 hours.
+                </span>
+              </>
+            }
+            sub="The scout + ingestor + multi-agent loop is portable. Texas is the demo corpus — the same pipeline ingests Chicago, NYC, LA, federal data.gov, anywhere with a Socrata-compatible API. People become knowledge-capable without writing a line of SoQL."
+          />
+          <div className="mt-12 grid gap-3 md:grid-cols-3">
+            <FeatureCard
+              tone="accent"
+              icon={<span className="text-[14px]">▷</span>}
+              title="1. Point at a portal"
+              body="Open an issue with the portal hostname. The scout's next 6h tick discovers every available dataset, scores it on (rows · time-col · geo-col · freshness · license), and proposes a catalog entry."
+              href="https://github.com/ATX-TXLookup/TXLookup/issues/new?labels=area%3Adata%2Cdataset-request&title=Add+portal%3A+"
+              ctaLabel="File a portal request →"
+            />
+            <FeatureCard
+              tone="purple"
+              icon={<span className="text-[14px]">⌽</span>}
+              title="2. Ingestor populates"
+              body="The ingestor cron pulls deltas into a local SQLite cache so cross-dataset SQL JOINs work (Socrata SoQL can't). Source pill (cache/live/cache-fallback) on every tool envelope."
+              href="/agents/ingestor"
+              ctaLabel="See the ingestor →"
+            />
+            <FeatureCard
+              tone="warm"
+              icon={<span className="text-[14px]">⌖</span>}
+              title="3. Anyone asks"
+              body="A citizen, journalist, or civic team types a question in plain English. The orchestrator dispatches specialists. The critic rejects ungrounded answers. The reporter composes long-form. Every claim has a citation."
+              href="/q"
+              ctaLabel="Try a question →"
+            />
+          </div>
+          <div className="mt-12 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-6">
+            <div className="grid gap-4 md:grid-cols-[auto_1fr_auto] md:items-center">
+              <p className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-[var(--ds-good)]">
+                On the scout's queue right now
+              </p>
+              <p className="font-mono text-[12px] text-[var(--ds-text-mute)]">
+                San Antonio · Houston · El Paso · data.texas.gov · data.gov (federal pilot)
+              </p>
+              <Link
+                href="/agents/dataset-scout"
+                className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-good)] hover:text-[var(--ds-text)]"
+              >
+                Watch the scout →
+              </Link>
+            </div>
           </div>
         </div>
       </section>
