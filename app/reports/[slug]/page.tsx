@@ -306,17 +306,40 @@ export default async function ReportPage({
   const statQueries = queries.filter((q) => q.viz === "stat");
   const otherQueries = queries.filter((q) => q.viz !== "stat");
 
-  // Pick 3 hero stats from the stat queries (or fall back to placeholders).
-  const heroStats = statQueries.slice(0, 3).map((q, i) => ({
-    value:
+  // Pick 3 hero stats. If stat queries are short, derive extras from the
+  // top values of any bar/line query so the hero strip always feels populated.
+  type HeroStat = { value: string; label: string; tone: keyof typeof TONE_FG };
+  const heroStats: HeroStat[] = [];
+  const tones: Array<keyof typeof TONE_FG> = ["good", "warm", "accent"];
+  for (const q of statQueries) {
+    if (heroStats.length >= 3) break;
+    const v =
       q.payload?.kind === "stat"
         ? typeof q.payload.value === "number"
           ? q.payload.value.toLocaleString()
           : (q.payload.value ?? "—")
-        : "—",
-    label: q.label,
-    tone: ((["good", "warm", "accent"] as const)[i] ?? "accent"),
-  }));
+        : "—";
+    heroStats.push({ value: String(v), label: q.label, tone: tones[heroStats.length] });
+  }
+  // Fill from bar chart tops
+  for (const q of otherQueries) {
+    if (heroStats.length >= 3) break;
+    if (q.payload?.kind === "bar" && q.payload.bars.length > 0) {
+      const top = q.payload.bars[0];
+      heroStats.push({
+        value: top.value.toLocaleString(),
+        label: `${top.label} · top of ${q.label.toLowerCase()}`,
+        tone: tones[heroStats.length],
+      });
+    } else if (q.payload?.kind === "line" && q.payload.points.length > 0) {
+      const peak = q.payload.points.reduce((a, b) => (a.y > b.y ? a : b));
+      heroStats.push({
+        value: peak.y.toLocaleString(),
+        label: `${String(peak.x).slice(0, 7)} · peak of ${q.label.toLowerCase()}`,
+        tone: tones[heroStats.length],
+      });
+    }
+  }
 
   // Section accents rotate through good/warm/purple.
   const sectionAccents: Array<keyof typeof TONE_FG> = ["good", "warm", "purple"];

@@ -114,7 +114,14 @@ export default async function DatasetsUniversePage() {
         sample_questions,
         row_count,
         has_report: REPORT_DATASET_IDS.has(d.id),
-        status: row_count === null ? "delayed" : "stable",
+        // STABLE green when count came back (>0). DELAYED amber on null
+        // (Socrata count() failed — dataset may be slow / temporarily down).
+        status:
+          row_count !== null && row_count > 0
+            ? "stable"
+            : row_count === 0
+              ? "scout"
+              : "delayed",
       };
     }),
   );
