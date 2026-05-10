@@ -15,6 +15,28 @@ export type DemoStep = {
   status: "completed" | "failed";
   resultPreview: string; // shown in the observatory + drives synth context
   error?: string;
+  // Issue #90 — multi-agent attribution + cache-source pill the DAG reads.
+  agent?: string;
+  tool_source?: "cache" | "live" | "cache-fallback";
+  // Parallel fan-out: this step is a delegate_to_parallel and ships these
+  // branches with parallel_dispatch + parallel_join events.
+  parallel_branches?: Array<{
+    id: string;
+    tool: string;
+    args?: Record<string, unknown>;
+  }>;
+};
+
+// Issue #90 — critic events the fixture replayer can interleave between
+// steps. `after` = "plan" injects a critique on the plan after the planning
+// event; "answer" = after synth (before done).
+export type DemoCritique = {
+  after: "plan" | "answer";
+  score: number;
+  approve: boolean;
+  issues: string[];
+  // If approve=false, a follow-up "revising" event is also injected.
+  revise?: boolean;
 };
 
 export type DemoFixture = {
@@ -43,6 +65,9 @@ export type DemoFixture = {
     api_url: string;
   };
   artifacts: string[];
+  // Issue #90 — optional critic events to inject during replay so the DAG
+  // demo visibly exercises the orchestrator+critic loop.
+  critiques?: DemoCritique[];
 };
 
 const PERMITS_CITATION = {
@@ -184,6 +209,7 @@ export const DEMO_FIXTURES: DemoFixture[] = [
         error:
           "HTTP 400 on https://data.austintexas.gov/resource/ecmv-9xxi.json — query.soql.no-such-column: 'score' (may be 'score_amt' or aliased).",
         delay_ms: 900,
+        tool_source: "live",
       },
       // After the failure, the replan kicks in (fixture pushes a replanning + replanned event)
       // The next 2 steps are the corrected plan
@@ -201,6 +227,7 @@ export const DEMO_FIXTURES: DemoFixture[] = [
         resultPreview:
           '{"records":[{"restaurant_name":"El Patio","zip_code":"78704","inspection_date":"2026-04-18","score_amt":64},{"restaurant_name":"Maya Cafe","zip_code":"78704","inspection_date":"2026-03-22","score_amt":68}],"count":11}',
         delay_ms: 1000,
+        tool_source: "cache-fallback",
       },
       {
         tool: "cite_dataset",
@@ -221,6 +248,138 @@ export const DEMO_FIXTURES: DemoFixture[] = [
     citation: INSPECTIONS_CITATION,
     artifacts: [
       "https://data.austintexas.gov/resource/ecmv-9xxi.json?$where=zip_code%3D'78704'+AND+score_amt+%3C+70&$limit=50",
+    ],
+    // Issue #90 — exercise the critic on both ends of the loop so the DAG
+    // demo shows critique nodes (diamonds) and a revise loopback arrow.
+    critiques: [
+      {
+        after: "plan",
+        score: 0.62,
+        approve: false,
+        issues: [
+          "summarize step uses column 'score' — verify against schema first",
+        ],
+        revise: true,
+      },
+      {
+        after: "answer",
+        score: 0.91,
+        approve: true,
+        issues: [],
+      },
+    ],
+  },
+
+  // Marquee — parallel specialist fan-out (issue #90 DAG demo)
+  // Triggers when the question implies a side-by-side comparison the
+  // orchestrator can dispatch as two specialists in parallel.
+  {
+    match: (q) =>
+      /(parallel|side[- ]by[- ]side|both .* analyst|fan[- ]out|two specialists|multi[- ]agent)/i.test(
+        q,
+      ),
+    intent: {
+      data_domain: "permits + inspections",
+      geography: "Austin",
+      time_range: "this year",
+      analysis_type: "parallel specialist comparison",
+      thinking:
+        "The user asked for a side-by-side run. Dispatch the data_analyst on permits AND on inspections in parallel, then join the results before composing.",
+    },
+    steps: [
+      {
+        tool: "discover_datasets",
+        args: { query: "permits and inspections", city: "Austin" },
+        rationale: "Anchor both branches on confirmed dataset ids.",
+        status: "completed",
+        resultPreview:
+          '[{"id":"3syk-w9eu","title":"Issued Construction Permits"},{"id":"ecmv-9xxi","title":"Food Establishment Inspection Scores"}]',
+        delay_ms: 600,
+        tool_source: "cache",
+      },
+      {
+        tool: "delegate_to_parallel",
+        args: {
+          branches: [
+            {
+              specialist: "data_analyst",
+              input: {
+                dataset_id: "3syk-w9eu",
+                dimensions: ["original_zip"],
+                metric_label: "permits",
+              },
+            },
+            {
+              specialist: "data_analyst",
+              input: {
+                dataset_id: "ecmv-9xxi",
+                dimensions: ["zip_code"],
+                metric_label: "inspections",
+              },
+            },
+          ],
+        },
+        rationale: "Fan out — one analyst per dataset, run concurrently.",
+        status: "completed",
+        resultPreview:
+          '{"parallel":true,"branches":[{"specialist":"data_analyst","status":"completed"},{"specialist":"data_analyst","status":"completed"}]}',
+        delay_ms: 1400,
+        agent: "data_analyst",
+        parallel_branches: [
+          {
+            id: "s2.b1",
+            tool: "delegate_to(data_analyst)",
+            args: { dataset_id: "3syk-w9eu" },
+          },
+          {
+            id: "s2.b2",
+            tool: "delegate_to(data_analyst)",
+            args: { dataset_id: "ecmv-9xxi" },
+          },
+        ],
+      },
+      {
+        tool: "delegate_to",
+        args: {
+          specialist: "reporter",
+          input: { query: "permits vs inspections by zip" },
+        },
+        rationale: "Reporter composes the side-by-side narrative.",
+        status: "completed",
+        resultPreview:
+          '{"agent":"reporter","title":"Permits vs Inspections — Top Zips"}',
+        delay_ms: 900,
+        agent: "reporter",
+      },
+      {
+        tool: "cite_dataset",
+        args: { datasetId: "3syk-w9eu" },
+        rationale: "Attribution.",
+        status: "completed",
+        resultPreview: JSON.stringify(PERMITS_CITATION),
+        delay_ms: 200,
+      },
+    ],
+    answer:
+      "Ran two analysts in parallel — one on permits (3syk-w9eu) and one on inspections (ecmv-9xxi) — and joined the results by zip. 78744 leads both: 1,104 permits and 412 failing inspections. The reporter composed a side-by-side leaderboard from the merged frame.",
+    citation: PERMITS_CITATION,
+    artifacts: [
+      "https://data.austintexas.gov/resource/3syk-w9eu.json?$select=original_zip,count(*)&$group=original_zip",
+      "https://data.austintexas.gov/resource/ecmv-9xxi.json?$select=zip_code,count(*)&$group=zip_code",
+    ],
+    critiques: [
+      {
+        after: "plan",
+        score: 0.88,
+        approve: true,
+        issues: [],
+      },
+      {
+        after: "answer",
+        score: 0.86,
+        approve: true,
+        issues: [],
+      },
     ],
   },
 

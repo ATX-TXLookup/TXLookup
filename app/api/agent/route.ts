@@ -206,6 +206,34 @@ function replayFixture(
       });
       await wait(500);
 
+      // Issue #90 — inject critic-on-plan event if the fixture defines one.
+      const planCritique = fx.critiques?.find((c) => c.after === "plan");
+      if (planCritique) {
+        send({
+          phase: "critique",
+          target: "plan",
+          score: planCritique.score,
+          approve: planCritique.approve,
+          issues: planCritique.issues,
+        });
+        await wait(300);
+        if (!planCritique.approve && planCritique.revise) {
+          send({
+            phase: "revising",
+            target: "plan",
+            reason: planCritique.issues.join("; "),
+          });
+          await wait(400);
+          // Replay the planning event so the DAG sees the corrected plan.
+          send({
+            phase: "planning",
+            plan: { intent: fx.intent, steps: fx.steps },
+            thinking: fx.intent.thinking,
+          });
+          await wait(300);
+        }
+      }
+
       const totalSteps = fx.steps.length;
       let didReplan = false;
       for (let i = 0; i < fx.steps.length; i++) {
@@ -218,7 +246,48 @@ function replayFixture(
           args: s.args,
           rationale: s.rationale,
         });
+
+        // Issue #90 — surface delegate / parallel-fork BEFORE the work runs.
+        if (s.tool === "delegate_to") {
+          send({
+            phase: "delegate_start",
+            step: i + 1,
+            agent: s.agent ?? "unknown",
+            input_summary: JSON.stringify(s.args).slice(0, 180),
+          });
+        } else if (s.tool === "delegate_to_parallel" && s.parallel_branches) {
+          send({
+            phase: "parallel_dispatch",
+            step: i + 1,
+            branches: s.parallel_branches,
+          });
+        }
+
         await wait(s.delay_ms ?? 600);
+
+        // Tool source pill, if defined.
+        if (s.tool_source) {
+          send({ phase: "tool_source", step: i + 1, source: s.tool_source });
+        }
+
+        // Parallel join + delegate done events, before step_done.
+        if (s.tool === "delegate_to_parallel" && s.parallel_branches) {
+          send({
+            phase: "parallel_join",
+            step: i + 1,
+            branch_ids: s.parallel_branches.map((b) => b.id),
+            results_count: s.parallel_branches.length,
+          });
+        } else if (s.tool === "delegate_to") {
+          send({
+            phase: "delegate_done",
+            step: i + 1,
+            agent: s.agent ?? "unknown",
+            status: s.status,
+            output_summary: s.resultPreview.slice(0, 180),
+          });
+        }
+
         send({
           phase: "step_done",
           step: i + 1,
@@ -226,6 +295,8 @@ function replayFixture(
           preview: s.resultPreview.slice(0, 240),
           error: s.error ?? null,
           duration_ms: s.delay_ms ?? 600,
+          ...(s.agent ? { agent: s.agent } : {}),
+          ...(s.tool_source ? { tool_source: s.tool_source } : {}),
         });
 
         // Inject a replan after the configured failAt step
@@ -261,6 +332,26 @@ function replayFixture(
 
       send({ phase: "completing", message: "Synthesizing answer..." });
       await wait(500);
+      // Issue #90 — answer critic, if the fixture defines one.
+      const answerCritique = fx.critiques?.find((c) => c.after === "answer");
+      if (answerCritique) {
+        send({
+          phase: "critique",
+          target: "answer",
+          score: answerCritique.score,
+          approve: answerCritique.approve,
+          issues: answerCritique.issues,
+        });
+        await wait(300);
+        if (!answerCritique.approve && answerCritique.revise) {
+          send({
+            phase: "revising",
+            target: "answer",
+            reason: answerCritique.issues.join("; "),
+          });
+          await wait(300);
+        }
+      }
       send({
         phase: "done",
         answer: fx.answer,
