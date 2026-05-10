@@ -5,6 +5,7 @@
 // Brand: tx-cream/tx-navy/tx-rust/tx-gold — same as the rest of the site.
 
 import Link from "next/link";
+import { Shell } from "@/app/components/ds";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
@@ -104,52 +105,35 @@ const MOATS = [
 
 export default function UseAsAgentPage() {
   return (
-    <main className="min-h-screen bg-[var(--ds-bg)] text-[var(--ds-text)] font-body">
-      <div className="bg-[var(--ds-bg-elev)] text-white">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-6 py-2 text-[13px] md:px-10">
-          <span>Install TXLookup as an MCP server in any agent runtime — copy-paste below.</span>
-          <span className="hidden font-mono text-[11px] uppercase tracking-wider text-white/70 md:inline">
-            v0.1 · MIT
-          </span>
-        </div>
-      </div>
-
+    <Shell active="/use-as-agent">
       {/* Hero */}
-      <section
-        className="border-b border-[var(--ds-border)]"
-        style={{
-          background: "var(--tx-navy)",
-          backgroundImage:
-            "radial-gradient(circle at 80% 30%, rgba(58,127,190,0.18) 0%, transparent 55%), radial-gradient(circle at 10% 80%, rgba(196,66,10,0.12) 0%, transparent 50%)",
-        }}
-      >
-        <div className="mx-auto max-w-[1100px] px-6 py-16 md:px-10 md:py-24">
-          <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-accent)]">
-            Use TXLookup as your agent
-          </p>
-          <h1 className="mt-3 max-w-[24ch] font-display-serif text-4xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl">
-            Sourced Texas civic data,<br />
-            <span className="italic text-[var(--ds-warn)]">wherever your agent lives.</span>
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1200px] px-6 pb-16 pt-12 md:px-8 md:pb-24 md:pt-16">
+          <h1 className="max-w-[24ch] text-[42px] font-bold leading-[1.05] tracking-[-0.025em] text-[var(--ds-text)] md:text-[64px]">
+            Sourced civic data,{" "}
+            <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">
+              wherever your agent lives.
+            </span>
           </h1>
-          <p className="mt-6 max-w-[58ch] text-base leading-relaxed text-white/85 md:text-lg">
-            One MCP server. Eight tools. Curated catalog of Texas public datasets across Austin, Dallas, San Antonio, Houston, and the state. Install in 30 seconds. Verify in 60.
+          <p className="mt-6 max-w-[60ch] text-[16px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
+            One MCP server. Eight tools. Curated Texas civic datasets — Austin, Dallas, SA, Houston, state. The scout grows the corpus. Install in 30 seconds. Verify in 60.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a
               href="#install"
-              className="inline-flex items-center rounded-sm bg-tx-rust px-5 py-2.5 font-mono text-[13px] font-semibold uppercase tracking-wider text-white hover:bg-tx-rust-dark"
+              className="inline-flex items-center rounded-md bg-[var(--ds-text)] px-5 py-2.5 text-[13px] font-semibold text-[var(--ds-bg)] hover:bg-[var(--ds-text-mute)]"
             >
               Install in 30s →
             </a>
             <a
               href="#prove"
-              className="inline-flex items-center rounded-sm border-2 border-tx-gold px-5 py-2.5 font-mono text-[13px] font-semibold uppercase tracking-wider text-[var(--ds-warn)] hover:bg-tx-gold hover:text-[var(--ds-text)]"
+              className="inline-flex items-center rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] px-5 py-2.5 text-[13px] font-semibold text-[var(--ds-text)] hover:border-[var(--ds-text-dim)]"
             >
               Prove it works in 60s →
             </a>
             <a
               href="https://github.com/ATX-TXLookup/TXLookup"
-              className="inline-flex items-center rounded-sm border-2 border-white/30 px-5 py-2.5 font-mono text-[13px] font-semibold uppercase tracking-wider text-white/85 hover:border-white"
+              className="inline-flex items-center rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] px-5 py-2.5 text-[13px] font-semibold text-[var(--ds-text)] hover:border-[var(--ds-text-dim)]"
             >
               GitHub ↗
             </a>
@@ -239,7 +223,7 @@ export default function UseAsAgentPage() {
               </p>
               <Link
                 href="/q?q=Where%20do%20permits%20and%20code%20violations%20both%20spike%20together%20this%20year%20by%20zip"
-                className="mt-4 inline-flex items-center rounded-sm border-2 border-[var(--ds-warm)] bg-tx-rust px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-wider text-white hover:bg-tx-rust-dark"
+                className="mt-4 inline-flex items-center rounded-md bg-[var(--ds-text)] px-4 py-2 text-[12px] font-semibold text-[var(--ds-bg)] hover:bg-[var(--ds-text-mute)]"
               >
                 Try a marquee query →
               </Link>
@@ -325,14 +309,6 @@ print(asyncio.run(ask_data(json.load(sys.stdin)["query"])))'`}
         </div>
       </section>
 
-      <footer className="bg-[var(--ds-bg-deep)] text-white">
-        <div className="mx-auto max-w-[1320px] px-6 py-8 md:px-10">
-          <p className="text-[13px] text-white/60">
-            All data sourced from public Texas open-data portals · Attribution enforced ·{" "}
-            <Link href="/" className="text-white/80 hover:text-[var(--ds-warn)]">← Back to TXLookup</Link>
-          </p>
-        </div>
-      </footer>
-    </main>
+    </Shell>
   );
 }
