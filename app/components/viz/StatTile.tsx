@@ -39,7 +39,7 @@ export function StatTile({ value, label, delta, caption, size = "lg", accent = "
     <div
       className={`border-l-[3px] ${ACCENT_BORDER[accent]} bg-white pl-4 pr-3 py-3`}
     >
-      <div className={`font-display ${s.value} font-bold leading-none tabular-nums text-tx-navy`}>
+      <div className={`${s.value} font-bold leading-none tabular-nums text-tx-navy`}>
         {value}
       </div>
       <div className={`mt-1.5 font-mono ${s.label} font-semibold uppercase tracking-[0.16em] text-tx-ink/65`}>

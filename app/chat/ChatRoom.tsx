@@ -140,7 +140,7 @@ export default function ChatRoom() {
         <button
           type="submit"
           disabled={!input.trim() || loading}
-          className="rounded-md bg-[var(--ds-text)] px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-bg)] hover:bg-[var(--ds-text-mute)] disabled:opacity-40"
+          className="rounded-md bg-[var(--ds-purple)] px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-white hover:opacity-90 disabled:opacity-40"
         >
           Send →
         </button>

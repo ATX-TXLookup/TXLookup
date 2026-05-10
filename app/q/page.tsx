@@ -64,7 +64,7 @@ export default async function QueryPage({
                 />
                 <button
                   type="submit"
-                  className="rounded-md bg-[var(--ds-text)] px-5 py-2.5 text-[13px] font-semibold text-[var(--ds-bg)] hover:bg-[var(--ds-text-mute)]"
+                  className="rounded-md bg-[var(--ds-purple)] px-5 py-2.5 text-[13px] font-semibold text-white hover:opacity-90"
                 >
                   Ask →
                 </button>
