@@ -75,10 +75,10 @@ export default async function HomePage() {
               <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
                 TXLookup · Civic-data agent · v0.1
               </p>
-              <h1 className="mt-4 max-w-[16ch] text-[52px] font-bold leading-[1.0] tracking-[-0.03em] text-[var(--ds-text)] md:text-[88px]">
+              <h1 className="mt-4 max-w-[16ch] text-[60px] font-bold leading-[1.0] tracking-[-0.03em] text-[var(--ds-text)] md:text-[104px]">
                 Redefining civic transparency.
               </h1>
-              <p className="mt-6 max-w-[58ch] text-[18px] leading-[1.55] text-[var(--ds-text-mute)]">
+              <p className="mt-7 max-w-[58ch] text-[20px] leading-[1.55] text-[var(--ds-text-mute)] md:text-[22px]">
                 Public records, scoring methods, multi-agent reasoning, and shared access — bridging the gap between civic data and answers anyone can use. Curated across Austin · Dallas · TX state. Growing every 6 hours via the dataset scout.
               </p>
             </div>
@@ -130,7 +130,7 @@ export default async function HomePage() {
               <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-text-dim)]">
                 Browse by topic
               </p>
-              <h2 className="mt-3 max-w-[20ch] text-[34px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[44px]">
+              <h2 className="mt-3 max-w-[20ch] text-[38px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[52px]">
                 Six domains, hundreds of datasets.
               </h2>
             </div>
@@ -174,7 +174,7 @@ export default async function HomePage() {
               <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.16em] text-[var(--ds-good)]">
                 Live · across Texas
               </p>
-              <h2 className="mt-2 max-w-[20ch] text-[26px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[34px]">
+              <h2 className="mt-2 max-w-[20ch] text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[44px]">
                 Three cities. Three domains.{" "}
                 <span className="text-[var(--ds-text-mute)]">All real-time.</span>
               </h2>
@@ -264,7 +264,7 @@ export default async function HomePage() {
               <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.16em] text-[var(--ds-good)]">
                 The selling point
               </p>
-              <h2 className="mt-2 max-w-[20ch] text-[26px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[34px]">
+              <h2 className="mt-2 max-w-[20ch] text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[44px]">
                 Any dataset. Any portal.{" "}
                 <span className="text-[var(--ds-text-mute)]">Knowledge in 24 hours.</span>
               </h2>
@@ -325,7 +325,7 @@ export default async function HomePage() {
               <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.16em] text-[var(--ds-accent)]">
                 Use as agent
               </p>
-              <h2 className="mt-2 max-w-[18ch] text-[26px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[32px]">
+              <h2 className="mt-2 max-w-[18ch] text-[30px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[40px]">
                 Install in 30 seconds.
               </h2>
               <p className="mt-3 max-w-[36ch] text-[13.5px] leading-relaxed text-[var(--ds-text-mute)]">
