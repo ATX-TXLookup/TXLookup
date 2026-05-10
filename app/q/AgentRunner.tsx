@@ -1,5 +1,13 @@
 "use client";
 
+// AgentRunner — the brain of the /q observatory page. Streams Server-Sent
+// Events from /api/agent and renders the answer column on the left + the
+// observatory sidebar on the right. Visual chrome is brand-faithful per
+// BRAND.md (brand-guide/BRAND.md): tx-cream surfaces, tx-navy hero, tx-rust
+// CTAs, tx-gold accents, DM Serif Display headlines, IBM Plex Mono for
+// queries / dataset IDs / errors. Functional logic (SSE handling, state
+// machine, prop shapes) is byte-identical to the pre-restyle version.
+
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -487,15 +495,6 @@ export function AgentRunner({
     };
   }, [query, dataset, mode]);
 
-  const phaseToActiveStep = (() => {
-    if (state.phase === "reasoning") return 0;
-    if (state.phase === "planning") return 1;
-    if (state.phase === "executing" || state.phase === "replanning") return 2;
-    if (state.phase === "completing") return 3;
-    if (state.phase === "done") return 3;
-    return -1;
-  })();
-
   const obsStatus =
     state.phase === "idle"
       ? "idle"
@@ -511,11 +510,13 @@ export function AgentRunner({
     if (state.phase === "idle") return "Awaiting";
     return "In progress";
   })();
+  // Brand-aligned status dot color. Sage = done, rust = error, gold = running,
+  // navy = idle (BRAND.md §3 signal mapping).
   const phaseDot = (() => {
-    if (state.phase === "done") return "#1E7A47";
-    if (state.phase === "error") return "#A0231C";
-    if (state.phase === "idle") return "#1A1F2A";
-    return "#A06200";
+    if (state.phase === "done") return "var(--tx-sage)";
+    if (state.phase === "error") return "var(--tx-rust)";
+    if (state.phase === "idle") return "var(--tx-navy)";
+    return "var(--tx-gold)";
   })();
   const currentStepObj = state.steps[state.currentStep - 1];
   const currentTool = currentStepObj?.tool ?? null;
@@ -526,7 +527,7 @@ export function AgentRunner({
         ? 1
         : 0;
 
-  // Pull standout numbers out of the answer (USAFacts-style "by the numbers" pull-out).
+  // Pull standout numbers out of the answer ("by the numbers" pull-out).
   const numbers = state.answer ? extractKeyNumbers(state.answer) : [];
 
   // Auto-suggest related-angle questions based on which dataset answered this one.
@@ -534,15 +535,31 @@ export function AgentRunner({
     ? buildRelatedAngles(state.citation.dataset_id, query)
     : [];
 
+  // Brand step-indicator data (Reason · Plan · Tool · Complete).
+  const phaseToActiveStep = (() => {
+    if (state.phase === "reasoning") return 0;
+    if (state.phase === "planning") return 1;
+    if (state.phase === "executing" || state.phase === "replanning") return 2;
+    if (state.phase === "completing") return 3;
+    if (state.phase === "done") return 3;
+    return -1;
+  })();
+  const stepLabels = [
+    { n: "01", title: "Reason" },
+    { n: "02", title: "Plan" },
+    { n: "03", title: "Tool" },
+    { n: "04", title: "Complete" },
+  ];
+
   return (
     <div className="grid md:grid-cols-[1fr_420px]">
-      {/* Left column — answer-first body */}
-      <div className="min-w-0 bg-[#FAFBFD]">
+      {/* Left column — answer-first body, cream surface */}
+      <div className="min-w-0 bg-tx-cream">
         {/* Question recap with live status pill */}
-        <section className="border-b border-[#E1E5EE] bg-white">
-          <div className="px-6 py-6 md:px-10">
+        <section className="border-b border-tx-ink/10 bg-tx-cream">
+          <div className="px-6 py-7 md:px-10">
             <div className="flex items-baseline justify-between gap-4">
-              <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
                 {state.phase === "done" ? "Answered" : "Asked"}
               </p>
               <div className="flex items-center gap-2">
@@ -552,40 +569,116 @@ export function AgentRunner({
                   }`}
                   style={{ backgroundColor: phaseDot }}
                 />
-                <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#0B2545]">
+                <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-tx-navy">
                   {phaseDisplayLabel}
                 </span>
               </div>
             </div>
-            <h1 className="mt-3 max-w-[58ch] font-display text-2xl font-semibold tracking-tight text-[#0B2545] md:text-[28px]">
+            <h2 className="mt-3 max-w-[58ch] font-display text-2xl font-normal leading-tight tracking-tight text-tx-navy md:text-[28px]">
               {query}
-            </h1>
+            </h2>
           </div>
         </section>
 
-        {/* Answer card — promoted to top, USAFacts editorial density */}
+        {/* ── 4-step indicator (Reason · Plan · Tool · Complete) ── */}
+        <section className="border-b border-tx-ink/10 bg-tx-cream">
+          <div className="px-6 py-6 md:px-10">
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
+              How the agent works
+            </p>
+            <div className="mt-4 grid gap-3 md:grid-cols-4">
+              {stepLabels.map((s, i) => {
+                const isDone =
+                  state.phase === "done"
+                    ? true
+                    : i < phaseToActiveStep;
+                const isActive =
+                  i === phaseToActiveStep && state.phase !== "done" && state.phase !== "error";
+                const isReplanning = isActive && state.phase === "replanning";
+                // Color tokens per brief: sage=done, rust=active, gold=replan,
+                // navy/muted=upcoming. Card body stays cream for hierarchy.
+                const accent = isReplanning
+                  ? "var(--tx-gold)"
+                  : isActive
+                    ? "var(--tx-rust)"
+                    : isDone
+                      ? "var(--tx-sage)"
+                      : "var(--tx-border)";
+                const numberColor = isReplanning
+                  ? "var(--tx-gold)"
+                  : isActive
+                    ? "var(--tx-rust)"
+                    : isDone
+                      ? "var(--tx-sage)"
+                      : "var(--tx-muted)";
+                return (
+                  <div
+                    key={s.n}
+                    className="rounded-[10px] bg-tx-cream p-4 transition-colors"
+                    style={{
+                      border: `0.5px solid ${accent}`,
+                      borderLeftWidth: isActive || isReplanning ? "4px" : "0.5px",
+                      borderLeftColor: accent,
+                    }}
+                  >
+                    <div className="flex items-baseline gap-2">
+                      <span
+                        className="font-mono text-[11px] font-semibold tracking-[0.18em]"
+                        style={{ color: numberColor }}
+                      >
+                        STEP {s.n}
+                      </span>
+                      {isActive && (
+                        <span
+                          className="ml-auto inline-flex h-1.5 w-1.5 rounded-full"
+                          style={{
+                            backgroundColor: accent,
+                            animation: "pulse 1.4s ease-in-out infinite",
+                          }}
+                        />
+                      )}
+                      {isDone && !isActive && (
+                        <span
+                          className="ml-auto font-mono text-[10px] uppercase tracking-wider"
+                          style={{ color: "var(--tx-sage)" }}
+                        >
+                          ✓ done
+                        </span>
+                      )}
+                    </div>
+                    <p
+                      className="mt-2 font-display text-xl font-normal leading-tight tracking-tight"
+                      style={{ color: isActive || isDone ? "var(--tx-navy)" : "var(--tx-muted)" }}
+                    >
+                      {s.title}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Answer card — DM Serif headline, citation aside, rust CTA ── */}
         {state.phase === "done" && state.answer ? (
-          <section className="border-b border-[#E1E5EE] bg-white">
-            <div className="relative px-6 py-8 md:px-10 md:py-10">
-              {/* Left action-blue accent strip — USAFacts editorial cue */}
-              <div
-                aria-hidden
-                className="absolute left-0 top-8 h-[calc(100%-3rem)] w-[4px] bg-[#0B5FFF] md:top-10"
-              />
+          <section className="border-b border-tx-ink/10 bg-tx-cream">
+            <div className="px-6 py-10 md:px-10 md:py-12">
               <div className="grid gap-8 md:grid-cols-12 md:gap-10">
                 <div className="md:col-span-8">
-                  <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+                  <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
                     Insight
                   </p>
-                  <p className="mt-3 max-w-[58ch] font-display text-2xl font-semibold leading-snug text-[#0B2545] md:text-[30px]">
+                  {/* DM Serif Display, navy ink, italic gold for emphasis */}
+                  <p className="mt-3 max-w-[58ch] font-display text-[28px] font-normal leading-snug tracking-tight text-tx-navy md:text-[32px]">
                     {state.answer}
                   </p>
-                  {/* Action row — sellable */}
-                  <div className="mt-6 flex flex-wrap items-center gap-3">
+
+                  {/* Action row — primary CTA in rust per BRAND §7 */}
+                  <div className="mt-7 flex flex-wrap items-center gap-3">
                     {state.citation && (
                       <Link
                         href={`/datasets/${state.citation.dataset_id}`}
-                        className="inline-flex items-center rounded-md border border-[#0B5FFF] bg-[#0B5FFF] px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-white hover:bg-[#0a52d6]"
+                        className="inline-flex items-center rounded-md bg-tx-rust px-5 py-2 font-body text-sm font-bold text-white hover:bg-tx-rust-dark"
                       >
                         Open dataset →
                       </Link>
@@ -595,7 +688,7 @@ export function AgentRunner({
                         href={state.citation.api_url}
                         target="_blank"
                         rel="noopener"
-                        className="inline-flex items-center rounded-md border border-[#E1E5EE] bg-white px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#0B2545] hover:bg-[#F4F6FB]"
+                        className="inline-flex items-center rounded-md border border-tx-ink/15 bg-tx-cream px-5 py-2 font-body text-sm font-bold text-tx-navy hover:border-tx-rust hover:text-tx-rust"
                       >
                         API endpoint →
                       </a>
@@ -607,7 +700,7 @@ export function AgentRunner({
                           navigator.clipboard.writeText(state.answer ?? "");
                         }
                       }}
-                      className="inline-flex items-center rounded-md border border-[#E1E5EE] bg-white px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#0B2545] hover:bg-[#F4F6FB]"
+                      className="inline-flex items-center rounded-md border border-tx-ink/15 bg-tx-cream px-5 py-2 font-body text-sm font-bold text-tx-navy hover:border-tx-rust hover:text-tx-rust"
                     >
                       Copy insight
                     </button>
@@ -622,13 +715,13 @@ export function AgentRunner({
                           navigator.clipboard.writeText(window.location.href);
                         }
                       }}
-                      className="inline-flex items-center rounded-md border border-[#E1E5EE] bg-white px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#0B2545] hover:bg-[#F4F6FB]"
+                      className="inline-flex items-center rounded-md border border-tx-ink/15 bg-tx-cream px-5 py-2 font-body text-sm font-bold text-tx-navy hover:border-tx-rust hover:text-tx-rust"
                     >
                       Share
                     </button>
                   </div>
 
-                  {/* Meta strip — chip style */}
+                  {/* Meta strip — gold insight badges per BRAND §7 */}
                   <div className="mt-6 flex flex-wrap items-center gap-2">
                     <MetaChip
                       label="Verified"
@@ -641,10 +734,7 @@ export function AgentRunner({
                     {state.usageTotal && (
                       <MetaChip label="Tokens" value={state.usageTotal.total.toLocaleString()} />
                     )}
-                    <MetaChip
-                      label="Sources"
-                      value={`${sourcesCount} cited`}
-                    />
+                    <MetaChip label="Sources" value={`${sourcesCount} cited`} />
                     {state.replans.length > 0 && (
                       <MetaChip
                         label="Self-corrections"
@@ -653,19 +743,23 @@ export function AgentRunner({
                     )}
                   </div>
 
-                  {/* By the numbers — USAFacts pull-out: standout figures from the answer */}
+                  {/* By the numbers — standout figures from the answer */}
                   {numbers.length > 0 && (
-                    <div className="mt-7 border-t border-[#E1E5EE] pt-5">
-                      <p className="font-display text-[10px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+                    <div className="mt-8 border-t border-tx-ink/10 pt-6">
+                      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
                         By the numbers
                       </p>
                       <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-3 md:grid-cols-3">
                         {numbers.slice(0, 3).map((n, i) => (
-                          <div key={i} className="border-l-2 border-[#0B5FFF] pl-3">
-                            <div className="font-display text-[28px] font-bold leading-none tabular-nums text-[#0B2545]">
+                          <div
+                            key={i}
+                            className="pl-3"
+                            style={{ borderLeft: "3px solid var(--tx-gold)" }}
+                          >
+                            <div className="font-display text-[32px] font-normal leading-none tabular-nums text-tx-navy">
                               {n.value}
                             </div>
-                            <div className="mt-1.5 text-[11px] uppercase tracking-wider text-[#1A1F2A]/60">
+                            <div className="mt-1.5 font-mono text-[11px] uppercase tracking-wider text-tx-muted">
                               {n.label}
                             </div>
                           </div>
@@ -675,25 +769,29 @@ export function AgentRunner({
                   )}
                 </div>
 
+                {/* Citation aside — BRAND.md card pattern */}
                 <aside className="md:col-span-4">
                   {state.citation && (
-                    <div className="rounded-md border border-[#E1E5EE] bg-[#F4F6FB] p-5">
-                      <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+                    <div
+                      className="rounded-[10px] bg-tx-cream p-5"
+                      style={{ border: "0.5px solid var(--tx-border)" }}
+                    >
+                      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
                         Primary source
                       </p>
-                      <p className="mt-3 text-sm font-semibold text-[#0B2545]">
+                      <p className="mt-3 text-sm font-bold text-tx-navy">
                         {state.citation.portal}
                       </p>
-                      <p className="mt-1 text-sm text-[#0B2545]">
+                      <p className="mt-1 font-display text-lg font-normal leading-tight text-tx-navy">
                         {state.citation.dataset_name}
                       </p>
-                      <p className="mt-1 font-mono text-[11px] text-[#1A1F2A]/55">
+                      <p className="mt-2 font-mono text-[11px] text-tx-muted">
                         {state.citation.dataset_id}
                       </p>
-                      <div className="mt-4 flex flex-col gap-1.5">
+                      <div className="mt-5 flex flex-col gap-2">
                         <Link
                           href={`/datasets/${state.citation.dataset_id}`}
-                          className="text-sm font-semibold text-[#0B5FFF] hover:underline"
+                          className="inline-flex items-center rounded-md bg-tx-rust px-4 py-2 font-body text-sm font-bold text-white hover:bg-tx-rust-dark"
                         >
                           Open dataset →
                         </Link>
@@ -702,7 +800,7 @@ export function AgentRunner({
                             href={state.citation.api_url}
                             target="_blank"
                             rel="noopener"
-                            className="text-sm font-semibold text-[#0B5FFF] hover:underline"
+                            className="text-sm font-bold text-tx-sky hover:text-tx-rust"
                           >
                             API endpoint →
                           </a>
@@ -716,22 +814,214 @@ export function AgentRunner({
           </section>
         ) : null}
 
+        {/* ── Plan-step list — visible during execution + after ── */}
+        {state.steps.length > 0 && state.phase !== "error" && (
+          <section className="border-b border-tx-ink/10 bg-tx-cream">
+            <div className="px-6 py-8 md:px-10 md:py-10">
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
+                Reasoning trace
+              </p>
+              <h3 className="mt-2 font-display text-2xl font-normal tracking-tight text-tx-navy">
+                Tool sequence the agent ran.
+              </h3>
+              <ol className="mt-6 space-y-3">
+                {state.steps.map((s) => {
+                  // Replan-origin steps and doom-loop replans get distinct
+                  // accent treatments per the brief.
+                  const isFailed = s.status === "failed";
+                  const isCompleted = s.status === "completed";
+                  const isReplan = s.fromReplan === true;
+                  // Map this step's index (1-based) to its corresponding
+                  // replan record so we can detect doom-loop replans.
+                  const replanForStep = state.replans.find(
+                    (r) => r.failedStep === s.step,
+                  );
+                  const isDoomLoop = replanForStep?.reason === "doom_loop";
+                  // Card visual: failed = rust-light bg, replan = gold-light
+                  // accent on top, completed = cream + sage tick, pending = cream.
+                  const cardBg = isFailed ? "var(--tx-rust-light)" : "var(--tx-cream)";
+                  const cardBorder = isFailed
+                    ? "var(--tx-rust)"
+                    : isReplan
+                      ? "var(--tx-gold)"
+                      : isCompleted
+                        ? "var(--tx-sage)"
+                        : "var(--tx-border)";
+                  const statusColor = isFailed
+                    ? "var(--tx-rust)"
+                    : isCompleted
+                      ? "var(--tx-sage)"
+                      : "var(--tx-muted)";
+                  return (
+                    <li
+                      key={s.step}
+                      className="rounded-[10px] p-5"
+                      style={{
+                        background: cardBg,
+                        border: `0.5px solid ${cardBorder}`,
+                        borderLeftWidth: isFailed || isReplan ? "3px" : "0.5px",
+                        borderLeftColor: cardBorder,
+                      }}
+                    >
+                      <div className="flex flex-wrap items-baseline gap-2">
+                        <span className="font-mono text-[11px] font-semibold tabular-nums text-tx-muted">
+                          {String(s.step).padStart(2, "0")}
+                        </span>
+                        <span className="font-mono text-sm font-semibold text-tx-navy">
+                          {s.tool}
+                        </span>
+                        {isReplan && !isDoomLoop && (
+                          <span
+                            className="rounded-full px-3 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em]"
+                            style={{
+                              background: "var(--tx-gold-light)",
+                              color: "var(--tx-gold-dark)",
+                              border: "0.5px solid rgba(212,139,16,0.3)",
+                            }}
+                          >
+                            Replan
+                          </span>
+                        )}
+                        {isDoomLoop && (
+                          <span className="rounded-full bg-tx-rust px-3 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.08em] text-white">
+                            DOOM-LOOP
+                          </span>
+                        )}
+                        <span
+                          className="ml-auto font-mono text-[10px] uppercase tracking-wider"
+                          style={{ color: statusColor }}
+                        >
+                          {s.status}
+                          {typeof s.durationMs === "number" && s.status !== "pending" && (
+                            <span className="ml-2 normal-case tracking-normal text-tx-muted">
+                              {s.durationMs}ms
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                      {s.rationale && (
+                        <p className="mt-2 max-w-[68ch] text-sm leading-relaxed text-tx-ink/80">
+                          {s.rationale}
+                        </p>
+                      )}
+                      {s.error && (
+                        <p className="mt-2 font-mono text-xs leading-relaxed text-tx-rust">
+                          ↳ {s.error}
+                        </p>
+                      )}
+                      {s.preview && !s.error && (
+                        <p className="mt-2 max-w-[68ch] font-mono text-xs leading-relaxed text-tx-muted">
+                          {s.preview}
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          </section>
+        )}
+
+        {/* ── Replan-diagnoses panel — gold-light surface with rust-light for doom-loop ── */}
+        {state.replans.length > 0 && (
+          <section className="border-b border-tx-ink/10 bg-tx-cream">
+            <div className="px-6 py-8 md:px-10 md:py-10">
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-gold-dark">
+                Self-corrections
+              </p>
+              <h3 className="mt-2 font-display text-2xl font-normal tracking-tight text-tx-navy">
+                Why the agent <span className="italic text-tx-gold">replanned</span>.
+              </h3>
+              <ol className="mt-5 space-y-3">
+                {state.replans.map((r, i) => {
+                  const isDoomLoop = r.reason === "doom_loop";
+                  return (
+                    <li
+                      key={i}
+                      className="rounded-[10px] p-5"
+                      style={{
+                        background: isDoomLoop
+                          ? "var(--tx-rust-light)"
+                          : "var(--tx-gold-light)",
+                        border: `0.5px solid ${
+                          isDoomLoop
+                            ? "var(--tx-rust)"
+                            : "rgba(212,139,16,0.35)"
+                        }`,
+                      }}
+                    >
+                      <div className="flex flex-wrap items-baseline gap-2">
+                        {isDoomLoop ? (
+                          <span className="rounded-full bg-tx-rust px-3 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.08em] text-white">
+                            Doom-loop
+                          </span>
+                        ) : (
+                          <span
+                            className="rounded-full px-3 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em]"
+                            style={{
+                              background: "rgba(212,139,16,0.18)",
+                              color: "var(--tx-gold-dark)",
+                              border: "0.5px solid rgba(212,139,16,0.3)",
+                            }}
+                          >
+                            Replan
+                          </span>
+                        )}
+                        <span className="font-mono text-xs font-semibold text-tx-navy">
+                          step {r.failedStep} · {r.failedTool}
+                        </span>
+                      </div>
+                      {r.error && (
+                        <p
+                          className="mt-2 font-mono text-xs leading-relaxed"
+                          style={{
+                            color: isDoomLoop
+                              ? "var(--tx-rust)"
+                              : "var(--tx-gold-dark)",
+                          }}
+                        >
+                          error: {r.error}
+                        </p>
+                      )}
+                      {r.diagnosis && (
+                        <p
+                          className="mt-2 max-w-[70ch] text-sm italic leading-relaxed"
+                          style={{
+                            color: isDoomLoop
+                              ? "var(--tx-rust)"
+                              : "var(--tx-gold-dark)",
+                          }}
+                        >
+                          {r.diagnosis}
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          </section>
+        )}
+
         {/* Related angles — only after a successful answer */}
         {state.phase === "done" && state.answer && relatedAngles.length > 0 && (
-          <section className="border-b border-[#E1E5EE] bg-[#FAFBFD]">
-            <div className="px-6 py-7 md:px-10">
-              <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+          <section className="border-b border-tx-ink/10 bg-tx-cream">
+            <div className="px-6 py-8 md:px-10 md:py-10">
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
                 Related angles
               </p>
-              <div className="mt-3 grid gap-2 md:grid-cols-3">
+              <h3 className="mt-2 font-display text-2xl font-normal tracking-tight text-tx-navy">
+                Other questions this dataset can answer.
+              </h3>
+              <div className="mt-5 grid gap-3 md:grid-cols-3">
                 {relatedAngles.map((q) => (
                   <Link
                     key={q}
                     href={`/q?q=${encodeURIComponent(q)}`}
-                    className="group flex items-center justify-between gap-3 rounded-md border border-[#E1E5EE] bg-white px-4 py-3 text-sm text-[#0B2545] transition-colors hover:border-[#0B5FFF] hover:text-[#0B5FFF]"
+                    className="group flex items-center justify-between gap-3 rounded-[10px] border border-tx-ink/10 bg-tx-cream px-4 py-3 text-sm leading-snug text-tx-navy transition-colors hover:border-tx-rust hover:text-tx-rust"
                   >
                     <span className="line-clamp-2">{q}</span>
-                    <span className="font-mono text-[11px] text-[#0B5FFF] opacity-0 transition-opacity group-hover:opacity-100">
+                    <span className="font-mono text-[12px] text-tx-rust opacity-0 transition-opacity group-hover:opacity-100">
                       →
                     </span>
                   </Link>
@@ -741,44 +1031,62 @@ export function AgentRunner({
           </section>
         )}
 
+        {/* ── Error state — rust-light surface, rust CTA back home ── */}
         {state.phase === "error" && (
-          <section className="border-b border-[#E1E5EE] bg-white">
-            <div className="px-6 py-10 md:px-10">
-              <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#A0231C]">
-                Agent error
-              </p>
-              <p className="mt-3 max-w-[60ch] font-mono text-sm text-[#1A1F2A]/85">
-                {state.error}
-              </p>
-              <p className="mt-4 text-sm text-[#1A1F2A]/65">
-                Try a different question or{" "}
-                <Link href="/" className="text-[#0B5FFF] hover:underline">
-                  start over
+          <section className="border-b border-tx-ink/10 bg-tx-cream">
+            <div className="px-6 py-10 md:px-10 md:py-12">
+              <div
+                className="rounded-[10px] p-6"
+                style={{
+                  background: "var(--tx-rust-light)",
+                  border: "0.5px solid var(--tx-rust)",
+                  borderLeftWidth: "3px",
+                  borderLeftColor: "var(--tx-rust)",
+                }}
+              >
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
+                  Agent error
+                </p>
+                <h3 className="mt-3 font-display text-2xl font-normal tracking-tight text-tx-navy md:text-3xl">
+                  The agent <span className="italic text-tx-rust">couldn’t finish</span>.
+                </h3>
+                <p className="mt-3 max-w-[60ch] font-mono text-sm leading-relaxed text-tx-navy/85">
+                  {state.error}
+                </p>
+                <p className="mt-4 max-w-[60ch] text-sm leading-relaxed text-tx-ink/75">
+                  Try a different question or{" "}
+                  <Link href="/" className="text-tx-rust underline hover:text-tx-rust-dark">
+                    start over
+                  </Link>
+                  . Detailed telemetry is in the right panel.
+                </p>
+                <Link
+                  href="/"
+                  className="mt-5 inline-flex items-center rounded-md bg-tx-rust px-5 py-2 font-body text-sm font-bold text-white hover:bg-tx-rust-dark"
+                >
+                  ← Home
                 </Link>
-                . Detailed telemetry is in the right panel.
-              </p>
+              </div>
             </div>
           </section>
         )}
 
+        {/* ── Working state — animated cream skeleton with mono progress line ── */}
         {state.phase !== "done" &&
           state.phase !== "error" &&
-          state.phase !== "idle" && (
-            <section className="border-b border-[#E1E5EE] bg-white">
-              <div className="relative px-6 py-8 md:px-10 md:py-10">
-                <div
-                  aria-hidden
-                  className="absolute left-0 top-8 h-[calc(100%-3rem)] w-[4px] bg-[#0B5FFF] md:top-10"
-                />
-                <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0B5FFF]">
+          state.phase !== "idle" &&
+          state.steps.length === 0 && (
+            <section className="border-b border-tx-ink/10 bg-tx-cream">
+              <div className="px-6 py-10 md:px-10 md:py-12">
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-rust">
                   Insight
                 </p>
-                <div className="mt-3 max-w-[58ch] space-y-3">
-                  <div className="h-7 w-[90%] animate-pulse rounded bg-[#F4F6FB]" />
-                  <div className="h-7 w-[78%] animate-pulse rounded bg-[#F4F6FB]" />
-                  <div className="h-7 w-[60%] animate-pulse rounded bg-[#F4F6FB]" />
+                <div className="mt-4 max-w-[58ch] space-y-3">
+                  <div className="h-7 w-[90%] animate-pulse rounded bg-tx-ink/5" />
+                  <div className="h-7 w-[78%] animate-pulse rounded bg-tx-ink/5" />
+                  <div className="h-7 w-[60%] animate-pulse rounded bg-tx-ink/5" />
                 </div>
-                <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.16em] text-[#1A1F2A]/55">
+                <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.16em] text-tx-muted">
                   {state.phase === "reasoning" && "Codex parsing the question…"}
                   {state.phase === "planning" && "Building the tool sequence…"}
                   {state.phase === "executing" &&
@@ -810,16 +1118,24 @@ export function AgentRunner({
   );
 }
 
+// Insight badge / meta-chip — BRAND.md §7 (gold-light bg, gold mono text).
 function MetaChip({ label, value }: { label: string; value: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-sm border border-[#E1E5EE] bg-white px-2 py-1 font-mono text-[10px] uppercase tracking-wider">
-      <span className="text-[#1A1F2A]/55">{label}</span>
-      <span className="font-semibold tabular-nums text-[#0B2545]">{value}</span>
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.08em]"
+      style={{
+        background: "var(--tx-gold-light)",
+        color: "var(--tx-gold-dark)",
+        border: "0.5px solid rgba(212,139,16,0.3)",
+      }}
+    >
+      <span className="text-tx-gold-dark/70">{label}</span>
+      <span className="tabular-nums text-tx-navy">{value}</span>
     </span>
   );
 }
 
-// Pull standout numbers from the answer text (USAFacts-style "by the numbers" callout).
+// Pull standout numbers from the answer text ("by the numbers" callout).
 // Heuristic — finds raw numbers, percentages, dollar amounts, plus the surrounding
 // noun-phrase as a label. Caps at 3 and dedupes by formatted value.
 type KeyNumber = { value: string; label: string };
