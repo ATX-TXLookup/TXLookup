@@ -20,6 +20,7 @@ import { DoomLoopGuard, type DoomLoopHit } from "@/app/lib/doomLoop";
 import { findFixture } from "@/app/lib/demo-fixtures";
 import { findRun, saveRun, type SavedRun } from "@/app/lib/run-archive";
 import { findById } from "@/app/lib/catalog";
+import { callSpecialist } from "@/app/lib/specialists";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -328,6 +329,14 @@ export async function POST(req: NextRequest) {
         const artifacts: string[] = [];
         let replanCount = 0;
         let i = 0;
+        // Track whether any "data step" — the kind that can produce groundable
+        // material for the synthesizer — ever returned successfully. Schema
+        // lookups and discovery don't count. If this stays false through the
+        // whole loop AND we exhausted replans, the synthesizer would
+        // hallucinate from catalog blurbs; delegate to support's
+        // failure-explanation mode instead.
+        const DATA_TOOLS = new Set(["summarize_data", "fetch_data", "delegate_to"]);
+        let anyDataStepSucceeded = false;
 
         while (i < currentPlan.steps.length) {
           const step = currentPlan.steps[i];
@@ -408,6 +417,9 @@ export async function POST(req: NextRequest) {
           const r = await executeStep(step);
           const duration_ms = Date.now() - stepStart;
           results.push(r);
+          if (r.status === "completed" && DATA_TOOLS.has(step.tool)) {
+            anyDataStepSucceeded = true;
+          }
           if (step.tool === "cite_dataset" && r.status === "completed") {
             citation = r.result;
           }
@@ -478,6 +490,74 @@ export async function POST(req: NextRequest) {
           }
 
           i += 1;
+        }
+
+        // Failure-fallback: if we exhausted replans AND no data step ever
+        // succeeded, the synthesizer has nothing real to ground in and would
+        // produce something like "I'm sorry, I couldn't retrieve...". Hand off
+        // to support's failure-explanation mode instead — it returns a plain-
+        // English message about what went wrong + how to rephrase. (Closes
+        // the last open item on #66.)
+        if (replanCount >= MAX_REPLANS && !anyDataStepSucceeded) {
+          // Reach back through results for the most informative failure.
+          const lastFailed = [...results].reverse().find((r) => r.status === "failed");
+          const lastFailedIdx = results.length - 1 - [...results].reverse().findIndex((r) => r.status === "failed");
+          const lastFailedStep = lastFailedIdx >= 0 ? currentPlan.steps[lastFailedIdx] : null;
+          const fallbackStart = Date.now();
+          send({
+            phase: "executing",
+            step: currentPlan.steps.length + 1,
+            total: currentPlan.steps.length + 1,
+            tool: "delegate_to",
+            args: { specialist: "support", input: { context: { failed: true } } },
+            rationale: "Plan exhausted its replan budget — handing off to support for a plain-English explanation.",
+          });
+          const supportEnv = await callSpecialist("support", {
+            context: {
+              failed: true,
+              failedTool: lastFailedStep?.tool ?? "a step",
+              error: lastFailed?.error ?? "no detail",
+            },
+          });
+          const supportMsg =
+            (supportEnv.result && typeof supportEnv.result === "object" && "message" in supportEnv.result
+              ? String((supportEnv.result as { message: unknown }).message)
+              : null) ??
+            "The agent couldn't recover from this query. Try rephrasing — broaden the geography, drop a filter, or pick a different time window.";
+          send({
+            phase: "step_done",
+            step: currentPlan.steps.length + 1,
+            status: supportEnv.status === "completed" ? "completed" : "failed",
+            preview: JSON.stringify(supportEnv.result).slice(0, 240),
+            error: supportEnv.error,
+            duration_ms: Date.now() - fallbackStart,
+            agent: "support",
+          });
+          finalPlan = currentPlan;
+          send({
+            phase: "done",
+            answer: supportMsg,
+            citation,
+            artifacts,
+            usage_total: usageTotal,
+            duration_ms: Date.now() - startedAt,
+          });
+          // Persist + close before bailing out of the try-block early.
+          try {
+            await saveRun(
+              query,
+              finalPlan,
+              captured,
+              supportMsg,
+              citation,
+              Date.now() - startedAt,
+              usageTotal.total,
+            );
+          } catch (e) {
+            console.warn("[agent] saveRun (failure-fallback) failed:", e);
+          }
+          controller.close();
+          return;
         }
 
         send({ phase: "completing", message: "Synthesizing answer..." });
