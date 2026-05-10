@@ -91,7 +91,7 @@ export default async function AboutPage() {
             Four people. Seven agents. {discovery.totalKnown.toLocaleString()} datasets.
           </h1>
           <p className="mt-6 max-w-[64ch] text-[16px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
-            Built at the AITX × Codex Hackathon (May 8–10, 2026). A smart layer over the source-of-truth Texas + Austin open-data portals — not a shadow database. Plain-English in, sourced answer out, every claim citable back to the originating portal.
+            Built at the AITX × Codex Hackathon (May 8–10, 2026). A live layer over the source-of-truth Texas + Austin open-data portals. Plain-English in, sourced answer out, every claim citable back to the originating portal.
           </p>
 
           <div className="mt-8 grid gap-x-8 gap-y-3 font-mono text-[11px] uppercase tracking-[0.12em] md:grid-cols-3">
