@@ -18,12 +18,13 @@
 #   # Run on a 5-min cron (locally or via GH Actions):
 #   while true; do ./scripts/watchdog.sh; sleep 300; done
 
-set -u
+# Don't set -u — we use optional empty arrays which trip set -u on bash 4.x.
 
 BASE_URL="${1:-https://txlookup.vercel.app}"
-AUTH_ARGS=()
+auth_header=""
 if [ -n "${TXLOOKUP_BASIC_AUTH:-}" ]; then
-  AUTH_ARGS=(-u "$TXLOOKUP_BASIC_AUTH")
+  encoded=$(printf '%s' "$TXLOOKUP_BASIC_AUTH" | base64)
+  auth_header="Authorization: Basic $encoded"
 fi
 
 ts() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
@@ -31,23 +32,24 @@ ok=0
 warn=0
 fail=0
 
-# Step 1 — liveness via robots.txt (always public)
-http_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "${BASE_URL}/robots.txt" || echo "000")
+# Step 1 — liveness via root path (Next.js home page; accepts 200 or 401-gated)
+liveness_args=(-s -o /dev/null -w "%{http_code}" --max-time 10)
+[ -n "$auth_header" ] && liveness_args+=(-H "$auth_header")
+http_code=$(curl "${liveness_args[@]}" "${BASE_URL}/" 2>/dev/null || echo "000")
 case "$http_code" in
   200|401)
-    echo "[$(ts)] LIVE  robots.txt → HTTP $http_code"
+    echo "[$(ts)] LIVE  / → HTTP $http_code"
     ok=$((ok+1)) ;;
   *)
-    echo "[$(ts)] DOWN  robots.txt → HTTP $http_code (expected 200 or 401)"
+    echo "[$(ts)] DOWN  / → HTTP $http_code (expected 200 or 401)"
     fail=$((fail+1)) ;;
 esac
 
-# Step 2 — agent warm-up via demo fixture (cheap, deterministic)
+# Step 2 — agent warm-up via demo fixture (cheap, deterministic, no Codex spend)
 agent_start=$(date +%s)
-agent_out=$(curl -s -N --max-time 60 \
-  -X POST "${BASE_URL}/api/agent?demo=1" \
-  -H "Content-Type: application/json" \
-  "${AUTH_ARGS[@]}" \
+agent_args=(-s -N --max-time 60 -X POST -H "Content-Type: application/json")
+agent_out=$(curl "${agent_args[@]}" \
+  "${BASE_URL}/api/agent?demo=1" \
   -d '{"query":"Where do permits and code violations both spike together this year by zip?"}' 2>&1 || true)
 agent_elapsed=$(( $(date +%s) - agent_start ))
 
