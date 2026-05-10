@@ -9,14 +9,15 @@ import { AgentRunner } from "./AgentRunner";
 export default async function QueryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; dataset?: string }>;
+  searchParams: Promise<{ q?: string; dataset?: string; demo?: string; fallback?: string }>;
 }) {
-  const { q, dataset } = await searchParams;
+  const { q, dataset, demo, fallback } = await searchParams;
   const query = q?.trim() || "";
+  const mode = fallback === "1" ? "fallback" : demo === "1" ? "demo" : "live";
 
   return (
     <Shell active="/q">
-      <AgentRunner query={query} dataset={dataset} />
+      <AgentRunner query={query} dataset={dataset} mode={mode} />
     </Shell>
   );
 }

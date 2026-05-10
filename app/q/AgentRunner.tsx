@@ -370,7 +370,7 @@ export function AgentRunner({
 }: {
   query: string;
   dataset?: string;
-  mode?: "live" | "fallback";
+  mode?: "live" | "fallback" | "demo";
 }) {
   const [state, setState] = useState<AgentState>(initial);
   const cancelled = useRef(false);
@@ -403,7 +403,12 @@ export function AgentRunner({
         const r = await fetch("/api/agent", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query, dataset, fallback: mode === "fallback" }),
+          body: JSON.stringify({
+            query,
+            dataset,
+            fallback: mode === "fallback",
+            demo: mode === "demo",
+          }),
           signal: ctrl.signal,
         });
         if (!r.ok || !r.body) {
