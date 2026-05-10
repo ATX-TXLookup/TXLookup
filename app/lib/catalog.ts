@@ -127,6 +127,30 @@ export const CATALOG: CatalogDataset[] = [
     keyColumns: ["location_name", "taxpayer_city", "total_receipts", "liquor_receipts", "beer_receipts", "wine_receipts", "obligation_end_date_yyyymmdd"],
     rows: "5,000,000+",
   },
+  {
+    id: "9fxf-t2tr",
+    title: "Dallas Police Active Calls",
+    agency: "Dallas Police Department",
+    city: "Dallas",
+    portal: "www.dallasopendata.com",
+    cadence: "daily",
+    blurb:
+      "Live feed of active Dallas Police calls — incident type, division, priority, location, and status.",
+    keyColumns: ["division", "nature_of_call", "priority", "date", "block", "location", "beat", "status"],
+    rows: "60,000+",
+  },
+  {
+    id: "gc4d-8a49",
+    title: "Dallas 311 Service Requests",
+    agency: "Dallas 311 Customer Service",
+    city: "Dallas",
+    portal: "www.dallasopendata.com",
+    cadence: "daily",
+    blurb:
+      "Every non-emergency 311 service request filed in Dallas — type, department, council district, status, response time.",
+    keyColumns: ["service_request_type", "department", "city_council_district", "status", "created_date", "priority"],
+    rows: "1,200,000+",
+  },
 ];
 
 // Portal label for the citation block.

@@ -58,7 +58,8 @@ ${catalogTable}
 Disambiguation rules (apply BEFORE picking a dataset):
 - "permits" / "permit" / "construction" / "building" → 3syk-w9eu (Issued Construction Permits). Even "food truck permits" → 3syk-w9eu, NOT food inspections.
 - "inspections" / "inspection" / "restaurant scores" → ecmv-9xxi (Food Establishment Inspection Scores)
-- "311" / "complaints" / "service requests" → xwdj-i9he
+- "311" / "complaints" / "service requests" → xwdj-i9he (Austin) BY DEFAULT. If the user says "Dallas 311" / "311 in Dallas" → gc4d-8a49 instead.
+- "police calls" / "active calls" / "active dispatches" with "Dallas" → 9fxf-t2tr (Dallas Police Active Calls). Austin doesn't have an equivalent live-calls dataset; if no city is specified and the question is about active calls, default to Dallas (9fxf-t2tr).
 - "code violations" / "zoning" → 6wtj-zbtb
 - "crime" / "incidents" → fdj4-gpfu
 - "traffic fatalities" / "vision zero" → y2wy-tgr5

@@ -71,3 +71,18 @@ texas:
       # location_city does not exist — use taxpayer_city
       key_columns: [location_name, taxpayer_city, total_receipts, liquor_receipts, beer_receipts, wine_receipts, obligation_end_date_yyyymmdd]
       updated: monthly
+
+dallas:
+  portal: www.dallasopendata.com
+  datasets:
+    police_active_calls:
+      id: 9fxf-t2tr
+      name: "Dallas Police Active Calls"
+      key_columns: [division, nature_of_call, priority, date, block, location, beat, status]
+      updated: daily
+
+    service_requests_311:
+      id: gc4d-8a49
+      name: "Dallas 311 Service Requests"
+      key_columns: [service_request_type, department, city_council_district, status, created_date, priority]
+      updated: daily
