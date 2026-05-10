@@ -158,6 +158,32 @@ export default async function DatasetsUniversePage() {
                 </div>
               </form>
 
+              {/* Auto-click question chips — pick one, agent fires immediately */}
+              <div className="mt-5">
+                <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+                  Or pick a question — agent answers in seconds
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {[
+                    "Where do permits cluster in the last 30 days?",
+                    "Restaurants near 78704 with failing inspections this year",
+                    "Top 311 complaint types in Austin",
+                    "Dallas 311 requests this month vs last",
+                    "Active TX franchise tax holders in Travis County",
+                    "Open code violations in 78745",
+                  ].map((q) => (
+                    <Link
+                      key={q}
+                      href={`/q?q=${encodeURIComponent(q)}`}
+                      className="group inline-flex items-center gap-2 rounded-full border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] px-3.5 py-1.5 text-[12px] text-[var(--ds-text-mute)] transition-colors hover:border-[var(--ds-accent)] hover:bg-[var(--ds-bg)] hover:text-[var(--ds-text)]"
+                    >
+                      <span>{q}</span>
+                      <span className="font-mono text-[10px] text-[var(--ds-accent)] opacity-0 transition-opacity group-hover:opacity-100">→</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
               {/* Filter chips */}
               <div className="mt-6 flex flex-wrap gap-2">
                 {FILTERS.map((f) => (

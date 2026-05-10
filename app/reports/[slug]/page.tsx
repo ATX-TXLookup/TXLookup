@@ -15,6 +15,7 @@ import {
   type QueryResult,
 } from "@/app/lib/report-builder";
 import { Shell } from "@/app/components/ds";
+import { FlagshipSection } from "./FlagshipSection";
 
 export const revalidate = REPORT_REVALIDATE;
 
@@ -300,6 +301,14 @@ export default async function ReportPage({
   const data = await buildReport(slug);
   if (!data) notFound();
   const { def, queries, generatedAt } = data;
+
+  // Flagship report gets a multi-perspective section computed from cached
+  // permits rows. Other reports skip this — keeps the bottom of the page
+  // report-specific.
+  const flagshipExtras =
+    slug === "austin-construction-2026"
+      ? await (await import("@/app/lib/flagship-aggregates")).computeFlagshipAggregates()
+      : null;
   const generatedISO = generatedAt.slice(0, 10);
   const generatedHuman = fmtDate(generatedISO);
 
@@ -410,6 +419,11 @@ export default async function ReportPage({
               }
             />
           ))}
+
+          {/* Flagship-only multi-perspective section */}
+          {flagshipExtras && (
+            <FlagshipSection data={flagshipExtras} />
+          )}
         </div>
       </section>
 
