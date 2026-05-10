@@ -14,3 +14,5 @@ log.md
 
 # Local run archive (issue #59 fallback) — never commit captured queries.
 data/runs/
+.env.local
+.env.*.local
