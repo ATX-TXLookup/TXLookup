@@ -97,32 +97,24 @@ export default async function HomePage() {
     <Shell active="/">
       {/* HERO — tight: headline left, search right; subtle Texas map backdrop */}
       <section className="relative overflow-hidden border-b border-[var(--ds-border)]">
-        {/* Decorative map backdrop — low opacity, behind everything */}
-        <div
-          className="pointer-events-none absolute inset-0 hidden md:flex items-center justify-end pr-8"
-          aria-hidden
-        >
-          <div className="w-[58%] max-w-[820px]">
-            <HeroTexasMap />
-          </div>
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-[var(--ds-bg)] via-[var(--ds-bg)]/85 to-transparent" aria-hidden />
-
         <div className="relative mx-auto max-w-[1240px] px-6 py-12 md:px-8 md:py-16">
-          <div className="grid items-end gap-8 md:grid-cols-12 md:gap-12">
-            <div className="md:col-span-7">
+          <div className="grid items-start gap-8 md:grid-cols-12 md:gap-12">
+            <div className="md:col-span-6">
               <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
                 TXLookup · Civic-data agent · v0.1
               </p>
-              <h1 className="mt-4 max-w-[16ch] text-[60px] font-bold leading-[1.0] tracking-[-0.03em] text-[var(--ds-text)] md:text-[104px]">
+              <h1 className="mt-4 max-w-[16ch] text-[40px] font-bold leading-[1.05] tracking-[-0.025em] text-[var(--ds-text)] md:text-[64px]">
                 Texas civic data, in plain English.
               </h1>
-              <p className="mt-7 max-w-[58ch] text-[20px] leading-[1.55] text-[var(--ds-text-mute)] md:text-[22px]">
+              <p className="mt-6 max-w-[58ch] text-[17px] leading-[1.55] text-[var(--ds-text-mute)] md:text-[18px]">
                 <span className="font-semibold text-[var(--ds-text)]">{discovery.totalKnown.toLocaleString()} Texas datasets indexed</span> across {discovery.portals.length} open-data portals — Austin, Dallas, San Antonio, Houston, TX state. <span className="text-[var(--ds-text)]">{CATALOG_LENGTH} are deeply curated</span> (full schema, locally mirrored). The rest are answered live: an agent reads catalog metadata, plans a query, runs it on the source-of-truth portal. <span className="text-[var(--ds-good)]">A smart layer over public data — every claim citable, every step replayable.</span>
               </p>
             </div>
-            <div className="md:col-span-5">
-              <form action="/q" method="GET">
+            <div className="md:col-span-6 md:-mx-2">
+              <HeroTexasMap />
+            </div>
+            <div className="md:col-span-12">
+              <form action="/q" method="GET" className="mt-2">
                 <div className="flex items-center gap-2 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-1.5 transition-colors focus-within:border-[var(--ds-accent)]">
                   <input
                     name="q"

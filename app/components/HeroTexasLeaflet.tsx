@@ -22,9 +22,12 @@ type Props = {
   statusColor: Record<Portal["status"], { ring: string; label: string }>;
 };
 
-// Center on geographic-ish Texas; zoom to show the whole state.
-const CENTER: [number, number] = [31.5, -99.5];
-const ZOOM = 5.5;
+// Center on geographic Texas — pulled north (31.0 → 31.6) and zoom out
+// (5.5 → 5.2) so all six markers (El Paso, Dallas, Austin, Houston, SA,
+// TX state) sit inside the visible frame, not cut off by Mexico spilling
+// in from the south.
+const CENTER: [number, number] = [31.6, -99.5];
+const ZOOM = 5.2;
 
 export default function HeroTexasLeaflet({ portals, statusColor }: Props) {
   return (
@@ -34,7 +37,7 @@ export default function HeroTexasLeaflet({ portals, statusColor }: Props) {
         zoom={ZOOM}
         scrollWheelZoom={false}
         zoomControl={false}
-        attributionControl={true}
+        attributionControl={false}
         style={{ height: "360px", width: "100%", background: "#0b0d12" }}
       >
         {/* Dark-themed CartoDB Positron tiles — free, no API key, attribution
