@@ -119,7 +119,7 @@ export default async function DatasetsUniversePage() {
       </section>
 
       {/* Stat strip */}
-      <section className="border-b border-[var(--ds-border)] bg-white">
+      <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
         <div className="mx-auto max-w-[1320px] px-6 py-8 md:px-10">
           <div className="grid gap-px bg-tx-ink/10 md:grid-cols-4">
             <Tile label="Datasets in catalog" value={summaries.length.toString()} />
@@ -141,7 +141,7 @@ export default async function DatasetsUniversePage() {
               <a
                 key={city}
                 href={`#${city.toLowerCase().replace(/\s+/g, "-")}`}
-                className="rounded-sm border border-tx-ink/20 bg-white px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--ds-text)] hover:border-[var(--ds-warm)] hover:text-[var(--ds-warm)]"
+                className="rounded-sm border border-[var(--ds-border-strong)] bg-[var(--ds-bg)] px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--ds-text)] hover:border-[var(--ds-warm)] hover:text-[var(--ds-warm)]"
               >
                 {city} <span className="text-[var(--ds-text)]/55">({byCity[city].length})</span>
               </a>
@@ -152,7 +152,7 @@ export default async function DatasetsUniversePage() {
 
       {/* Per-city dataset grids */}
       {cities.map((city) => (
-        <section key={city} className="border-b border-[var(--ds-border)] bg-white" id={city.toLowerCase().replace(/\s+/g, "-")}>
+        <section key={city} className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]" id={city.toLowerCase().replace(/\s+/g, "-")}>
           <div className="mx-auto max-w-[1320px] px-6 py-12 md:px-10 md:py-16">
             <div className="flex items-baseline justify-between gap-4">
               <div>
@@ -245,13 +245,13 @@ export default async function DatasetsUniversePage() {
           <div className="mt-6 flex flex-wrap gap-3">
             <a
               href="https://github.com/ATX-TXLookup/TXLookup/issues/new?labels=area%3Adata%2Cdataset-request&title=Add%20dataset%3A%20"
-              className="inline-flex items-center rounded-sm bg-tx-rust px-5 py-2.5 font-mono text-[13px] font-semibold uppercase tracking-wider text-white hover:bg-tx-rust-dark"
+              className="inline-flex items-center rounded-sm bg-[var(--ds-text)] px-5 py-2.5 text-[13px] font-semibold text-[var(--ds-bg)] hover:bg-[var(--ds-text-mute)]"
             >
               Request a dataset →
             </a>
             <Link
               href="/agents/dataset-scout"
-              className="inline-flex items-center rounded-sm border-2 border-tx-gold px-5 py-2.5 font-mono text-[13px] font-semibold uppercase tracking-wider text-[var(--ds-warn)] hover:bg-tx-gold hover:text-[var(--ds-text)]"
+              className="inline-flex items-center rounded-sm border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] px-5 py-2.5 text-[13px] font-semibold text-[var(--ds-text)] hover:border-[var(--ds-text-dim)]"
             >
               How the scout works →
             </Link>
@@ -265,7 +265,7 @@ export default async function DatasetsUniversePage() {
 
 function Tile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-white px-5 py-4">
+    <div className="bg-[var(--ds-bg)] px-5 py-4">
       <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text)]/55">{label}</p>
       <p className="mt-2 font-display-serif text-2xl font-bold tabular-nums text-[var(--ds-text)]">{value}</p>
     </div>
