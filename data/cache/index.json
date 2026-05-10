@@ -1,0 +1,35 @@
+{
+  "datasets": [
+    {
+      "dataset_id": "3syk-w9eu",
+      "row_count": 5000,
+      "fetched_at": 1778415615
+    },
+    {
+      "dataset_id": "ecmv-9xxi",
+      "row_count": 2000,
+      "fetched_at": 1778415616
+    },
+    {
+      "dataset_id": "xwdj-i9he",
+      "row_count": 5000,
+      "fetched_at": 1778415617
+    },
+    {
+      "dataset_id": "6wtj-zbtb",
+      "row_count": 3000,
+      "fetched_at": 1778415617
+    },
+    {
+      "dataset_id": "9cir-efmm",
+      "row_count": 5000,
+      "fetched_at": 1778415618
+    },
+    {
+      "dataset_id": "gc4d-8a49",
+      "row_count": 5000,
+      "fetched_at": 1778415620
+    }
+  ],
+  "ingested_at": "2026-05-10T12:20:20.367748+00:00"
+}

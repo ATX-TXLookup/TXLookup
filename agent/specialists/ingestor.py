@@ -211,6 +211,51 @@ def ingest_one(spec: dict[str, Any], db: sqlite3.Connection, verbose: bool = Fal
     return {"ok": True, "dataset_id": spec["dataset_id"], "row_count": len(rows)}
 
 
+def _write_json_mirror(specs: list[dict[str, Any]], db: sqlite3.Connection) -> None:
+    """Also dump each dataset to data/cache/<datasetId>.json so the TS reader
+    on Vercel can use plain fs.readFile (no native sqlite dependency).
+    The SQLite db remains the source of truth for hashed-query lookups; the
+    JSON files are just a portable read-mirror for the deployed function.
+    """
+    out_dir = CACHE_DB.parent / "cache"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    index: dict[str, Any] = {"datasets": [], "ingested_at": datetime.now(tz=timezone.utc).isoformat()}
+    for spec in specs:
+        ds_id = spec["dataset_id"]
+        cache_params = {"select": spec["select"], "order": spec["order"], "limit": spec["limit"]}
+        query_hash = _hash_query(ds_id, cache_params)
+        row = db.execute(
+            "SELECT payload, fetched_at, ttl_seconds, row_count FROM cache_query WHERE query_hash = ?",
+            (query_hash,),
+        ).fetchone()
+        if not row:
+            continue
+        payload_str, fetched_at, ttl_seconds, row_count = row
+        try:
+            rows = json.loads(payload_str)
+        except json.JSONDecodeError:
+            continue
+        out_path = out_dir / f"{ds_id}.json"
+        with out_path.open("w") as f:
+            json.dump(
+                {
+                    "dataset_id": ds_id,
+                    "params": cache_params,
+                    "fetched_at": int(fetched_at),
+                    "ttl_seconds": int(ttl_seconds),
+                    "row_count": int(row_count),
+                    "rows": rows,
+                },
+                f,
+                separators=(",", ":"),
+            )
+        index["datasets"].append(
+            {"dataset_id": ds_id, "row_count": int(row_count), "fetched_at": int(fetched_at)}
+        )
+    with (out_dir / "index.json").open("w") as f:
+        json.dump(index, f, indent=2)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="TXLookup cache ingestor")
     parser.add_argument("--dataset", help="Single dataset id (default: all)")
@@ -226,6 +271,7 @@ def main() -> int:
     results = []
     for spec in specs:
         results.append(ingest_one(spec, db, verbose=args.verbose))
+    _write_json_mirror(specs, db)
     db.close()
 
     summary = {

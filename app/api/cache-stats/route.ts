@@ -1,14 +1,14 @@
-// /api/cache-stats — diagnostic endpoint for the SQLite mirror.
+// /api/cache-stats — diagnostic endpoint for the local JSON mirror.
 // Reports whether the cache is reachable on the deployed function,
 // how many datasets it knows, and how old the oldest entry is.
 //
 // Useful for: judges inspecting the resilience layer; us debugging
-// "why is every tile showing Live?" on Vercel.
+// "is my deploy actually serving from the local mirror?"
 
 import { NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
-import { cacheStats } from "@/app/lib/cache";
+import { cacheStats, cacheLookup } from "@/app/lib/cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,59 +16,36 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const cwd = process.cwd();
   const candidates = [
-    path.join(cwd, "data", "cache.db"),
-    path.join(cwd, "data/cache.db"),
-    "/var/task/data/cache.db",
+    path.join(cwd, "data", "cache"),
+    "/var/task/data/cache",
   ];
-  const fileChecks = await Promise.all(
-    candidates.map(async (p) => {
+  const dirChecks = await Promise.all(
+    candidates.map(async (dir) => {
       try {
-        const s = await fs.stat(p);
-        return { path: p, exists: true, size: s.size };
-      } catch {
-        return { path: p, exists: false, size: 0 };
+        const entries = await fs.readdir(dir);
+        return { dir, exists: true, files: entries };
+      } catch (e) {
+        return { dir, exists: false, error: e instanceof Error ? e.message : String(e) };
       }
     }),
   );
   const stats = await cacheStats();
+  // Smoke an actual cache lookup so we can see source + row_count.
+  const sample = await cacheLookup("3syk-w9eu", {
+    select:
+      "permit_number,permittype,permit_class_mapped,status_current,original_address1,original_zip,issue_date,total_existing_bldg_sqft",
+    order: "issue_date DESC",
+    limit: 5000,
+  });
   return NextResponse.json({
     cwd,
-    fileChecks,
+    dirChecks,
     cacheStats: stats,
-    betterSqlite3: betterSqlite3Check(),
+    sampleLookup: {
+      datasetId: "3syk-w9eu",
+      source: sample.source,
+      age_seconds: sample.age_seconds,
+      row_count: sample.rows.length,
+    },
   });
-}
-
-function betterSqlite3Check(): { available: boolean; error?: string; meta?: unknown } {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const Database = require("better-sqlite3") as new (
-      path: string,
-      opts?: { readonly?: boolean; fileMustExist?: boolean },
-    ) => {
-      prepare: (sql: string) => { all: () => unknown[] };
-      close: () => void;
-    };
-    // Try to actually open the cache file.
-    for (const p of [
-      path.join(process.cwd(), "data", "cache.db"),
-      "/var/task/data/cache.db",
-    ]) {
-      try {
-        const db = new Database(p, { readonly: true, fileMustExist: true });
-        const meta = db.prepare("SELECT dataset_id, row_count FROM cache_meta").all();
-        db.close();
-        return { available: true, meta };
-      } catch (e) {
-        // try next
-        const err = e instanceof Error ? e.message : String(e);
-        if (!err.includes("does not exist")) {
-          return { available: false, error: `${p}: ${err}` };
-        }
-      }
-    }
-    return { available: false, error: "no candidate path opened" };
-  } catch (e) {
-    return { available: false, error: e instanceof Error ? e.message : String(e) };
-  }
 }

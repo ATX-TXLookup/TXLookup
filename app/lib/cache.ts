@@ -1,82 +1,55 @@
-// SQLite cache layer for Socrata SODA results.
+// JSON-file-backed cache reader for the local Socrata mirror.
 //
-// Wraps the live Socrata client with a fallback chain:
-//   1. Try local SQLite cache (data/cache.db) — fastest, ~ms response
-//   2. On miss / stale, try live Socrata
-//   3. On live failure, surface "cache-stale" if anything is in cache (any age)
-//   4. On all-fail, surface error envelope with helpful diagnosis
+// The ingestor (agent/specialists/ingestor.py) writes one JSON file per
+// dataset to data/cache/<datasetId>.json. The reader here uses fs.readFile
+// — zero native deps, zero WASM, works on every Node platform including
+// Vercel serverless functions.
 //
-// Per-dataset TTL config keeps fast-moving data (permits, 311) fresh
-// while letting slow-moving data (traffic fatalities, franchise tax) live
-// in cache for days.
+// Why not SQLite? sql.js needs WASM that Vercel doesn't trace; better-sqlite3
+// has prebuilt N-API bindings whose ABI didn't match Vercel's Node runtime
+// ('Module did not self-register' on every cold start). JSON files have none
+// of those failure modes — the ingestor is the only writer, the reader is
+// stateless and pure-JS.
 //
-// Reader uses sql.js (WASM) so it works on Vercel serverless without a
-// native binary. Writer (the ingestor) uses better-sqlite3 in CI.
+// Each cached dataset file:
+//   { dataset_id, params, fetched_at, ttl_seconds, row_count, rows: [...] }
+// Cache lookups by hashed query envelope. Today the only query the reader
+// asks for IS the headline ingest envelope, so cache hits are 100%
+// deterministic post-warmup.
 
 import { createHash } from "crypto";
+import { promises as fs } from "fs";
 import path from "path";
 
-// Per-dataset cache TTL in seconds. Defaults to 1 hour.
+// Per-dataset cache TTL in seconds. Defaults to 1 hour. Used as override
+// when the cached file's stored ttl_seconds is missing.
 const TTL: Record<string, number> = {
-  "3syk-w9eu": 3600,        // permits — daily updates, 1h cache
-  "ecmv-9xxi": 86400,       // food inspections — weekly, 24h cache
-  "xwdj-i9he": 3600,        // 311 — high freq, 1h cache
-  "6wtj-zbtb": 86400,       // code violations — daily, 24h cache
-  "fdj4-gpfu": 86400 * 7,   // crime — weekly, 7d cache
-  "y2wy-tgr5": 86400 * 30,  // fatalities — monthly, 30d cache
-  "9cir-efmm": 86400 * 7,   // franchise tax — weekly, 7d cache
+  "3syk-w9eu": 3600,
+  "ecmv-9xxi": 86400,
+  "xwdj-i9he": 3600,
+  "6wtj-zbtb": 86400,
+  "fdj4-gpfu": 86400 * 7,
+  "y2wy-tgr5": 86400 * 30,
+  "9cir-efmm": 86400 * 7,
+  "gc4d-8a49": 3600,
 };
 const DEFAULT_TTL = 3600;
 
 // Try multiple paths so this works in dev (cwd = repo root) AND on Vercel
 // serverless (cwd = /var/task; data/ is bundled via outputFileTracingIncludes).
-const CACHE_DB_CANDIDATES = [
-  path.join(process.cwd(), "data", "cache.db"),
-  "/var/task/data/cache.db",
-  path.resolve(__dirname, "../../data/cache.db"),
+const CACHE_DIR_CANDIDATES = [
+  path.join(process.cwd(), "data", "cache"),
+  "/var/task/data/cache",
 ];
 
-// better-sqlite3 reader — opened once per cold start in readonly mode.
-type BetterDB = {
-  prepare: (sql: string) => {
-    get: (...params: unknown[]) => unknown;
-    all: (...params: unknown[]) => unknown[];
-  };
-  close: () => void;
+type CachedFile<T> = {
+  dataset_id: string;
+  params: Record<string, unknown>;
+  fetched_at: number;
+  ttl_seconds: number;
+  row_count: number;
+  rows: T[];
 };
-
-let _db: BetterDB | null | undefined = undefined;
-
-function getDb(): BetterDB | null {
-  if (_db !== undefined) return _db;
-  try {
-    // require so webpack/Next leaves better-sqlite3 as an external native
-    // dependency. Configured via serverComponentsExternalPackages in
-    // next.config.mjs.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const Database = require("better-sqlite3") as new (
-      path: string,
-      opts?: { readonly?: boolean; fileMustExist?: boolean },
-    ) => BetterDB;
-
-    for (const p of CACHE_DB_CANDIDATES) {
-      try {
-        const db = new Database(p, { readonly: true, fileMustExist: true });
-        _db = db;
-        return _db;
-      } catch {
-        // try next path
-      }
-    }
-    console.warn("[cache] cache.db not found in any candidate path:", CACHE_DB_CANDIDATES);
-    _db = null;
-    return null;
-  } catch (e) {
-    console.warn("[cache] better-sqlite3 unavailable:", e instanceof Error ? e.message : e);
-    _db = null;
-    return null;
-  }
-}
 
 function normalizeQuery(datasetId: string, params: Record<string, unknown> | undefined): string {
   const ordered: Record<string, unknown> = {};
@@ -100,37 +73,44 @@ export type CacheLookup<T> = {
   rows: T[];
 };
 
+async function readCachedFile<T>(datasetId: string): Promise<CachedFile<T> | null> {
+  for (const dir of CACHE_DIR_CANDIDATES) {
+    try {
+      const buf = await fs.readFile(path.join(dir, `${datasetId}.json`), "utf8");
+      return JSON.parse(buf) as CachedFile<T>;
+    } catch {
+      // try next dir
+    }
+  }
+  return null;
+}
+
 /** Look up a query in the cache. Returns hit=false if missing or stale. */
 export async function cacheLookup<T = unknown>(
   datasetId: string,
   params: Record<string, unknown> | undefined,
 ): Promise<CacheLookup<T>> {
-  const db = getDb();
-  if (!db) return { hit: false, source: "miss", age_seconds: null, rows: [] };
+  const file = await readCachedFile<T>(datasetId);
+  if (!file) return { hit: false, source: "miss", age_seconds: null, rows: [] };
 
-  const queryHash = hashQuery(datasetId, params);
-  try {
-    const row = db
-      .prepare("SELECT payload, fetched_at, ttl_seconds FROM cache_query WHERE query_hash = ?")
-      .get(queryHash) as { payload: string; fetched_at: number; ttl_seconds: number } | undefined;
-    if (!row) return { hit: false, source: "miss", age_seconds: null, rows: [] };
-
-    const ageSeconds = Math.floor(Date.now() / 1000) - Number(row.fetched_at);
-    const ttl = Number(row.ttl_seconds) || DEFAULT_TTL;
-    let rows: T[];
-    try {
-      rows = JSON.parse(row.payload) as T[];
-    } catch {
-      return { hit: false, source: "miss", age_seconds: null, rows: [] };
-    }
-    if (ageSeconds <= ttl) {
-      return { hit: true, source: "cache", age_seconds: ageSeconds, rows };
-    }
-    return { hit: false, source: "stale", age_seconds: ageSeconds, rows };
-  } catch (e) {
-    console.warn("[cache] lookup error:", e instanceof Error ? e.message : e);
-    return { hit: false, source: "miss", age_seconds: null, rows: [] };
+  // Verify the requested params match what was ingested. If they don't,
+  // we don't actually have an answer for this exact query — treat as miss.
+  const requestHash = hashQuery(datasetId, params);
+  const cachedHash = hashQuery(datasetId, file.params);
+  if (requestHash !== cachedHash) {
+    // Caller is asking for a different envelope than what the ingestor
+    // pre-computed. Return the rows anyway as 'stale' so cache-recovery
+    // paths can still serve something on a 429.
+    const ageSeconds = Math.floor(Date.now() / 1000) - Number(file.fetched_at);
+    return { hit: false, source: "stale", age_seconds: ageSeconds, rows: file.rows };
   }
+
+  const ageSeconds = Math.floor(Date.now() / 1000) - Number(file.fetched_at);
+  const ttl = Number(file.ttl_seconds) || DEFAULT_TTL;
+  if (ageSeconds <= ttl) {
+    return { hit: true, source: "cache", age_seconds: ageSeconds, rows: file.rows };
+  }
+  return { hit: false, source: "stale", age_seconds: ageSeconds, rows: file.rows };
 }
 
 export async function cacheStats(): Promise<{
@@ -139,23 +119,29 @@ export async function cacheStats(): Promise<{
   total_queries: number;
   oldest_seconds: number | null;
 }> {
-  const db = getDb();
-  if (!db) return { enabled: false, dataset_count: 0, total_queries: 0, oldest_seconds: null };
-  try {
-    const ds = db.prepare("SELECT COUNT(*) AS c FROM cache_meta").get() as { c: number };
-    const q = db
-      .prepare("SELECT COUNT(*) AS c, MIN(fetched_at) AS m FROM cache_query")
-      .get() as { c: number; m: number | null };
-    const oldest =
-      q.m !== null ? Math.floor(Date.now() / 1000) - Number(q.m) : null;
-    return { enabled: true, dataset_count: ds.c, total_queries: q.c, oldest_seconds: oldest };
-  } catch {
-    return { enabled: false, dataset_count: 0, total_queries: 0, oldest_seconds: null };
+  for (const dir of CACHE_DIR_CANDIDATES) {
+    try {
+      const buf = await fs.readFile(path.join(dir, "index.json"), "utf8");
+      const idx = JSON.parse(buf) as {
+        datasets: { dataset_id: string; row_count: number; fetched_at: number }[];
+      };
+      const ts = idx.datasets.map((d) => d.fetched_at).filter((t) => Number.isFinite(t));
+      const oldest = ts.length > 0 ? Math.floor(Date.now() / 1000) - Math.min(...ts) : null;
+      return {
+        enabled: true,
+        dataset_count: idx.datasets.length,
+        total_queries: idx.datasets.length,
+        oldest_seconds: oldest,
+      };
+    } catch {
+      // try next
+    }
   }
+  return { enabled: false, dataset_count: 0, total_queries: 0, oldest_seconds: null };
 }
 
 /** Wrap a live-fetch promise with the cache + fallback chain.
- *  Order: cache → live → stale-cache → error.                              */
+ *  Order: cache → live → stale-cache → error. */
 export async function withCacheFallback<T>(
   datasetId: string,
   params: Record<string, unknown> | undefined,
@@ -166,19 +152,15 @@ export async function withCacheFallback<T>(
   age_seconds: number | null;
   error?: string;
 }> {
-  // 1. Cache fresh
   const lookup = await cacheLookup<T>(datasetId, params);
   if (lookup.hit) {
     return { rows: lookup.rows, source: "cache", age_seconds: lookup.age_seconds };
   }
-  // 2. Live
   try {
     const live = await liveFetch();
     if (live.ok) {
       return { rows: live.rows, source: "live", age_seconds: 0 };
     }
-    // Live failed; fall through.
-    // 3. Stale cache (better than nothing)
     if (lookup.source === "stale") {
       return {
         rows: lookup.rows,
