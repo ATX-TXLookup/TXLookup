@@ -1,8 +1,55 @@
 // Bounded Socrata SODA client (TS, server-side).
 // Mirrors agent/tools/data.py contract — same envelope, same hard limits.
+//
+// Cache fallback: on HTTP 429 (rate limit) or network failure, attempts to
+// pull recent rows for the same dataset from the local SQLite mirror
+// (data/cache.db). The agent loop downstream sees rows + a `cache_fallback`
+// flag in the result so it can include a caveat in the synthesized answer.
+// This makes the multi-agent loop demo-resilient when the upstream portal
+// throttles us.
+
+import { cacheLookup } from "./cache";
 
 const HARD_LIMIT = 5000;
 const TIMEOUT_MS = 30_000;
+
+// The exact ingest spec — must match agent/specialists/ingestor.py INGEST_SPEC.
+// Used to look up the headline cache entry per dataset.
+const INGEST_PARAMS: Record<string, { select: string; order: string; limit: number }> = {
+  "3syk-w9eu": {
+    select:
+      "permit_number,permittype,permit_class_mapped,status_current,original_address1,original_zip,issue_date,total_existing_bldg_sqft",
+    order: "issue_date DESC",
+    limit: 5000,
+  },
+  "ecmv-9xxi": {
+    select: "restaurant_name,score,address,zip_code,inspection_date,facility_id",
+    order: "inspection_date DESC",
+    limit: 2000,
+  },
+  "xwdj-i9he": {
+    select:
+      "sr_type_desc,sr_status_desc,sr_location_zip_code,sr_created_date,sr_department_desc",
+    order: "sr_created_date DESC",
+    limit: 5000,
+  },
+  "6wtj-zbtb": {
+    select: "case_id,case_type,status,address,zip_code,opened_date,priority,department",
+    order: "opened_date DESC",
+    limit: 3000,
+  },
+  "9cir-efmm": {
+    select:
+      "taxpayer_number,taxpayer_name,taxpayer_city,taxpayer_zip,taxpayer_county_code,responsibility_beginning_date,right_to_transact_business_code",
+    order: "responsibility_beginning_date DESC",
+    limit: 5000,
+  },
+  "gc4d-8a49": {
+    select: "service_request_number,status,created_date",
+    order: "created_date DESC",
+    limit: 5000,
+  },
+};
 
 /**
  * Build auth headers for Socrata.
@@ -28,9 +75,44 @@ export type SodaResult = {
     records: Record<string, unknown>[];
     url: string;
     count: number;
+    /** Set when records came from data/cache.db instead of live Socrata. */
+    cache_fallback?: boolean;
+    /** Age in seconds of the cached rows when cache_fallback is true. */
+    cache_age_seconds?: number;
   } | null;
   error: string | null;
 };
+
+/** Try to recover from a Socrata failure by pulling cached rows. */
+async function cacheRecover(
+  datasetId: string,
+  url: string,
+  liveError: string,
+): Promise<SodaResult> {
+  const params = INGEST_PARAMS[datasetId];
+  if (!params) {
+    return { status: "failed", result: null, error: liveError };
+  }
+  try {
+    const c = await cacheLookup<Record<string, unknown>>(datasetId, params);
+    if ((c.source === "cache" || c.source === "stale") && c.rows.length > 0) {
+      return {
+        status: "completed",
+        result: {
+          records: c.rows,
+          url,
+          count: c.rows.length,
+          cache_fallback: true,
+          cache_age_seconds: c.age_seconds ?? 0,
+        },
+        error: null,
+      };
+    }
+  } catch {
+    // fall through
+  }
+  return { status: "failed", result: null, error: liveError };
+}
 
 type Params = {
   where?: string;
@@ -73,11 +155,12 @@ export async function sodaQuery(
       next: { revalidate: 60 },
     });
     if (!r.ok) {
-      return {
-        status: "failed",
-        result: null,
-        error: `HTTP ${r.status} on ${url}`,
-      };
+      const liveErr = `HTTP ${r.status} on ${url}`;
+      // Rate-limited or upstream 5xx → try the local mirror.
+      if (r.status === 429 || r.status >= 500) {
+        return cacheRecover(datasetId, url, liveErr);
+      }
+      return { status: "failed", result: null, error: liveErr };
     }
     const records = (await r.json()) as Record<string, unknown>[];
     return {
@@ -86,11 +169,9 @@ export async function sodaQuery(
       error: null,
     };
   } catch (e: unknown) {
-    return {
-      status: "failed",
-      result: null,
-      error: e instanceof Error ? e.message : String(e),
-    };
+    // Network failure / abort / timeout — try the local mirror.
+    const msg = e instanceof Error ? e.message : String(e);
+    return cacheRecover(datasetId, url, msg);
   } finally {
     clearTimeout(t);
   }
