@@ -27,16 +27,32 @@ const TOOL_LIST = `1. discover_datasets({query: string, city?: string}) — retu
 3. summarize_data({datasetId: string, where: string, dimensions: string[]}) — group + count, returns rows {col, count}
 4. fetch_data({datasetId: string, where: string, order?: string, limit?: number}) — returns rows. DO NOT pass a "select" arg — that's not supported.
 5. cite_dataset({datasetId: string}) — returns the citation block for the answer
-6. render_to_miro({title: string, summary: string, records: array}) — agent-to-agent: hands off to Miro to render a visual board with the answer. Use ONLY for "show me a board", "visualize", or as the optional final step on multi-record results.`;
 
-const TOOL_NAMES = `"discover_datasets" | "get_dataset_schema" | "summarize_data" | "fetch_data" | "cite_dataset" | "render_to_miro"`;
+(Miro / "render to whiteboard" is not configured in this deployment — do NOT emit render_to_miro under any circumstance. For chart/visualization requests, see the data_analyst routing rule below.)`;
+
+const TOOL_NAMES = `"discover_datasets" | "get_dataset_schema" | "summarize_data" | "fetch_data" | "cite_dataset"`;
 
 function buildPlannerPrompt(): string {
   const today = new Date().toISOString().slice(0, 10);
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400_000)
+    .toISOString()
+    .slice(0, 10);
+  const ninetyDaysAgo = new Date(Date.now() - 90 * 86400_000)
+    .toISOString()
+    .slice(0, 10);
   const sixMonthsAgo = new Date(Date.now() - 183 * 86400_000)
     .toISOString()
     .slice(0, 10);
   const oneYearAgo = new Date(Date.now() - 365 * 86400_000)
+    .toISOString()
+    .slice(0, 10);
+  const twoYearsAgo = new Date(Date.now() - 2 * 365 * 86400_000)
+    .toISOString()
+    .slice(0, 10);
+  const threeYearsAgo = new Date(Date.now() - 3 * 365 * 86400_000)
+    .toISOString()
+    .slice(0, 10);
+  const fiveYearsAgo = new Date(Date.now() - 5 * 365 * 86400_000)
     .toISOString()
     .slice(0, 10);
 
@@ -46,7 +62,15 @@ function buildPlannerPrompt(): string {
   ).join("\n");
 
   return `You are TXLookup's planner. The user asks a question about Texas public data.
-TODAY is ${today}. Compute time ranges from TODAY (e.g. "last six months" = >= ${sixMonthsAgo}, "this year" = >= ${oneYearAgo}).
+TODAY is ${today}. Use these pre-computed date constants for time-range filters:
+  "last 30 days"    → >= '${thirtyDaysAgo}'
+  "last 90 days"    → >= '${ninetyDaysAgo}'
+  "last six months" → >= '${sixMonthsAgo}'
+  "this year"       → >= '${oneYearAgo}'
+  "past 2 years"    → >= '${twoYearsAgo}'
+  "past 3 years"    → >= '${threeYearsAgo}'
+  "past 5 years"    → >= '${fiveYearsAgo}'
+NEVER write SQL date math like "::timestamp - interval '3 years'" or "INTERVAL 3 YEARS" — Socrata SoQL ONLY accepts literal date strings ('YYYY-MM-DD'). If the user names a span we don't have a constant for, compute the literal date yourself and inline it.
 
 You have these tools to call (in order):
 
@@ -67,7 +91,9 @@ Disambiguation rules (apply BEFORE picking a dataset):
 Specialist routing — these question shapes route to specialists, NOT raw tools:
 - META questions about TXLookup itself ("what data do you have?", "how does this work?", "what does original_zip mean?", "can you query Dallas?", "what cities do you cover?") → emit a 1-step plan: [{tool:"delegate_to", args:{specialist:"support", input:{query:<user's question>}}}]. No cite_dataset needed — support handles its own attribution.
 - VAGUE geographic shorthands the user probably knows the answer to but the agent shouldn't guess ("south austin", "downtown", "north austin", "east austin", "west austin") → emit [{tool:"delegate_to", args:{specialist:"support", input:{query:<user's question>}}}]. Support returns clarifier chips and pauses; the user picks one, then re-asks. Do NOT attempt to disambiguate to a single zip yourself.
-- STATISTICAL / TEMPORAL questions — anything asking for yoy/qoq/mom deltas, "how has X shifted/changed since [year]", "trend over time", "top N by Y", "compare A vs B period" — emit [{tool:"delegate_to", args:{specialist:"data_analyst", input:{...spec...}}}, {tool:"cite_dataset", args:{datasetId:"..."}}]. The data_analyst input MUST include: dataset_id, dimensions (group-by SoQL field names), and where applicable time_column + current_window + prior_window (each window is a SoQL where fragment like "issue_date >= '2025-01-01'"). Optional: filter (extra where clause), metric (default "count(*) AS count"), metric_label (human label), top_n. Example for "how has Austin's permit mix shifted from residential to commercial since 2024?": input = {query, dataset_id:"3syk-w9eu", dimensions:["permit_class_mapped"], time_column:"issue_date", current_window:"issue_date >= '2025-01-01'", prior_window:"issue_date >= '2024-01-01' AND issue_date <= '2024-12-31'", metric_label:"permits"}.
+- STATISTICAL / TEMPORAL / VISUALIZATION questions — anything asking for yoy/qoq/mom deltas, "how has X shifted/changed since [year]", "trend over time", "top N by Y", "compare A vs B period", OR any chart/visualization request ("bar chart", "line chart", "month over month chart", "show me a chart", "visualize", "graph this") — emit [{tool:"delegate_to", args:{specialist:"data_analyst", input:{...spec...}}}, {tool:"cite_dataset", args:{datasetId:"..."}}]. The data_analyst input MUST include: dataset_id, dimensions (group-by SoQL field names), and where applicable time_column + current_window + prior_window (each window is a SoQL where fragment like "issue_date >= '2025-01-01'"). Optional: filter (extra where clause), metric (default "count(*) AS count"; for dollar totals use "sum(<column>) AS total"), metric_label (human label), top_n. The data_analyst returns findings + a viz_spec which the UI renders inline as a real bar/line/stat chart — that's how chart requests get satisfied.
+  - Example for "how has Austin's permit mix shifted from residential to commercial since 2024?": input = {query, dataset_id:"3syk-w9eu", dimensions:["permit_class_mapped"], time_column:"issue_date", current_window:"issue_date >= '2025-01-01'", prior_window:"issue_date >= '2024-01-01' AND issue_date <= '2024-12-31'", metric_label:"permits"}.
+  - Example for "money spent on permits in the past 3 years month over month, as a bar chart": dimensions:["date_trunc_ym(issue_date)"] won't work (Socrata rejects function calls in dimensions); instead group by year-month using a string column or a transformed field that exists. If unsure, use the closest grouping the dataset supports (e.g., dimensions:["original_zip"] for permits geographic breakdowns, or use a multi-window split like {prior_window:"issue_date >= '${twoYearsAgo}' AND issue_date < '${oneYearAgo}'", current_window:"issue_date >= '${oneYearAgo}'"} for a year-vs-year comparison). For "money spent" use metric:"sum(total_job_valuation) AS total_spent" and metric_label:"$".
 - REPORT / NEWSLETTER / SUMMARY-PAGE questions — "give me a report on X", "compose a newsletter about Y", "summarize the state of Z", "tell me everything about W in [city]" — emit [{tool:"delegate_to", args:{specialist:"reporter", input:{query, dataset_id}}}, {tool:"cite_dataset", args:{datasetId:"..."}}]. Reporter runs its own hero-stat queries on the chosen dataset and composes a structured (category, title, dek, hero_stats, sections, sources) report shape. If the user's question implies a statistical comparison (yoy etc.), prefer data_analyst — only route to reporter when the user is asking for a report-style PRODUCT, not a single answer.
 - All other data questions ("permits in 78702", "top zips for 311 complaints") → use raw tools as before (discover_datasets / get_dataset_schema / summarize_data / fetch_data / cite_dataset).
 
@@ -83,9 +109,9 @@ Hard rules:
 - DO NOT pass "select" to fetch_data — Socrata rejects $select=*. Just omit it.
 
 SCOPING RULES (load-bearing — ungrounded answers will be rejected):
-- Every summarize_data, fetch_data, and render_to_miro step MUST include an args.where that scopes to whatever the user mentioned (zip, date range, keyword, status). render_to_miro should reference filtered records only.
+- Every summarize_data and fetch_data step MUST include an args.where that scopes to whatever the user mentioned (zip, date range, keyword, status).
 - If the user mentions a 5-digit zip code (e.g. "78704"), the where clause MUST contain that zip on the dataset's zip column (original_zip for permits, zip_code for inspections / code complaints, sr_location_zip_code for 311, taxpayer_zip for franchise / mixed beverage).
-- If the user mentions a date range ("this year" → >= ${oneYearAgo}; "last six months" → >= ${sixMonthsAgo}; "last 30 days" → >= ${new Date(Date.now() - 30 * 86400_000).toISOString().slice(0, 10)}), the where clause MUST include the dataset's date column constraint (issue_date for permits, inspection_date for inspections, sr_created_date for 311, opened_date for code complaints, occ_date for crime, crash_timestamp for crashes).
+- If the user mentions a date range, use the constants in the TODAY block above ('${thirtyDaysAgo}' / '${ninetyDaysAgo}' / '${sixMonthsAgo}' / '${oneYearAgo}' / '${twoYearsAgo}' / '${threeYearsAgo}' / '${fiveYearsAgo}'), wrapped in single quotes and compared against the dataset's date column (issue_date for permits, inspection_date for inspections, sr_created_date for 311, opened_date for code complaints, occ_date for crime, crash_timestamp for crashes). NEVER write SQL INTERVAL syntax or ::timestamp casts — Socrata rejects them with HTTP 400.
 - DO NOT emit a 1-step plan that just calls summarize_data for a scoped query. Scoped queries MUST start with discover_datasets followed by get_dataset_schema, then summarize_data or fetch_data with the proper where clause, then cite_dataset.
 
 Return a JSON object with this exact shape:
@@ -217,7 +243,7 @@ export type Synthesized = { answer: string; usage: TokenUsage };
 // once with a corrective system message instead of letting it through.
 // ---------------------------------------------------------------------------
 
-const SCOPED_TOOLS = new Set(["summarize_data", "fetch_data", "render_to_miro"]);
+const SCOPED_TOOLS = new Set(["summarize_data", "fetch_data"]);
 
 const DATE_PHRASES: Array<{ pattern: RegExp; label: string }> = [
   { pattern: /\bthis year\b/i, label: "this year" },
@@ -304,7 +330,7 @@ function buildScopeCorrectivePrompt(issues: ScopeIssue[], query: string): string
   return `Your previous plan was rejected because it ignored explicit scoping in the user's question. Issues:
 ${lines.join("\n")}
 
-Re-emit the plan with a correctly-scoped where clause on EVERY summarize_data / fetch_data / render_to_miro step. ${zip ? `Use the dataset's zip column = '${zip}' (original_zip for permits, zip_code for inspections / code complaints, sr_location_zip_code for 311, taxpayer_zip for franchise / mixed beverage).` : ""} If the question implies a date range, include the dataset's date-column constraint. Do NOT emit a 1-step plan — scoped queries start with discover_datasets + get_dataset_schema.`;
+Re-emit the plan with a correctly-scoped where clause on EVERY summarize_data / fetch_data step. ${zip ? `Use the dataset's zip column = '${zip}' (original_zip for permits, zip_code for inspections / code complaints, sr_location_zip_code for 311, taxpayer_zip for franchise / mixed beverage).` : ""} If the question implies a date range, include the dataset's date-column constraint (use literal 'YYYY-MM-DD' strings — NEVER use SQL INTERVAL or ::timestamp casts). Do NOT emit a 1-step plan — scoped queries start with discover_datasets + get_dataset_schema.`;
 }
 
 function readUsage(u: unknown): TokenUsage {
