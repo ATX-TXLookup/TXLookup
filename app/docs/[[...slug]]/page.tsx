@@ -99,33 +99,36 @@ export default async function DocsPage({
   const prev = idx > 0 ? allLinear[idx - 1] : null;
   const next = idx < allLinear.length - 1 ? allLinear[idx + 1] : null;
 
+  // Find which group this slug belongs to (for the eyebrow)
+  const activeGroup = NAV.find((s) => s.pages.some((p) => p.slug === activeSlug))?.group ?? "Docs";
+
   return (
     <Shell active="/docs">
       <section className="border-b border-[var(--ds-border)]">
-        <div className="mx-auto grid max-w-[1240px] gap-10 px-6 py-12 md:grid-cols-[240px_1fr] md:px-8 md:py-16">
+        <div className="mx-auto grid max-w-[1200px] gap-10 px-6 py-12 md:grid-cols-[240px_1fr] md:px-8 md:py-20">
           {/* Left nav */}
           <aside className="hidden md:block">
             <div className="sticky top-20">
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-text-dim)]">
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
                 Documentation
               </p>
-              <nav className="mt-6 space-y-6">
+              <nav className="mt-6 space-y-7">
                 {NAV.map((section) => (
                   <div key={section.group}>
                     <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
                       {section.group}
                     </p>
-                    <ul className="mt-2 space-y-1">
+                    <ul className="mt-2.5 space-y-0.5">
                       {section.pages.map((p) => {
                         const isActive = p.slug === activeSlug;
                         return (
                           <li key={p.slug}>
                             <Link
                               href={`/docs/${p.slug}`}
-                              className={`block rounded-md px-2.5 py-1.5 text-[13px] transition-colors ${
+                              className={`block rounded-md border-l-2 px-2.5 py-1.5 text-[13px] transition-colors ${
                                 isActive
-                                  ? "bg-[var(--ds-bg-elev)] text-[var(--ds-text)]"
-                                  : "text-[var(--ds-text-mute)] hover:bg-[var(--ds-bg-elev)] hover:text-[var(--ds-text)]"
+                                  ? "border-[var(--ds-accent)] bg-[var(--ds-bg-elev)] text-[var(--ds-accent)]"
+                                  : "border-transparent text-[var(--ds-text-mute)] hover:border-[var(--ds-border)] hover:bg-[var(--ds-bg-elev)] hover:text-[var(--ds-text)]"
                               }`}
                             >
                               {p.label}
@@ -140,16 +143,16 @@ export default async function DocsPage({
             </div>
           </aside>
 
-          {/* Content */}
-          <article className="min-w-0 max-w-[760px]">
+          {/* Content — 720-820px reading column */}
+          <article className="min-w-0 max-w-[780px]">
             <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
-              TXLookup Docs
+              {activeGroup}
             </p>
-            <h1 className="mt-3 text-[36px] font-bold leading-[1.1] tracking-[-0.025em] text-[var(--ds-text)] md:text-[48px]">
+            <h1 className="mt-3 text-[36px] font-bold leading-[1.05] tracking-[-0.025em] text-[var(--ds-text)] md:text-[48px]">
               {doc.title}
             </h1>
             {doc.description && (
-              <p className="mt-4 text-[18px] leading-[1.55] text-[var(--ds-text-mute)] md:text-[20px]">
+              <p className="mt-4 text-[17px] leading-[1.55] text-[var(--ds-text-mute)] md:text-[19px]">
                 {doc.description}
               </p>
             )}
@@ -158,44 +161,60 @@ export default async function DocsPage({
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  h2: ({ ...p }) => (
-                    <h2 className="mt-12 text-[26px] font-bold leading-tight tracking-tight text-[var(--ds-text)] md:text-[32px]" {...p} />
+                  h2: ({ children, ...p }) => (
+                    <div className="mt-12 mb-4">
+                      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
+                        Section
+                      </p>
+                      <h2 className="mt-2 text-[24px] font-bold leading-tight tracking-tight text-[var(--ds-text)] md:text-[28px]" {...p}>
+                        {children}
+                      </h2>
+                    </div>
                   ),
                   h3: ({ ...p }) => (
-                    <h3 className="mt-9 text-[20px] font-bold leading-tight text-[var(--ds-text)] md:text-[22px]" {...p} />
+                    <h3 className="mt-8 text-[18px] font-semibold leading-tight text-[var(--ds-text)] md:text-[20px]" {...p} />
                   ),
                   p: ({ ...p }) => (
-                    <p className="mt-5 text-[16px] leading-[1.7] text-[var(--ds-text-mute)] md:text-[17px]" {...p} />
+                    <p className="mt-5 text-[15.5px] leading-[1.65] text-[var(--ds-text-mute)]" {...p} />
+                  ),
+                  strong: ({ ...p }) => (
+                    <strong className="font-semibold text-[var(--ds-text)]" {...p} />
                   ),
                   ul: ({ ...p }) => (
-                    <ul className="mt-5 space-y-2 pl-6 text-[16px] leading-[1.7] text-[var(--ds-text-mute)] [&>li]:list-disc md:text-[17px]" {...p} />
+                    <ul className="docs-ul mt-5 space-y-2 pl-5 text-[15.5px] leading-[1.65] text-[var(--ds-text-mute)]" {...p} />
                   ),
                   ol: ({ ...p }) => (
-                    <ol className="mt-5 space-y-2 pl-6 text-[16px] leading-[1.7] text-[var(--ds-text-mute)] [&>li]:list-decimal md:text-[17px]" {...p} />
+                    <ol className="mt-5 list-decimal space-y-2 pl-6 text-[15.5px] leading-[1.65] text-[var(--ds-text-mute)] marker:text-[var(--ds-text-dim)]" {...p} />
+                  ),
+                  li: ({ ...p }) => (
+                    <li className="pl-1" {...p} />
                   ),
                   a: ({ ...p }) => (
                     <a className="text-[var(--ds-accent)] underline underline-offset-2 hover:text-[var(--ds-text)]" {...p} />
                   ),
+                  hr: () => (
+                    <hr className="my-10 border-t border-[var(--ds-border)]" />
+                  ),
                   code: ({ children, ...p }) => (
-                    <code className="rounded-sm bg-[var(--ds-bg-elev)] px-1.5 py-0.5 font-mono text-[13px] text-[var(--ds-text)]" {...p}>
+                    <code className="rounded bg-[var(--ds-bg-elev)] px-1.5 py-0.5 font-mono text-[13px] text-[var(--ds-text)]" {...p}>
                       {children}
                     </code>
                   ),
                   pre: ({ children, ...p }) => (
-                    <pre className="mt-5 overflow-x-auto rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-deep)] p-4 font-mono text-[13px] leading-relaxed text-[var(--ds-text)]" {...p}>
+                    <pre className="mt-5 overflow-x-auto rounded-md border border-[var(--ds-border)] border-l-2 border-l-[var(--ds-accent)] bg-[var(--ds-bg-deep)] p-4 font-mono text-[13px] leading-relaxed text-[var(--ds-text)]" {...p}>
                       {children}
                     </pre>
                   ),
                   blockquote: ({ ...p }) => (
-                    <blockquote className="mt-5 border-l-2 border-[var(--ds-accent)] bg-[var(--ds-bg-elev)] px-5 py-3 text-[15px] italic text-[var(--ds-text-mute)]" {...p} />
+                    <blockquote className="mt-5 rounded-md border-l-2 border-[var(--ds-accent)] bg-[var(--ds-bg-elev)] px-5 py-3 text-[15px] italic text-[var(--ds-text-mute)]" {...p} />
                   ),
                   table: ({ ...p }) => (
-                    <div className="mt-5 overflow-x-auto">
+                    <div className="mt-6 overflow-x-auto rounded-md border border-[var(--ds-border)]">
                       <table className="w-full border-collapse text-[14px]" {...p} />
                     </div>
                   ),
                   th: ({ ...p }) => (
-                    <th className="border-b border-[var(--ds-border)] px-3 py-2 text-left font-semibold text-[var(--ds-text)]" {...p} />
+                    <th className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-3 py-2 text-left font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--ds-text)]" {...p} />
                   ),
                   td: ({ ...p }) => (
                     <td className="border-b border-[var(--ds-border)] px-3 py-2 text-[var(--ds-text-mute)]" {...p} />
@@ -211,7 +230,7 @@ export default async function DocsPage({
               {prev ? (
                 <Link
                   href={`/docs/${prev.slug}`}
-                  className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4 transition-colors hover:border-[var(--ds-accent)]/40"
+                  className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5 transition-colors hover:border-[var(--ds-accent)]/40"
                 >
                   <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
                     ← Previous
@@ -224,7 +243,7 @@ export default async function DocsPage({
               {next && (
                 <Link
                   href={`/docs/${next.slug}`}
-                  className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4 text-right transition-colors hover:border-[var(--ds-accent)]/40"
+                  className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5 text-right transition-colors hover:border-[var(--ds-accent)]/40"
                 >
                   <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
                     Next →

@@ -7,6 +7,7 @@
 // share a single FlagshipAggregates payload computed from cache.
 
 import { DataSourceBadge } from "@/app/components/ds/DataSourceBadge";
+import { AustinZipDotMap } from "@/app/components/AustinZipDotMap";
 import type { FlagshipAggregates } from "@/app/lib/flagship-aggregates";
 
 const C = {
@@ -264,11 +265,29 @@ export function FlagshipSection({ data }: { data: FlagshipAggregates }) {
         Where the cranes are. What they're building. How fast.
       </h2>
       <p className="mt-4 max-w-[60ch] text-[15px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
-        Four views of the same 5,000 most-recent permits, computed locally
-        from the mirror. Heatmap is class × month density. Small multiples
-        let you compare the top zips on the same scale. Cumulative YTD shows
-        whether 2026 is ahead of or behind 2025.
+        Five views of the same 5,000 most-recent permits, computed locally
+        from the mirror. Map shows where permits cluster by zip. Heatmap is
+        class × month density. Small multiples let you compare the top zips
+        on the same scale. Cumulative YTD shows whether 2026 is ahead of or
+        behind 2025.
       </p>
+
+      {/* Geo dot map — Austin zips */}
+      {data.zipDensity.source === "cache" && Object.keys(data.zipDensity.counts).length > 0 && (
+        <div className="mt-8 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5 md:p-7">
+          <div className="flex items-baseline justify-between gap-4">
+            <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
+              Geo · permit density by zip
+            </p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+              size = count · top 6 labelled
+            </p>
+          </div>
+          <div className="mt-4">
+            <AustinZipDotMap counts={data.zipDensity.counts} tone="accent" />
+          </div>
+        </div>
+      )}
 
       {/* Heatmap */}
       <div className="mt-8 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5 md:p-7">

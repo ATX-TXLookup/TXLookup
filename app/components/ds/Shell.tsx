@@ -13,6 +13,7 @@ const NAV = [
   { href: "/use-as-agent", label: "Install" },
   { href: "/docs", label: "Docs" },
   { href: "/developer", label: "Developer" },
+  { href: "/about", label: "About" },
 ];
 
 export function ShellHeader({ active }: { active?: string }) {

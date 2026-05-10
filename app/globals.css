@@ -102,3 +102,24 @@ h1, h2, h3, .display {
 
 /* Selection */
 ::selection { background: var(--ds-accent); color: var(--ds-bg); }
+
+/* Docs prose — thin accent bullets for unordered lists */
+.docs-prose .docs-ul > li {
+  position: relative;
+  padding-left: 0.75rem;
+  list-style: none;
+}
+.docs-prose .docs-ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.65em;
+  width: 0.4rem;
+  height: 1px;
+  background: var(--ds-accent);
+  opacity: 0.7;
+}
+.docs-prose .docs-ul .docs-ul,
+.docs-prose .docs-ul ul {
+  margin-top: 0.5rem;
+}

@@ -16,6 +16,7 @@ import {
 } from "@/app/lib/report-builder";
 import { Shell } from "@/app/components/ds";
 import { FlagshipSection } from "./FlagshipSection";
+import { AustinConstructionReport } from "./AustinConstructionReport";
 
 export const revalidate = REPORT_REVALIDATE;
 
@@ -311,6 +312,43 @@ export default async function ReportPage({
       : null;
   const generatedISO = generatedAt.slice(0, 10);
   const generatedHuman = fmtDate(generatedISO);
+
+  // ── BRANCH: long-form Austin Construction report ──────────────────────────
+  // The construction slug gets a fully editorial layout with prose + multiple
+  // chart types. The other 4 reports keep the existing dark-stat/bar/line
+  // flow below.
+  if (slug === "austin-construction-2026" && flagshipExtras) {
+    // Pull "Permits issued in the last 30 days" out of the stat query if it
+    // ran successfully; fall back to summing the cache directly so the hero
+    // never shows "—".
+    const last30Stat = queries.find(
+      (q) => q.viz === "stat" && q.payload?.kind === "stat",
+    );
+    let permitCountLast30d =
+      last30Stat?.payload?.kind === "stat" ? last30Stat.payload.value : 0;
+    if (!permitCountLast30d) {
+      // Fallback: derive from the cache via flagship-aggregates monthly area.
+      // current[monthIdx] is cumulative-through-this-month; subtract the prior
+      // month's cumulative to get this-month's volume — a reasonable proxy
+      // when the live stat is unavailable.
+      const cur = flagshipExtras.area.current;
+      if (cur.length >= 2) {
+        const last = cur[cur.length - 1].y;
+        const prev = cur[cur.length - 2].y;
+        permitCountLast30d = Math.max(last - prev, last);
+      }
+    }
+    return (
+      <Shell active="/reports">
+        <AustinConstructionReport
+          def={def}
+          extras={flagshipExtras}
+          generatedAt={generatedAt}
+          permitCountLast30d={permitCountLast30d}
+        />
+      </Shell>
+    );
+  }
 
   const statQueries = queries.filter((q) => q.viz === "stat");
   const otherQueries = queries.filter((q) => q.viz !== "stat");
