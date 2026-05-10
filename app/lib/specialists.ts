@@ -342,6 +342,53 @@ function fmtNum(n: number): string {
   return n.toLocaleString("en-US");
 }
 
+// --- Statistical-quality helpers (exported for testing) ------------------
+
+// Fraction of rows whose `dim` value is null / empty / placeholder. The
+// agent should flag findings derived from a heavily-null column because
+// the counts understate the real picture.
+export function nullRate(
+  rows: Array<Record<string, unknown>>,
+  dim: string,
+): number {
+  if (rows.length === 0) return 0;
+  const nulls = rows.filter((r) => {
+    const v = r[dim];
+    if (v === null || v === undefined) return true;
+    const s = String(v).trim();
+    return s === "" || s === "-" || s.toLowerCase() === "null" || s.toLowerCase() === "none";
+  }).length;
+  return nulls / rows.length;
+}
+
+// What fraction of the metric's total mass lives in the top-K rows. High
+// concentration (e.g. >80% in top 2) usually means the dimension is
+// effectively bucketed and the rest of the distribution is noise — a
+// useful signal to surface as a caveat.
+export function topConcentration(
+  rows: Array<Record<string, unknown>>,
+  metricField: string,
+  topK: number,
+): number {
+  if (rows.length === 0) return 0;
+  const values = rows.map((r) => {
+    const n = Number(r[metricField] ?? 0);
+    return Number.isFinite(n) ? n : 0;
+  });
+  const total = values.reduce((s, v) => s + v, 0);
+  if (total === 0) return 0;
+  const sorted = [...values].sort((a, b) => b - a);
+  const topSum = sorted.slice(0, topK).reduce((s, v) => s + v, 0);
+  return topSum / total;
+}
+
+// Scale the base confidence by sample size. <30 rows: heavy discount.
+// 30–100 rows: gradual ramp. ≥100 rows: full confidence. Floor at 40%
+// of base so a small sample doesn't dominate the message.
+export function sampleFactor(totalRows: number): number {
+  return Math.max(0.4, Math.min(1, totalRows / 100));
+}
+
 const dataAnalyst: Specialist = async (rawInput) => {
   const input = rawInput as AnalysisInput;
   const datasetId = (input.dataset_id ?? "").trim();
@@ -481,6 +528,32 @@ const dataAnalyst: Specialist = async (rawInput) => {
     caveats.push("no rows returned for the requested window — try broadening the filter or time range");
   }
 
+  // Statistical-quality caveats. Rates computed against currentRows (the
+  // window the user actually asked about) rather than the merged dataset.
+  const totalRows = currentRows.length + priorRows.length;
+  const nullPctCurrent = nullRate(currentRows, dim) * 100;
+  if (nullPctCurrent > 20) {
+    caveats.push(
+      `${nullPctCurrent.toFixed(0)}% of records have a null/empty "${dim}" value — counts may understate the real picture`,
+    );
+  }
+  const concentration = topConcentration(currentRows, metricField, 2) * 100;
+  if (concentration > 80 && currentRows.length >= 5) {
+    caveats.push(
+      `top 2 values account for ${concentration.toFixed(0)}% of all records — the data may be heavily bucketed and middle/long-tail rankings are noisy`,
+    );
+  }
+  if (totalRows < 30 && totalRows > 0) {
+    caveats.push(
+      `small sample (${totalRows} total rows across both windows) — treat percentages with caution`,
+    );
+  }
+
+  // Confidence: base × sample factor. Delta-mode is more confident because
+  // we have a baseline; single-window is just a snapshot.
+  const baseConf = hasPrior && priorRows.length > 0 ? 0.85 : 0.7;
+  const confidence = Number((baseConf * sampleFactor(totalRows)).toFixed(2));
+
   return {
     agent: "data_analyst",
     status: "completed",
@@ -494,9 +567,15 @@ const dataAnalyst: Specialist = async (rawInput) => {
         current_url: currentR.result.url,
         prior_url: hasPrior ? "queried" : null,
       },
+      sample: {
+        current_rows: currentRows.length,
+        prior_rows: priorRows.length,
+        null_pct_current: Number(nullPctCurrent.toFixed(1)),
+        top2_concentration_pct: Number(concentration.toFixed(1)),
+      },
     },
     error: null,
-    confidence: hasPrior && priorRows.length > 0 ? 0.85 : 0.7,
+    confidence,
     caveats: caveats.length > 0 ? caveats : undefined,
     artifacts: [currentR.result.url],
   };
