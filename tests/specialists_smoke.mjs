@@ -27,14 +27,74 @@ test("isSpecialistName recognizes the three roster names", () => {
   assert.equal(isSpecialistName("nope"), false);
 });
 
-test("stub specialists (data_analyst, reporter) return not-yet-implemented", async () => {
+test("reporter is still a stub (returns not-yet-implemented)", async () => {
   _resetSpecialistsForTest();
-  for (const name of ["data_analyst", "reporter"]) {
-    const env = await callSpecialist(name, {});
-    assert.equal(env.agent, name);
-    assert.equal(env.status, "failed");
-    assert.match(env.error ?? "", /not yet implemented/i);
-  }
+  const env = await callSpecialist("reporter", {});
+  assert.equal(env.agent, "reporter");
+  assert.equal(env.status, "failed");
+  assert.match(env.error ?? "", /not yet implemented/i);
+});
+
+test("data_analyst — empty input fails clearly (no crash)", async () => {
+  _resetSpecialistsForTest();
+  const env = await callSpecialist("data_analyst", {});
+  assert.equal(env.agent, "data_analyst");
+  assert.equal(env.status, "failed");
+  assert.match(env.error ?? "", /dataset_id|dimension/i);
+});
+
+test("data_analyst — unknown dataset_id fails clearly", async () => {
+  _resetSpecialistsForTest();
+  const env = await callSpecialist("data_analyst", {
+    dataset_id: "phantom-id",
+    dimensions: ["foo"],
+  });
+  assert.equal(env.status, "failed");
+  assert.match(env.error ?? "", /unknown dataset_id/i);
+});
+
+// Pure-function test for the delta math — doesn't hit Socrata.
+import deltaPkg from "../app/lib/specialists.ts";
+const { computeDeltas } = deltaPkg;
+
+test("computeDeltas — basic +/- and zero-prior cases", () => {
+  const current = [
+    { permit_class_mapped: "Residential", count: 1200 },
+    { permit_class_mapped: "Commercial", count: 480 },
+    { permit_class_mapped: "Industrial", count: 12 }, // new category, zero prior
+  ];
+  const prior = [
+    { permit_class_mapped: "Residential", count: 1000 },
+    { permit_class_mapped: "Commercial", count: 600 },
+    { permit_class_mapped: "Mixed", count: 50 }, // dropped to zero
+  ];
+  const deltas = computeDeltas(current, prior, "permit_class_mapped", "count");
+  assert.equal(deltas.length, 4, "should include all keys from both windows");
+
+  const byKey = Object.fromEntries(deltas.map((d) => [d.key, d]));
+  // Residential: 1000 → 1200 = +20%
+  assert.equal(byKey.Residential.delta, 200);
+  assert.ok(Math.abs(byKey.Residential.pct - 20) < 0.01);
+  // Commercial: 600 → 480 = -20%
+  assert.equal(byKey.Commercial.delta, -120);
+  assert.ok(Math.abs(byKey.Commercial.pct - -20) < 0.01);
+  // Industrial: 0 → 12 = no prior baseline
+  assert.equal(byKey.Industrial.prior, 0);
+  assert.equal(byKey.Industrial.pct, null, "zero-prior should yield null pct (avoid div-by-zero)");
+  // Mixed: 50 → 0 = -100%
+  assert.equal(byKey.Mixed.delta, -50);
+  assert.ok(Math.abs(byKey.Mixed.pct - -100) < 0.01);
+});
+
+test("computeDeltas — sort puts biggest absolute pct change first", () => {
+  const deltas = computeDeltas(
+    [{ k: "A", n: 110 }, { k: "B", n: 200 }, { k: "C", n: 1000 }],
+    [{ k: "A", n: 100 }, { k: "B", n: 100 }, { k: "C", n: 950 }],
+    "k",
+    "n",
+  );
+  // B: +100% — biggest pct change
+  assert.equal(deltas[0].key, "B");
 });
 
 test("support specialist — catalog meta query returns pre-canned summary (no LLM)", async () => {

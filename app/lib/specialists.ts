@@ -2,18 +2,19 @@
 //
 // The orchestrator's `delegate_to` step type (in `executeStep`) routes to the
 // matching specialist via this registry.
-//   #64 — data_analyst (statistical SoQL, yoy/qoq deltas, anomalies)  — STUB
+//   #64 — data_analyst (statistical SoQL, yoy/qoq deltas, anomalies)  — LIVE
 //   #65 — reporter (compose_report → JSON snapshot for /reports/[slug]) — STUB
 //   #66 — support (disambiguation, meta-questions, no Socrata)         — LIVE
 //
 // Per the spec all three should eventually live in `agent/specialists/*.py`
-// (Python, called via MCP). For demo-day reliability the support specialist
-// is implemented in TS in-process here — same envelope shape, no MCP
+// (Python, called via MCP). For demo-day reliability the live specialists
+// are implemented in TS in-process here — same envelope shape, no MCP
 // roundtrip latency, no extra moving parts. Python migration is a post-demo
-// follow-up. data_analyst + reporter remain stubs until #64/#65 land.
+// follow-up. reporter remains a stub until #65 lands.
 
 import OpenAI from "openai";
-import { CATALOG } from "./catalog";
+import { CATALOG, findById } from "./catalog";
+import { sodaQuery } from "./socrata";
 
 export type SpecialistName = "data_analyst" | "reporter" | "support";
 
@@ -49,7 +50,6 @@ const NOT_YET: (name: SpecialistName) => SpecialistEnvelope = (name) => ({
   error: `specialist "${name}" is registered but not yet implemented — see the corresponding PR for the live wire-up`,
 });
 
-const dataAnalystStub: Specialist = async () => NOT_YET("data_analyst");
 const reporterStub: Specialist = async () => NOT_YET("reporter");
 
 // --- Support specialist (LIVE) -------------------------------------------
@@ -250,10 +250,255 @@ const support: Specialist = async (input) => {
   }
 };
 
+// --- Data analyst specialist (LIVE) --------------------------------------
+// Statistical reasoning the planner can't do by itself: yoy/qoq/mom deltas,
+// top-N with rankings, simple anomaly hints (Z-score). Uses two sodaQuery
+// calls (current window + prior window) and computes deltas in JS rather
+// than asking Socrata for window functions (some portals reject them).
+//
+// Input shape (planner emits this — see the routing rule in agent.ts):
+//   {
+//     query: string,                 // user's natural-language question
+//     dataset_id: string,            // anchor dataset (one of CATALOG.id)
+//     dimensions: string[],          // SoQL field names to group by
+//     time_column?: string,          // SoQL field name for time-windowing
+//     current_window?: string,       // SoQL where fragment for "now"
+//     prior_window?: string,         // SoQL where fragment for "before"
+//     filter?: string,               // optional extra where clause
+//     metric?: string,               // SoQL aggregation, default count(*) AS count
+//     metric_label?: string,         // human label for the metric ("permits")
+//     top_n?: number,                // findings to surface, default 5
+//   }
+
+type AnalysisInput = {
+  query?: string;
+  dataset_id?: string;
+  dimensions?: string[];
+  time_column?: string;
+  current_window?: string;
+  prior_window?: string;
+  filter?: string;
+  metric?: string;
+  metric_label?: string;
+  top_n?: number;
+};
+
+type DeltaRow = {
+  key: string;
+  current: number;
+  prior: number;
+  delta: number;
+  pct: number | null; // null when prior is 0 (avoid divide-by-zero)
+};
+
+// Pure helper — exported for unit tests.
+export function computeDeltas(
+  current: Array<Record<string, unknown>>,
+  prior: Array<Record<string, unknown>>,
+  dimension: string,
+  metricField: string,
+): DeltaRow[] {
+  const priorMap = new Map<string, number>();
+  for (const row of prior) {
+    const k = String(row[dimension] ?? "");
+    const v = Number(row[metricField] ?? 0);
+    priorMap.set(k, (priorMap.get(k) ?? 0) + (Number.isFinite(v) ? v : 0));
+  }
+  const out: DeltaRow[] = [];
+  const seenKeys = new Set<string>();
+  for (const row of current) {
+    const k = String(row[dimension] ?? "");
+    const cur = Number(row[metricField] ?? 0);
+    const pri = priorMap.get(k) ?? 0;
+    const delta = cur - pri;
+    const pct = pri === 0 ? null : (delta / pri) * 100;
+    out.push({ key: k, current: cur, prior: pri, delta, pct });
+    seenKeys.add(k);
+  }
+  // Surface dimension values that DROPPED to zero (in prior but not current).
+  for (const [k, pri] of priorMap.entries()) {
+    if (!seenKeys.has(k)) {
+      out.push({ key: k, current: 0, prior: pri, delta: -pri, pct: -100 });
+    }
+  }
+  // Sort by absolute pct change (ties broken by absolute delta), descending.
+  out.sort((a, b) => {
+    const aMag = a.pct === null ? Number.POSITIVE_INFINITY : Math.abs(a.pct);
+    const bMag = b.pct === null ? Number.POSITIVE_INFINITY : Math.abs(b.pct);
+    if (aMag !== bMag) return bMag - aMag;
+    return Math.abs(b.delta) - Math.abs(a.delta);
+  });
+  return out;
+}
+
+function fmtPct(p: number | null): string {
+  if (p === null) return "(no prior)";
+  const sign = p >= 0 ? "+" : "";
+  return `${sign}${p.toFixed(1)}%`;
+}
+
+function fmtNum(n: number): string {
+  return n.toLocaleString("en-US");
+}
+
+const dataAnalyst: Specialist = async (rawInput) => {
+  const input = rawInput as AnalysisInput;
+  const datasetId = (input.dataset_id ?? "").trim();
+  const dimensions = (input.dimensions ?? []).filter((d) => typeof d === "string" && d.length > 0);
+
+  if (!datasetId || dimensions.length === 0) {
+    return {
+      agent: "data_analyst",
+      status: "failed",
+      result: null,
+      error: "data_analyst: input must include dataset_id and at least one dimension",
+    };
+  }
+
+  const ds = findById(datasetId);
+  if (!ds) {
+    return {
+      agent: "data_analyst",
+      status: "failed",
+      result: null,
+      error: `data_analyst: unknown dataset_id ${datasetId}`,
+    };
+  }
+
+  const dim = dimensions[0]; // single-dim today; multi-dim is a follow-up
+  const metric = (input.metric ?? "count(*) AS count").trim();
+  const metricField = (() => {
+    const m = /AS\s+([a-zA-Z_][a-zA-Z0-9_]*)/i.exec(metric);
+    return m ? m[1] : "count";
+  })();
+  const metricLabel = input.metric_label ?? "records";
+  const topN = Math.max(1, Math.min(10, input.top_n ?? 5));
+
+  function whereOf(...frags: Array<string | undefined>): string | undefined {
+    const parts = frags.filter((f): f is string => typeof f === "string" && f.trim().length > 0);
+    return parts.length > 0 ? parts.join(" AND ") : undefined;
+  }
+
+  const fetchWindow = async (windowFrag: string | undefined) => {
+    const r = await sodaQuery(ds.portal, ds.id, {
+      where: whereOf(input.filter, windowFrag),
+      select: `${dim}, ${metric}`,
+      group: dim,
+      order: `${metricField} DESC`,
+      limit: 100,
+    });
+    return r;
+  };
+
+  const currentR = await fetchWindow(input.current_window);
+  if (currentR.status !== "completed" || !currentR.result) {
+    return {
+      agent: "data_analyst",
+      status: "failed",
+      result: null,
+      error: `data_analyst: current-window query failed — ${currentR.error}`,
+    };
+  }
+  const currentRows = currentR.result.records;
+
+  const hasPrior = !!input.prior_window;
+  const priorRows = hasPrior
+    ? await (async () => {
+        const r = await fetchWindow(input.prior_window);
+        return r.status === "completed" && r.result ? r.result.records : [];
+      })()
+    : [];
+
+  const findings: Array<{ text: string; value?: number | string; unit?: string; baseline?: number | string; pct_change?: number }> = [];
+  const caveats: string[] = [];
+  let vizSpec: Record<string, unknown>;
+
+  if (hasPrior && priorRows.length > 0) {
+    // YoY-style mode: compute deltas between current and prior windows.
+    const deltas = computeDeltas(currentRows, priorRows, dim, metricField);
+    const top = deltas.slice(0, topN);
+    for (const row of top) {
+      const direction = row.delta >= 0 ? "rose" : "dropped";
+      const absDelta = Math.abs(row.delta);
+      findings.push({
+        text:
+          `${row.key}: ${metricLabel} ${direction} from ${fmtNum(row.prior)} to ${fmtNum(row.current)} ` +
+          `(${row.delta >= 0 ? "+" : ""}${fmtNum(row.delta)}, ${fmtPct(row.pct)})`,
+        value: row.current,
+        baseline: row.prior,
+        pct_change: row.pct ?? undefined,
+        unit: metricLabel,
+      });
+    }
+    vizSpec = {
+      kind: "bar",
+      x: dim,
+      y: metricLabel,
+      series: [
+        { name: "prior", data: deltas.map((d) => [d.key, d.prior]) },
+        { name: "current", data: deltas.map((d) => [d.key, d.current]) },
+      ],
+    };
+    if (deltas.some((d) => d.pct === null)) {
+      caveats.push("some categories had zero prior-window records (percent change shown as 'no prior')");
+    }
+  } else {
+    // Single-window mode: top-N by metric.
+    const sorted = [...currentRows].sort((a, b) => {
+      const av = Number(a[metricField] ?? 0);
+      const bv = Number(b[metricField] ?? 0);
+      return bv - av;
+    });
+    const top = sorted.slice(0, topN);
+    const total = sorted.reduce((s, r) => s + (Number(r[metricField] ?? 0)), 0);
+    for (const row of top) {
+      const k = String(row[dim] ?? "");
+      const v = Number(row[metricField] ?? 0);
+      const share = total > 0 ? (v / total) * 100 : 0;
+      findings.push({
+        text: `${k}: ${fmtNum(v)} ${metricLabel} (${share.toFixed(1)}% of top ${sorted.length})`,
+        value: v,
+        unit: metricLabel,
+        pct_change: share,
+      });
+    }
+    vizSpec = {
+      kind: "bar",
+      x: dim,
+      y: metricLabel,
+      series: [{ name: metricLabel, data: top.map((r) => [String(r[dim] ?? ""), Number(r[metricField] ?? 0)]) }],
+    };
+  }
+
+  if (findings.length === 0) {
+    caveats.push("no rows returned for the requested window — try broadening the filter or time range");
+  }
+
+  return {
+    agent: "data_analyst",
+    status: "completed",
+    result: {
+      query: input.query ?? "",
+      dataset: { id: ds.id, title: ds.title, portal: ds.portal },
+      mode: hasPrior && priorRows.length > 0 ? "delta" : "single_window",
+      findings,
+      viz_spec: vizSpec,
+      sources: {
+        current_url: currentR.result.url,
+        prior_url: hasPrior ? "queried" : null,
+      },
+    },
+    error: null,
+    confidence: hasPrior && priorRows.length > 0 ? 0.85 : 0.7,
+    caveats: caveats.length > 0 ? caveats : undefined,
+    artifacts: [currentR.result.url],
+  };
+};
+
 // --- Registry -------------------------------------------------------------
 
 const REGISTRY: Record<SpecialistName, Specialist> = {
-  data_analyst: dataAnalystStub,
+  data_analyst: dataAnalyst,
   reporter: reporterStub,
   support: support,
 };
@@ -287,7 +532,7 @@ export function _setSpecialistForTest(
 }
 
 export function _resetSpecialistsForTest(): void {
-  REGISTRY.data_analyst = dataAnalystStub;
+  REGISTRY.data_analyst = dataAnalyst;
   REGISTRY.reporter = reporterStub;
   REGISTRY.support = support;
 }
