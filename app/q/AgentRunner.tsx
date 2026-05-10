@@ -995,7 +995,7 @@ export function AgentRunner({
                 </p>
                 <Link
                   href="/"
-                  className="mt-5 inline-flex items-center rounded-md bg-[var(--ds-text)] px-5 py-2 text-[13px] font-semibold text-[var(--ds-bg)] hover:opacity-90"
+                  className="mt-5 inline-flex items-center rounded-md bg-[var(--ds-purple)] px-5 py-2 text-[13px] font-semibold text-white hover:opacity-90"
                 >
                   ← Home
                 </Link>

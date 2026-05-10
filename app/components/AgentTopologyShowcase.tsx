@@ -105,7 +105,7 @@ export default function AgentTopologyShowcase({ replayHash = "a8f3c19d2e7b" }: {
             <div className="mt-7 flex flex-col gap-2">
               <Link
                 href={`/admin/replay/${replayHash}`}
-                className="inline-flex w-fit items-center rounded-md bg-[var(--ds-text)] px-5 py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-bg)] hover:bg-[var(--ds-text-mute)]"
+                className="inline-flex w-fit items-center rounded-md bg-[var(--ds-purple)] px-5 py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-white hover:opacity-90"
               >
                 Watch a real run →
               </Link>

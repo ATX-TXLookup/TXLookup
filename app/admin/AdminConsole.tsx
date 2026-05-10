@@ -151,7 +151,7 @@ export function AdminConsole({ runs: initialRuns }: { runs: SavedRun[] }) {
             <button
               type="submit"
               disabled={running || !query.trim()}
-              className="rounded-sm bg-[var(--ds-text)] px-5 py-2 text-sm font-semibold text-[var(--ds-bg)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-sm bg-[var(--ds-purple)] px-5 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {running ? "Running…" : "Run"}
             </button>

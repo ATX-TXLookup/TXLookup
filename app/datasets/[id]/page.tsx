@@ -157,7 +157,7 @@ export default async function DatasetPage({
             />
             <button
               type="submit"
-              className="rounded-sm bg-[var(--ds-text)] px-6 py-3 text-sm font-semibold text-[var(--ds-bg)] hover:bg-[var(--ds-text-mute)] md:text-base"
+              className="rounded-sm bg-[var(--ds-purple)] px-6 py-3 text-sm font-semibold text-white hover:opacity-90 md:text-base"
             >
               Ask
             </button>

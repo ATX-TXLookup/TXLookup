@@ -57,7 +57,7 @@ export function BarChart({ bars, title, unit, maxValue, format, source }: BarCha
                   </span>
                 )}
               </div>
-              <span className="font-display text-sm font-semibold tabular-nums text-tx-navy min-w-[60px] text-right">
+              <span className="text-sm font-semibold tabular-nums text-tx-navy min-w-[60px] text-right">
                 {fmt(b.value)}
               </span>
             </li>

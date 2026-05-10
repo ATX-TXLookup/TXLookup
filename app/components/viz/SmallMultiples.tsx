@@ -37,7 +37,7 @@ export function SmallMultiples({ charts, cols = 4, title, source }: SmallMultipl
                 </p>
                 <Sparkline points={c.points} accent={c.accent ?? "rust"} width={160} height={36} />
                 {c.current && (
-                  <p className="mt-1 font-display text-base font-bold tabular-nums text-tx-navy">{c.current}</p>
+                  <p className="mt-1 text-base font-bold tabular-nums text-tx-navy">{c.current}</p>
                 )}
               </div>
             )}

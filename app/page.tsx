@@ -134,7 +134,7 @@ export default async function HomePage() {
                   />
                   <button
                     type="submit"
-                    className="rounded-md bg-[var(--ds-text)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-bg)] hover:bg-[var(--ds-text-mute)]"
+                    className="rounded-md bg-[var(--ds-purple)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-white hover:opacity-90"
                   >
                     Ask →
                   </button>
@@ -593,7 +593,7 @@ export default async function HomePage() {
               <div className="mt-5 flex flex-wrap gap-2">
                 <Link
                   href="/use-as-agent"
-                  className="rounded-md bg-[var(--ds-text)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-bg)] hover:bg-[var(--ds-text-mute)]"
+                  className="rounded-md bg-[var(--ds-purple)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-white hover:opacity-90"
                 >
                   Install pitch →
                 </Link>
