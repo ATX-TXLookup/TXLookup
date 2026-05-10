@@ -27,7 +27,7 @@ TXLookup is an autonomous agent for Texas open civic data. Type a plain-English 
 ## Long description (≤ 1500 chars)
 Texas publishes millions of public records every day — building permits, food inspections, 311 calls, code complaints, traffic fatalities, franchise tax. Almost no one queries them, because hand-writing SoQL against a dozen Socrata portals is brutal.
 
-TXLookup turns those portals into a conversational data interface. A single search box hides a six-agent loop:
+TXLookup turns those portals into a conversational data interface. A single search box hides a seven-agent loop:
 
 - **Planner** decomposes the question into a SoQL plan
 - **Data analyst** computes statistics with quality flags (null rate, top concentration, sample factor)
