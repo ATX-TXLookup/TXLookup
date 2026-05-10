@@ -101,8 +101,8 @@ const ROSTER: AgentCard[] = [
 ];
 
 export const metadata = {
-  title: "Agent Operations Center — TXLookup",
-  description: "Live status of every agent in the TXLookup roster. Schedules, last-runs, recent activity. Watch the multi-agent system work in real time.",
+  title: "The agent roster — TXLookup",
+  description: "Seven specialists, one coherent loop. Each agent owns a single responsibility — planner, analyst, reporter, support, critic, scout, ingestor. Auditable end-to-end.",
 };
 
 const STATUS_DOT: Record<AgentCard["status"], string> = {
@@ -124,15 +124,15 @@ export default async function AgentsPage() {
       {/* Hero */}
       <section className="border-b border-[var(--ds-border)]">
         <div className="mx-auto max-w-[1200px] px-6 pb-16 pt-12 md:px-8 md:pb-24 md:pt-16">
-          <EyebrowLabel tone="good">Operations center · live</EyebrowLabel>
+          <EyebrowLabel tone="good">The roster · live</EyebrowLabel>
           <h1 className="mt-4 max-w-[24ch] text-[42px] font-bold leading-[1.05] tracking-[-0.025em] text-[var(--ds-text)] md:text-[64px]">
-            Seven agents.{" "}
-            <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">
-              Working on a clock.
+            Seven specialists.{" "}
+            <span className="text-[var(--ds-text-mute)]">
+              One coherent loop.
             </span>
           </h1>
-          <p className="mt-6 max-w-[60ch] text-[16px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
-            Multi-agent reasoning isn&rsquo;t a slide — it&rsquo;s running right now. Each agent has a defined role, a schedule (cron or on-demand), an audit trail, and a public detail page. This is what we mean by &ldquo;not a wrapper.&rdquo;
+          <p className="mt-6 max-w-[64ch] text-[16px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
+            The agent loop isn&rsquo;t a slide — it&rsquo;s running. Each specialist owns a single responsibility: planning, statistical reasoning, narrative synthesis, disambiguation, self-critique, dataset discovery, local-mirror ingestion. The orchestrator routes between them, the critic verifies, the doom-loop guard catches cycles. Every run is auditable end-to-end.
           </p>
         </div>
       </section>

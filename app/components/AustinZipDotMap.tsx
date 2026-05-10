@@ -1,4 +1,8 @@
+"use client";
+
 // Austin zip-code dot map — inline SVG, dark palette.
+// Interactive: hover a dot for a tooltip card with the zip + name + count.
+// Click a dot to navigate to /q with a question scoped to that zip.
 // Used in /reports/austin-permits-heatmap (and reusable elsewhere).
 //
 // Centroids are hand-picked approximate lat/lng for ~30 Austin metro zips
@@ -75,6 +79,12 @@ export type AustinZipDotMapProps = {
   /** How many top zips to label inline. Default 6. */
   labelTop?: number;
   height?: number;
+  /** Default click handler asks the agent about the zip. Override to swap behavior. */
+  onZipClick?: (zip: string) => void;
+  /** Question to fire on click. {zip} is replaced. Default "Tell me about {zip} in Austin". */
+  questionTemplate?: string;
+  /** Singular word that follows the count in the tooltip. Default "permits". */
+  unit?: string;
 };
 
 const TONE_FILL: Record<NonNullable<AustinZipDotMapProps["tone"]>, string> = {
@@ -84,12 +94,19 @@ const TONE_FILL: Record<NonNullable<AustinZipDotMapProps["tone"]>, string> = {
   purple: C.purple,
 };
 
+// Hooks must come AFTER the "use client" directive (already at top of file).
+import { useState } from "react";
+
 export function AustinZipDotMap({
   counts,
   tone = "accent",
   labelTop = 6,
   height,
+  onZipClick,
+  questionTemplate = "Tell me about {zip} in Austin",
+  unit = "permits",
 }: AustinZipDotMapProps) {
+  const [hovered, setHovered] = useState<string | null>(null);
   const ranked = Object.entries(counts)
     .filter(([z]) => ZIP_CENTROIDS[z])
     .sort(([, a], [, b]) => b - a);
@@ -100,6 +117,14 @@ export function AustinZipDotMap({
   const totalDots = ranked.length;
   const totalRows = ranked.reduce((s, [, n]) => s + n, 0);
 
+  const handleClick = (zip: string) => {
+    if (onZipClick) onZipClick(zip);
+    else {
+      const q = questionTemplate.replace("{zip}", zip);
+      if (typeof window !== "undefined") window.location.assign(`/q?q=${encodeURIComponent(q)}`);
+    }
+  };
+
   // Radius range — visually map area to count: r = sqrt(t) * (20 - 4) + 4
   const radiusFor = (n: number): number => {
     if (n <= 0) return 3;
@@ -108,12 +133,13 @@ export function AustinZipDotMap({
   };
 
   return (
+    <div className="relative">
     <svg
       viewBox="0 0 720 540"
       className="block w-full"
       style={{ height: height ? `${height}px` : "auto" }}
       role="img"
-      aria-label="Austin zip code permit density map"
+      aria-label="Austin zip code permit density map · interactive · click a dot to ask the agent"
     >
       <defs>
         <radialGradient id="austin-glow" cx="50%" cy="50%" r="50%">
@@ -177,8 +203,15 @@ export function AustinZipDotMap({
         if (!c) return null;
         const r = radiusFor(n);
         const isTop = tops.has(zip);
+        const isHovered = hovered === zip;
         return (
-          <g key={zip}>
+          <g
+            key={zip}
+            onMouseEnter={() => setHovered(zip)}
+            onMouseLeave={() => setHovered((h) => (h === zip ? null : h))}
+            onClick={() => handleClick(zip)}
+            style={{ cursor: "pointer" }}
+          >
             {isTop && (
               <circle
                 cx={c.x}
@@ -202,8 +235,21 @@ export function AustinZipDotMap({
                 />
               </circle>
             )}
-            <circle cx={c.x} cy={c.y} r={r} fill={fill} stroke={C.bg} strokeWidth={isTop ? 2 : 1}>
-              <title>{`${zip} · ${c.name} · ${n.toLocaleString()} permits`}</title>
+            {isHovered && (
+              <circle
+                cx={c.x}
+                cy={c.y}
+                r={r + 6}
+                fill="none"
+                stroke={fill}
+                strokeWidth={1.5}
+                opacity={0.7}
+              />
+            )}
+            {/* Hit-target — invisible but generously large for click ergonomics */}
+            <circle cx={c.x} cy={c.y} r={Math.max(r + 6, 12)} fill="transparent" />
+            <circle cx={c.x} cy={c.y} r={r} fill={fill} stroke={isHovered ? C.text : C.bg} strokeWidth={isTop || isHovered ? 2 : 1}>
+              <title>{`${zip} · ${c.name} · ${n.toLocaleString()} ${unit} · click to ask the agent`}</title>
             </circle>
             {isTop && (
               <g>
@@ -279,5 +325,42 @@ export function AustinZipDotMap({
         <line x1={-10} y1={0} x2={10} y2={0} stroke={C.textDim} strokeWidth={0.8} />
       </g>
     </svg>
+
+    {/* Floating hover tooltip — positioned by zip centroid as % of viewBox */}
+    {(() => {
+      if (!hovered) return null;
+      const c = ZIP_CENTROIDS[hovered];
+      const n = counts[hovered] ?? 0;
+      if (!c) return null;
+      // Position the card at the dot, clamping to the right edge.
+      const xPct = Math.min(c.x / 720, 0.65) * 100;
+      const yPct = Math.min(c.y / 540, 0.85) * 100;
+      return (
+        <div
+          className="pointer-events-none absolute"
+          style={{ left: `${xPct}%`, top: `${yPct}%`, transform: "translate(8px, -50%)" }}
+        >
+          <div className="rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg)] px-3 py-2 shadow-lg">
+            <p className="text-[12px] font-bold tabular-nums text-[var(--ds-text)]">{hovered}</p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-mute)]">
+              {c.name}
+            </p>
+            <p className="mt-1 text-[11px] tabular-nums" style={{ color: fill }}>
+              {n.toLocaleString()} {unit}
+            </p>
+            <p className="mt-1.5 font-mono text-[9px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+              click to ask agent →
+            </p>
+          </div>
+        </div>
+      );
+    })()}
+
+    {/* Status footer */}
+    <div className="mt-2 flex items-baseline justify-between gap-3 font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+      <span>● Hover a dot for detail · click to ask the agent</span>
+      <span>{totalDots} zips · {totalRows.toLocaleString()} {unit}</span>
+    </div>
+    </div>
   );
 }
