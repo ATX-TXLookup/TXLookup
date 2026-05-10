@@ -27,6 +27,10 @@ type SidebarStep = {
   error?: string | null;
   fromReplan?: boolean;
   durationMs?: number;
+  // Responsible agent emitted on SSE step_done (PR #68). Drives Flow-tab
+  // color-coding: orchestrator=navy, support=gold, data_analyst=sky,
+  // reporter=rust. Absent (older streams or pre-step_done) → orchestrator.
+  agent?: string;
 };
 
 type SidebarReplan = {
@@ -98,6 +102,57 @@ const PILL_COLORS: Record<string, { bg: string; fg: string; border: string }> = 
     border: "rgba(212,139,16,0.5)",
   },
 };
+
+// Per-agent tone palette for Flow-tab color-coding (PR #68 step_done.agent).
+// Mapping per the brief:
+//   orchestrator → tx-navy   (neutral; raw tool calls)
+//   support      → tx-gold   (clarifier / meta — the gold thread)
+//   data_analyst → tx-sky    (data, info)
+//   reporter     → tx-rust   (CTA, output, "the published thing")
+// `accent` is a Tailwind border-l-* class; `badge` is a Tailwind text-* class
+// for the tiny mono badge next to the step number; `dot` is a CSS-var color
+// for the legend dot. Unknown agents collapse to orchestrator.
+type AgentTone = { accent: string; badge: string; dot: string; label: string };
+const AGENT_TONES: Record<string, AgentTone> = {
+  orchestrator: {
+    accent: "border-l-tx-navy",
+    badge: "text-tx-cream/65",
+    dot: "var(--tx-navy)",
+    label: "orchestrator",
+  },
+  support: {
+    accent: "border-l-tx-gold",
+    badge: "text-tx-gold",
+    dot: "var(--tx-gold)",
+    label: "support",
+  },
+  data_analyst: {
+    accent: "border-l-tx-sky",
+    badge: "text-tx-sky",
+    dot: "var(--tx-sky)",
+    label: "data_analyst",
+  },
+  reporter: {
+    accent: "border-l-tx-rust",
+    badge: "text-tx-rust-light",
+    dot: "var(--tx-rust)",
+    label: "reporter",
+  },
+};
+
+function agentTone(agent?: string): AgentTone {
+  if (!agent) return AGENT_TONES.orchestrator;
+  return AGENT_TONES[agent] ?? AGENT_TONES.orchestrator;
+}
+
+// Order for the legend row — matches narrative flow: orchestrator drives,
+// delegates to support / data_analyst, then reporter publishes.
+const AGENT_LEGEND: Array<keyof typeof AGENT_TONES> = [
+  "orchestrator",
+  "support",
+  "data_analyst",
+  "reporter",
+];
 
 export function AgentSidebar(props: Props) {
   const [tab, setTab] = useState<Tab>("status");
@@ -315,6 +370,28 @@ function FlowTab({
       <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
         Reasoning trace
       </p>
+
+      {/* Agent-color legend — one-line key for the per-step accent + badge.
+          Mirrors PR #68's responsible-agent attribution so users can read the
+          visual code at a glance. IBM Plex Mono, muted labels per BRAND.md. */}
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        {AGENT_LEGEND.map((name) => {
+          const tone = AGENT_TONES[name];
+          return (
+            <span key={name} className="inline-flex items-center gap-1.5">
+              <span
+                aria-hidden
+                className="inline-block h-1.5 w-1.5 rounded-full"
+                style={{ background: tone.dot }}
+              />
+              <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-tx-muted">
+                {tone.label}
+              </span>
+            </span>
+          );
+        })}
+      </div>
+
       <ol className="mt-4 space-y-0">
         {steps.map((s, i) => {
           const replan = replanIndex.has(s.step);
@@ -326,6 +403,7 @@ function FlowTab({
                 : s.fromReplan
                   ? PILL_COLORS.replan
                   : PILL_COLORS.pending;
+          const tone = agentTone(s.agent);
           const isLast = i === steps.length - 1;
           return (
             <li key={s.step} className="relative pl-8 pb-4">
@@ -344,14 +422,28 @@ function FlowTab({
                   background: "var(--tx-navy-dark)",
                 }}
               />
+              {/* Card — left edge accent reflects the responsible agent;
+                  status border + bg still reflect step pass/fail/pending. */}
               <div
-                className="rounded-[10px] px-3 py-2"
-                style={{ borderColor: colors.border, borderWidth: "0.5px", borderStyle: "solid", backgroundColor: colors.bg }}
+                className={`rounded-[10px] border-l-4 px-3 py-2 ${tone.accent}`}
+                style={{ borderColor: colors.border, borderWidth: "0.5px", borderStyle: "solid", borderLeftWidth: "4px", backgroundColor: colors.bg }}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-[12px] font-semibold text-tx-cream">
-                    {s.tool}
-                  </span>
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="font-mono text-[10px] tabular-nums text-tx-cream/55">
+                      {String(s.step).padStart(2, "0")}
+                    </span>
+                    {/* Agent badge — colored mono tag attributing this step
+                        to its responsible agent (orchestrator default). */}
+                    <span
+                      className={`font-mono text-[10px] uppercase tracking-[0.12em] ${tone.badge}`}
+                    >
+                      {tone.label}
+                    </span>
+                    <span className="truncate font-mono text-[12px] font-semibold text-tx-cream">
+                      {s.tool}
+                    </span>
+                  </div>
                   <span
                     className="font-mono text-[10px] uppercase tracking-wider"
                     style={{ color: colors.fg }}

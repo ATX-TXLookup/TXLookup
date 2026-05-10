@@ -38,6 +38,9 @@ type StepLog = {
   error?: string | null;
   fromReplan?: boolean;
   durationMs?: number;
+  // Responsible agent for this step (PR #68 SSE step_done.agent):
+  // "orchestrator" | "support" | "data_analyst" | "reporter".
+  agent?: string;
 };
 
 type ReplanLog = {
@@ -141,6 +144,9 @@ type SseEvent = {
   kind?: "identical" | "sequence";
   detail?: string;
   reason?: "step_failed" | "doom_loop";
+  // Responsible agent (PR #68): present on `step_done`. Drives Flow-tab
+  // color-coding in AgentSidebar.
+  agent?: string;
 };
 
 function eventForObservatory(ev: SseEvent): ObsEvent | null {
@@ -379,6 +385,9 @@ export function AgentRunner({
                         preview: ev.preview,
                         error: ev.error,
                         durationMs: ev.duration_ms,
+                        // Pipe the responsible agent through so AgentSidebar's
+                        // Flow tab can color-code rows by agent (PR #68).
+                        agent: ev.agent ?? next[idx].agent,
                       };
                     }
                     return { ...s, steps: next, events: eventsNext };
