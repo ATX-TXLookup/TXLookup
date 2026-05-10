@@ -1,24 +1,24 @@
 import type { Metadata } from "next";
 import {
   DM_Serif_Display,
-  Geist,
-  Geist_Mono,
   IBM_Plex_Mono,
+  Inter,
   Instrument_Serif,
+  JetBrains_Mono,
   Syne,
 } from "next/font/google";
 import "./globals.css";
 
 import { Analytics } from "./components/Analytics";
 
-// Geist (Vercel's sans + mono) — used by the dark tool-first homepage and
-// the topology showcase. Loaded as --font-geist / --font-geist-mono.
-const geist = Geist({
+// Inter — primary sans for the new DS (closest reliable match to Geist
+// available via next/font/google in this Next.js version).
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-geist",
   weight: ["400", "500", "600", "700", "800"],
 });
-const geistMono = Geist_Mono({
+const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-geist-mono",
   weight: ["400", "500", "600"],
@@ -65,7 +65,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geist.variable} ${geistMono.variable} ${instrumentSerif.variable} ${dmSerifDisplay.variable} ${syne.variable} ${ibmPlexMono.variable}`}
+      className={`${inter.variable} ${jetbrainsMono.variable} ${instrumentSerif.variable} ${dmSerifDisplay.variable} ${syne.variable} ${ibmPlexMono.variable}`}
     >
       <body>
         <Analytics />
