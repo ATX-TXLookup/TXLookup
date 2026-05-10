@@ -400,7 +400,12 @@ export function AgentRunner({
     const ctrl = new AbortController();
     (async () => {
       try {
-        const r = await fetch("/api/agent", {
+        // Use absolute URL via window.location.origin so a basic-auth user:pass
+        // in window.location.href doesn't leak into the fetch URL (browser
+        // rejects "Request cannot be constructed from a URL that includes credentials").
+        const r = await fetch(
+          (typeof window !== "undefined" ? window.location.origin : "") + "/api/agent",
+          {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -410,7 +415,8 @@ export function AgentRunner({
             demo: mode === "demo",
           }),
           signal: ctrl.signal,
-        });
+          },
+        );
         if (!r.ok || !r.body) {
           setState((s) => ({
             ...s,
