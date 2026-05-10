@@ -4,6 +4,10 @@ import { getInsights } from "../../../../lib/insights";
 import { sodaQuery } from "../../../../lib/socrata";
 import { findById } from "../../../../lib/catalog";
 
+// BRAND.md §3 — Primary UI pairing: Navy bg + Cream text + Gold accent
+// BRAND.md §3 — Light UI pairing:   Cream bg + Navy text + Rust CTA
+// BRAND.md §7 — Dark Hero: navy bg, sky glow at 80% 30%, rust glow at 10% 80%
+
 export const dynamic = "force-dynamic";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -15,8 +19,8 @@ function isNumericVal(v: unknown): boolean {
 function detectNumericCol(rows: Record<string, unknown>[]): string | null {
   if (rows.length === 0) return null;
   const cols = Object.keys(rows[0]);
-  const aggHints = ["cnt", "count", "total", "amount", "deaths", "crashes", "injuries", "sum", "receipts"];
-  for (const hint of aggHints) {
+  const hints = ["cnt", "count", "total", "amount", "deaths", "crashes", "injuries", "sum", "receipts"];
+  for (const hint of hints) {
     const col = cols.find(c => c.toLowerCase().includes(hint));
     if (col && rows.every(r => isNumericVal(r[col]))) return col;
   }
@@ -39,10 +43,10 @@ function fmt(v: unknown): string {
 
 function buildSoqlDisplay(soql: Record<string, unknown>): string {
   const lines: string[] = ["SELECT " + (soql.select ?? "*")];
-  if (soql.where) lines.push("WHERE " + soql.where);
+  if (soql.where) lines.push("WHERE   " + soql.where);
   if (soql.group) lines.push("GROUP BY " + soql.group);
   if (soql.order) lines.push("ORDER BY " + soql.order);
-  if (soql.limit) lines.push("LIMIT " + soql.limit);
+  if (soql.limit) lines.push("LIMIT   " + soql.limit);
   return lines.join("\n");
 }
 
@@ -56,69 +60,30 @@ function labelify(col: string): string {
     .join(" ");
 }
 
-// ── sub-components ────────────────────────────────────────────────────────────
-
-function HeroSection({
-  headline,
-  detail,
-  findingNum,
-  datasetTitle,
-  datasetId,
-}: {
-  headline: string;
-  detail: string;
-  findingNum: number;
-  datasetTitle: string;
-  datasetId: string;
-}) {
-  return (
-    <section
-      style={{
-        background: "#0D2340",
-        backgroundImage:
-          "radial-gradient(circle at 85% 15%, rgba(212,139,16,0.14) 0%, transparent 50%), radial-gradient(circle at 10% 85%, rgba(58,127,190,0.12) 0%, transparent 45%)",
-      }}
-    >
-      <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider" style={{ color: "rgba(250,247,242,0.45)" }}>
-          <Link href="/" style={{ color: "rgba(250,247,242,0.45)" }} className="hover:text-[#FAF7F2]">
-            TXLookup
-          </Link>
-          <span>/</span>
-          <Link href={`/datasets/${datasetId}`} style={{ color: "rgba(250,247,242,0.45)" }} className="hover:text-[#FAF7F2]">
-            {datasetTitle}
-          </Link>
-          <span>/</span>
-          <span style={{ color: "#D48B10" }}>Finding {String(findingNum).padStart(2, "0")}</span>
-        </div>
-
-        {/* Heading */}
-        <p className="mt-8 font-mono text-[11px] font-semibold uppercase tracking-[0.20em]" style={{ color: "#C4420A" }}>
-          Live data finding
-        </p>
-        <h1 className="mt-3 max-w-[820px] font-display text-3xl font-extrabold leading-tight tracking-tight md:text-5xl" style={{ color: "#FAF7F2" }}>
-          {headline}
-        </h1>
-        <p className="mt-5 max-w-[640px] text-base leading-relaxed md:text-lg" style={{ color: "rgba(250,247,242,0.65)" }}>
-          {detail}
-        </p>
-      </div>
-    </section>
-  );
-}
+// ── stat grid (single-row aggregate) ─────────────────────────────────────────
+// BRAND: cream surface, navy numbers, muted labels — §3 Light UI pairing
 
 function SingleStatGrid({ row }: { row: Record<string, unknown> }) {
   const entries = Object.entries(row).filter(([, v]) => v !== null && v !== undefined && v !== "");
+  const cols = entries.length >= 3 ? 3 : entries.length;
   return (
-    <div className="grid gap-px overflow-hidden rounded-2xl border border-[#1A1510]/10" style={{ background: "#E5E2E1" }}>
-      <div className={`grid ${entries.length >= 3 ? "md:grid-cols-3" : entries.length === 2 ? "md:grid-cols-2" : "grid-cols-1"} gap-px`}>
+    <div
+      className="overflow-hidden rounded-[10px]"
+      style={{ border: "0.5px solid rgba(26,21,16,0.10)" }}
+    >
+      <div className={`grid gap-px bg-[rgba(26,21,16,0.08)] md:grid-cols-${cols}`}>
         {entries.map(([col, val]) => (
-          <div key={col} className="flex flex-col items-start gap-2 px-8 py-8" style={{ background: "#FAF7F2" }}>
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: "#6B6660" }}>
+          <div key={col} className="flex flex-col gap-2 px-8 py-8" style={{ background: "#FAF7F2" }}>
+            <p
+              className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em]"
+              style={{ color: "#6B6660" }}
+            >
               {labelify(col)}
             </p>
-            <p className="font-display text-5xl font-extrabold leading-none tracking-tight md:text-6xl" style={{ color: "#0D2340" }}>
+            <p
+              className="font-display text-5xl font-extrabold leading-none tracking-tight md:text-6xl"
+              style={{ color: "#0D2340" }}
+            >
               {isNumericVal(val) ? fmt(val) : String(val)}
             </p>
           </div>
@@ -127,6 +92,9 @@ function SingleStatGrid({ row }: { row: Record<string, unknown> }) {
     </div>
   );
 }
+
+// ── ranked list (multi-row with numeric column) ───────────────────────────────
+// BRAND: cream rows, navy text, gold bar accent, muted labels — §3 Light + §3 gold accent
 
 function RankedList({
   rows,
@@ -141,21 +109,23 @@ function RankedList({
   const otherCols = Object.keys(rows[0]).filter(c => c !== numericCol && c !== labelCol);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#1A1510]/10">
-      {/* header */}
+    <div
+      className="overflow-hidden rounded-[10px]"
+      style={{ border: "0.5px solid rgba(26,21,16,0.10)" }}
+    >
+      {/* header row */}
       <div
         className="grid px-6 py-3 font-mono text-[10px] font-semibold uppercase tracking-[0.15em]"
         style={{
           background: "#F0EDEC",
-          color: "#8C7166",
-          gridTemplateColumns: labelCol ? "1fr 160px" : "1fr",
+          color: "#6B6660",
+          gridTemplateColumns: labelCol ? "1fr 140px" : "1fr",
         }}
       >
         <span>{labelCol ? labelify(labelCol) : "Item"}</span>
         <span className="text-right">{labelify(numericCol)}</span>
       </div>
 
-      {/* rows */}
       {rows.map((row, i) => {
         const numVal = Number(row[numericCol]) || 0;
         const pct = maxVal > 0 ? (numVal / maxVal) * 100 : 0;
@@ -165,51 +135,55 @@ function RankedList({
         return (
           <div
             key={i}
-            className="group relative border-b border-[#1A1510]/08 last:border-b-0"
-            style={{ background: i % 2 === 0 ? "#FAF7F2" : "#FFFFFF" }}
+            className="group relative border-t"
+            style={{
+              borderColor: "rgba(26,21,16,0.08)",
+              background: i % 2 === 0 ? "#FAF7F2" : "#FFFFFF",
+            }}
           >
-            {/* bar fill */}
+            {/* proportional bar background */}
             <div
               className="absolute inset-y-0 left-0"
-              style={{
-                width: `${pct}%`,
-                background: "rgba(212,139,16,0.07)",
-                transition: "width 0.3s ease",
-              }}
+              style={{ width: `${pct}%`, background: "rgba(212,139,16,0.08)" }}
             />
-
             <div
               className="relative grid items-center gap-4 px-6 py-4"
-              style={{ gridTemplateColumns: labelCol ? "1fr 160px" : "1fr" }}
+              style={{ gridTemplateColumns: "1fr 140px" }}
             >
-              <div className="flex items-baseline gap-3">
+              <div className="flex items-baseline gap-3 min-w-0">
                 <span
                   className="w-6 shrink-0 font-mono text-[10px] font-bold tabular-nums"
                   style={{ color: "#D48B10" }}
                 >
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <div>
-                  <span className="font-body text-sm font-medium" style={{ color: "#1C1B1B" }}>
+                <div className="min-w-0">
+                  <span
+                    className="block truncate font-body text-sm font-medium"
+                    style={{ color: "#1A1510" }}
+                  >
                     {label}
                   </span>
                   {extra.length > 0 && (
-                    <span className="ml-2 font-mono text-[10px]" style={{ color: "#8C7166" }}>
+                    <span className="font-mono text-[10px]" style={{ color: "#6B6660" }}>
                       {extra.map(v => String(v)).join(" · ")}
                     </span>
                   )}
                 </div>
               </div>
               <div className="flex items-center justify-end gap-2">
-                <span className="font-mono text-sm font-bold tabular-nums" style={{ color: "#0D2340" }}>
+                <span
+                  className="font-mono text-sm font-bold tabular-nums"
+                  style={{ color: "#0D2340" }}
+                >
                   {fmt(numVal)}
                 </span>
                 <span
-                  className="h-1.5 rounded-full"
+                  className="h-1.5 rounded-full shrink-0"
                   style={{
-                    width: `${Math.max(pct * 0.6, 4)}px`,
+                    width: `${Math.max(pct * 0.5, 3)}px`,
                     background: "#D48B10",
-                    opacity: 0.7,
+                    opacity: 0.65,
                   }}
                 />
               </div>
@@ -217,28 +191,6 @@ function RankedList({
           </div>
         );
       })}
-    </div>
-  );
-}
-
-function QueryBlock({ soql }: { soql: Record<string, unknown> }) {
-  const display = buildSoqlDisplay(soql);
-  return (
-    <div className="overflow-hidden rounded-2xl" style={{ background: "#0D2340" }}>
-      <div className="flex items-center justify-between border-b border-white/10 px-6 py-3">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: "#D48B10" }}>
-          SoQL query
-        </span>
-        <span className="font-mono text-[10px] uppercase tracking-wider" style={{ color: "rgba(250,247,242,0.35)" }}>
-          Socrata SODA API
-        </span>
-      </div>
-      <pre
-        className="overflow-x-auto px-6 py-5 font-mono text-sm leading-relaxed"
-        style={{ color: "#FAF7F2", background: "transparent" }}
-      >
-        {display}
-      </pre>
     </div>
   );
 }
@@ -271,58 +223,117 @@ export default async function FindingsPage({
   const isRanked = rows.length > 1 && numericCol !== null;
 
   return (
-    <main className="min-h-screen font-body" style={{ background: "#FAF7F2", color: "#1C1B1B" }}>
-      {/* Utility bar */}
-      <div style={{ background: "#0D2340", color: "rgba(250,247,242,0.75)" }}>
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-6 py-2 font-mono text-[12px] md:px-10">
-          <span>TXLookup · Texas open data · cited</span>
-          <span className="hidden font-mono text-[10px] uppercase tracking-wider md:inline" style={{ color: "rgba(250,247,242,0.40)" }}>
-            live Socrata data
-          </span>
-        </div>
-      </div>
+    <main className="min-h-screen font-body" style={{ background: "#FAF7F2", color: "#1A1510" }}>
 
-      {/* Hero */}
-      <HeroSection
-        headline={insight.headline}
-        detail={insight.detail}
-        findingNum={idx + 1}
-        datasetTitle={ds.title}
-        datasetId={id}
-      />
-
-      {/* Live results */}
-      <section className="border-b border-[#1A1510]/10">
+      {/* ── Dark hero — BRAND.md §7 Dark Hero Section ── */}
+      {/* navy bg, sky glow at 80%/30%, rust glow at 10%/80% */}
+      <section
+        style={{
+          background: "#0D2340",
+          backgroundImage:
+            "radial-gradient(circle at 80% 30%, rgba(58,127,190,0.18) 0%, transparent 55%), " +
+            "radial-gradient(circle at 10% 80%, rgba(196,66,10,0.12) 0%, transparent 50%)",
+        }}
+      >
         <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
-          {/* Section label */}
+
+          {/* Breadcrumb — IBM Plex Mono, muted cream */}
+          <nav
+            className="flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em]"
+            style={{ color: "rgba(250,247,242,0.40)" }}
+          >
+            <Link href="/" style={{ color: "rgba(250,247,242,0.40)" }} className="hover:text-[#FAF7F2]">
+              TXLookup
+            </Link>
+            <span>/</span>
+            <Link href={`/datasets/${id}`} style={{ color: "rgba(250,247,242,0.40)" }} className="hover:text-[#FAF7F2]">
+              {ds.title}
+            </Link>
+            <span>/</span>
+            {/* gold accent for current location — BRAND §3 gold = accents */}
+            <span style={{ color: "#D48B10" }}>Finding {String(idx + 1).padStart(2, "0")}</span>
+          </nav>
+
+          {/* Label — Rust, IBM Plex Mono, BRAND §4 Label style */}
+          <p
+            className="mt-8 font-mono text-[11px] font-semibold uppercase tracking-[0.18em]"
+            style={{ color: "#C4420A" }}
+          >
+            Live data finding · {ds.cadence} refresh
+          </p>
+
+          {/* H1 — DM Serif Display, cream, BRAND §4 H1 = 40–48px white/navy on hero */}
+          <h1
+            className="mt-3 max-w-[820px] font-display text-4xl font-extrabold leading-tight tracking-tight md:text-5xl"
+            style={{ color: "#FAF7F2" }}
+          >
+            {insight.headline}
+          </h1>
+
+          {/* Body — Syne 400, cream 65%, BRAND §4 body = Syne 400 16px lh 1.7 */}
+          <p
+            className="mt-5 max-w-[640px] text-base leading-[1.7] md:text-lg"
+            style={{ color: "rgba(250,247,242,0.65)" }}
+          >
+            {insight.detail}
+          </p>
+        </div>
+      </section>
+
+      {/* ── Live data results — BRAND.md §3 Light UI pairing: cream + navy + gold ── */}
+      <section
+        className="border-b"
+        style={{ borderColor: "rgba(26,21,16,0.10)", background: "#FAF7F2" }}
+      >
+        <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-20">
+
+          {/* Section label — BRAND §4 Label style */}
           <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: "#C4420A" }}>
-                Live data · refreshed on page load
+              <p
+                className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em]"
+                style={{ color: "#C4420A" }}
+              >
+                Live Socrata data · refreshed on load
               </p>
-              <h2 className="mt-2 font-display text-2xl font-extrabold tracking-tight md:text-3xl" style={{ color: "#0D2340" }}>
-                {insight.valueLabel ? insight.valueLabel.charAt(0).toUpperCase() + insight.valueLabel.slice(1) : "Results"}
+              <h2
+                className="mt-2 font-display text-2xl font-extrabold tracking-tight md:text-3xl"
+                style={{ color: "#0D2340" }}
+              >
+                {insight.valueLabel
+                  ? insight.valueLabel.charAt(0).toUpperCase() + insight.valueLabel.slice(1)
+                  : "Results"}
               </h2>
             </div>
             {rows.length > 0 && (
-              <span className="font-mono text-[11px] uppercase tracking-wider" style={{ color: "#8C7166" }}>
+              <span
+                className="font-mono text-[11px] uppercase tracking-wider"
+                style={{ color: "#6B6660" }}
+              >
                 {rows.length} {rows.length === 1 ? "row" : "rows"} returned
               </span>
             )}
           </div>
 
-          {/* Results rendering */}
+          {/* Error state */}
           {result.status === "failed" && (
-            <div className="rounded-2xl border border-[#1A1510]/10 px-8 py-10 text-center" style={{ background: "#F0EDEC" }}>
-              <p className="font-mono text-sm" style={{ color: "#8C7166" }}>
+            <div
+              className="rounded-[10px] px-8 py-10 text-center"
+              style={{ background: "#F0EDEC", border: "0.5px solid rgba(26,21,16,0.10)" }}
+            >
+              <p className="font-mono text-sm" style={{ color: "#6B6660" }}>
                 Could not fetch live data — Socrata may be temporarily unavailable.
               </p>
             </div>
           )}
 
+          {/* Empty state */}
           {result.status === "completed" && rows.length === 0 && (
-            <div className="rounded-2xl border border-[#1A1510]/10 px-8 py-10 text-center" style={{ background: "#F0EDEC" }}>
-              <p className="font-mono text-sm" style={{ color: "#8C7166" }}>
+            <div
+              className="rounded-[10px] px-8 py-10 text-center"
+              style={{ background: "#F0EDEC", border: "0.5px solid rgba(26,21,16,0.10)" }}
+            >
+              <p className="font-mono text-sm" style={{ color: "#6B6660" }}>
                 Query returned no rows. Try expanding the date range.
               </p>
             </div>
@@ -335,20 +346,36 @@ export default async function FindingsPage({
           )}
 
           {!isSingleStat && !isRanked && rows.length > 0 && (
-            <div className="overflow-x-auto rounded-2xl border border-[#1A1510]/10">
+            <div
+              className="overflow-x-auto rounded-[10px]"
+              style={{ border: "0.5px solid rgba(26,21,16,0.10)" }}
+            >
               <table className="w-full text-left text-sm">
                 <thead style={{ background: "#F0EDEC" }}>
-                  <tr className="font-mono text-[10px] uppercase tracking-wider" style={{ color: "#8C7166" }}>
+                  <tr
+                    className="font-mono text-[10px] uppercase tracking-wider"
+                    style={{ color: "#6B6660" }}
+                  >
                     {Object.keys(rows[0]).map(col => (
-                      <th key={col} className="whitespace-nowrap px-5 py-3 font-semibold">{labelify(col)}</th>
+                      <th key={col} className="whitespace-nowrap px-5 py-3 font-semibold">
+                        {labelify(col)}
+                      </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((row, i) => (
-                    <tr key={i} className="border-t border-[#1A1510]/08 hover:bg-[#F0EDEC]" style={{ background: "#FAF7F2" }}>
+                    <tr
+                      key={i}
+                      className="border-t hover:bg-[#F0EDEC]"
+                      style={{ borderColor: "rgba(26,21,16,0.08)", background: "#FAF7F2" }}
+                    >
                       {Object.values(row).map((v, j) => (
-                        <td key={j} className="whitespace-nowrap px-5 py-3 font-mono text-xs" style={{ color: "#1C1B1B" }}>
+                        <td
+                          key={j}
+                          className="whitespace-nowrap px-5 py-3 font-mono text-xs"
+                          style={{ color: "#1A1510" }}
+                        >
                           {String(v ?? "—").slice(0, 80)}
                         </td>
                       ))}
@@ -361,45 +388,96 @@ export default async function FindingsPage({
         </div>
       </section>
 
-      {/* Query used */}
-      <section className="border-b border-[#1A1510]/10" style={{ background: "#0D2340" }}>
-        <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-16">
-          <p className="mb-6 font-mono text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: "#D48B10" }}>
-            How we queried it
+      {/* ── Query block — cream section, navy query input per §7 Query Input ── */}
+      <section
+        className="border-b"
+        style={{ borderColor: "rgba(26,21,16,0.10)", background: "#FAF7F2" }}
+      >
+        <div className="mx-auto max-w-[1320px] px-6 py-12 md:px-10 md:py-14">
+          <p
+            className="mb-4 font-mono text-[11px] font-semibold uppercase tracking-[0.18em]"
+            style={{ color: "#6B6660" }}
+          >
+            SoQL query used
           </p>
-          <QueryBlock soql={insight.soql as Record<string, unknown>} />
-          <p className="mt-4 font-mono text-[11px] uppercase tracking-wider" style={{ color: "rgba(250,247,242,0.35)" }}>
-            {insight.portal} · dataset {insight.datasetId}
-          </p>
+
+          {/* BRAND §7 Query Input: navy bg, cream text, sky border */}
+          <div
+            className="overflow-x-auto rounded-[8px]"
+            style={{
+              background: "#0D2340",
+              border: "0.5px solid rgba(58,127,190,0.40)",
+            }}
+          >
+            <div
+              className="flex items-center justify-between border-b px-5 py-2"
+              style={{ borderColor: "rgba(58,127,190,0.20)" }}
+            >
+              <span
+                className="font-mono text-[10px] font-semibold uppercase tracking-[0.15em]"
+                style={{ color: "#3A7FBE" }}
+              >
+                Socrata SODA API · {insight.portal}
+              </span>
+              <span
+                className="font-mono text-[10px] uppercase tracking-wider"
+                style={{ color: "rgba(250,247,242,0.30)" }}
+              >
+                dataset {insight.datasetId}
+              </span>
+            </div>
+            <pre
+              className="overflow-x-auto px-5 py-5 font-mono text-[13px] font-semibold leading-relaxed"
+              style={{ color: "#FAF7F2", background: "transparent" }}
+            >
+              {buildSoqlDisplay(insight.soql as Record<string, unknown>)}
+            </pre>
+          </div>
         </div>
       </section>
 
-      {/* Ask a follow-up */}
+      {/* ── CTA — BRAND §3 Light UI: cream bg + navy text + rust CTA ── */}
       <section style={{ background: "#FAF7F2" }}>
         <div className="mx-auto max-w-[1320px] px-6 py-14 md:px-10 md:py-16">
-          <div className="flex flex-col items-start gap-6 rounded-2xl border border-[#1A1510]/10 px-8 py-10 md:flex-row md:items-center md:justify-between" style={{ background: "#FFFFFF" }}>
+
+          {/* Primary CTA card */}
+          <div
+            className="flex flex-col items-start gap-6 rounded-[10px] px-8 py-10 md:flex-row md:items-center md:justify-between"
+            style={{
+              background: "#FFFFFF",
+              border: "0.5px solid rgba(26,21,16,0.10)",
+            }}
+          >
             <div>
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: "#C4420A" }}>
+              <p
+                className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em]"
+                style={{ color: "#6B6660" }}
+              >
                 Go deeper
               </p>
-              <p className="mt-2 font-display text-xl font-bold tracking-tight md:text-2xl" style={{ color: "#0D2340" }}>
+              <p
+                className="mt-2 font-display text-xl font-extrabold tracking-tight md:text-2xl"
+                style={{ color: "#0D2340" }}
+              >
                 Ask a follow-up question
               </p>
-              <p className="mt-1 text-sm" style={{ color: "#8C7166" }}>
-                The agent will query live Socrata data and cite every number.
+              <p className="mt-1 text-sm leading-[1.7]" style={{ color: "#6B6660" }}>
+                The agent queries live Socrata data and cites every number.
               </p>
             </div>
+
             <div className="flex shrink-0 flex-wrap gap-3">
+              {/* Primary button — BRAND §7 Primary Button: rust bg, Syne 700, radius 8px */}
               <Link
                 href={`/q?q=${encodeURIComponent(di.questions[idx % di.questions.length] ?? insight.headline)}`}
                 style={{
                   background: "#C4420A",
-                  color: "#FAF7F2",
-                  borderRadius: "10px",
-                  padding: "12px 24px",
-                  fontFamily: "inherit",
+                  color: "#FFFFFF",
+                  borderRadius: "8px",
+                  padding: "10px 20px",
+                  fontFamily: "var(--font-inter, Syne, sans-serif)",
                   fontWeight: 700,
-                  fontSize: "0.9rem",
+                  fontSize: "14px",
                   textDecoration: "none",
                   display: "inline-block",
                 }}
@@ -409,12 +487,12 @@ export default async function FindingsPage({
               <Link
                 href={`/datasets/${id}`}
                 style={{
-                  border: "1px solid rgba(26,21,16,0.15)",
+                  border: "0.5px solid rgba(26,21,16,0.15)",
                   color: "#0D2340",
-                  borderRadius: "10px",
-                  padding: "12px 24px",
+                  borderRadius: "8px",
+                  padding: "10px 20px",
                   fontWeight: 600,
-                  fontSize: "0.9rem",
+                  fontSize: "14px",
                   textDecoration: "none",
                   display: "inline-block",
                 }}
@@ -424,14 +502,17 @@ export default async function FindingsPage({
             </div>
           </div>
 
-          {/* Suggested questions */}
+          {/* Suggested questions — BRAND §7 Dataset Insight Badge adapted for chips */}
           {di.questions.length > 0 && (
             <div className="mt-8">
-              <p className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: "#8C7166" }}>
+              <p
+                className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.18em]"
+                style={{ color: "#6B6660" }}
+              >
                 Try one of these
               </p>
               <div className="flex flex-wrap gap-2">
-                {di.questions.map((q) => (
+                {di.questions.map(q => (
                   <Link
                     key={q}
                     href={`/q?q=${encodeURIComponent(q)}`}
@@ -440,9 +521,9 @@ export default async function FindingsPage({
                       border: "0.5px solid rgba(58,127,190,0.28)",
                       color: "#3A7FBE",
                       borderRadius: "100px",
-                      padding: "7px 16px",
+                      padding: "6px 14px",
                       fontFamily: "monospace",
-                      fontSize: "0.75rem",
+                      fontSize: "12px",
                       textDecoration: "none",
                       display: "inline-block",
                       whiteSpace: "nowrap",
@@ -457,11 +538,11 @@ export default async function FindingsPage({
         </div>
       </section>
 
-      {/* Footer */}
-      <footer style={{ background: "#0D2340", color: "rgba(250,247,242,0.65)" }}>
+      {/* ── Footer — navy, BRAND §3 Primary pairing ── */}
+      <footer style={{ background: "#0D2340", color: "rgba(250,247,242,0.60)" }}>
         <div className="mx-auto flex max-w-[1320px] flex-col gap-3 px-6 py-8 text-sm md:flex-row md:items-center md:justify-between md:px-10">
           <p>All data sourced from public Texas open-data portals · Attribution enforced</p>
-          <Link href="/" style={{ color: "rgba(250,247,242,0.65)" }} className="hover:text-[#FAF7F2]">
+          <Link href="/" style={{ color: "rgba(250,247,242,0.60)" }} className="hover:text-[#FAF7F2]">
             ← Back to TXLookup
           </Link>
         </div>
