@@ -215,7 +215,10 @@ def main() -> int:
         "ok": all(r["ok"] for r in results),
     }
     print(json.dumps(summary, indent=2))
-    return 0 if summary["ok"] else 1
+    # Exit 0 if at least one dataset succeeded — partial-success is still
+    # useful for the cache. Only fail the workflow if EVERY dataset failed.
+    any_ok = any(r["ok"] for r in results)
+    return 0 if any_ok else 1
 
 
 if __name__ == "__main__":
