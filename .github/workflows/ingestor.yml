@@ -1,0 +1,48 @@
+name: Ingestor (refresh SQLite cache, every 6h)
+
+# Pulls live Socrata data into data/cache.db so the runtime tool dispatch
+# can hit the cache first (~ms) and only fall through to live when stale.
+# Offset from the dataset scout cron so they don't overlap.
+#
+# Issue #97. The cache is the second link in the fallback chain:
+#   cache → live → cache-fallback (stale) → error.
+
+on:
+  schedule:
+    - cron: "30 */6 * * *"  # every 6 hours, +30 min offset from scout
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run ingestor
+        env:
+          SOCRATA_KEY_ID: ${{ secrets.SOCRATA_KEY_ID }}
+          SOCRATA_KEY_SECRET: ${{ secrets.SOCRATA_KEY_SECRET }}
+        run: |
+          python -m agent.specialists.ingestor --all --verbose
+
+      - name: Commit cache.db
+        if: always()
+        run: |
+          if [ -z "$(git status --porcelain data/cache.db data/cache_meta.json 2>/dev/null)" ]; then
+            echo "no cache changes — skipping commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cache.db
+          git commit -m "chore(cache): refresh @ $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push
