@@ -1,0 +1,69 @@
+name: Dataset scout (multi-city, every 6h)
+
+# Runs the dataset scout every 6 hours. The scout scans Texas Socrata-
+# compatible portals (Austin / Dallas / TX state, with SA + Houston on
+# the queue) for new or recently-refreshed datasets, scores them, and
+# files GitHub issues for the top-N qualified candidates.
+#
+# Issue #91. The corpus grows by itself.
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"  # every 6 hours
+  workflow_dispatch:
+
+permissions:
+  contents: write   # commit data/scout/last_seen.json
+  issues: write     # open scout-find issues
+
+jobs:
+  scout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run scout
+        env:
+          SOCRATA_KEY_ID: ${{ secrets.SOCRATA_KEY_ID }}
+          SOCRATA_KEY_SECRET: ${{ secrets.SOCRATA_KEY_SECRET }}
+        run: |
+          python -m agent.specialists.dataset_scout --verbose
+
+      - name: Open issues for new candidates
+        if: ${{ hashFiles('data/scout/pending_issues.json') != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ ! -f data/scout/pending_issues.json ]; then
+            echo "no pending issues — done"
+            exit 0
+          fi
+          count=$(jq 'length' data/scout/pending_issues.json)
+          echo "filing $count issue(s)"
+          for i in $(seq 0 $((count - 1))); do
+            title=$(jq -r ".[$i].title" data/scout/pending_issues.json)
+            body=$(jq -r ".[$i].body" data/scout/pending_issues.json)
+            labels=$(jq -r ".[$i].labels | join(\",\")" data/scout/pending_issues.json)
+            echo "  · $title"
+            gh issue create --title "$title" --body "$body" --label "$labels" || echo "    (failed — continuing)"
+          done
+          rm -f data/scout/pending_issues.json
+
+      - name: Commit state
+        if: always()
+        run: |
+          if [ -z "$(git status --porcelain data/scout/)" ]; then
+            echo "no state changes — skipping commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/scout/
+          git commit -m "chore(scout): refresh last_seen @ $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push
