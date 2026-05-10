@@ -92,7 +92,7 @@ Pick **one** of the two paths below based on judge mood. Don't try both.
 | OpenAI 429 | Same as timeout. The cache-fallback in `sodaQuery()` will surface stale rows with a "served from local mirror" caveat. |
 | Wifi drop | mp4 fallback. Narration unchanged. |
 | Miro doesn't load | Skip the close-tab. Just say "Miro is wired — running on demo board <number>" and end on /about. |
-| Question accidentally hits a non-cached dataset | The dataset gets answered via the discovery layer — agent reads catalog metadata, plans a query, runs it. Frame it as a feature: "This wasn't in our deeply-curated 9 — agent figured it out from the indexed catalog." |
+| Question accidentally hits a non-cached dataset | The dataset gets answered via the discovery layer — agent reads catalog metadata, plans a query, runs it. Frame it as a feature: "This wasn't in our deeply-curated 11 — agent figured it out from the indexed catalog." |
 
 ---
 
