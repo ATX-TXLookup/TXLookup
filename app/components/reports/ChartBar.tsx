@@ -1,6 +1,7 @@
-// ChartBar — inline-SVG horizontal bar chart, no external deps.
-// BRAND.md §3 data palette: bars in tx-sky, top (highlight) bar in tx-gold,
-// labels in IBM Plex Mono, value in tx-navy. Cream card surface, hairline border.
+// ChartBar — USAFacts-grade horizontal bar chart. Monochrome neutral bars
+// with a single accent (--rep-accent) on the standout (top) bar. Hairline
+// baseline only — no card surface, no rounded fills. Sits inside the editorial
+// column; the wrapping <figure> in page.tsx supplies the per-chart caption.
 
 type Bar = { label: string; value: number };
 
@@ -8,32 +9,29 @@ type Props = {
   label: string;
   bars: Bar[];
   unavailable?: boolean;
-  caption?: string;
 };
 
-// CSS-var refs map to brand tokens; SVG can't consume Tailwind classes.
-// These resolve to tx-sky / tx-gold / tx-navy / tx-ink at the document level.
-const SKY = "var(--tx-sky)";
-const GOLD = "var(--tx-gold)";
-const NAVY = "var(--tx-navy)";
-const INK = "var(--tx-ink)";
+const ACCENT = "var(--rep-accent)";
+const NEUTRAL = "#C9C7BE"; // muted warm gray, sits on #F8F7F4
+const TEXT = "var(--rep-text)";
+const MUTE = "#4B4F57";
 
-export function ChartBar({ label, bars, unavailable, caption }: Props) {
+export function ChartBar({ label, bars, unavailable }: Props) {
   const W = 720;
-  const ROW_H = 32;
-  const PAD_LEFT = 110;
-  const PAD_RIGHT = 64;
+  const ROW_H = 30;
+  const PAD_LEFT = 130;
+  const PAD_RIGHT = 70;
   const max = Math.max(1, ...bars.map((b) => b.value));
   const inner = W - PAD_LEFT - PAD_RIGHT;
-  const H = bars.length * ROW_H + 16;
+  const H = bars.length * ROW_H + 28;
 
   return (
-    <figure className="my-8 rounded-[10px] border border-[color:var(--tx-border)] bg-tx-cream p-6">
-      <figcaption className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-tx-rust">
+    <div>
+      <p className="text-[15px] font-bold tracking-tight text-[var(--rep-text)]">
         {label}
-      </figcaption>
+      </p>
       {unavailable || bars.length === 0 ? (
-        <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-tx-muted">
+        <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.12em] text-[#86827A]">
           Data temporarily unavailable
         </p>
       ) : (
@@ -44,40 +42,47 @@ export function ChartBar({ label, bars, unavailable, caption }: Props) {
           aria-label={label}
           className="mt-4"
         >
+          {/* hairline baseline */}
+          <line
+            x1={PAD_LEFT}
+            y1={H - 14}
+            x2={W - PAD_RIGHT}
+            y2={H - 14}
+            stroke={TEXT}
+            strokeOpacity="0.15"
+          />
           {bars.map((b, i) => {
             const y = i * ROW_H + 8;
             const w = (b.value / max) * inner;
-            // Highlight the top bar (input is sorted DESC by value).
             const isTop = i === 0;
-            const fill = isTop ? GOLD : SKY;
+            const fill = isTop ? ACCENT : NEUTRAL;
             return (
               <g key={`${b.label}-${i}`}>
                 <text
-                  x={PAD_LEFT - 10}
+                  x={PAD_LEFT - 12}
                   y={y + 16}
                   textAnchor="end"
                   fontSize="12"
-                  fontFamily="'IBM Plex Mono', ui-monospace, monospace"
-                  fill={INK}
-                  fillOpacity="0.75"
+                  fontFamily="var(--font-geist), ui-sans-serif, system-ui, sans-serif"
+                  fill={MUTE}
                 >
                   {b.label}
                 </text>
                 <rect
                   x={PAD_LEFT}
-                  y={y + 4}
+                  y={y + 5}
                   width={Math.max(2, w)}
-                  height={ROW_H - 12}
+                  height={ROW_H - 14}
                   fill={fill}
-                  rx="2"
+                  rx="0"
                 />
                 <text
-                  x={PAD_LEFT + w + 8}
+                  x={PAD_LEFT + w + 10}
                   y={y + 16}
                   fontSize="12"
-                  fontFamily="'IBM Plex Mono', ui-monospace, monospace"
+                  fontFamily="var(--font-geist-mono), ui-monospace, monospace"
                   fontWeight="600"
-                  fill={NAVY}
+                  fill={TEXT}
                 >
                   {b.value.toLocaleString()}
                 </text>
@@ -86,11 +91,6 @@ export function ChartBar({ label, bars, unavailable, caption }: Props) {
           })}
         </svg>
       )}
-      {caption && !unavailable && (
-        <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.12em] text-tx-muted">
-          {caption}
-        </p>
-      )}
-    </figure>
+    </div>
   );
 }

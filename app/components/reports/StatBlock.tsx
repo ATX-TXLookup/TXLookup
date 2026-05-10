@@ -1,6 +1,7 @@
-// StatBlock — big number + label + optional delta + caption.
-// BRAND.md §7 card pattern: cream surface, hairline border, navy display number.
-// Number set in DM Serif Display per the reports brand brief; label in Syne caps.
+// StatBlock — USAFacts-grade pull-quote stat: big tabular numeral, terse label,
+// small caption beneath. No card chrome, no border, no fill — the number IS the
+// element. Lives inline in the editorial column. Used both for the "at a glance"
+// strip and for mid-article pull-quotes between chart figures.
 
 type Props = {
   label: string;
@@ -18,22 +19,23 @@ export function StatBlock({ label, value, delta, caption, unavailable }: Props) 
         ? value.toLocaleString()
         : value;
   return (
-    <figure className="my-8 rounded-[10px] border border-[color:var(--tx-border)] bg-tx-cream p-6">
-      <figcaption className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-tx-rust">
-        {label}
-      </figcaption>
-      <div className="mt-3 flex items-baseline gap-3">
-        <span className="font-display text-5xl font-normal tabular-nums leading-none text-tx-navy md:text-6xl">
-          {display}
-        </span>
+    <figure className="my-2">
+      <div
+        className="text-[44px] font-bold leading-[1.0] tracking-[-0.02em] tabular-nums text-[var(--rep-text)] md:text-[56px]"
+        style={{ fontFeatureSettings: '"tnum" 1, "lnum" 1' }}
+      >
+        {display}
         {delta && !unavailable && (
-          <span className="font-mono text-sm font-semibold text-tx-sky">
+          <span className="ml-2 align-baseline text-[14px] font-mono font-semibold text-[var(--rep-accent)]">
             {delta}
           </span>
         )}
       </div>
+      <figcaption className="mt-2 text-[13px] font-medium leading-snug text-[var(--rep-text)]">
+        {label}
+      </figcaption>
       {(caption || unavailable) && (
-        <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.12em] text-tx-muted">
+        <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[#86827A]">
           {unavailable ? "Data temporarily unavailable" : caption}
         </p>
       )}

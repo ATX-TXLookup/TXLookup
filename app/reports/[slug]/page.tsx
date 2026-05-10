@@ -1,8 +1,10 @@
 // /reports/[slug] — USAFacts editorial style. Light surface within the dark
-// site to signal "this is an article". Narrow column (820px), serif italic
-// display title, chart-prose interleave with source per chart.
+// site to signal "this is an article". Narrow editorial column (720px), bold
+// sans display headline, italic serif dek, byline strip, chart-prose interleave
+// with a per-figure source line, and mid-article stat pull-quotes that break up
+// long passages of charts the way USAFacts breaks up paragraphs.
 //
-// IMPORTANT: buildReport(slug), notFound, generateStaticParams, VizPayload
+// IMPORTANT: buildReport(slug), notFound, generateStaticParams, QueryResult
 // shapes, and ISR cache are byte-identical to before. Visual restyle only.
 
 import Link from "next/link";
@@ -24,31 +26,96 @@ export async function generateStaticParams() {
   return REPORTS.map((r) => ({ slug: r.slug }));
 }
 
-function renderNonStatQuery(q: QueryResult, key: string, sourceLabel: string) {
+const MONTHS = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+function formatHumanDate(iso: string): string {
+  // ISO yyyy-mm-dd → "DD MMM YYYY"
+  const [y, m, d] = iso.slice(0, 10).split("-");
+  const mi = Math.max(0, Math.min(11, Number(m) - 1));
+  return `${d} ${MONTHS[mi]} ${y}`;
+}
+
+function chartFigcaption(q: QueryResult, datasetIds: string[], date: string) {
+  // Per-figure source line — Source · {dataset_id} · TXLookup agent · {date}
+  const dsId = datasetIds[0] ?? "";
+  return `Source · ${dsId} · TXLookup agent · ${date}`;
+}
+
+function NonStatFigure({
+  q,
+  datasetIds,
+  date,
+}: {
+  q: QueryResult;
+  datasetIds: string[];
+  date: string;
+}) {
   const unavailable = q.status !== "completed" || !q.payload;
   const inner =
     q.viz === "bar" ? (
       <ChartBar
-        key={key}
         label={q.label}
         bars={!unavailable && q.payload?.kind === "bar" ? q.payload.bars : []}
         unavailable={unavailable}
       />
     ) : (
       <ChartLine
-        key={key}
         label={q.label}
         points={!unavailable && q.payload?.kind === "line" ? q.payload.points : []}
         unavailable={unavailable}
       />
     );
   return (
-    <figure key={key} className="my-10 print:my-6">
+    <figure className="my-12 print:my-6">
       {inner}
-      <figcaption className="mt-3 font-mono text-[10.5px] uppercase tracking-[0.14em] text-[#86827A]">
-        Source · TXLookup agent · {sourceLabel}
+      <figcaption className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-[#86827A]">
+        {chartFigcaption(q, datasetIds, date)}
       </figcaption>
     </figure>
+  );
+}
+
+function PullQuoteStat({
+  q,
+  datasetIds,
+}: {
+  q: QueryResult;
+  datasetIds: string[];
+}) {
+  // Mid-article stat callout. Big serif italic numeral, 1-line caption.
+  const unavailable = q.status !== "completed" || !q.payload;
+  const value =
+    !unavailable && q.payload?.kind === "stat" ? q.payload.value : null;
+  const display =
+    unavailable || value === null
+      ? "—"
+      : typeof value === "number"
+        ? value.toLocaleString()
+        : value;
+  return (
+    <aside
+      className="my-12 border-l-2 pl-6 print:my-6"
+      style={{ borderColor: "var(--rep-accent)" }}
+    >
+      <div
+        className="text-[56px] font-normal italic leading-[1.0] tracking-[-0.02em] tabular-nums text-[var(--rep-text)] md:text-[72px]"
+        style={{
+          fontFamily: "var(--font-serif), ui-serif, Georgia, serif",
+          fontFeatureSettings: '"tnum" 1, "lnum" 1',
+        }}
+      >
+        {display}
+      </div>
+      <p className="mt-3 max-w-[42ch] text-[15px] leading-snug text-[var(--rep-text)]">
+        {q.label}
+      </p>
+      <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[#86827A]">
+        Source · {datasetIds[0] ?? ""} · TXLookup agent
+      </p>
+    </aside>
   );
 }
 
@@ -61,11 +128,43 @@ export default async function ReportPage({
   const data = await buildReport(slug);
   if (!data) notFound();
   const { def, queries, generatedAt } = data;
-  const generatedDate = generatedAt.slice(0, 10);
+  const generatedISO = generatedAt.slice(0, 10);
+  const generatedHuman = formatHumanDate(generatedISO);
 
   const statQueries = queries.filter((q) => q.viz === "stat");
   const otherQueries = queries.filter((q) => q.viz !== "stat");
-  const sourceLine = def.dataset_ids.join(" · ");
+
+  // Interleave a stat pull-quote between charts roughly every 2 figures.
+  // This breaks up long chart runs the way USAFacts breaks paragraphs.
+  // Stat #0 is reserved for the "at a glance" strip; the rest become
+  // mid-article pull-quotes.
+  const pullQuoteStats = statQueries.slice(1);
+  const interleaved: Array<
+    | { kind: "chart"; q: QueryResult; key: string }
+    | { kind: "pull"; q: QueryResult; key: string }
+  > = [];
+  let pullIdx = 0;
+  otherQueries.forEach((q, i) => {
+    interleaved.push({ kind: "chart", q, key: `chart-${i}` });
+    // After every 2nd chart, drop in a pull-quote if we have one left.
+    if ((i + 1) % 2 === 0 && pullIdx < pullQuoteStats.length) {
+      interleaved.push({
+        kind: "pull",
+        q: pullQuoteStats[pullIdx],
+        key: `pull-${pullIdx}`,
+      });
+      pullIdx++;
+    }
+  });
+  // Any pull-quotes still unused → append before the conclusion.
+  while (pullIdx < pullQuoteStats.length) {
+    interleaved.push({
+      kind: "pull",
+      q: pullQuoteStats[pullIdx],
+      key: `pull-${pullIdx}`,
+    });
+    pullIdx++;
+  }
 
   return (
     <main
@@ -92,49 +191,43 @@ export default async function ReportPage({
         </div>
       </header>
 
-      {/* Hero — narrow column, serif italic title, USAFacts cadence */}
-      <article className="mx-auto max-w-[820px] px-6 pt-12 md:px-8 md:pt-20">
+      {/* Hero — narrow editorial column, bold sans display, serif italic dek */}
+      <article className="mx-auto max-w-[720px] px-6 pt-10 md:px-8 md:pt-16">
         <Link
           href="/reports"
           className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--rep-accent)] hover:underline print:hidden"
         >
           ← All reports
         </Link>
-        <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.16em] text-[#86827A]">
+        <p className="mt-6 font-mono text-[10.5px] uppercase tracking-[0.18em] text-[#86827A]">
           TXLookup · Report
         </p>
-        <h1 className="mt-3 text-[36px] font-bold leading-[1.08] tracking-[-0.02em] text-[var(--rep-text)] md:text-[56px]">
+        <h1 className="mt-3 text-[40px] font-bold leading-[1.05] tracking-[-0.025em] text-[var(--rep-text)] md:text-[56px]">
           {def.title}
         </h1>
         <p
-          className="mt-4 font-display-serif text-[20px] italic leading-[1.4] text-[var(--rep-text-mute)] md:text-[26px]"
-          style={{ fontFamily: "var(--font-serif), serif" }}
+          className="mt-5 text-[22px] italic leading-[1.4] text-[var(--rep-text-mute)] md:text-[26px]"
+          style={{ fontFamily: "var(--font-serif), ui-serif, Georgia, serif" }}
         >
           {def.subtitle}
         </p>
-        <p className="mt-7 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-[var(--rep-border)] pt-5 font-mono text-[10.5px] uppercase tracking-[0.14em] text-[#86827A]">
-          <span>By the TXLookup agent</span>
-          <span>·</span>
-          <span>Auto-refreshed every 6h</span>
-          <span>·</span>
-          <span>Generated {generatedDate}</span>
+        {/* Single-line byline strip, mono small-caps */}
+        <p className="mt-7 font-mono text-[10.5px] uppercase tracking-[0.16em] text-[#86827A]">
+          By the TXLookup agent · {generatedHuman} · auto-refreshed every 6h
         </p>
 
         {/* Intro paragraph */}
-        <p className="mt-10 text-[17px] leading-[1.7] text-[var(--rep-text)] md:text-[19px]">
+        <p className="mt-10 text-[19px] leading-[1.7] text-[var(--rep-text)]">
           {def.intro_paragraph}
         </p>
       </article>
 
-      {/* At-a-glance stat strip */}
+      {/* At-a-glance stat strip — uses the FIRST stat query as the lead figure */}
       {statQueries.length > 0 && (
-        <section className="mt-8 print:mt-6">
-          <div className="mx-auto max-w-[820px] px-6 md:px-8">
-            <p className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-[var(--rep-accent)]">
-              At a glance
-            </p>
-            <div className="mt-3 grid gap-3 md:grid-cols-3">
-              {statQueries.map((q, i) => {
+        <section className="mt-2 print:mt-2">
+          <div className="mx-auto max-w-[720px] px-6 md:px-8">
+            <div className="mt-12 grid gap-x-10 gap-y-8 border-t border-[var(--rep-border)] pt-10 sm:grid-cols-3">
+              {statQueries.slice(0, 3).map((q, i) => {
                 const unavailable = q.status !== "completed" || !q.payload;
                 const value =
                   !unavailable && q.payload?.kind === "stat"
@@ -155,29 +248,44 @@ export default async function ReportPage({
         </section>
       )}
 
-      {/* Article body — chart-prose interleave */}
-      <article className="mx-auto max-w-[820px] px-6 py-10 md:px-8 md:py-14 print:p-0">
-        {otherQueries.map((q, i) =>
-          renderNonStatQuery(q, `${slug}-q${i}`, sourceLine),
+      {/* Article body — chart-prose interleave with mid-article pull-quotes */}
+      <article className="mx-auto max-w-[720px] px-6 py-10 md:px-8 md:py-14 print:p-0">
+        {interleaved.map((item) =>
+          item.kind === "chart" ? (
+            <NonStatFigure
+              key={item.key}
+              q={item.q}
+              datasetIds={def.dataset_ids}
+              date={generatedHuman}
+            />
+          ) : (
+            <PullQuoteStat
+              key={item.key}
+              q={item.q}
+              datasetIds={def.dataset_ids}
+            />
+          ),
         )}
 
         {def.conclusion_paragraph && (
           <>
-            <h2 className="mt-14 text-[22px] font-bold tracking-tight text-[var(--rep-text)] md:text-[28px]">
+            <h2 className="mt-16 text-[24px] font-bold tracking-tight text-[var(--rep-text)] md:text-[30px]">
               The takeaway
             </h2>
-            <p className="mt-4 text-[17px] leading-[1.7] text-[var(--rep-text)] md:text-[19px]">
+            <p className="mt-4 text-[19px] leading-[1.7] text-[var(--rep-text)]">
               {def.conclusion_paragraph}
             </p>
           </>
         )}
 
-        <div className="mt-12 border-t border-[var(--rep-border)] pt-6">
+        {/* Subtle source roll-call — sources are now per-chart inline */}
+        <div className="mt-16 border-t border-[var(--rep-border)] pt-6">
           <CitationFooter datasetIds={def.dataset_ids} />
         </div>
 
-        <section className="mt-10 rounded-md border border-[var(--rep-border)] bg-white p-6 print:hidden">
-          <p className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-[var(--rep-accent)]">
+        {/* "How this was made" — subtle, no card, no CTA chrome */}
+        <section className="mt-10 border-t border-[var(--rep-border)] pt-6 print:hidden">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#86827A]">
             How this was made
           </p>
           <p className="mt-3 text-[14px] leading-relaxed text-[var(--rep-text-mute)]">
@@ -207,7 +315,7 @@ export default async function ReportPage({
               <a href="https://github.com/ATX-TXLookup/TXLookup" className="hover:text-[var(--rep-text)]">GitHub ↗</a>
             </nav>
           </div>
-          <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.12em] text-[#86827A]">
+          <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.14em] text-[#86827A]">
             All data sourced from public Texas open-data portals · Attribution enforced
           </p>
         </div>
