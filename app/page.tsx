@@ -14,6 +14,7 @@ import Link from "next/link";
 import AgentTopologyShowcase from "@/app/components/AgentTopologyShowcase";
 import { HeroTexasMap } from "@/app/components/HeroTexasMap";
 import { FeatureCard, Shell, TerminalBlock } from "@/app/components/ds";
+import { DataSourceBadge } from "@/app/components/ds/DataSourceBadge";
 import {
   austin311Last30d,
   austinInspections30dByZip,
@@ -46,14 +47,14 @@ const SAMPLES = [
 
 export default async function HomePage() {
   const [
-    permitsSpark,
-    permits7d,
-    inspectionsByZip,
-    requests30d,
-    openViolations,
-    dallas311,
-    dallasActiveCalls,
-    txFranchise,
+    permitsSparkRes,
+    permits7dRes,
+    inspectionsByZipRes,
+    requests30dRes,
+    openViolationsRes,
+    dallas311Res,
+    dallasActiveCallsRes,
+    txFranchiseRes,
   ] = await Promise.all([
     austinPermitsLast7Days(),
     austinPermits7dTotal(),
@@ -64,6 +65,27 @@ export default async function HomePage() {
     dallasPoliceActiveCalls(),
     texasFranchisePermitsActive(),
   ]);
+
+  // Unwrap StatResult shape into legacy plain values for the renderer below.
+  const permitsSpark = permitsSparkRes.value ?? [];
+  const permits7d = permits7dRes.value ?? 0;
+  const inspectionsByZip = inspectionsByZipRes.value ?? [];
+  const requests30d = requests30dRes.value ?? 0;
+  const openViolations = openViolationsRes.value ?? 0;
+  const dallas311 = dallas311Res.value ?? 0;
+  const dallasActiveCalls = dallasActiveCallsRes.value ?? 0;
+  const txFranchise = txFranchiseRes.value ?? 0;
+
+  // Per-tile freshness — used for the "Local mirror · Nh ago" badge.
+  const tileMeta: Record<string, { source: string; age_seconds: number | null }> = {
+    "ecmv-9xxi": { source: inspectionsByZipRes.source, age_seconds: inspectionsByZipRes.age_seconds },
+    "gc4d-8a49": { source: dallas311Res.source, age_seconds: dallas311Res.age_seconds },
+    "9cir-efmm": { source: txFranchiseRes.source, age_seconds: txFranchiseRes.age_seconds },
+    "xwdj-i9he": { source: requests30dRes.source, age_seconds: requests30dRes.age_seconds },
+    "9fxf-t2tr": { source: dallasActiveCallsRes.source, age_seconds: dallasActiveCallsRes.age_seconds },
+    "6wtj-zbtb": { source: openViolationsRes.source, age_seconds: openViolationsRes.age_seconds },
+    "3syk-w9eu": { source: permits7dRes.source, age_seconds: permits7dRes.age_seconds },
+  };
 
   return (
     <Shell active="/">
@@ -172,14 +194,14 @@ export default async function HomePage() {
           <div className="grid gap-10 md:grid-cols-12 md:gap-12">
             <div className="md:col-span-5">
               <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.16em] text-[var(--ds-good)]">
-                Live · across Texas
+                Local mirror · refreshed every 6h
               </p>
               <h2 className="mt-2 max-w-[20ch] text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[44px]">
                 Three cities. Three domains.{" "}
-                <span className="text-[var(--ds-text-mute)]">All real-time.</span>
+                <span className="text-[var(--ds-text-mute)]">Always available.</span>
               </h2>
-              <p className="mt-4 max-w-[40ch] text-[14px] leading-relaxed text-[var(--ds-text-mute)]">
-                Counts pulled live from each portal at request time. Recomputed every 5 minutes. The corpus answers in any domain — not just permits, not just Austin.
+              <p className="mt-4 max-w-[44ch] text-[14px] leading-relaxed text-[var(--ds-text-mute)]">
+                Every dataset that powers this page is mirrored to a local SQLite store every 6 hours by an autonomous ingest agent. Pages render from the mirror in milliseconds and survive upstream throttling — each tile carries a freshness badge so you can see exactly what you're looking at.
               </p>
               <HeroTexasMap />
             </div>
@@ -201,6 +223,7 @@ export default async function HomePage() {
                     bad: "var(--ds-bad)",
                     neutral: "var(--ds-text)",
                   };
+                  const meta = tileMeta[t.sub];
                   return (
                     <div key={t.label} className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4">
                       <p className="ds-eyebrow text-[var(--ds-text-dim)]">{t.label}</p>
@@ -210,9 +233,14 @@ export default async function HomePage() {
                       >
                         {t.value}
                       </p>
-                      <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
-                        {t.sub}
-                      </p>
+                      <div className="mt-1 flex items-center justify-between gap-2">
+                        <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+                          {t.sub}
+                        </p>
+                        {meta && (
+                          <DataSourceBadge source={meta.source} ageSeconds={meta.age_seconds} />
+                        )}
+                      </div>
                     </div>
                   );
                 })}

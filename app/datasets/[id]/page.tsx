@@ -13,6 +13,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { findById, type CatalogDataset } from "../../lib/catalog";
 import DatasetInsightCard from "../../components/DatasetInsightCard";
+import { getCachedInsight } from "../../lib/cached-stats";
 import { getLiveInsight } from "../../lib/dataset-insights";
 import { REPORTS } from "../../../config/reports";
 import { Shell } from "@/app/components/ds";
@@ -85,11 +86,14 @@ export default async function DatasetPage({
   const ds = findById(id);
   if (!ds) notFound();
 
-  const [meta, sample, liveInsight] = await Promise.all([
+  // Cache-first insight: try the local mirror, fall through to live Socrata.
+  const [meta, sample, cachedInsightRes] = await Promise.all([
     fetchMetadata(ds.portal, ds.id),
     fetchSample(ds.portal, ds.id),
-    getLiveInsight(ds.id),
+    getCachedInsight(ds.id),
   ]);
+  const liveInsight =
+    cachedInsightRes.value ?? (await getLiveInsight(ds.id));
   const reportSlug = findReportSlugForDataset(ds.id);
 
   const lastRefreshed = meta?.rowsUpdatedAt

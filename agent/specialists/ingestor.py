@@ -47,7 +47,9 @@ INGEST_SPEC: list[dict[str, Any]] = [
     {
         "dataset_id": "xwdj-i9he",
         "portal": "datahub.austintexas.gov",
-        "select": "sr_type_desc,sr_status_desc,sr_location_zip_code,sr_council_district,sr_created_date,sr_department_desc",
+        # sr_council_district was rejected with HTTP 400 — column doesn't exist
+        # on the current xwdj-i9he revision. Dropped.
+        "select": "sr_type_desc,sr_status_desc,sr_location_zip_code,sr_created_date,sr_department_desc",
         "order": "sr_created_date DESC",
         "limit": 5000,
     },
@@ -57,6 +59,23 @@ INGEST_SPEC: list[dict[str, Any]] = [
         "select": "case_id,case_type,status,address,zip_code,opened_date,priority,department",
         "order": "opened_date DESC",
         "limit": 3000,
+    },
+    {
+        # TX franchise tax permit holders — homepage "active permits" tile.
+        # No date column we can sort on, so just take the first N records.
+        "dataset_id": "9cir-efmm",
+        "portal": "data.texas.gov",
+        "select": "taxpayer_number,taxpayer_name,taxpayer_city,taxpayer_zip,taxpayer_county_code,responsibility_beginning_date,right_to_transact_business_code",
+        "order": "responsibility_beginning_date DESC",
+        "limit": 5000,
+    },
+    {
+        # Dallas 311 — universality story on homepage.
+        "dataset_id": "gc4d-8a49",
+        "portal": "www.dallasopendata.com",
+        "select": "service_request_number,status,created_date",
+        "order": "created_date DESC",
+        "limit": 5000,
     },
 ]
 
