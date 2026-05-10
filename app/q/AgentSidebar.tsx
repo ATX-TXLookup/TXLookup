@@ -163,9 +163,10 @@ const AGENT_LEGEND: Array<keyof typeof AGENT_TONES> = [
 ];
 
 export function AgentSidebar(props: Props) {
-  // Default to the DAG tab — issue #90's marquee view. Status / Flow /
-  // Execution / Telemetry are still one click away.
-  const [tab, setTab] = useState<Tab>("dag");
+  // Default to the Status tab — gives the user an at-a-glance "what's
+  // happening right now" view on first paint. DAG / Steps / Telemetry are
+  // one click away.
+  const [tab, setTab] = useState<Tab>("status");
 
   return (
     <aside

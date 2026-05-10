@@ -47,6 +47,47 @@ const AGENT_COLOR: Record<AgentKey, string> = {
   critic:       "#F59E0B",
 };
 
+// One-sentence explanations for every agent and every tool node that can
+// appear in the DAG. Surfaced as native SVG <title> hover tooltips and as
+// the (i) icon caption in the legend. Keep these terse — they show up in
+// hover bubbles, not in articles.
+const AGENT_DOCS: Record<AgentKey, string> = {
+  orchestrator: "Drives the loop. Reasons, plans, dispatches tools, and synthesizes the final answer.",
+  data_analyst: "Computes aggregates with quality flags (null rate, top concentration, sample factor).",
+  reporter: "Composes the final answer paragraph from the analyst's findings.",
+  support: "Handles meta-questions and disambiguation. No Socrata calls.",
+  critic: "Verifies plan and answer. Rejects ungrounded outputs.",
+};
+
+const TOOL_DOCS: Record<string, string> = {
+  reason: "Codex parses the question into a structured intent (domain, geography, time, analysis).",
+  plan: "Codex emits a structured plan: which datasets, which SoQL, which specialists to dispatch.",
+  replan: "Re-derives the plan from the failure point with a fresh diagnosis.",
+  "doom-loop catch": "Caught a repeating failure pattern. Aborts before the loop wastes tokens.",
+  done: "All steps verified, citation attached, answer published.",
+  join: "Parallel branches finished. Results merged for the next step.",
+  "critic · plan": "Critic LLM grades the plan. Score < threshold triggers a revise.",
+  "critic · answer": "Critic LLM grades the answer for grounding + citation. Reject = revise.",
+  "revise · plan": "Orchestrator rewrites the plan after critic feedback.",
+  "revise · answer": "Orchestrator rewrites the answer after critic feedback.",
+  discover_datasets: "Finds the relevant dataset from the catalog.",
+  get_dataset_schema: "Inspects columns + types before constructing a query.",
+  fetch_data: "Bounded SoQL query against Socrata. Hard-capped at 5000 rows.",
+  summarize_data: "Computes stats over a slice (count, sum, avg, top-N).",
+  cite_dataset: "Emits portal + dataset_id + URL citation. Required to terminate.",
+  delegate_to: "Hands off to a specialist agent (analyst / reporter / support).",
+  delegate_to_parallel: "Fans out to multiple specialists concurrently, then joins.",
+};
+
+function docsForNode(label: string, agent: AgentKey): string {
+  // Tool docs first (most specific). Strip a "delegate_to(name)" wrapper if
+  // present — the route emits that form for delegate_to steps.
+  const bare = label.replace(/\(.*\)$/, "");
+  if (TOOL_DOCS[label]) return TOOL_DOCS[label];
+  if (TOOL_DOCS[bare]) return TOOL_DOCS[bare];
+  return AGENT_DOCS[agent];
+}
+
 type NodeShape = "rect" | "diamond" | "pill" | "round";
 
 type Node = {
@@ -394,10 +435,12 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
           const fill = STATUS_FILL[n.status];
           const agentTone = AGENT_COLOR[n.agent];
 
+          const tip = docsForNode(n.label, n.agent);
           if (n.shape === "diamond") {
             const r = 22;
             return (
-              <g key={n.id}>
+              <g key={n.id} style={{ cursor: "help" }}>
+                <title>{`${n.label} — ${tip}`}</title>
                 <polygon
                   points={`${x},${y - r} ${x + r * 1.2},${y} ${x},${y + r} ${x - r * 1.2},${y}`}
                   fill={fill}
@@ -412,6 +455,9 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
                     {n.sub}
                   </text>
                 )}
+                {/* (i) icon — top-right corner of the diamond's bbox */}
+                <circle cx={x + r * 1.2 - 4} cy={y - r + 4} r={4} fill="#15171C" stroke="#71717A" strokeWidth={0.75} />
+                <text x={x + r * 1.2 - 4} y={y - r + 6.5} textAnchor="middle" fontSize={6.5} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={700}>i</text>
               </g>
             );
           }
@@ -419,12 +465,16 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
             const w = NODE_W * 0.85;
             const h = NODE_H;
             return (
-              <g key={n.id}>
+              <g key={n.id} style={{ cursor: "help" }}>
+                <title>{`${n.label} — ${tip}`}</title>
                 <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={h / 2} fill={fill} stroke={ring} strokeWidth={1.5} />
                 <circle cx={x - w / 2 + 9} cy={y} r={2.5} fill={agentTone} />
                 <text x={x - w / 2 + 16} y={y + 3.5} fontSize={9.5} fontFamily="JetBrains Mono, monospace" fill="#F5F5F7" fontWeight={500}>
                   {(n.label.length > 12 ? n.label.slice(0, 11) + "…" : n.label)}
                 </text>
+                {/* (i) icon — top-right of the pill */}
+                <circle cx={x + w / 2 - 6} cy={y - h / 2 + 6} r={4} fill="#15171C" stroke="#71717A" strokeWidth={0.75} />
+                <text x={x + w / 2 - 6} y={y - h / 2 + 8.5} textAnchor="middle" fontSize={6.5} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={700}>i</text>
               </g>
             );
           }
@@ -443,7 +493,8 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
               ? subDisplay.slice(0, maxSubChars - 1) + "…"
               : subDisplay;
           return (
-            <g key={n.id}>
+            <g key={n.id} style={{ cursor: "help" }}>
+              <title>{`${n.label} — ${tip}`}</title>
               <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={4} fill={fill} stroke={ring} strokeWidth={1.5} />
               <rect x={x - w / 2} y={y - h / 2} width={2.5} height={h} fill={agentTone} />
               <text x={x - w / 2 + 7} y={y - 4} fontSize={9.5} fontFamily="JetBrains Mono, monospace" fill="#F5F5F7" fontWeight={600}>
@@ -452,6 +503,9 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
               <text x={x - w / 2 + 7} y={y + 8} fontSize={8} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA">
                 {subDisplayClipped}
               </text>
+              {/* (i) icon — bottom-right corner. Don't overlap the source pill which is top-right. */}
+              <circle cx={x + w / 2 - 6} cy={y + h / 2 - 6} r={4} fill="#15171C" stroke="#71717A" strokeWidth={0.75} />
+              <text x={x + w / 2 - 6} y={y + h / 2 - 3.5} textAnchor="middle" fontSize={6.5} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={700}>i</text>
               {n.source && (() => {
                 const p = SOURCE_COLOR[n.source];
                 return (
@@ -471,12 +525,15 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
       <div className="border-t border-[var(--ds-border)] px-4 py-3">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
           {(["orchestrator", "data_analyst", "critic", "reporter", "support"] as AgentKey[]).map((a) => (
-            <div key={a} className="inline-flex items-center gap-1.5">
+            <div key={a} className="inline-flex items-center gap-1.5" title={AGENT_DOCS[a]} style={{ cursor: "help" }}>
               <span className="block h-2 w-2 rounded-full" style={{ background: AGENT_COLOR[a] }} />
               <span>{a}</span>
             </div>
           ))}
         </div>
+        <p className="mt-2 font-mono text-[10px] leading-relaxed text-[var(--ds-text-dim)]/70">
+          Hover any node for what it does.
+        </p>
       </div>
     </div>
   );

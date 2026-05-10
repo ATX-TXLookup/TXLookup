@@ -702,8 +702,13 @@ export function AgentRunner({
   // showing the same 4-step linear story on every search felt naive (the
   // multi-agent reality is non-linear: parallel + critic-revision + scout).
 
+  // Latest event message — used by the working-state caption to give the
+  // user a live "what's the agent doing right now" line under the spinner.
+  const latestEvent =
+    state.events.length > 0 ? state.events[state.events.length - 1] : null;
+
   return (
-    <div className="grid md:grid-cols-[1fr_420px]">
+    <div className="mx-auto grid max-w-[1240px] gap-0 px-0 md:grid-cols-[1fr_420px]">
       {/* Left column — answer-first body, dark surface */}
       <div className="min-w-0 bg-[var(--ds-bg)]">
         {/* Question recap with live status pill */}
@@ -1218,29 +1223,69 @@ export function AgentRunner({
           </section>
         )}
 
-        {/* ── Working state — animated dark skeleton ── */}
+        {/* ── Working state — spinner + phase + latest-event caption + skeleton.
+            Renders for the entire run-to-completion window (not just before the
+            first step lands), so the body is never visually empty during the
+            ~5-10s the agent is thinking. Disappears once the answer renders. */}
         {state.phase !== "done" &&
           state.phase !== "error" &&
-          state.phase !== "idle" &&
-          state.steps.length === 0 && (
+          state.phase !== "idle" && (
             <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
               <div className="px-6 py-10 md:px-10 md:py-12">
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
-                  Insight
-                </p>
-                <div className="mt-4 max-w-[58ch] space-y-3">
-                  <div className="h-7 w-[90%] animate-pulse rounded bg-[var(--ds-bg-elev)]" />
-                  <div className="h-7 w-[78%] animate-pulse rounded bg-[var(--ds-bg-elev)]" />
-                  <div className="h-7 w-[60%] animate-pulse rounded bg-[var(--ds-bg-elev)]" />
+                <div className="flex items-center gap-3">
+                  {/* Spinner — inline SVG, brand-tinted, rotates via CSS animation.
+                      No new chart libs — pure SVG + tailwind animate-spin. */}
+                  <svg
+                    className="h-4 w-4 animate-spin text-[var(--ds-accent)]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden
+                  >
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.25" strokeWidth="2.5" />
+                    <path
+                      d="M21 12a9 9 0 0 0-9-9"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
+                    {state.phase === "reasoning" && "Reasoning"}
+                    {state.phase === "planning" && "Planning"}
+                    {state.phase === "executing" && "Executing"}
+                    {state.phase === "replanning" && "Replanning"}
+                    {state.phase === "completing" && "Composing"}
+                  </p>
+                  {state.phase === "executing" && state.totalSteps > 0 && (
+                    <span className="font-mono text-[11px] tabular-nums text-[var(--ds-text-mute)]">
+                      step {state.currentStep}/{state.totalSteps}
+                      {currentTool ? ` · ${currentTool}` : ""}
+                    </span>
+                  )}
                 </div>
-                <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ds-text-mute)]">
-                  {state.phase === "reasoning" && "Codex parsing the question…"}
-                  {state.phase === "planning" && "Building the tool sequence…"}
-                  {state.phase === "executing" &&
-                    `Step ${state.currentStep}/${state.totalSteps}${currentTool ? ` · ${currentTool}` : ""}…`}
-                  {state.phase === "replanning" && "Self-correcting after a failure…"}
-                  {state.phase === "completing" && "Synthesizing the answer…"}
-                </p>
+
+                {/* Latest SSE event — one-line caption so the user can see
+                    what the agent is doing right now without opening Telemetry. */}
+                {latestEvent && (
+                  <p className="mt-3 max-w-[68ch] truncate font-mono text-[12px] leading-relaxed text-[var(--ds-text-mute)]">
+                    {latestEvent.message}
+                  </p>
+                )}
+
+                {/* Answer-shape skeleton — same vertical rhythm as the final
+                    answer card so layout doesn't jump on completion. */}
+                <div className="mt-7 max-w-[58ch] space-y-3">
+                  <div className="h-8 w-[92%] animate-pulse rounded bg-[var(--ds-bg-elev)]" />
+                  <div className="h-8 w-[80%] animate-pulse rounded bg-[var(--ds-bg-elev)]" />
+                  <div className="h-8 w-[64%] animate-pulse rounded bg-[var(--ds-bg-elev)]" />
+                </div>
+
+                {/* Action-row + meta-strip skeleton — matches the final layout. */}
+                <div className="mt-7 flex flex-wrap items-center gap-2">
+                  <div className="h-9 w-32 animate-pulse rounded-md bg-[var(--ds-bg-elev)]" />
+                  <div className="h-9 w-28 animate-pulse rounded-md bg-[var(--ds-bg-elev)]" />
+                  <div className="h-9 w-24 animate-pulse rounded-md bg-[var(--ds-bg-elev)]" />
+                </div>
               </div>
             </section>
           )}
