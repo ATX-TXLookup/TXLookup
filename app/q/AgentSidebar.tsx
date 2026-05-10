@@ -72,15 +72,16 @@ type Props = {
   startedAt: number | null;
 };
 
-type Tab = "status" | "dag" | "flow" | "execution" | "telemetry";
+type Tab = "status" | "dag" | "steps" | "telemetry";
 
+// User feedback: Flow + Execution did the same thing in two slightly
+// different shapes. Consolidated into a single "Steps" tab that uses
+// the existing ExecutionTab renderer (richer per-step info than Flow).
+// The visual flowchart still lives in the DAG tab.
 const TABS: { id: Tab; label: string }[] = [
   { id: "status", label: "Status" },
-  // Issue #90 — DAG tab is the marquee view: every tool / delegate / critic
-  // pass / parallel branch as a node that lights up live.
   { id: "dag", label: "DAG" },
-  { id: "flow", label: "Flow" },
-  { id: "execution", label: "Execution" },
+  { id: "steps", label: "Steps" },
   { id: "telemetry", label: "Telemetry" },
 ];
 
@@ -202,8 +203,7 @@ export function AgentSidebar(props: Props) {
         <div className="flex-1 overflow-y-auto">
           {tab === "status" && <StatusTab {...props} />}
           {tab === "dag" && <AgentDAG events={props.dagEvents} />}
-          {tab === "flow" && <FlowTab steps={props.steps} replans={props.replans} />}
-          {tab === "execution" && <ExecutionTab steps={props.steps} replans={props.replans} />}
+          {tab === "steps" && <ExecutionTab steps={props.steps} replans={props.replans} />}
           {tab === "telemetry" && <TelemetryTab events={props.events} startedAt={props.startedAt} />}
         </div>
       </div>
