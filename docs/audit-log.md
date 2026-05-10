@@ -68,3 +68,17 @@ PR #112 (button consistency sweep) and a follow-up workflow_dispatch BOTH FAILED
 - Axis 4 · Innovation: doom-loop 4 hits · demo-fixtures · skill 129L · heat-index aggregator 358L
 
 **No drift detected.** Stale-number sweep across demo-delivery + hackathon-form-copy returned empty.
+
+## 2026-05-10 · post-3a8c588 · all green (cache refresh)
+
+**Latest commit:** `3a8c588` · cache cron tick (3a8c588 ingestor refresh). No app-code change.
+
+**Live state · 4 axes — ALL GREEN:**
+- Axis 1 · Technical: MCP 8 tools · doom-loop 12/12 PASS · /api/agent 200 · cache enabled, 6 datasets, ~6h old
+- Axis 2 · Partner: 5 Vercel env vars
+- Axis 3 · Value: 11/11 routes 200
+- Axis 4 · Innovation: doom-loop 4 hits · skill 129L
+
+**Note:** cache cron commits don't trigger deploy.yml (GitHub safety: bot pushes skip downstream workflows). Live function bundle still has the previous cache snapshot — fine for now; next runtime push will pick up the fresh data.
+
+**No drift detected.**
