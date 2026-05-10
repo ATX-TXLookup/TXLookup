@@ -27,7 +27,7 @@ const RUNTIMES: { id: string; label: string; install: string; verify: string }[]
   {
     id: "codex",
     label: "Codex CLI",
-    install: "codex --add-mcp 'name=txlookup,command=python,args=[-m,mcp.server]'",
+    install: "codex mcp add txlookup --command python --args -m --args mcp.server",
     verify: 'codex "use txlookup ask_data: which Austin zips have the most code violations this year"',
   },
   {
@@ -47,48 +47,43 @@ const RUNTIMES: { id: string; label: string; install: string; verify: string }[]
 const TOOLS: { name: string; description: string; example: string }[] = [
   {
     name: "ask_data",
-    description: "End-to-end loop: parse question → plan → dispatch tools → critic-revise → cited answer. Use this for plain-English questions.",
+    description: "End-to-end loop. Plain-English question → plan → tool dispatch (with replan on failure + doom-loop guard + critic-driven revision) → cited answer.",
     example: '{ "query": "Where do permits and code violations both spike together this year by zip?" }',
   },
   {
     name: "discover_datasets",
-    description: "Find a TX civic dataset for a topic. Returns top candidates from the curated catalog.",
+    description: "Find a TX civic dataset for a topic. Returns up to 5 candidates from the curated catalog.",
     example: '{ "query": "311 service requests", "city": "Austin" }',
   },
   {
     name: "get_dataset_schema",
-    description: "Inspect a dataset's columns and field-name aliases before SoQL. Run BEFORE fetch_data on a fresh dataset.",
+    description: "Inspect a dataset's columns, types, and field-name aliases before SoQL. Run BEFORE fetch_data on a fresh dataset.",
     example: '{ "dataset_id": "3syk-w9eu" }',
   },
   {
     name: "fetch_data",
-    description: "Bounded SODA fetch (≤100 rows). Cache-first; falls through to live with X-source pill in the envelope.",
+    description: "Bounded SODA fetch (≤100 rows). Cache-first; live fallback. Returns _source: cache | live | cache-fallback so callers can audit provenance.",
     example: '{ "dataset_id": "3syk-w9eu", "where": "original_zip=\'78702\' AND issue_date >= \'2026-01-01\'" }',
   },
   {
-    name: "summarize_data",
-    description: "Compress a fetch result into a structured finding (top-N, deltas, anomalies) the reporter can cite.",
-    example: '{ "rows": [...], "dimension": "zip", "metric": "count" }',
+    name: "get_task_status",
+    description: "Poll status of a long-running ask_data task started in async mode.",
+    example: '{ "task_id": "task_01HZ…" }',
   },
   {
-    name: "cite_dataset",
-    description: "Mandatory step before answer composition. Records the dataset id + portal + query that backs every claim.",
-    example: '{ "dataset_id": "3syk-w9eu", "portal": "data.austintexas.gov" }',
+    name: "create_miro_board",
+    description: "Create a Miro board for visualizing agent results. Returns board id + URL.",
+    example: '{ "name": "Austin permit hotspots Q2 2026", "description": "Built by ask_data" }',
   },
   {
-    name: "replan_step",
-    description: "Self-correction. When a tool fails or the critic rejects the draft, the orchestrator replans from this point.",
-    example: '{ "reason": "schema mismatch", "from_step": 3 }',
+    name: "add_to_miro",
+    description: "Post a structured payload (frame + sticky grid + chart card) to an existing Miro board.",
+    example: '{ "board_id": "uXjVM…", "items": ["frame", "sticky_grid", "chart_card"] }',
   },
   {
-    name: "render_to_miro",
-    description: "Post structured findings (heatmap, leaderboard, citation card) to a Miro board.",
-    example: '{ "name": "Austin permit hotspots Q2 2026" }',
-  },
-  {
-    name: "delegate_to",
-    description: "Hand a sub-task to a named specialist (data_analyst, dataset_scout, critic, reporter). Multi-agent fan-out.",
-    example: '{ "agent": "data_analyst", "task": "compute zip-level join" }',
+    name: "list_known_tools",
+    description: "Self-introspection: returns this tool catalog. Useful for agents that load the server dynamically.",
+    example: "{}",
   },
 ];
 
@@ -133,7 +128,7 @@ export default function UseAsAgentPage() {
             <span className="text-[var(--ds-text-mute)]">wherever your agent lives.</span>
           </h1>
           <p className="mt-7 max-w-[60ch] text-[16px] leading-relaxed text-[var(--ds-text-mute)] md:text-[18px]">
-            One MCP server. Eight tools. Curated Texas civic datasets — Austin, Dallas, San Antonio, Houston, state. The scout grows the corpus. <span className="text-[var(--ds-good)]">Install in 30 seconds. Verify in 60.</span>
+            One MCP server. Eight tools. <span className="font-semibold text-[var(--ds-text)]">6,061 Texas datasets indexed</span> across 6 portals — Austin, Dallas, San Antonio, Houston, TX state. 9 deeply curated; the rest answered on demand. <span className="text-[var(--ds-good)]">Install in 30 seconds. Verify in 60.</span>
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a

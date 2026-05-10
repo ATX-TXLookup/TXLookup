@@ -1,9 +1,9 @@
 // /about — team + project page.
 // Dark theme, matches the rest of the site (Shell wrapper, ds tokens).
-// LinkedIn URLs are placeholders — drop the real ones into TEAM[].linkedin.
 
 import Link from "next/link";
 import { Shell } from "@/app/components/ds";
+import { CATALOG } from "@/app/lib/catalog";
 import { loadDiscovery } from "@/app/lib/catalog-discovered";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +23,6 @@ type Person = {
   tone: "accent" | "good" | "warm" | "purple";
 };
 
-// LinkedIn URLs go here when ready — set to null until provided.
 const TEAM: Person[] = [
   {
     name: "Ravinder Jilkapally",
@@ -89,10 +88,10 @@ export default async function AboutPage() {
             About · The team
           </p>
           <h1 className="mt-4 max-w-[24ch] text-[44px] font-bold leading-[1.04] tracking-[-0.025em] text-[var(--ds-text)] md:text-[64px]">
-            Four people. Six agents. {discovery.totalKnown.toLocaleString()} datasets.
+            Four people. Seven agents. {discovery.totalKnown.toLocaleString()} datasets.
           </h1>
           <p className="mt-6 max-w-[64ch] text-[16px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
-            TXLookup was built at the AITX × Codex Hackathon (May 8–10, 2026) by a team that wanted Texas civic data to stop being a mystery. We ship a multi-agent system that turns plain-English questions into sourced answers from public Socrata + CKAN portals — every claim citable, every step replayable.
+            Built at the AITX × Codex Hackathon (May 8–10, 2026). A smart layer over the source-of-truth Texas + Austin open-data portals — not a shadow database. Plain-English in, sourced answer out, every claim citable back to the originating portal.
           </p>
 
           <div className="mt-8 grid gap-x-8 gap-y-3 font-mono text-[11px] uppercase tracking-[0.12em] md:grid-cols-3">
@@ -116,7 +115,7 @@ export default async function AboutPage() {
             Builders, not just demoers.
           </h2>
           <p className="mt-4 max-w-[60ch] text-[15px] leading-relaxed text-[var(--ds-text-mute)] md:text-[16px]">
-            Each person owns a distinct slice of the system. The git history attributes every line — no committee architecture, no anonymous code.
+            Each person owns a distinct slice. Git history attributes every line.
           </p>
 
           <ul className="mt-12 grid gap-5 md:grid-cols-2">
@@ -204,8 +203,8 @@ export default async function AboutPage() {
                 sub: `${discovery.portals.length} portals · Socrata + CKAN`,
                 tone: "accent" as const,
               },
-              { value: "9", label: "Deeply curated", sub: "Schema knowledge + cached rows", tone: "good" as const },
-              { value: "6", label: "Specialist agents", sub: "Planner / analyst / reporter / support / critic / scout", tone: "purple" as const },
+              { value: String(CATALOG.length), label: "Deeply curated", sub: "Schema knowledge + cached rows", tone: "good" as const },
+              { value: "7", label: "Specialist agents", sub: "Orchestrator / analyst / reporter / support / critic / scout / ingestor", tone: "purple" as const },
               { value: "8", label: "MCP tools exposed", sub: "Discoverable from Claude Code, Cursor, Codex", tone: "warm" as const },
             ].map((s) => (
               <div
@@ -238,7 +237,7 @@ export default async function AboutPage() {
             None of this exists without the open-data movement.
           </h2>
           <p className="mt-4 max-w-[64ch] text-[15px] leading-relaxed text-[var(--ds-text-mute)]">
-            Thanks to the City of Austin, the City of Dallas, the City of San Antonio, the City of Houston, and the State of Texas for publishing every dataset behind this site openly. Thanks to AITX and Codex for hosting the hackathon. Thanks to the Miro and Smithery teams for the MCP tooling. The agent loop is built on OpenAI Codex / GPT-4o, with Featherless as the open-source fallback path.
+            Thanks to the cities of Austin, Dallas, San Antonio, Houston, and the State of Texas for publishing the datasets behind this site openly. Thanks to AITX and Codex for hosting the hackathon, and to Miro and Smithery for the MCP tooling. The agent loop runs on OpenAI Codex / GPT-4o, with Featherless as an open-source fallback.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link

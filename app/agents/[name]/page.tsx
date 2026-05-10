@@ -71,8 +71,7 @@ const AGENTS: Record<string, AgentSpec> = {
     inputs: ["query: string", "dataset_ids: string[]", "context: object"],
     outputs: ["AgentEnvelope with findings + viz_spec + confidence + caveats"],
     source_files: [
-      { path: "app/lib/specialists.ts", description: "callSpecialist router" },
-      { path: "agent/specialists/data_analyst.py", description: "Python implementation (in flight)" },
+      { path: "app/lib/specialists.ts", description: "Live TS implementation — dataAnalyst()" },
     ],
     envelope_field: "data_analyst",
   },
@@ -94,8 +93,7 @@ const AGENTS: Record<string, AgentSpec> = {
     inputs: ["slug: string", "findings: AnalystResult[]", "template?: string"],
     outputs: ["data/reports/{slug}.json", "AgentEnvelope { composed_at, run_archive_hashes, sections_count }"],
     source_files: [
-      { path: "app/lib/specialists.ts", description: "callSpecialist router" },
-      { path: "agent/specialists/reporter.py", description: "Python composer (in flight)" },
+      { path: "app/lib/specialists.ts", description: "Live TS implementation — reporter()" },
       { path: "app/components/viz/", description: "Inline-SVG viz library" },
     ],
     envelope_field: "reporter",
@@ -118,8 +116,7 @@ const AGENTS: Record<string, AgentSpec> = {
     inputs: ["query: string", "context: object"],
     outputs: ["AgentEnvelope { status, message, next_actions[] }"],
     source_files: [
-      { path: "app/lib/specialists.ts", description: "callSpecialist router" },
-      { path: "agent/specialists/support.py", description: "Python disambiguation (in flight)" },
+      { path: "app/lib/specialists.ts", description: "Live TS implementation — support()" },
       { path: "app/q/components/SupportChips.tsx", description: "UI for next_actions chips" },
     ],
     envelope_field: "support",
@@ -166,7 +163,7 @@ const AGENTS: Record<string, AgentSpec> = {
     inputs: ["portals: string[] (configurable)", "since: datetime (last_seen)"],
     outputs: ["GitHub issues with label scout-find", "data/scout/last_seen.json updates"],
     source_files: [
-      { path: "agent/specialists/dataset_scout.py", description: "Python scout (in flight)" },
+      { path: "agent/specialists/dataset_scout.py", description: "Python scout — catalog scan + scoring" },
       { path: ".github/workflows/dataset-scout.yml", description: "6h cron" },
       { path: "data/scout/last_seen.json", description: "State file" },
     ],
@@ -191,7 +188,7 @@ const AGENTS: Record<string, AgentSpec> = {
     inputs: ["dataset_id: string | --all", "since?: datetime"],
     outputs: ["data/cache.db updates", "data/cache_meta.json", "Optional GitHub commit"],
     source_files: [
-      { path: "agent/specialists/ingestor.py", description: "Python ingestor (in flight)" },
+      { path: "agent/specialists/ingestor.py", description: "Python ingestor — paginated SODA pulls + UPSERT" },
       { path: ".github/workflows/ingestor.yml", description: "6h cron" },
       { path: "app/lib/cache.ts", description: "sql.js reader" },
     ],

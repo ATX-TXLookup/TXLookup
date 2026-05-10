@@ -148,7 +148,7 @@ const SAMPLE_QUERIES = [
 type Snippet = { label: string; tone: "neutral" | "accent" | "good"; cmd: string };
 const INSTALL_SNIPPETS: Snippet[] = [
   { label: "claude-code · install MCP", tone: "accent", cmd: "claude mcp add txlookup -- python -m mcp.server" },
-  { label: "codex · install MCP",        tone: "neutral", cmd: "codex --add-mcp 'name=txlookup,command=python,args=[-m,mcp.server]'" },
+  { label: "codex · install MCP",        tone: "neutral", cmd: "codex mcp add txlookup --command python --args -m --args mcp.server" },
   { label: "cursor · settings.json",     tone: "neutral", cmd: '"txlookup": { "command": "python", "args": ["-m", "mcp.server"] }' },
   { label: "curl · ask the agent",       tone: "good",    cmd: "curl -N https://txlookup.vercel.app/api/agent \\\n  -H 'content-type: application/json' \\\n  -d '{\"query\":\"food truck permits in 78702 last 6 months\"}'" },
 ];
@@ -186,7 +186,7 @@ export default async function DeveloperPage() {
             </span>
           </h1>
           <p className="mt-4 max-w-[64ch] text-[14px] leading-relaxed text-[var(--ds-text-mute)] md:text-[15px]">
-            Everything you need to drop the TXLookup agent into Claude Code, Codex, or Cursor — plus the public surface area we expose. One screen, no docs maze.
+            Everything you need to drop the TXLookup agent into Claude Code, Codex, or Cursor — plus the public surface area we expose. <span className="text-[var(--ds-text)]">6,061 datasets indexed across 6 portals · 9 deeply curated · MIT licensed.</span> One screen, no docs maze.
           </p>
         </div>
       </section>

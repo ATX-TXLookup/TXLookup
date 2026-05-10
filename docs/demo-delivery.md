@@ -64,7 +64,7 @@ Pick **one** of the two paths below based on judge mood. Don't try both.
 - **Say:** "Same multi-agent loop, conversational surface. The support specialist handles disambiguation — vague-geography questions, schema clarifications. Doesn't fire SoQL; just talks about the system."
 - **Tab:** `https://txlookup.vercel.app/agents`
 - **Show:** the 6 agent cards.
-- **Say:** "Every specialist has a role, a schedule, an audit trail. Six agents on a clock."
+- **Say:** "Seven specialists. Five fire on every /q request. Two — scout and ingestor — run on a six-hour cron and grow the system in the background."
 
 ## 2:30 → 3:00 · Close (30s)
 

@@ -41,9 +41,9 @@ export default function ReportsIndex() {
               </span>
             </h1>
             <p className="mt-6 max-w-[60ch] text-[16px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
-              Each report is built by the TXLookup agent at request time —
-              bounded SoQL queries against public Socrata feeds, every number
-              cited to the source dataset. Auto-refreshed every six hours.
+              Agent-composed from a local mirror of the source datasets.
+              Every chart cites portal + dataset id + SoQL. Cache refreshes
+              every 6 hours; pages render from the mirror in milliseconds.
             </p>
           </div>
         </div>

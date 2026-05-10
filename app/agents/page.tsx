@@ -1,6 +1,6 @@
-// /agents — operations center index. Wrapped in <Shell> for consistency
-// with the homepage. 7-agent roster as <FeatureCard> grid + recent run
-// archive feed below.
+// /agents — agent roster index. Wrapped in <Shell> for consistency with
+// the homepage. 7-agent roster as <FeatureCard> grid + recent run-archive
+// feed below.
 
 import Link from "next/link";
 import { listRuns } from "@/app/lib/run-archive";
@@ -132,7 +132,7 @@ export default async function AgentsPage() {
             </span>
           </h1>
           <p className="mt-6 max-w-[64ch] text-[16px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
-            The agent loop isn&rsquo;t a slide — it&rsquo;s running. Each specialist owns a single responsibility: planning, statistical reasoning, narrative synthesis, disambiguation, self-critique, dataset discovery, local-mirror ingestion. The orchestrator routes between them, the critic verifies, the doom-loop guard catches cycles. Every run is auditable end-to-end.
+            Each specialist owns one job: planning, statistical reasoning, narrative synthesis, disambiguation, self-critique, dataset discovery, local-mirror ingestion. The orchestrator routes between them, the critic verifies, the doom-loop guard catches cycles. Every run is auditable end-to-end.
           </p>
         </div>
       </section>
@@ -189,9 +189,9 @@ export default async function AgentsPage() {
               eyebrowTone="warm"
               headline={
                 <>
-                  What every agent has done{" "}
+                  Recent agent runs,{" "}
                   <span className="font-display-serif font-normal text-[var(--ds-text-mute)]">
-                    in the last hour.
+                    replayable end-to-end.
                   </span>
                 </>
               }

@@ -49,7 +49,7 @@ export default async function QueryPage({
               Type a question. Get a sourced answer.
             </h1>
             <p className="mt-6 max-w-[58ch] text-[18px] leading-[1.55] text-[var(--ds-text-mute)]">
-              Plain English. The agent picks the dataset, runs bounded SoQL, asks the critic to verify, composes the answer, attaches the citation. ~7 seconds end-to-end.
+              Plain English over 6,061 indexed Texas datasets across 6 portals. 9 are deeply curated and locally mirrored; the rest are answered on demand from catalog metadata. The agent picks the dataset, runs bounded SoQL, asks the critic to verify, composes the answer, attaches the citation.
             </p>
 
             <form action="/q" method="GET" className="mt-10 max-w-[820px]">

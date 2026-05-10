@@ -144,7 +144,7 @@ export default async function DatasetsUniversePage() {
                 <span className="font-semibold text-[var(--ds-text)]">
                   {discovery.totalKnown.toLocaleString()} datasets indexed
                 </span>{" "}
-                across {discovery.portals.length || 6} Texas open-data portals — Austin, Austin Hub, Dallas, San Antonio, Houston, TX state. Of those, {summaries.length} are deeply curated for the demo (full schema knowledge, hand-picked SoQL, locally mirrored). For everything else the agent reads the catalog metadata, plans a query, and runs it live. <span className="text-[var(--ds-good)]">No shadow database.</span> The agent leverages the source-of-truth portals smartly.
+                across {discovery.portals.length || 6} Texas open-data portals — Austin, Austin Hub, Dallas, San Antonio, Houston, TX state. {summaries.length} are deeply curated (full schema, hand-picked SoQL, locally mirrored). The rest are answered on demand: the agent reads catalog metadata, plans a SoQL query, runs it. <span className="text-[var(--ds-good)]">Not a shadow database</span> — a smart layer over the source-of-truth portals.
               </p>
 
               {/* Per-portal indexed counts */}
@@ -267,7 +267,7 @@ export default async function DatasetsUniversePage() {
                     </span>
                   </h2>
                   <p className="mt-3 max-w-[64ch] text-[14.5px] leading-relaxed text-[var(--ds-text-mute)]">
-                    The catalog metadata for every indexed dataset is stored locally as a searchable corpus — titles, descriptions, tags, categories. When you pick one, the agent reads the schema live, plans a SoQL query, and runs it. The 9 above are pre-cached for &lt;1s answers; the 6,000+ below are answered on demand.
+                    Catalog metadata for every indexed dataset is stored locally as a searchable corpus — titles, descriptions, tags, categories. When you pick one, the agent reads the schema live, plans a SoQL query, and runs it. The {summaries.length} above are pre-cached for sub-second answers; the rest are answered on demand.
                   </p>
                   <ul className="mt-7 grid gap-2 md:grid-cols-2">
                     {discovery.popular.slice(0, 24).map((d) => (
@@ -312,44 +312,28 @@ export default async function DatasetsUniversePage() {
                   ↗ Featured analysis
                 </p>
                 <h2 className="mt-3 text-[22px] font-bold leading-tight text-[var(--ds-text)]">
-                  Austin Construction Boom
+                  Austin Construction in 2026
                 </h2>
                 <p className="mt-3 text-[13px] leading-relaxed text-[var(--ds-text-mute)]">
-                  Analysis of the &lsquo;Issued Construction Permits&rsquo; dataset reveals a 14% year-over-year increase in multi-family unit permits in Travis County, indicating sustained urban densification.
+                  Live readout from the City of Austin permits feed (3syk-w9eu). Where permits cluster, what is being built, and how cumulative-YTD compares to last year — composed from a 5,000-row local mirror.
                 </p>
 
-                {/* Mini chart — purple/lavender gradient bars */}
-                <div className="mt-5 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg)] p-3">
-                  <div className="flex h-[80px] items-end gap-1.5">
-                    {[42, 36, 48, 55, 64, 71, 88, 96].map((h, i) => (
-                      <div
-                        key={i}
-                        className="flex-1 rounded-sm"
-                        style={{
-                          height: `${h}%`,
-                          background:
-                            i >= 6
-                              ? "linear-gradient(180deg, var(--ds-purple) 0%, rgba(168,85,247,0.4) 100%)"
-                              : "linear-gradient(180deg, rgba(168,85,247,0.55) 0%, rgba(168,85,247,0.2) 100%)",
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <div className="mt-2 flex items-baseline justify-between font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
-                    <span>&lsquo;19</span>
-                    <span>&lsquo;24 (YTD)</span>
-                  </div>
-                </div>
+                <Link
+                  href="/reports/austin-construction-2026"
+                  className="mt-5 block w-full rounded-md bg-[var(--ds-purple)] py-2.5 text-center text-[12px] font-semibold uppercase tracking-[0.1em] text-white hover:opacity-90"
+                >
+                  Read the report ↗
+                </Link>
 
                 <Link
                   href="/q?q=Show+me+Austin+construction+permit+trends+over+the+last+5+years&dataset=3syk-w9eu"
-                  className="mt-5 block w-full rounded-md bg-[var(--ds-purple)] py-2.5 text-center text-[12px] font-semibold uppercase tracking-[0.1em] text-white hover:opacity-90"
+                  className="mt-2 block w-full rounded-md border border-[var(--ds-border-strong)] bg-transparent py-2.5 text-center text-[12px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-text)] hover:border-[var(--ds-purple)] hover:text-[var(--ds-purple)]"
                 >
-                  Run agent query ↗
+                  Run agent query →
                 </Link>
 
                 <p className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
-                  Powered by Texas Open Data
+                  Cache refreshes every 6h · cited per chart
                 </p>
               </div>
             </aside>
