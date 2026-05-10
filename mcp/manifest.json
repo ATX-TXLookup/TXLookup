@@ -138,7 +138,7 @@
   "skill_doc": "https://github.com/ATX-TXLookup/TXLookup/blob/main/skills/txlookup/SKILL.md",
   "examples": {
     "claude_code_install": "claude mcp add txlookup -- python -m mcp.server",
-    "codex_install": "codex --add-mcp 'name=txlookup,command=python,args=[-m,mcp.server]'",
+    "codex_install": "codex mcp add txlookup --command python --args -m --args mcp.server",
     "cursor_install": "Add to Cursor MCP settings: { \"txlookup\": { \"command\": \"python\", \"args\": [\"-m\", \"mcp.server\"] } }",
     "smoke_test": "echo '{\"query\":\"food truck permits in 78702 last 6 months\"}' | python -c 'import json,sys; from mcp.server import ask_data; import asyncio; print(asyncio.run(ask_data(json.load(sys.stdin)[\"query\"])))'"
   },
