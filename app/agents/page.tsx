@@ -3,6 +3,7 @@
 // feed below.
 
 import Link from "next/link";
+import AgentTopologyShowcase from "@/app/components/AgentTopologyShowcase";
 import { listRuns } from "@/app/lib/run-archive";
 import {
   EyebrowLabel,
@@ -134,6 +135,28 @@ export default async function AgentsPage() {
           <p className="mt-6 max-w-[64ch] text-[16px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
             Each specialist owns one job: planning, statistical reasoning, narrative synthesis, disambiguation, self-critique, dataset discovery, local-mirror ingestion. The orchestrator routes between them, the critic verifies, the doom-loop guard catches cycles. Every run is auditable end-to-end.
           </p>
+        </div>
+      </section>
+
+      {/* Topology — how the agents tie back to the orchestrator */}
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1200px] px-6 py-16 md:px-8 md:py-20">
+          <SectionHeader
+            eyebrow="How they tie together"
+            eyebrowTone="purple"
+            headline={
+              <>
+                The orchestrator routes,{" "}
+                <span className="text-[var(--ds-text-mute)]">
+                  the specialists deliver.
+                </span>
+              </>
+            }
+            kicker="Watch a real run — orchestrator dispatches to data_analyst (in parallel), critic reviews, replans on the missing-window flag, then reporter composes the final answer with citation."
+          />
+          <div className="mt-8">
+            <AgentTopologyShowcase />
+          </div>
         </div>
       </section>
 

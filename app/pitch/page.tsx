@@ -47,7 +47,7 @@ export default async function PitchPage() {
           <div className="mt-10 flex flex-wrap items-center gap-3">
             <Link
               href="/q"
-              className="inline-flex items-center gap-2 rounded-md bg-[var(--ds-purple)] px-5 py-3 text-[14px] font-semibold uppercase tracking-[0.08em] text-white hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-md bg-white px-5 py-3 text-[14px] font-semibold uppercase tracking-[0.08em] text-[var(--ds-bg)] hover:opacity-90"
             >
               Try the agent →
             </Link>
@@ -197,11 +197,51 @@ export default async function PitchPage() {
         </div>
       </section>
 
+      {/* MIRO — visual answers */}
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto max-w-[1100px] px-6 py-14 md:px-8 md:py-20">
+          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-purple)]">
+            05 · Visual answers via Miro
+          </p>
+          <h2 className="mt-3 max-w-[28ch] text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[44px]">
+            The board <span className="text-[var(--ds-text-mute)]">is the answer.</span>
+          </h2>
+          <p className="mt-5 max-w-[68ch] text-[16px] leading-relaxed text-[var(--ds-text-mute)]">
+            When a question benefits from a visual, the agent hands off to Miro through its live REST API. The result is a real, persistent board — share the link, embed it, keep editing. Same capability is exposed as MCP tools (<code className="font-mono text-[14px] text-[var(--ds-text)]">create_miro_board</code>, <code className="font-mono text-[14px] text-[var(--ds-text)]">add_to_miro</code>) so any MCP client — Claude Code, Cursor, Codex — can drive Miro through TXLookup.
+          </p>
+
+          <div className="mt-8 overflow-hidden rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)]">
+            <iframe
+              src="https://miro.com/app/live-embed/uXjVHWYFIqE=/?embedMode=view_only_without_ui&moveToViewport=&embedId=txlookup-pitch"
+              title="TXLookup live Miro board"
+              loading="lazy"
+              allow="fullscreen; clipboard-read; clipboard-write"
+              allowFullScreen
+              className="block h-[480px] w-full border-0"
+            />
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <a
+              href="https://miro.com/app/board/uXjVHWYFIqE=/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-[var(--ds-bg)] hover:opacity-90"
+            >
+              Open in Miro ↗
+            </a>
+            <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+              Live · agent-generated · MCP-installable
+            </span>
+          </div>
+        </div>
+      </section>
+
       {/* USE IT IN YOUR CODING AGENT */}
       <section className="border-b border-[var(--ds-border)]">
         <div className="mx-auto max-w-[1100px] px-6 py-14 md:px-8 md:py-20">
           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
-            05 · It&rsquo;s extensible
+            06 · It&rsquo;s extensible
           </p>
           <h2 className="mt-3 max-w-[28ch] text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[44px]">
             Use the same agent in your coding tools.
@@ -245,7 +285,7 @@ export default async function PitchPage() {
       <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
         <div className="mx-auto max-w-[1100px] px-6 py-14 md:px-8 md:py-20">
           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
-            06 · By the numbers
+            07 · By the numbers
           </p>
           <h2 className="mt-3 max-w-[28ch] text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[44px]">
             What landed in 48 hours.
@@ -275,13 +315,13 @@ export default async function PitchPage() {
       <section>
         <div className="mx-auto max-w-[1100px] px-6 py-14 md:px-8 md:py-20">
           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-purple)]">
-            07 · The team
+            08 · The team
           </p>
           <h2 className="mt-3 max-w-[28ch] text-[28px] font-bold leading-[1.15] tracking-[-0.02em] text-[var(--ds-text)] md:text-[36px]">
             Four people. Shipped at the AITX × Codex Hackathon, May 2026.
           </h2>
           <p className="mt-3 max-w-[60ch] text-[14.5px] leading-relaxed text-[var(--ds-text-mute)]">
-            Ravinder Jilkapally · Kunal Vyas · Godwyn James · Raj Akula. <Link href="/about" className="text-[var(--ds-accent)] hover:underline">Full bios + LinkedIns</Link>.
+            Ravinder Jilkapally · Kunal Vasavada · Godwyn James · Raj Akula. <Link href="/about" className="text-[var(--ds-accent)] hover:underline">Full bios + LinkedIns</Link>.
           </p>
 
           <div className="mt-10 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-7">
@@ -294,7 +334,7 @@ export default async function PitchPage() {
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <Link
                 href="/q?q=Restaurants%20near%2078704%20with%20failing%20inspections%20this%20year"
-                className="inline-flex items-center gap-2 rounded-md bg-[var(--ds-purple)] px-5 py-3 text-[14px] font-semibold uppercase tracking-[0.08em] text-white hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-md bg-white px-5 py-3 text-[14px] font-semibold uppercase tracking-[0.08em] text-[var(--ds-bg)] hover:opacity-90"
               >
                 Try the agent →
               </Link>

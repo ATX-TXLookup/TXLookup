@@ -81,7 +81,7 @@ The 11 deeply-curated datasets:
 - **Ravinder Jilkapally** — Agent loop, replanner, observatory
   - GitHub: [jravinder](https://github.com/jravinder)
   - LinkedIn: https://www.linkedin.com/in/jravinder
-- **Kunal Vyas** — Dataset onboarding, catalog correctness
+- **Kunal Vasavada** — Dataset onboarding, catalog correctness
   - GitHub: [promptkv](https://github.com/promptkv)
   - LinkedIn: https://www.linkedin.com/in/kunalvasavada
 - **Godwyn James** — Doom-loop wiring, instrumentation

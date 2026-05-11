@@ -369,7 +369,7 @@ function StatusTab({
           }`}
           style={{ backgroundColor: dot }}
         />
-        <p className="font-display text-base font-normal text-tx-cream">{phaseLabel}</p>
+        <p className="text-base font-medium text-tx-cream">{phaseLabel}</p>
       </div>
       <p className="mt-1 text-[12px] leading-relaxed text-tx-cream/65">{phaseLine}</p>
       {status === "running" && totalSteps > 0 && (
@@ -445,7 +445,7 @@ function Tile({ label, value }: { label: string; value: string }) {
       <p className="font-mono text-[10px] uppercase tracking-wider text-tx-cream/55">
         {label}
       </p>
-      <p className="mt-1 font-display text-lg font-normal tabular-nums text-tx-cream">
+      <p className="mt-1 text-lg font-semibold tabular-nums text-tx-cream">
         {value}
       </p>
     </div>
@@ -736,7 +736,7 @@ function TelemetryTab({
               onClick={() => setFilter(f)}
               className={`rounded-md px-2.5 py-1 text-[11px] font-medium capitalize transition-colors ${
                 active
-                  ? "bg-white/10 text-white"
+                  ? "bg-white/10 text-[var(--ds-bg)]"
                   : "text-white/55 hover:text-white"
               }`}
             >

@@ -123,7 +123,7 @@ The language model itself, the Socrata SODA API, the Model Context Protocol tran
 ## Inventors
 
 - Ravinder Jilkapally (jravinder, GitHub) — agent loop, replanner, observatory.
-- Kunal Vyas (promptkv, GitHub) — dataset onboarding, catalog correctness.
+- Kunal Vasavada (promptkv, GitHub) — dataset onboarding, catalog correctness.
 - Godwyn James (goodguygoddy, GitHub) — doom-loop wiring, instrumentation.
 - Raj Akula (rajakula1, GitHub) — external-runtime validation, MCP integration.
 
