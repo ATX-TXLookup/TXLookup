@@ -152,7 +152,7 @@ export default async function AgentsPage() {
                 </span>
               </>
             }
-            kicker="Watch a real run — orchestrator dispatches to data_analyst (in parallel), critic reviews, replans on the missing-window flag, then reporter composes the final answer with citation."
+            sub="Watch a real run — orchestrator dispatches to data_analyst (in parallel), critic reviews, replans on the missing-window flag, then reporter composes the final answer with citation."
           />
           <div className="mt-8">
             <AgentTopologyShowcase />
