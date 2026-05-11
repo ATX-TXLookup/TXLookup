@@ -18,21 +18,12 @@ name: Deploy to Vercel (Production)
 # pulled into the build via `vercel pull`. They never enter this repo.
 
 on:
+  # Auto-deploy disabled post-hackathon. The site is stable and we want
+  # control over when Vercel ships. Two ways to deploy:
+  #   1. Push a v-tag:  git tag v0.2 && git push --tags
+  #   2. Fire manually: gh workflow run deploy.yml
   push:
-    branches: [main]
-    # Skip deploys when only non-runtime files change. Avoids burning Vercel
-    # upload quota on doc-only / gitignore-only / scout-state-only commits.
-    paths-ignore:
-      - "docs/**"
-      - "notes/**"
-      - "README.md"
-      - "CONTRIBUTING.md"
-      - "LICENSE"
-      - ".gitignore"
-      - ".github/ISSUE_TEMPLATE/**"
-      - "*.md"
-      - "data/scout/**"
-      - "tests/fixtures/**"
+    tags: ["v*"]
   workflow_dispatch: {}
 
 permissions:
