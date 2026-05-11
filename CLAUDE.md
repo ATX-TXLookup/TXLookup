@@ -110,3 +110,28 @@ python mcp/server.py                # MCP server
 - Don't skip error handling on tool calls
 - Don't make the orchestrator complex — push logic to tools
 - Don't store raw API responses without normalizing first
+
+## Pre-submission protocol (mandatory before any hackathon/release submission)
+
+**Any agent operating in this repo, before any action whose user-facing
+description includes "submit", "release", "ship", "freeze", or "v1.0"
+must run BOTH of these in sequence and surface findings before the user
+clicks the submit button:**
+
+1. **`scripts/pre-submission-review.md`** — fresh-agent audit of every
+   claim in `docs/hackathon-form-copy.md` against the actual code +
+   live deploy. Catches drift, fake numbers, broken routes,
+   aspirational features, overstated capabilities. ~30 min.
+
+2. **`scripts/scout-the-room.md`** — open-web sweep for competitor
+   positioning, sponsor bounty updates, judge social posts, community
+   signals. ~30 min.
+
+These are not optional. We built and shipped TXLookup v1.0.0 without
+them; the retrospective at `docs/hackathon-retrospective.md` documents
+the BLOCKER findings each would have surfaced.
+
+When the user asks to submit / release / tag / freeze, treat the two
+scripts as required pre-flight steps the same way a build script
+treats a compile step. Refuse to proceed without running them, or at
+minimum surface every finding from both before the user confirms.
