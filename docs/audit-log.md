@@ -42,3 +42,43 @@
 PR #112 (button consistency sweep) and a follow-up workflow_dispatch BOTH FAILED with `AbortError: The user aborted a request` / `Error: Too many requests - try again in 24 hours (more than 5000, code: "api-upload-free")`. Vercel free-tier daily upload cap exceeded after 8 PR-deploys in 6h. Live site is at PR #111 state — all substantive work landed. PR #112 is purely cosmetic (8 secondary buttons → purple). Will land automatically when the cap window resets (~24h from first overuse).
 
 **Numbers swept:** 9 → 11 deeply curated, "Not a shadow database" framing dropped per user direction.
+
+## 2026-05-10 · post-PR-#114 (Vercel Pro · all green)
+
+**Latest commit:** `697033d` · 2 PRs since prev tick (#113 #114)
+
+**Live state · 4 axes — ALL GREEN:**
+- Axis 1 · Technical: MCP 8 tools · doom-loop 12/12 PASS · /api/agent 200 · cache enabled, 6 datasets
+- Axis 2 · Partner: 5 Vercel env vars (OPENAI · MIRO_API_TOKEN · MIRO_BOARD_ID · SOCRATA_*); smithery.yaml + manifest.json present
+- Axis 3 · Value: 11/11 routes 200 (/ /q /chat /datasets /reports /sources /about /agents /architecture /pitch /reports/austin-heat-index-2026)
+- Axis 4 · Innovation: DoomLoopGuard 4 hits · demo-fixtures wired · skill doc 129 lines · Heat Index aggregator 358 lines
+
+**Resolved:** Vercel deploy regression from prev tick — Pro upgrade unblocked the upload cap. PR #112 (button consistency sweep) now live; 7 purple buttons on home (was 2), 4 on /datasets, 2 on /about, 1 on /chat, 2 on /q empty state.
+
+**Numbers swept:** "six-agent loop" → "seven-agent loop" in hackathon-form-copy.md (single occurrence, was the only remaining count drift).
+
+## 2026-05-10 · post-563706f · all green
+
+**Latest commit:** `563706f` · 5 commits since prev tick (#115 #116 #117 #118 + 563706f)
+
+**Live state · 4 axes — ALL GREEN:**
+- Axis 1 · Technical: MCP 8 tools · doom-loop 12/12 PASS · /api/agent 200 · cache enabled, 6 datasets
+- Axis 2 · Partner: 5 Vercel env vars · smithery.yaml + manifest.json present
+- Axis 3 · Value: 11/11 routes 200
+- Axis 4 · Innovation: doom-loop 4 hits · demo-fixtures · skill 129L · heat-index aggregator 358L
+
+**No drift detected.** Stale-number sweep across demo-delivery + hackathon-form-copy returned empty.
+
+## 2026-05-10 · post-3a8c588 · all green (cache refresh)
+
+**Latest commit:** `3a8c588` · cache cron tick (3a8c588 ingestor refresh). No app-code change.
+
+**Live state · 4 axes — ALL GREEN:**
+- Axis 1 · Technical: MCP 8 tools · doom-loop 12/12 PASS · /api/agent 200 · cache enabled, 6 datasets, ~6h old
+- Axis 2 · Partner: 5 Vercel env vars
+- Axis 3 · Value: 11/11 routes 200
+- Axis 4 · Innovation: doom-loop 4 hits · skill 129L
+
+**Note:** cache cron commits don't trigger deploy.yml (GitHub safety: bot pushes skip downstream workflows). Live function bundle still has the previous cache snapshot — fine for now; next runtime push will pick up the fresh data.
+
+**No drift detected.**

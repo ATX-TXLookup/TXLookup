@@ -20,6 +20,19 @@ name: Deploy to Vercel (Production)
 on:
   push:
     branches: [main]
+    # Skip deploys when only non-runtime files change. Avoids burning Vercel
+    # upload quota on doc-only / gitignore-only / scout-state-only commits.
+    paths-ignore:
+      - "docs/**"
+      - "notes/**"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "LICENSE"
+      - ".gitignore"
+      - ".github/ISSUE_TEMPLATE/**"
+      - "*.md"
+      - "data/scout/**"
+      - "tests/fixtures/**"
   workflow_dispatch: {}
 
 permissions:

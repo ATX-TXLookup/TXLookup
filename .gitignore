@@ -18,3 +18,9 @@ data/runs/
 .env.*.local
 .vercel
 .env*.local
+
+# Local-only team contact info (emails are PII — never commit)
+docs/team-contacts.local.md
+
+# Local-only working notes (partner feedback, drafts)
+notes/
