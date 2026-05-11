@@ -127,12 +127,36 @@ Print this. Tape it to the laptop.
 ### Day 2 (freeze day)
 
 - [ ] All code work stops 2 hours before freeze. Bug fixes only.
+- [ ] **Run `scripts/pre-submission-review.md`** in a fresh agent session. 30 min audit, 30 min triage. Catches drift / aspirational claims / fake numbers that the build team can no longer see.
+- [ ] **Run `scripts/scout-the-room.md`** one last time. 30 min sweep for any sponsor / judge / competitor signals from the last 24h.
 - [ ] Record backup demo video by 9 AM (2 hours before freeze).
 - [ ] Pre-fire one marquee question 30 seconds before demo to warm the function.
 - [ ] **Tag `v1.0.0` at the freeze-moment commit.** Annotated tag with what shipped.
 - [ ] Submit hackathon form (paste from `docs/hackathon-form-copy.md`)
 - [ ] Submit DeepInvent (paste from `docs/deepinvent-submission.md`)
 - [ ] Sleep.
+
+## Two patterns we should have used (but didn't) — built into this repo for next time
+
+### Pre-submission Codex review · `scripts/pre-submission-review.md`
+
+A prompt template for a fresh agent session to audit the whole project against the four judging axes ~2 hours before freeze. Surfaces every fake number, drifted claim, broken route, aspirational feature, and overstated capability.
+
+Why a fresh agent: the agent that helped build the project has bias. It defends its own work. A fresh session with explicit "find what's broken or aspirational" framing finds things you can't see anymore.
+
+A retrospective dry-run of this on our v1.0.0 would have caught: the "9 deeply curated" → 11 drift, the "8 MCP tools" claim vs 5-in-manifest reality, the `kicker` prop type error in PR #121 that broke the build, the fabricated install-terminal numbers, and the 7-specialists-but-5-lanes mismatch. Six BLOCKER/WEAK findings in 30 minutes.
+
+**Time-box: 30 min audit + 30 min triage. Anything not fixed in 30 min becomes a known limitation in the submission.**
+
+### Internet scout · `scripts/scout-the-room.md`
+
+A prompt template for an "intelligence scout" agent that pulls signals from the open web every 12h during the hackathon: competitor positioning, sponsor bounty updates, judge social posts, community Discord/Slack activity.
+
+Why a dedicated scout: the build team has tunnel vision. Atlas TX's "evidence workstation" framing was visible on their public repo by Saturday afternoon. A scout run would have flagged the positioning gap. We never looked.
+
+A retrospective dry-run would have caught: Atlas TX's product framing, the Miro $500 bounty's Miroverse-template requirement we missed, the Smithery doc drift toward `modelcontextprotocol/registry`, and the fact that MCP-installability was table stakes (not a differentiator) in the Codex track.
+
+**Cadence: Day 0 evening · Day 1 noon · Day 1 evening · Day 2 morning. 30 min per run. Output to a shared brief, not just chat.**
 
 ## Tool feedback we'd file again
 
