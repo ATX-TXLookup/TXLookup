@@ -53,6 +53,12 @@
       "candidates_qualified": 0,
       "candidates_total": 63,
       "started_at": "2026-05-12T14:18:43.154230+00:00"
+    },
+    {
+      "candidates_filed": 0,
+      "candidates_qualified": 0,
+      "candidates_total": 3,
+      "started_at": "2026-05-12T19:47:34.863145+00:00"
     }
   ],
   "seen": {
@@ -1503,8 +1509,8 @@
     },
     "data.texas.gov/drau-zphx": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-12T14:18:43.154230+00:00",
-      "last_updated_at": 1778594474
+      "last_scout_run": "2026-05-12T19:47:34.863145+00:00",
+      "last_updated_at": 1778610659
     },
     "data.texas.gov/e5pp-jbjt": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3498,8 +3504,8 @@
     },
     "www.dallasopendata.com/f77p-sgrc": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
-      "last_updated_at": 1778513967
+      "last_scout_run": "2026-05-12T19:47:34.863145+00:00",
+      "last_updated_at": 1778600336
     },
     "www.dallasopendata.com/f7mm-gdcj": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3843,8 +3849,8 @@
     },
     "www.dallasopendata.com/s8ga-2yn6": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-12T14:18:43.154230+00:00",
-      "last_updated_at": 1778595416
+      "last_scout_run": "2026-05-12T19:47:34.863145+00:00",
+      "last_updated_at": 1778615216
     },
     "www.dallasopendata.com/sgg9-e5yn": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
