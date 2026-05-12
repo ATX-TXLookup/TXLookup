@@ -35,6 +35,12 @@
       "candidates_qualified": 0,
       "candidates_total": 29,
       "started_at": "2026-05-11T14:44:43.249969+00:00"
+    },
+    {
+      "candidates_filed": 0,
+      "candidates_qualified": 0,
+      "candidates_total": 100,
+      "started_at": "2026-05-12T02:44:50.926471+00:00"
     }
   ],
   "seen": {
@@ -963,6 +969,11 @@
       "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
       "last_updated_at": 1777406573
     },
+    "data.austintexas.gov/wv2p-kpcm": {
+      "first_seen": "2026-05-12T02:44:50.926471+00:00",
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1770667425
+    },
     "data.austintexas.gov/wwrg-3jry": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
       "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
@@ -1480,8 +1491,8 @@
     },
     "data.texas.gov/drau-zphx": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-11T14:44:43.249969+00:00",
-      "last_updated_at": 1778502932
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778524504
     },
     "data.texas.gov/e5pp-jbjt": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -2625,8 +2636,8 @@
     },
     "datahub.austintexas.gov/k2wj-4v6p": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-11T02:53:00.906517+00:00",
-      "last_updated_at": 1778454362
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778540776
     },
     "datahub.austintexas.gov/k3ii-ftbf": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -2870,8 +2881,8 @@
     },
     "datahub.austintexas.gov/tuwa-vk6q": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775505875
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778521945
     },
     "datahub.austintexas.gov/tvn8-ik2m": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -2978,6 +2989,11 @@
       "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
       "last_updated_at": 1776271696
     },
+    "datahub.austintexas.gov/xk6m-khf8": {
+      "first_seen": "2026-05-12T02:44:50.926471+00:00",
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1751572983
+    },
     "datahub.austintexas.gov/xm6p-jjgw": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
       "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
@@ -3045,8 +3061,8 @@
     },
     "www.dallasopendata.com/2cbf-wdfc": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919339
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511988
     },
     "www.dallasopendata.com/2duj-g53n": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3055,23 +3071,23 @@
     },
     "www.dallasopendata.com/2gvz-awei": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919337
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511948
     },
     "www.dallasopendata.com/2p8m-g9cn": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936848
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529366
     },
     "www.dallasopendata.com/2rc5-qt3z": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919409
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512013
     },
     "www.dallasopendata.com/2vmq-t9f3": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919409
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512013
     },
     "www.dallasopendata.com/36p8-jfgz": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3085,8 +3101,8 @@
     },
     "www.dallasopendata.com/3rgr-5d4g": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919352
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511982
     },
     "www.dallasopendata.com/3tma-c3ae": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3115,8 +3131,8 @@
     },
     "www.dallasopendata.com/4mkr-8rbe": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936848
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529372
     },
     "www.dallasopendata.com/4n3h-rfqm": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3130,8 +3146,8 @@
     },
     "www.dallasopendata.com/587x-v8pb": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919342
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511946
     },
     "www.dallasopendata.com/5dt2-nnrg": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3140,13 +3156,13 @@
     },
     "www.dallasopendata.com/5g44-gkir": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919350
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511967
     },
     "www.dallasopendata.com/5hqk-zir6": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919348
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511962
     },
     "www.dallasopendata.com/5m3u-fch2": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3155,13 +3171,13 @@
     },
     "www.dallasopendata.com/63v7-sb9y": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936852
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529371
     },
     "www.dallasopendata.com/6fvg-c3je": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936843
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529364
     },
     "www.dallasopendata.com/6hec-4qkj": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3170,8 +3186,8 @@
     },
     "www.dallasopendata.com/6isa-wxi3": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919333
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511957
     },
     "www.dallasopendata.com/6pf9-weec": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3185,8 +3201,8 @@
     },
     "www.dallasopendata.com/76cq-nay7": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919669
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512261
     },
     "www.dallasopendata.com/7ajb-6vrw": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3205,18 +3221,18 @@
     },
     "www.dallasopendata.com/7zbq-ukjt": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919371
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511972
     },
     "www.dallasopendata.com/85fu-45q3": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919346
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511976
     },
     "www.dallasopendata.com/85yz-drz2": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919335
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511959
     },
     "www.dallasopendata.com/8azx-38jc": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3225,13 +3241,13 @@
     },
     "www.dallasopendata.com/8hyu-vkvq": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919715
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512324
     },
     "www.dallasopendata.com/8kst-cucq": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919331
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511948
     },
     "www.dallasopendata.com/8r5a-qz5k": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3240,18 +3256,18 @@
     },
     "www.dallasopendata.com/8y6i-ds2p": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936853
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529371
     },
     "www.dallasopendata.com/8z5m-ahhm": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919669
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512262
     },
     "www.dallasopendata.com/93ri-xyua": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-11T02:53:00.906517+00:00",
-      "last_updated_at": 1778443544
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529646
     },
     "www.dallasopendata.com/9e6m-eru6": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3270,8 +3286,8 @@
     },
     "www.dallasopendata.com/9yvv-prxx": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919663
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512279
     },
     "www.dallasopendata.com/a2n4-nd8r": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3280,8 +3296,8 @@
     },
     "www.dallasopendata.com/a8cr-fb2u": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919346
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511956
     },
     "www.dallasopendata.com/afey-66jf": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3295,33 +3311,33 @@
     },
     "www.dallasopendata.com/aiuh-nfe2": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919666
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512261
     },
     "www.dallasopendata.com/anqw-k9ru": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936853
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529371
     },
     "www.dallasopendata.com/aum4-fuvd": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919718
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512288
     },
     "www.dallasopendata.com/avns-xray": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919337
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511948
     },
     "www.dallasopendata.com/azzh-475x": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919328
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511980
     },
     "www.dallasopendata.com/b4ip-ttmc": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936843
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529364
     },
     "www.dallasopendata.com/b6gx-znng": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3335,23 +3351,23 @@
     },
     "www.dallasopendata.com/b9pd-bcfb": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919663
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512279
     },
     "www.dallasopendata.com/bba9-494k": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919666
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512285
     },
     "www.dallasopendata.com/bf3y-wt8a": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919342
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511946
     },
     "www.dallasopendata.com/bswg-q2mh": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919368
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511972
     },
     "www.dallasopendata.com/bu7a-3fad": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3360,8 +3376,8 @@
     },
     "www.dallasopendata.com/bw6g-a3ur": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919970
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512458
     },
     "www.dallasopendata.com/c2bd-k3di": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3380,8 +3396,8 @@
     },
     "www.dallasopendata.com/ceug-gptu": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919325
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511953
     },
     "www.dallasopendata.com/cgb7-598g": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3400,8 +3416,8 @@
     },
     "www.dallasopendata.com/dcir-mtfz": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919368
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511995
     },
     "www.dallasopendata.com/ddkn-hx8m": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3415,8 +3431,8 @@
     },
     "www.dallasopendata.com/dmz8-evnt": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775937123
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529517
     },
     "www.dallasopendata.com/dnkw-wpwy": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3425,13 +3441,13 @@
     },
     "www.dallasopendata.com/dtwr-gvwh": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919680
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512278
     },
     "www.dallasopendata.com/ea2b-fbaj": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936856
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529396
     },
     "www.dallasopendata.com/eekh-7bvs": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3445,8 +3461,8 @@
     },
     "www.dallasopendata.com/ekx8-rxk3": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919335
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511948
     },
     "www.dallasopendata.com/emmz-iq98": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3465,18 +3481,18 @@
     },
     "www.dallasopendata.com/f3t3-a5rd": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919419
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512035
     },
     "www.dallasopendata.com/f77p-sgrc": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T18:59:26.957696+00:00",
-      "last_updated_at": 1778427175
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778513967
     },
     "www.dallasopendata.com/f7mm-gdcj": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919352
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511982
     },
     "www.dallasopendata.com/fgdu-xvrp": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3495,8 +3511,8 @@
     },
     "www.dallasopendata.com/g2f3-i5gx": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919325
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511953
     },
     "www.dallasopendata.com/g342-r9x2": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3510,13 +3526,13 @@
     },
     "www.dallasopendata.com/gaed-saby": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919332
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511956
     },
     "www.dallasopendata.com/gcfp-ib9j": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919718
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512288
     },
     "www.dallasopendata.com/gmh8-itny": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3530,28 +3546,28 @@
     },
     "www.dallasopendata.com/griv-uymc": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775937123
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529517
     },
     "www.dallasopendata.com/gum8-y5sv": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919336
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511951
     },
     "www.dallasopendata.com/h3pj-kxz2": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919346
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511976
     },
     "www.dallasopendata.com/hb26-wf68": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936848
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529366
     },
     "www.dallasopendata.com/hiyi-ytgj": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919669
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512261
     },
     "www.dallasopendata.com/hpuy-56sq": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3570,8 +3586,8 @@
     },
     "www.dallasopendata.com/i5ed-wtgw": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919666
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512262
     },
     "www.dallasopendata.com/i8hv-sx9b": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3605,13 +3621,13 @@
     },
     "www.dallasopendata.com/j86r-cwi5": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919666
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512285
     },
     "www.dallasopendata.com/jejh-7i4d": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919340
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511948
     },
     "www.dallasopendata.com/jk5c-7csb": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3640,23 +3656,23 @@
     },
     "www.dallasopendata.com/jxsk-ntkc": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919335
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511948
     },
     "www.dallasopendata.com/k6zy-ifv7": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919328
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511980
     },
     "www.dallasopendata.com/k83h-2zve": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936851
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529369
     },
     "www.dallasopendata.com/kc6w-2si8": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919371
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511972
     },
     "www.dallasopendata.com/kc9e-h3nc": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3665,18 +3681,18 @@
     },
     "www.dallasopendata.com/kwwd-isx4": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919335
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511959
     },
     "www.dallasopendata.com/m4fg-uia7": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919350
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511967
     },
     "www.dallasopendata.com/mdwb-29sm": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936851
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529369
     },
     "www.dallasopendata.com/mjzi-rhq3": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3690,28 +3706,28 @@
     },
     "www.dallasopendata.com/n7fy-kcfb": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919689
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512280
     },
     "www.dallasopendata.com/n95u-787v": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919348
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511978
     },
     "www.dallasopendata.com/nbzi-8gwk": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919348
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511962
     },
     "www.dallasopendata.com/nfu5-een5": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919339
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511988
     },
     "www.dallasopendata.com/ngx2-ykem": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919716
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512291
     },
     "www.dallasopendata.com/nufk-2iqn": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3725,18 +3741,18 @@
     },
     "www.dallasopendata.com/p96m-d8hb": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919689
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512280
     },
     "www.dallasopendata.com/pizh-cy6b": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936848
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529372
     },
     "www.dallasopendata.com/pr7j-sbp7": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936847
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529367
     },
     "www.dallasopendata.com/pxcj-qffj": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3750,8 +3766,8 @@
     },
     "www.dallasopendata.com/q394-96q2": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919333
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511957
     },
     "www.dallasopendata.com/q52g-y2t5": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3760,18 +3776,18 @@
     },
     "www.dallasopendata.com/q8yy-vume": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936856
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529396
     },
     "www.dallasopendata.com/qsim-ypyc": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919669
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512262
     },
     "www.dallasopendata.com/qur6-dex5": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936848
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529369
     },
     "www.dallasopendata.com/qvv4-4hdd": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3790,8 +3806,8 @@
     },
     "www.dallasopendata.com/rjtm-64j9": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919332
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511956
     },
     "www.dallasopendata.com/rrmz-kc7d": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3800,8 +3816,8 @@
     },
     "www.dallasopendata.com/ruzk-6eyi": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919368
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511995
     },
     "www.dallasopendata.com/rv7h-h552": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3810,28 +3826,28 @@
     },
     "www.dallasopendata.com/s6zx-pihw": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919715
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512324
     },
     "www.dallasopendata.com/s8ga-2yn6": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-11T14:44:43.249969+00:00",
-      "last_updated_at": 1778510697
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778553896
     },
     "www.dallasopendata.com/sgg9-e5yn": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936847
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529367
     },
     "www.dallasopendata.com/sz68-grsn": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919336
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511951
     },
     "www.dallasopendata.com/t2h9-tpdd": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936852
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529371
     },
     "www.dallasopendata.com/taeg-x7ft": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3855,8 +3871,8 @@
     },
     "www.dallasopendata.com/ts23-ua6t": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919346
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511956
     },
     "www.dallasopendata.com/txcn-ne83": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3865,8 +3881,8 @@
     },
     "www.dallasopendata.com/u5nr-hktw": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919348
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511978
     },
     "www.dallasopendata.com/ue8j-d4q6": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3875,8 +3891,8 @@
     },
     "www.dallasopendata.com/um9u-6gya": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919680
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512278
     },
     "www.dallasopendata.com/uu3b-ppfz": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3890,8 +3906,8 @@
     },
     "www.dallasopendata.com/uukg-v62r": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919666
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512262
     },
     "www.dallasopendata.com/uyte-zi7f": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3930,8 +3946,8 @@
     },
     "www.dallasopendata.com/w2rm-qutg": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919419
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512035
     },
     "www.dallasopendata.com/w3vc-jnif": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3940,8 +3956,8 @@
     },
     "www.dallasopendata.com/wgym-ax8z": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919666
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512261
     },
     "www.dallasopendata.com/wudr-fw95": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3950,8 +3966,8 @@
     },
     "www.dallasopendata.com/xd3q-ipis": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919828
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512480
     },
     "www.dallasopendata.com/xd5h-5j2e": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3975,13 +3991,13 @@
     },
     "www.dallasopendata.com/xum9-x6px": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919970
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512458
     },
     "www.dallasopendata.com/y48n-h92h": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919331
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511948
     },
     "www.dallasopendata.com/y4qc-xp55": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3990,18 +4006,18 @@
     },
     "www.dallasopendata.com/y4wx-65x4": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775936848
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778529369
     },
     "www.dallasopendata.com/y58x-dpsg": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919368
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511972
     },
     "www.dallasopendata.com/y6ju-xsm7": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919340
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778511948
     },
     "www.dallasopendata.com/y9i7-p37p": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -4020,8 +4036,8 @@
     },
     "www.dallasopendata.com/yi5a-ym5z": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919828
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512480
     },
     "www.dallasopendata.com/ync5-xnfn": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -4030,8 +4046,8 @@
     },
     "www.dallasopendata.com/ytff-g4jf": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-10T11:40:25.445086+00:00",
-      "last_updated_at": 1775919716
+      "last_scout_run": "2026-05-12T02:44:50.926471+00:00",
+      "last_updated_at": 1778512291
     },
     "www.dallasopendata.com/yuwv-wm7a": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
