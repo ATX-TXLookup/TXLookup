@@ -271,7 +271,7 @@ export default async function QPage({
   const query = q?.trim() || "";
 
   if (!query) {
-    const runs = (await listRuns(100)).filter((r) => r.status !== "bad" && r.answer);
+    const runs = (await listRuns(500)).filter((r) => r.status !== "bad" && r.answer);
     return <ListView runs={runs} />;
   }
 
