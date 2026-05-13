@@ -15,7 +15,7 @@ import {
 } from "@/app/lib/run-archive";
 
 import { AgentRunner } from "./AgentRunner";
-import { WatchToggle } from "./WatchToggle";
+import { WatchStar } from "./WatchStar";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -82,18 +82,26 @@ function ListView({ runs }: { runs: SavedRun[] }) {
       <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
         <div className="mx-auto max-w-[1100px] px-6 py-16 md:px-8 md:py-20">
           <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
-            Lookups · TXLookup
+            For journalists, civic researchers, and city staff
           </p>
           <h1 className="mt-4 max-w-[22ch] text-[44px] font-bold leading-[1.04] tracking-[-0.025em] text-[var(--ds-text)] md:text-[56px]">
-            What the data says about Texas.
+            Austin permits, inspections, 311 — answered with sourced data.
           </h1>
-          <p className="mt-5 max-w-[58ch] text-lg leading-relaxed text-[var(--ds-text-mute)]">
-            Each entry is a question the multi-agent loop has already answered against authoritative civic data — click to watch the agent run.
+          <p className="mt-5 max-w-[60ch] text-lg leading-relaxed text-[var(--ds-text-mute)]">
+            A multi-agent loop reads the question, picks the dataset, queries it live, lets a critic verify, and writes a sourced answer. Every step is preserved and replayable. Each source is tagged{" "}
+            <span className="font-mono text-[var(--ds-good)]">authoritative</span>{" "}
+            <span className="font-mono text-[var(--ds-warm)]">modeled</span>{" "}
+            <span className="font-mono text-[var(--ds-accent)]">community</span>{" "}
+            so you can cite with confidence.
           </p>
           <p className="mt-3 max-w-[58ch] font-mono text-[12px] uppercase tracking-wider text-[var(--ds-text-dim)]">
             {runs.length} lookup{runs.length === 1 ? "" : "s"} · refreshed every 60s ·{" "}
             <Link href="/byok" className="text-[var(--ds-accent)] hover:underline">
-              Ask your own
+              Ask your own →
+            </Link>{" "}
+            ·{" "}
+            <Link href="/about" className="text-[var(--ds-accent)] hover:underline">
+              How it works
             </Link>
           </p>
         </div>
@@ -136,9 +144,12 @@ function ListView({ runs }: { runs: SavedRun[] }) {
                             )}
                           </p>
                         </div>
-                        <span className="self-start font-mono text-[11px] uppercase tracking-wider text-[var(--ds-accent)]">
-                          watch →
-                        </span>
+                        <div className="flex items-center gap-3 self-start">
+                          <WatchStar slug={slugifyQuery(r.query)} />
+                          <span className="font-mono text-[11px] uppercase tracking-wider text-[var(--ds-accent)]">
+                            replay →
+                          </span>
+                        </div>
                       </div>
                     </Link>
                   </li>
