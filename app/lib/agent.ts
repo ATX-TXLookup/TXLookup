@@ -3,14 +3,29 @@
 // to typed wrappers around Socrata SODA + outbound A2A calls (Miro REST).
 
 import OpenAI from "openai";
+import { AsyncLocalStorage } from "node:async_hooks";
 
 import { CATALOG, PORTAL_LABELS, discover, findById } from "./catalog";
 import { searchDiscovery } from "./catalog-discovered";
 import { describeDataset, sodaQuery } from "./socrata";
 import { callSpecialist, isSpecialistName } from "./specialists";
 
+// Per-request BYOK key store. /api/agent reads the txl_byok cookie and
+// wraps the agent call in `runWithKey(key, () => …)`. Inside the loop,
+// `client()` picks up the per-request key if set; otherwise falls through
+// to the server's OPENAI_API_KEY (the owner-funded balance).
+const _byokStore = new AsyncLocalStorage<string>();
+export function runWithKey<T>(key: string, fn: () => Promise<T>): Promise<T> {
+  return _byokStore.run(key, fn);
+}
+
 let _client: OpenAI | null = null;
 function client() {
+  const userKey = _byokStore.getStore();
+  if (userKey) {
+    // Per-request client; do NOT cache — different users have different keys
+    return new OpenAI({ apiKey: userKey });
+  }
   if (!_client) {
     if (!process.env.OPENAI_API_KEY) {
       throw new Error("OPENAI_API_KEY missing");
@@ -1215,7 +1230,7 @@ export async function criticize(
   payload: unknown,
   query: string,
   context?: string,
-  model = "gpt-4o-mini",
+  model = "gpt-4o",
 ): Promise<{ critique: Critique; usage: TokenUsage }> {
   const sys =
     target === "plan" ? CRITIC_PLAN_PROMPT : CRITIC_ANSWER_PROMPT;

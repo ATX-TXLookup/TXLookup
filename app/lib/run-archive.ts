@@ -28,6 +28,27 @@ export function hashQuery(query: string): string {
   return createHash("sha256").update(n).digest("hex").slice(0, 16);
 }
 
+// Public slug from the query. Stable, URL-safe, SEO-readable.
+// Falls back to hash if slugify produces empty string.
+export function slugifyQuery(query: string): string {
+  const slug = query
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 70);
+  return slug || hashQuery(query);
+}
+
+// Lookup by slug: scan recent runs (within `scanLimit`) for a match.
+// Slug-collision handling: if multiple runs share a slug, return the newest.
+export async function findRunBySlug(slug: string, scanLimit = 500): Promise<SavedRun | null> {
+  const runs = await listRuns(scanLimit);
+  return runs.find((r) => slugifyQuery(r.query) === slug) ?? null;
+}
+
 type KvLike = {
   set: (k: string, v: unknown) => Promise<unknown>;
   get: <T>(k: string) => Promise<T | null>;

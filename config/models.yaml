@@ -8,22 +8,22 @@ planner:
   description: "Task decomposition — needs strong reasoning"
 
 executor:
-  model: gpt-4o-mini
+  model: gpt-4o
   temperature: 0.1
   max_tokens: 1000
-  description: "Step execution — fast and focused"
+  description: "Step execution — quality over cost since runs are cached + replayable"
 
 browser:
-  model: gpt-4o-mini
+  model: gpt-4o
   temperature: 0.1
   max_tokens: 500
-  description: "Browser automation decisions — quick responses"
+  description: "Browser automation decisions — quality over cost"
 
 miro:
-  model: gpt-4o-mini
+  model: gpt-4o
   temperature: 0.2
   max_tokens: 1000
-  description: "Miro layout decisions — creative but structured"
+  description: "Miro layout decisions — quality over cost"
 
 synthesizer:
   model: gpt-4o

@@ -9,8 +9,8 @@ type NavGroup =
 
 const NAV: NavGroup[] = [
   { kind: "link", href: "/", label: "Home" },
-  { kind: "link", href: "/q", label: "Ask" },
-  { kind: "link", href: "/chat", label: "Chat" },
+  { kind: "link", href: "/answers", label: "Investigations" },
+  { kind: "link", href: "/byok", label: "Ask" },
   { kind: "link", href: "/datasets", label: "Datasets" },
   { kind: "link", href: "/reports", label: "Reports" },
   { kind: "link", href: "/agents", label: "Agents" },
