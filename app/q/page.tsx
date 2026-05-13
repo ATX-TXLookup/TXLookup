@@ -5,6 +5,7 @@
 // AgentRunner (left answer column + right observatory sidebar).
 
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Shell } from "@/app/components/ds";
 
 import { AgentRunner } from "./AgentRunner";
@@ -35,10 +36,19 @@ export default async function QueryPage({
   const query = q?.trim() || "";
   const mode = fallback === "1" ? "fallback" : demo === "1" ? "demo" : "live";
 
-  // No query → render the empty-state landing (search + samples + explainer).
+  // No query → /q is no longer the public ask surface. Investigations live
+  // at /answers; query box moved behind auth on /admin. Redirect cleanly.
   if (!query) {
+    redirect("/answers");
+  }
+
+  // Below: legacy path used when an admin opens a direct ?q=… deep link.
+  // Kept for backwards compatibility with replay URLs and saved bookmarks.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _legacyEmptyState = false;
+  if (_legacyEmptyState) {
     return (
-      <Shell active="/q">
+      <Shell active="/answers">
         {/* HERO — search-first */}
         <section className="border-b border-[var(--ds-border)]">
           <div className="mx-auto max-w-[1100px] px-6 py-16 md:px-8 md:py-24">
@@ -155,7 +165,7 @@ export default async function QueryPage({
 
   // Query present → hand off to the AgentRunner (left answer + right DAG).
   return (
-    <Shell active="/q">
+    <Shell active="/answers">
       <AgentRunner query={query} dataset={dataset} mode={mode} />
     </Shell>
   );
