@@ -20,6 +20,7 @@ import {
 import { DoomLoopGuard, type DoomLoopHit } from "@/app/lib/doomLoop";
 import { findFixture } from "@/app/lib/demo-fixtures";
 import { findRun, saveRun, type SavedRun } from "@/app/lib/run-archive";
+import { runWithKey } from "@/app/lib/agent";
 import { findById } from "@/app/lib/catalog";
 import { callSpecialist } from "@/app/lib/specialists";
 
@@ -372,7 +373,7 @@ function replayFixture(
   });
 }
 
-export async function POST(req: NextRequest) {
+async function handlePost(req: NextRequest): Promise<Response> {
   const body = (await req.json().catch(() => ({}))) as {
     query?: string;
     demo?: boolean;
@@ -993,4 +994,16 @@ export async function POST(req: NextRequest) {
       Connection: "keep-alive",
     },
   });
+}
+
+// Public entry point. If the request carries a txl_byok cookie, we run the
+// agent inside an AsyncLocalStorage scope so all downstream OpenAI calls
+// pick up the user's key (see runWithKey in app/lib/agent.ts). Otherwise
+// we fall through to the server's OPENAI_API_KEY (owner-funded balance).
+export async function POST(req: NextRequest): Promise<Response> {
+  const byok = req.cookies.get("txl_byok")?.value;
+  if (byok && byok.startsWith("sk-")) {
+    return runWithKey(byok, () => handlePost(req));
+  }
+  return handlePost(req);
 }
