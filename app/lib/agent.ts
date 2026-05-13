@@ -1215,7 +1215,7 @@ export async function criticize(
   payload: unknown,
   query: string,
   context?: string,
-  model = "gpt-4o-mini",
+  model = "gpt-4o",
 ): Promise<{ critique: Critique; usage: TokenUsage }> {
   const sys =
     target === "plan" ? CRITIC_PLAN_PROMPT : CRITIC_ANSWER_PROMPT;
