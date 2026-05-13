@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Shell } from "@/app/components/ds";
+import { AgentRunner } from "@/app/q/AgentRunner";
 import { findRunBySlug, listRuns, slugifyQuery, type SavedRun } from "@/app/lib/run-archive";
 
 import { WatchToggle } from "./WatchToggle";
@@ -120,8 +121,16 @@ export default async function InvestigationPage({
         </div>
       </section>
 
-      {/* FINDING — the prose answer in editorial typography */}
-      <section className="bg-[var(--ds-bg)]">
+      {/* LIVE REPLAY — re-stream the saved agent events through AgentRunner.
+          Mode=fallback hits /api/agent with {fallback:true} which returns the
+          saved SSE events at realistic timing. The user sees the planner →
+          critic → tools → synth → answer animate as if running now. */}
+      <AgentRunner query={run.query} mode="fallback" />
+
+      {/* FINDING — the prose answer in editorial typography (also rendered
+          at the end of the live stream, but we keep it here as a stable
+          post-replay anchor for SEO + non-JS visitors). */}
+      <section className="border-t border-[var(--ds-border)] bg-[var(--ds-bg)]">
         <div className="mx-auto max-w-[820px] px-6 py-10 md:px-8 md:py-14">
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ds-accent)]">
             Finding
