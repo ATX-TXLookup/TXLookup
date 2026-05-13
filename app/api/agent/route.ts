@@ -151,6 +151,16 @@ function sse(ev: Event): string {
 
 // Replay a previously-saved run (from /api/admin or fallback path) at
 // realistic-ish timing so the SSE consumer animates correctly.
+//
+// Historical save shape quirk: saveRun is called BEFORE the final `done`
+// event is captured (so /admin sees the record the moment the done event
+// fires for the consumer). That means run.events typically ends at
+// `revising` / `completing` / `step_done`, NOT at `done`. AgentRunner stays
+// stuck on "Composing" forever if we don't synthesize the missing terminal.
+//
+// Fix: after streaming captured events, if no `done` event landed, emit a
+// synthetic one built from the run record (answer + citation + duration +
+// tokenTotal). This makes cached and live flows finish identically.
 function replaySavedRun(run: SavedRun): ReadableStream {
   return new ReadableStream({
     async start(controller) {
@@ -159,12 +169,25 @@ function replaySavedRun(run: SavedRun): ReadableStream {
         controller.enqueue(enc.encode(`data: ${JSON.stringify(obj)}\n\n`));
       const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
       const events = Array.isArray(run.events) ? run.events : [];
+      let sawDone = false;
       for (const ev of events) {
         send(ev);
         const phase = (ev as { phase?: string }).phase;
+        if (phase === "done") sawDone = true;
         // Tighter pacing than fixture replay — these are real events the user
         // already paid the latency for.
         await wait(phase === "executing" ? 250 : phase === "step_done" ? 200 : 120);
+      }
+      if (!sawDone && run.answer) {
+        await wait(200);
+        send({
+          phase: "done",
+          answer: run.answer,
+          citation: run.citation ?? null,
+          artifacts: [],
+          usage_total: { prompt: 0, completion: 0, total: run.tokenTotal ?? 0 },
+          duration_ms: run.durationMs ?? 0,
+        });
       }
       controller.close();
     },
