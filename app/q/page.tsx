@@ -163,11 +163,36 @@ function ListView({ runs }: { runs: SavedRun[] }) {
   );
 }
 
-function DetailView({ run }: { run: SavedRun }) {
+function pickRelated(current: SavedRun, all: SavedRun[]): SavedRun[] {
+  // Score by overlap: shared dataset weight 3, shared 4+char word weight 1.
+  const myEv = extractEvidence(current).map((e) => e.datasetId);
+  const myWords = new Set(
+    current.query
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .filter((w) => w.length >= 4),
+  );
+  type Scored = { run: SavedRun; score: number };
+  const scored: Scored[] = [];
+  for (const r of all) {
+    if (r.hash === current.hash || !r.answer || r.status === "bad") continue;
+    let score = 0;
+    const ev = extractEvidence(r).map((e) => e.datasetId);
+    for (const d of ev) if (myEv.includes(d)) score += 3;
+    const words = r.query.toLowerCase().split(/[^a-z0-9]+/);
+    for (const w of words) if (w.length >= 4 && myWords.has(w)) score += 1;
+    if (score > 0) scored.push({ run: r, score });
+  }
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, 6).map((s) => s.run);
+}
+
+function DetailView({ run, related }: { run: SavedRun; related: SavedRun[] }) {
   const evidence = extractEvidence(run);
 
   return (
     <Shell active="/q">
+      {/* HERO — question + meta */}
       <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
         <div className="mx-auto max-w-[820px] px-6 py-12 md:px-8 md:py-16">
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ds-text-mute)]">
@@ -182,21 +207,19 @@ function DetailView({ run }: { run: SavedRun }) {
             {run.query}
           </h1>
           <p className="mt-4 font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-dim)]">
-            Looked up {new Date(run.savedAt).toISOString().slice(0, 10)} · {run.durationMs.toLocaleString()}ms · {run.tokenTotal.toLocaleString()} tok
+            {new Date(run.savedAt).toISOString().slice(0, 10)} · {(run.durationMs / 1000).toFixed(1)}s · {run.tokenTotal.toLocaleString()} tok
             {run.status === "good" && <span className="ml-3 text-[var(--ds-good)]">· verified</span>}
           </p>
         </div>
       </section>
 
-      {/* The agent loop animates here on page load via SSE replay. */}
-      <AgentRunner query={run.query} mode="fallback" />
-
-      <section className="border-t border-[var(--ds-border)] bg-[var(--ds-bg)]">
-        <div className="mx-auto max-w-[820px] px-6 py-10 md:px-8 md:py-14">
+      {/* ANSWER — big, clean, the punchline */}
+      <section className="bg-[var(--ds-bg)]">
+        <div className="mx-auto max-w-[820px] px-6 py-12 md:px-8 md:py-16">
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ds-accent)]">
-            Finding
+            Answer
           </p>
-          <div className="mt-4 space-y-5 text-[18px] leading-[1.65] text-[var(--ds-text)] md:text-[19px]">
+          <div className="mt-5 space-y-5 text-[19px] leading-[1.65] text-[var(--ds-text)] md:text-[20px]">
             {run.answer.split(/\n\n+/).map((para, i) => (
               <p key={i}>{para}</p>
             ))}
@@ -204,21 +227,16 @@ function DetailView({ run }: { run: SavedRun }) {
         </div>
       </section>
 
+      {/* SOURCES — compact */}
       {evidence.length > 0 && (
         <section className="border-t border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
-          <div className="mx-auto max-w-[820px] px-6 py-10 md:px-8">
-            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ds-accent)]">
-              Evidence
+          <div className="mx-auto max-w-[820px] px-6 py-8 md:px-8">
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ds-text-mute)]">
+              Sources
             </p>
-            <p className="mt-2 text-sm text-[var(--ds-text-mute)]">
-              {evidence.length} dataset{evidence.length === 1 ? "" : "s"} queried
-            </p>
-            <ul className="mt-5 space-y-3">
+            <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
               {evidence.map((e) => (
-                <li
-                  key={e.datasetId}
-                  className="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-[var(--ds-border)] pb-3"
-                >
+                <li key={e.datasetId} className="flex items-baseline gap-2">
                   <Link
                     href={`/datasets/${e.datasetId}`}
                     className="font-mono text-sm font-semibold text-[var(--ds-text)] hover:text-[var(--ds-accent)]"
@@ -243,9 +261,75 @@ function DetailView({ run }: { run: SavedRun }) {
         </section>
       )}
 
+      {/* RELATED LOOKUPS — the centerpiece of this redesign */}
+      {related.length > 0 && (
+        <section className="border-t border-[var(--ds-border)] bg-[var(--ds-bg)]">
+          <div className="mx-auto max-w-[820px] px-6 py-12 md:px-8 md:py-14">
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ds-accent)]">
+              Related lookups
+            </p>
+            <p className="mt-2 text-sm text-[var(--ds-text-mute)]">
+              Other questions touching the same data or topic.
+            </p>
+            <ul className="mt-6 grid gap-3 md:grid-cols-2">
+              {related.map((r) => {
+                const f = extractFinding(r);
+                return (
+                  <li key={r.hash}>
+                    <Link
+                      href={`/q?q=${encodeURIComponent(r.query)}`}
+                      className="block h-full rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5 transition-colors hover:border-[var(--ds-accent)]"
+                    >
+                      <h3 className="text-[15px] font-semibold leading-snug text-[var(--ds-text)]">
+                        {r.query}
+                      </h3>
+                      {f && (
+                        <p className="mt-2 line-clamp-3 text-[13px] leading-relaxed text-[var(--ds-text-mute)]">
+                          {f}
+                        </p>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="mt-6 font-mono text-[11px] text-[var(--ds-text-mute)]">
+              Don&apos;t see your question?{" "}
+              <Link href="/byok" className="text-[var(--ds-accent)] hover:underline">
+                Bring your own key →
+              </Link>{" "}
+              ·{" "}
+              <Link href={`/suggest?q=${encodeURIComponent(run.query)}`} className="text-[var(--ds-accent)] hover:underline">
+                Suggest a follow-up →
+              </Link>
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* WATCH — small */}
       <section className="border-t border-[var(--ds-border)] bg-[var(--ds-bg)]">
-        <div className="mx-auto max-w-[820px] px-6 py-8 md:px-8">
+        <div className="mx-auto max-w-[820px] px-6 py-6 md:px-8">
           <WatchToggle slug={slugifyQuery(run.query)} query={run.query} />
+        </div>
+      </section>
+
+      {/* HOW WE GOT THIS — collapsible agent dashboard */}
+      <section className="border-t border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
+        <div className="mx-auto max-w-[820px] px-6 py-8 md:px-8">
+          <details>
+            <summary className="cursor-pointer">
+              <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ds-accent)]">
+                How we got this — watch the agent run ▸
+              </span>
+              <p className="mt-1 text-sm text-[var(--ds-text-mute)]">
+                Re-streams the planner → critic → tools → synthesizer loop in real time.
+              </p>
+            </summary>
+            <div className="mt-6">
+              <AgentRunner query={run.query} mode="fallback" />
+            </div>
+          </details>
         </div>
       </section>
     </Shell>
@@ -319,7 +403,9 @@ export default async function QPage({
 
   const cached = await findRun(query);
   if (cached && cached.answer) {
-    return <DetailView run={cached} />;
+    const all = await listRuns(200);
+    const related = pickRelated(cached, all);
+    return <DetailView run={cached} related={related} />;
   }
 
   const libraryCount = (await listRuns(200)).length;
