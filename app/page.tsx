@@ -16,6 +16,7 @@ import { HeroTexasMap } from "@/app/components/HeroTexasMap";
 import { FeatureCard, Shell, TerminalBlock } from "@/app/components/ds";
 import { DataSourceBadge } from "@/app/components/ds/DataSourceBadge";
 import { loadDiscovery } from "@/app/lib/catalog-discovered";
+import { listRuns, type SavedRun } from "@/app/lib/run-archive";
 import { CATALOG } from "@/app/lib/catalog";
 
 const CATALOG_LENGTH = CATALOG.length;
@@ -71,6 +72,13 @@ export default async function HomePage() {
     texasFranchisePermitsActive(),
     loadDiscovery(),
   ]);
+
+  // Pull top 6 cached investigations to feature on the homepage (post-mortem:
+  // investigation as the unit of work). Drop bad-status runs + ones without
+  // a real answer / duration.
+  const featuredRuns = (await listRuns(50))
+    .filter((r) => r.status !== "bad" && r.answer && r.durationMs > 0)
+    .slice(0, 6);
 
   // Unwrap StatResult shape into legacy plain values for the renderer below.
   const permitsSpark = permitsSparkRes.value ?? [];
@@ -153,6 +161,74 @@ export default async function HomePage() {
                 <span>agent online · 7 specialists · 9 curated · {discovery.totalKnown.toLocaleString()} indexed</span>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURED INVESTIGATIONS — the post-mortem "investigation as the
+          unit of work" lesson on the homepage. Pulls top cached lookups
+          and shows them as headline + finding + dataset + replay link. */}
+      <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
+        <div className="mx-auto max-w-[1240px] px-6 py-14 md:px-8 md:py-20">
+          <div className="flex items-end justify-between gap-6">
+            <div>
+              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
+                Featured investigations
+              </p>
+              <h2 className="mt-3 max-w-[26ch] text-[34px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[44px]">
+                Questions we&apos;ve already answered.
+              </h2>
+              <p className="mt-3 max-w-[60ch] text-[14.5px] leading-relaxed text-[var(--ds-text-mute)]">
+                Click any card to watch the agent run end-to-end — same UI a live query produces, replayed from the saved trace.
+              </p>
+            </div>
+            <Link
+              href="/q"
+              className="hidden md:inline-flex shrink-0 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg)] px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--ds-text)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
+            >
+              All lookups →
+            </Link>
+          </div>
+
+          <ul className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {featuredRuns.map((r) => {
+              const finding = (r.answer || "").split(/\n\n+/)[0]?.slice(0, 180) ?? "";
+              const events = (r.events ?? []) as Array<Record<string, unknown>>;
+              let dsId: string | null = null;
+              for (const ev of events) {
+                if (ev.phase === "executing" && ev.args && typeof ev.args === "object") {
+                  const d = (ev.args as Record<string, unknown>).datasetId;
+                  if (typeof d === "string") { dsId = d; break; }
+                }
+              }
+              return (
+                <li key={r.hash}>
+                  <Link
+                    href={`/q?q=${encodeURIComponent(r.query)}`}
+                    className="flex h-full flex-col rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg)] p-5 transition-colors hover:border-[var(--ds-accent)]"
+                  >
+                    <h3 className="text-[16px] font-semibold leading-snug text-[var(--ds-text)]">
+                      {r.query}
+                    </h3>
+                    {finding && (
+                      <p className="mt-2 line-clamp-3 text-[13px] leading-relaxed text-[var(--ds-text-mute)]">
+                        {finding}
+                      </p>
+                    )}
+                    <div className="mt-4 flex items-baseline gap-3 font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+                      {dsId && <span className="text-[var(--ds-accent)]">{dsId}</span>}
+                      <span>{(r.durationMs / 1000).toFixed(1)}s</span>
+                      <span>{r.tokenTotal.toLocaleString()} tok</span>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] text-[var(--ds-text-dim)]">
+            <span>Source classes: <span className="text-[var(--ds-good)]">authoritative</span> · <span className="text-[var(--ds-warm)]">modeled</span> · <span className="text-[var(--ds-accent)]">community</span></span>
+            <Link href="/q" className="text-[var(--ds-accent)] hover:underline md:hidden">All lookups →</Link>
           </div>
         </div>
       </section>
