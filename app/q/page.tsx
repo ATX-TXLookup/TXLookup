@@ -266,9 +266,7 @@ export default async function QPage({
 
   const cached = await findRun(query);
   if (cached && cached.answer) {
-    const all = await listRuns(200);
-    const related = pickRelated(cached, all);
-    return <DetailView run={cached} related={related} />;
+    return <DetailView run={cached} />;
   }
 
   const libraryCount = (await listRuns(200)).length;
