@@ -1,0 +1,127 @@
+{
+  "hash": "81492905b545a92f",
+  "query": "How does the agent work?",
+  "plan": {
+    "intent": {
+      "data_domain": "meta",
+      "geography": null,
+      "time_range": null,
+      "analysis_type": "support query",
+      "thinking": "The user is asking about how the agent functions or operates, which is a meta question about TXLookup itself."
+    },
+    "steps": [
+      {
+        "tool": "delegate_to",
+        "args": {
+          "specialist": "support",
+          "input": {
+            "query": "How does the agent work?"
+          }
+        },
+        "rationale": "This is a meta question about the agent's functionality, so it should be routed to the support specialist for clarification."
+      }
+    ]
+  },
+  "events": [
+    {
+      "phase": "reasoning",
+      "message": "How does the agent work?"
+    },
+    {
+      "phase": "planning",
+      "plan": {
+        "intent": {
+          "data_domain": "meta",
+          "geography": null,
+          "time_range": null,
+          "analysis_type": "support query",
+          "thinking": "The user is asking about how the agent functions or operates, which is a meta question about TXLookup itself."
+        },
+        "steps": [
+          {
+            "tool": "delegate_to",
+            "args": {
+              "specialist": "support",
+              "input": {
+                "query": "How does the agent work?"
+              }
+            },
+            "rationale": "This is a meta question about the agent's functionality, so it should be routed to the support specialist for clarification."
+          }
+        ]
+      },
+      "thinking": "The user is asking about how the agent functions or operates, which is a meta question about TXLookup itself.",
+      "usage": {
+        "prompt": 3129,
+        "completion": 148,
+        "total": 3277
+      }
+    },
+    {
+      "phase": "critique",
+      "target": "plan",
+      "score": 1,
+      "approve": true,
+      "issues": []
+    },
+    {
+      "phase": "executing",
+      "step": 1,
+      "total": 1,
+      "tool": "delegate_to",
+      "args": {
+        "specialist": "support",
+        "input": {
+          "query": "How does the agent work?"
+        }
+      },
+      "rationale": "This is a meta question about the agent's functionality, so it should be routed to the support specialist for clarification."
+    },
+    {
+      "phase": "delegate_start",
+      "step": 1,
+      "agent": "support",
+      "input_summary": "{\"query\":\"How does the agent work?\"}"
+    },
+    {
+      "phase": "delegate_done",
+      "step": 1,
+      "agent": "support",
+      "status": "completed",
+      "output_summary": "{\"agent\":\"support\",\"message\":\"The agent works in a loop where it first understands your question or request, then determines which dataset(s) in the catalog are relevant. If needed"
+    },
+    {
+      "phase": "step_done",
+      "step": 1,
+      "status": "completed",
+      "preview": "{\"agent\":\"support\",\"message\":\"The agent works in a loop where it first understands your question or request, then determines which dataset(s) in the catalog are relevant. If needed, it runs a query on the dataset to fetch the information an",
+      "error": null,
+      "duration_ms": 1050,
+      "agent": "support",
+      "result_json": {
+        "agent": "support",
+        "message": "The agent works in a loop where it first understands your question or request, then determines which dataset(s) in the catalog are relevant. If needed, it runs a query on the dataset to fetch the information and provides the results back to you. If your question is about how the system works or what data is available, I handle it. For specific data queries, a specialist like \"planner\" or \"data_analyst\" takes over.",
+        "confidence": 0.7
+      }
+    },
+    {
+      "phase": "completing",
+      "message": "Synthesizing answer..."
+    },
+    {
+      "phase": "critique",
+      "target": "answer",
+      "score": 0.8,
+      "approve": true,
+      "issues": [
+        "Lacks specific details from tool context"
+      ]
+    }
+  ],
+  "answer": "The agent operates in a loop: it first interprets your question or request, identifies relevant datasets, and, if necessary, queries those datasets to retrieve information. For system-related questions or data availability, the agent itself responds, while specific data queries are handled by specialized roles like \"planner\" or \"data_analyst.\"",
+  "citation": null,
+  "durationMs": 16879,
+  "tokenTotal": 4217,
+  "status": "pending",
+  "savedAt": 1778637848869
+}
