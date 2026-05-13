@@ -7,6 +7,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Shell } from "@/app/components/ds";
+import { findRun, slugifyQuery } from "@/app/lib/run-archive";
 
 import { AgentRunner } from "./AgentRunner";
 
@@ -41,6 +42,17 @@ export default async function QueryPage({
   if (!query) {
     redirect("/answers");
   }
+
+  // With a query: check the cache. If a cached run exists, redirect to the
+  // public /answers/[slug] page so the visitor sees the live replay without
+  // burning a fresh OpenAI call. If no cache, also redirect to /answers —
+  // public visitors can't fire fresh agent runs anymore; they BYOK at /ask
+  // or suggest at /suggest. Owners run fresh queries via /admin.
+  const cached = await findRun(query);
+  if (cached) {
+    redirect(`/answers/${slugifyQuery(cached.query)}`);
+  }
+  redirect("/answers");
 
   // Below: legacy path used when an admin opens a direct ?q=… deep link.
   // Kept for backwards compatibility with replay URLs and saved bookmarks.
