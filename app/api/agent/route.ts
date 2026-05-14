@@ -180,11 +180,34 @@ function replaySavedRun(run: SavedRun): ReadableStream {
       }
       if (!sawDone && run.answer) {
         await wait(200);
+        // Recover artifacts from the saved events. The run is saved BEFORE the
+        // real `done` event fires, so the top-level run has no artifacts and
+        // no done event — but tool outputs (e.g. the render_to_miro board
+        // link) live inside step_done `preview`/`artifacts` fields. Scan for
+        // any artifact-like URLs so the synthetic done carries them; without
+        // this the Miro embed (gated on a miro.com artifact) never renders on
+        // a cached replay.
+        const recovered: string[] = [];
+        const urlRe = /https?:\/\/[^\s"'\\]+/g;
+        for (const ev of events) {
+          const evRec = ev as Record<string, unknown>;
+          if (Array.isArray(evRec.artifacts)) {
+            for (const a of evRec.artifacts) {
+              if (typeof a === "string") recovered.push(a);
+            }
+          }
+          const preview = evRec.preview;
+          if (typeof preview === "string") {
+            const matches = preview.match(urlRe);
+            if (matches) recovered.push(...matches);
+          }
+        }
+        const artifacts = [...new Set(recovered)];
         send({
           phase: "done",
           answer: run.answer,
           citation: run.citation ?? null,
-          artifacts: [],
+          artifacts,
           usage_total: { prompt: 0, completion: 0, total: run.tokenTotal ?? 0 },
           duration_ms: run.durationMs ?? 0,
         });
