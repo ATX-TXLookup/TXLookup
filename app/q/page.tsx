@@ -81,46 +81,100 @@ function extractEvidence(
 function ListView({
   runs,
   totalCount,
+  unfilteredCount,
   currentPage,
   totalPages,
   datasetCount,
+  filter,
 }: {
   runs: SavedRun[];
   totalCount: number;
+  unfilteredCount: number;
   currentPage: number;
   totalPages: number;
   datasetCount: number;
+  filter: string;
 }) {
   const pageSize = 25;
-  const start = (currentPage - 1) * pageSize + 1;
+  const start = totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const end = Math.min(totalCount, start + runs.length - 1);
+  const isFiltering = filter.length > 0;
   return (
     <Shell active="/q">
       <HomeHero datasetCount={datasetCount} searchOnly />
 
       <section className="bg-[var(--ds-bg)]">
         <div className="mx-auto max-w-[1200px] px-6 pt-10 md:px-8">
-          <div className="flex items-baseline justify-between gap-4">
+          <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
                 All lookups
               </p>
               <h2 className="mt-2 text-[24px] font-bold leading-[1.1] tracking-[-0.02em] text-white md:text-[30px]">
-                {totalCount} answered. Click a row to replay.
+                {isFiltering ? (
+                  <>
+                    {totalCount} match
+                    {totalCount === 1 ? "" : "es"}{" "}
+                    <span className="text-[var(--ds-text-mute)]">of {unfilteredCount}</span>
+                  </>
+                ) : (
+                  <>{totalCount} answered. Click a row to replay.</>
+                )}
               </h2>
             </div>
-            <p className="hidden font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-dim)] md:block">
-              Showing <span className="text-white">{start}&ndash;{end}</span> of {totalCount}
-            </p>
+            <form
+              action="/q"
+              method="GET"
+              className="flex items-stretch gap-2 rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] p-1.5 focus-within:border-[var(--ds-accent)]"
+            >
+              <input
+                name="filter"
+                type="search"
+                defaultValue={filter}
+                placeholder="Filter lookups..."
+                className="w-[260px] bg-transparent px-2.5 py-1.5 text-[13.5px] text-white placeholder:text-[var(--ds-text-dim)] focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="rounded-md bg-white px-3 py-1 text-[12px] font-semibold text-[var(--ds-bg)] hover:opacity-90"
+              >
+                Filter
+              </button>
+              {isFiltering && (
+                <Link
+                  href="/q"
+                  className="flex items-center px-2 font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-mute)] hover:text-white"
+                >
+                  clear ×
+                </Link>
+              )}
+            </form>
           </div>
+          {totalCount > 0 && (
+            <p className="mt-3 font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+              Showing <span className="text-white">{start}&ndash;{end}</span> of {totalCount}
+              {isFiltering && (
+                <> · filter: <span className="text-[var(--ds-accent)]">&ldquo;{filter}&rdquo;</span></>
+              )}
+            </p>
+          )}
         </div>
       </section>
 
       <section className="bg-[var(--ds-bg)]">
         <div className="mx-auto max-w-[1200px] px-6 py-8 md:px-8">
           {runs.length === 0 ? (
-            <div className="rounded-sm border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-8 text-center">
-              <p className="text-[var(--ds-text-mute)]">No lookups yet.</p>
+            <div className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-10 text-center">
+              {isFiltering ? (
+                <>
+                  <p className="text-[15px] text-white">No lookups match &ldquo;{filter}&rdquo;.</p>
+                  <Link href="/q" className="mt-3 inline-flex text-[13px] text-[var(--ds-accent)] hover:underline">
+                    Clear filter →
+                  </Link>
+                </>
+              ) : (
+                <p className="text-[var(--ds-text-mute)]">No lookups yet.</p>
+              )}
             </div>
           ) : (
             <div className="overflow-x-auto rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
@@ -183,7 +237,7 @@ function ListView({
           )}
 
           {totalPages > 1 && (
-            <Pagination currentPage={currentPage} totalPages={totalPages} />
+            <Pagination currentPage={currentPage} totalPages={totalPages} filter={filter} />
           )}
         </div>
       </section>
@@ -192,7 +246,7 @@ function ListView({
   );
 }
 
-function Pagination({ currentPage, totalPages }: { currentPage: number; totalPages: number }) {
+function Pagination({ currentPage, totalPages, filter }: { currentPage: number; totalPages: number; filter: string }) {
   const pages: (number | "ellipsis")[] = [];
   // Always show first + last; window of 1 around current; ellipsis between gaps.
   const window = new Set<number>([1, totalPages, currentPage - 1, currentPage, currentPage + 1]);
@@ -203,7 +257,12 @@ function Pagination({ currentPage, totalPages }: { currentPage: number; totalPag
     pages.push(i);
     prev = i;
   }
-  const linkFor = (n: number) => (n === 1 ? "/q" : `/q?page=${n}`);
+  const filterParam = filter ? `&filter=${encodeURIComponent(filter)}` : "";
+  const linkFor = (n: number) => {
+    if (n === 1 && !filter) return "/q";
+    if (n === 1) return `/q?filter=${encodeURIComponent(filter)}`;
+    return `/q?page=${n}${filterParam}`;
+  };
   return (
     <nav className="mt-6 flex items-center justify-between gap-3" aria-label="Pagination">
       <Link
@@ -346,9 +405,9 @@ function GateView({ query, libraryCount }: { query: string; libraryCount: number
 export default async function QPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; filter?: string }>;
 }) {
-  const { q, page } = await searchParams;
+  const { q, page, filter } = await searchParams;
   const query = q?.trim() || "";
 
   if (!query) {
@@ -356,18 +415,35 @@ export default async function QPage({
       listRuns(500).then((all) => all.filter((r) => r.status !== "bad" && r.answer)),
       loadDiscovery(),
     ]);
+    // Filter (case-insensitive contains across query + answer + dataset id)
+    const filterText = (filter ?? "").trim().toLowerCase();
+    const filtered = filterText
+      ? allRuns.filter((r) => {
+          const haystack = [
+            r.query,
+            r.answer ?? "",
+            extractDataset(r) ?? "",
+          ]
+            .join(" ")
+            .toLowerCase();
+          return haystack.includes(filterText);
+        })
+      : allRuns;
+
     const pageSize = 25;
-    const totalPages = Math.max(1, Math.ceil(allRuns.length / pageSize));
+    const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
     const requestedPage = Math.max(1, Math.min(totalPages, Number.parseInt(page || "1", 10) || 1));
     const start = (requestedPage - 1) * pageSize;
-    const runs = allRuns.slice(start, start + pageSize);
+    const runs = filtered.slice(start, start + pageSize);
     return (
       <ListView
         runs={runs}
-        totalCount={allRuns.length}
+        totalCount={filtered.length}
+        unfilteredCount={allRuns.length}
         currentPage={requestedPage}
         totalPages={totalPages}
         datasetCount={discovery.totalKnown}
+        filter={filterText}
       />
     );
   }
