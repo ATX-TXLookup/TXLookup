@@ -124,7 +124,7 @@ type AgentTone = { accent: string; badge: string; dot: string; label: string };
 const AGENT_TONES: Record<string, AgentTone> = {
   orchestrator: {
     accent: "border-l-tx-navy",
-    badge: "text-tx-cream/65",
+    badge: "text-[var(--ds-text)]",
     dot: "var(--tx-navy)",
     label: "orchestrator",
   },
@@ -191,7 +191,7 @@ export function AgentSidebar(props: Props) {
                 className={`flex-1 border-b-2 px-3 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors ${
                   active
                     ? "border-tx-gold text-tx-cream"
-                    : "border-transparent text-tx-cream/55 hover:text-tx-cream"
+                    : "border-transparent text-[var(--ds-text-mute)] hover:text-tx-cream"
                 }`}
               >
                 {t.label}
@@ -265,7 +265,7 @@ function NewQueryFooter() {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Ask another question…"
-                className="flex-1 bg-transparent px-2 py-1.5 text-[13px] text-tx-cream placeholder:text-tx-cream/40 focus:outline-none"
+                className="flex-1 bg-transparent px-2 py-1.5 text-[13px] text-tx-cream placeholder:text-[var(--ds-text-dim)] focus:outline-none"
               />
               <button
                 type="submit"
@@ -281,7 +281,7 @@ function NewQueryFooter() {
               <button
                 key={s}
                 onClick={() => fire(s)}
-                className="rounded-full border border-white/12 bg-white/[0.03] px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-tx-cream/70 transition-colors hover:border-tx-gold/60 hover:bg-white/[0.08] hover:text-tx-cream"
+                className="rounded-full border border-white/12 bg-white/[0.03] px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-mute)] transition-colors hover:border-tx-gold/60 hover:bg-white/[0.08] hover:text-tx-cream"
                 title={s}
               >
                 {s.length > 28 ? s.slice(0, 26) + "…" : s}
@@ -293,7 +293,7 @@ function NewQueryFooter() {
               setOpen(false);
               setQ("");
             }}
-            className="font-mono text-[10px] uppercase tracking-wider text-tx-cream/50 hover:text-tx-cream"
+            className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-mute)] hover:text-tx-cream"
           >
             ← Close
           </button>
@@ -371,7 +371,7 @@ function StatusTab({
         />
         <p className="text-base font-medium text-tx-cream">{phaseLabel}</p>
       </div>
-      <p className="mt-1 text-[12px] leading-relaxed text-tx-cream/65">{phaseLine}</p>
+      <p className="mt-1 text-[12px] leading-relaxed text-[var(--ds-text)]">{phaseLine}</p>
       {status === "running" && totalSteps > 0 && (
         <div
           className="mt-3 h-1 w-full overflow-hidden rounded-full"
@@ -413,10 +413,10 @@ function StatusTab({
           border: "0.5px solid rgba(250,247,242,0.12)",
         }}
       >
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-tx-cream/55">
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-text-mute)]">
           Reachability
         </p>
-        <ul className="mt-2 space-y-1 font-mono text-[12px] text-tx-cream/85">
+        <ul className="mt-2 space-y-1 font-mono text-[12px] text-[var(--ds-text)]">
           <li>
             <span className="text-tx-sage">●</span> Codex reachable
           </li>
@@ -442,7 +442,7 @@ function Tile({ label, value }: { label: string; value: string }) {
         border: "0.5px solid rgba(250,247,242,0.12)",
       }}
     >
-      <p className="font-mono text-[10px] uppercase tracking-wider text-tx-cream/55">
+      <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-mute)]">
         {label}
       </p>
       <p className="mt-1 text-lg font-semibold tabular-nums text-tx-cream">
@@ -461,7 +461,7 @@ function FlowTab({
 }) {
   if (steps.length === 0) {
     return (
-      <div className="px-5 py-12 text-center font-mono text-[12px] text-tx-cream/45">
+      <div className="px-5 py-12 text-center font-mono text-[12px] text-[var(--ds-text-mute)]">
         Waiting for plan…
       </div>
     );
@@ -532,7 +532,7 @@ function FlowTab({
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex min-w-0 items-center gap-2">
-                    <span className="font-mono text-[10px] tabular-nums text-tx-cream/55">
+                    <span className="font-mono text-[10px] tabular-nums text-[var(--ds-text-mute)]">
                       {String(s.step).padStart(2, "0")}
                     </span>
                     {/* Agent badge — colored mono tag attributing this step
@@ -552,7 +552,7 @@ function FlowTab({
                   >
                     {s.status}
                     {typeof s.durationMs === "number" && s.status !== "pending" && (
-                      <span className="ml-1.5 normal-case tracking-normal text-tx-cream/55">
+                      <span className="ml-1.5 normal-case tracking-normal text-[var(--ds-text-mute)]">
                         {s.durationMs}ms
                       </span>
                     )}
@@ -588,7 +588,7 @@ function ExecutionTab({
 }) {
   if (steps.length === 0) {
     return (
-      <div className="px-5 py-12 text-center font-mono text-[12px] text-tx-cream/45">
+      <div className="px-5 py-12 text-center font-mono text-[12px] text-[var(--ds-text-mute)]">
         No steps yet.
       </div>
     );
@@ -621,7 +621,7 @@ function ExecutionTab({
                 }}
               >
                 <div className="flex items-baseline gap-2 flex-wrap">
-                  <span className="font-mono text-[10px] tabular-nums text-tx-cream/55">
+                  <span className="font-mono text-[10px] tabular-nums text-[var(--ds-text-mute)]">
                     {String(s.step).padStart(2, "0")}
                   </span>
                   <span className="font-mono text-[12px] font-semibold text-tx-cream">
@@ -650,7 +650,7 @@ function ExecutionTab({
                   </span>
                 </div>
                 {typeof s.durationMs === "number" && s.status !== "pending" && (
-                  <p className="mt-1 font-mono text-[10px] text-tx-cream/55">
+                  <p className="mt-1 font-mono text-[10px] text-[var(--ds-text-mute)]">
                     {s.durationMs}ms
                   </p>
                 )}
@@ -737,20 +737,20 @@ function TelemetryTab({
               className={`rounded-md px-2.5 py-1 text-[11px] font-medium capitalize transition-colors ${
                 active
                   ? "bg-white/10 text-[var(--ds-bg)]"
-                  : "text-white/55 hover:text-white"
+                  : "text-[var(--ds-text-mute)] hover:text-white"
               }`}
             >
               {f}
             </button>
           );
         })}
-        <span className="ml-auto font-mono text-[10px] text-white/45">
+        <span className="ml-auto font-mono text-[10px] text-[var(--ds-text-mute)]">
           {filtered.length} / {events.length}
         </span>
       </div>
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 leading-relaxed">
         {filtered.length === 0 ? (
-          <p className="py-8 text-center text-[12px] text-white/45">No events yet.</p>
+          <p className="py-8 text-center text-[12px] text-[var(--ds-text-mute)]">No events yet.</p>
         ) : (
           <ol className="space-y-3">
             {filtered.map((e, i) => (
@@ -765,15 +765,15 @@ function TelemetryTab({
                   >
                     {e.phase.replace(/_/g, " ")}
                   </span>
-                  <span className="font-mono text-[10px] tabular-nums text-white/45">
+                  <span className="font-mono text-[10px] tabular-nums text-[var(--ds-text-mute)]">
                     {fmtClock(e.ts, start)}
                   </span>
                 </div>
-                <p className="mt-1.5 text-[12.5px] leading-snug text-white/85">
+                <p className="mt-1.5 text-[12.5px] leading-snug text-[var(--ds-text)]">
                   {e.message}
                 </p>
                 {e.detail && (
-                  <pre className="mt-2 max-h-28 overflow-x-auto whitespace-pre-wrap break-all rounded bg-black/30 px-2.5 py-1.5 font-mono text-[10.5px] leading-relaxed text-white/65">
+                  <pre className="mt-2 max-h-28 overflow-x-auto whitespace-pre-wrap break-all rounded bg-black/30 px-2.5 py-1.5 font-mono text-[10.5px] leading-relaxed text-[var(--ds-text)]">
                     {e.detail}
                   </pre>
                 )}
