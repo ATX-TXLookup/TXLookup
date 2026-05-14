@@ -111,15 +111,14 @@ export default async function HomePage() {
               <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
                 For journalists, civic researchers, and city staff
               </p>
-              <h1 className="mt-4 max-w-[18ch] text-[40px] font-bold leading-[1.05] tracking-[-0.025em] text-[var(--ds-text)] md:text-[64px]">
-                Austin permits, inspections, 311 — answered with sourced data.
+              <h1 className="mt-4 max-w-[14ch] text-[44px] font-bold leading-[1.02] tracking-[-0.03em] text-[var(--ds-text)] md:text-[88px]">
+                Look up Texas.
               </h1>
               <p className="mt-6 max-w-[60ch] text-[17px] leading-[1.6] text-[var(--ds-text-mute)] md:text-[18px]">
-                A multi-agent loop reads your question, picks the dataset out of {discovery.totalKnown.toLocaleString()} indexed across {discovery.portals.length} Texas open-data portals, queries it live, lets a critic verify, and writes a sourced answer. Every source is tagged{" "}
+                Plain-English questions over {discovery.totalKnown.toLocaleString()} Texas civic datasets. A team of agents picks the right one, writes the query, runs it live, lets a critic verify, and hands you a sourced answer in seconds. Every source tagged{" "}
                 <span className="font-mono text-[var(--ds-good)]">authoritative</span>{" "}
                 <span className="font-mono text-[var(--ds-warm)]">modeled</span>{" "}
-                <span className="font-mono text-[var(--ds-accent)]">community</span>{" "}
-                so you can cite with confidence. <span className="text-[var(--ds-text)]">Every step replayable.</span>
+                <span className="font-mono text-[var(--ds-accent)]">community</span>. <span className="text-[var(--ds-text)]">Every step replayable.</span>
               </p>
             </div>
             <div className="md:col-span-6 md:-mx-2">
