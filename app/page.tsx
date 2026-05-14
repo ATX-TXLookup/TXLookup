@@ -190,23 +190,50 @@ export default async function HomePage() {
                     bad: "var(--ds-bad)",
                     neutral: "var(--ds-text)",
                   };
+                  // City color-code: Austin orange, Dallas purple, TX/state green,
+                  // San Antonio blue, Houston red. Read from the label prefix.
+                  const cityPrefix = t.label.split(" · ")[0] || "";
+                  const cityColorMap: Record<string, string> = {
+                    Austin: "var(--ds-warm)",
+                    Dallas: "var(--ds-purple)",
+                    TX: "var(--ds-good)",
+                    "San Antonio": "var(--ds-accent)",
+                    Houston: "var(--ds-bad)",
+                  };
+                  const cityColor = cityColorMap[cityPrefix] ?? "var(--ds-text-dim)";
+                  const labelRest = t.label.slice(cityPrefix.length);
                   const meta = tileMeta[t.sub];
                   return (
-                    <div key={t.label} className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4">
-                      <p className="ds-eyebrow text-[var(--ds-text-dim)]">{t.label}</p>
-                      <p
-                        className="mt-2 text-[24px] font-semibold tabular-nums tracking-tight"
-                        style={{ color: colorMap[t.tone] }}
-                      >
-                        {t.value}
-                      </p>
-                      <div className="mt-1 flex items-center justify-between gap-2">
-                        <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
-                          {t.sub}
-                        </p>
-                        {meta && (
-                          <DataSourceBadge source={meta.source} ageSeconds={meta.age_seconds} />
-                        )}
+                    <div
+                      key={t.label}
+                      className="overflow-hidden rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)]"
+                    >
+                      <div className="flex">
+                        <span
+                          aria-hidden
+                          className="w-1 shrink-0"
+                          style={{ background: cityColor }}
+                        />
+                        <div className="flex-1 p-4">
+                          <p className="ds-eyebrow text-[var(--ds-text-dim)]">
+                            <span className="font-semibold" style={{ color: cityColor }}>{cityPrefix}</span>
+                            <span>{labelRest}</span>
+                          </p>
+                          <p
+                            className="mt-2 text-[24px] font-semibold tabular-nums tracking-tight"
+                            style={{ color: colorMap[t.tone] }}
+                          >
+                            {t.value}
+                          </p>
+                          <div className="mt-1 flex items-center justify-between gap-2">
+                            <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+                              {t.sub}
+                            </p>
+                            {meta && (
+                              <DataSourceBadge source={meta.source} ageSeconds={meta.age_seconds} />
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   );
