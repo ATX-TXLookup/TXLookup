@@ -721,10 +721,17 @@ export async function executeStep(
           }
 
           // Miro v2: when an item has a parent, its position is interpreted
-          // FRAME-relative (not board-relative). So we add frameY only when
-          // there's no parent (fallback path). With a parent, y is used raw.
+          // FRAME-relative with a TOP-LEFT origin — valid coords are
+          // 0..FRAME_W x 0..FRAME_H. The layout below is authored in
+          // center-origin space (negative coords around 0,0), so for parented
+          // items we translate by half the frame size. Without this every
+          // negative-coord item 400s with "new position is outside of parent
+          // boundaries" and the board renders nearly empty (the 2026-05-14
+          // empty-board bug: 42/45 items failed this way).
           const parent = frameId ? { parent: { id: frameId } } : {};
           const yOffset = frameId ? 0 : frameY;
+          const parentDX = frameId ? FRAME_W / 2 : 0;
+          const parentDY = frameId ? FRAME_H / 2 : 0;
 
           const addSticky = async (
             content: string,
@@ -742,7 +749,7 @@ export async function executeStep(
                   body: JSON.stringify({
                     data: { content: content.slice(0, 1500), shape: "rectangle" },
                     style: { fillColor: color },
-                    position: { x, y: y + yOffset, origin: "center" },
+                    position: { x: x + parentDX, y: y + yOffset + parentDY, origin: "center" },
                     geometry: { width },
                     ...parent,
                   }),
@@ -785,7 +792,7 @@ export async function executeStep(
                       fontSize: "14",
                       textAlign: "center",
                     },
-                    position: { x, y: y + yOffset, origin: "center" },
+                    position: { x: x + parentDX, y: y + yOffset + parentDY, origin: "center" },
                     geometry: { width, height },
                     ...parent,
                   }),
@@ -821,7 +828,7 @@ export async function executeStep(
                       title: cardTitle.slice(0, 120),
                       description: description.slice(0, 1000),
                     },
-                    position: { x, y: y + yOffset, origin: "center" },
+                    position: { x: x + parentDX, y: y + yOffset + parentDY, origin: "center" },
                     ...parent,
                   }),
                 },

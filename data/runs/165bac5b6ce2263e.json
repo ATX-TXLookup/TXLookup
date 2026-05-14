@@ -92,10 +92,10 @@
     {
       "phase": "critique",
       "target": "plan",
-      "score": 0.8,
+      "score": 0.9,
       "approve": true,
       "issues": [
-        "Current and prior window dates are incorrect for the current year and last year comparison."
+        "Current and prior window dates are set in the future, adjust to current and previous year."
       ]
     },
     {
@@ -139,7 +139,7 @@
       "status": "completed",
       "preview": "{\"agent\":\"data_analyst\",\"query\":\"How do food inspection failures this year compare to last year?\",\"dataset\":{\"id\":\"ecmv-9xxi\",\"title\":\"Food Establishment Inspection Scores\",\"portal\":\"data.austintexas.gov\"},\"mode\":\"delta\",\"findings\":[{\"text\"",
       "error": null,
-      "duration_ms": 2,
+      "duration_ms": 6,
       "agent": "data_analyst",
       "result_json": {
         "agent": "data_analyst",
@@ -646,7 +646,7 @@
       "issues": []
     }
   ],
-  "answer": "Food inspection failures have increased this year compared to last year in several areas. For example, in zip code 78753-3798, failures rose from 0 last year to 2 this year, and in zip codes 78701-4189, 78701-4212, 78702-3153, and 78702-3217, failures increased from 0 to 1 each. These changes indicate a rise in inspection failures across multiple locations.",
+  "answer": "Food inspection failures have increased this year compared to last year in several areas. For example, in the 78753-3798 zip code, failures rose from 0 last year to 2 this year, and in the 78701-4189 zip code, failures went from 0 to 1. Similar increases occurred in other zip codes like 78702-3153 and 78702-3217, each rising from 0 to 1. These changes indicate a rise in inspection failures across multiple locations.",
   "citation": {
     "portal": "City of Austin",
     "portal_host": "data.austintexas.gov",
@@ -655,8 +655,8 @@
     "url": "https://data.austintexas.gov/d/ecmv-9xxi",
     "api_url": "https://data.austintexas.gov/resource/ecmv-9xxi.json"
   },
-  "durationMs": 6880,
-  "tokenTotal": 5237,
+  "durationMs": 6093,
+  "tokenTotal": 5259,
   "status": "pending",
-  "savedAt": 1778778756226
+  "savedAt": 1778788112506
 }
