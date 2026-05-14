@@ -603,7 +603,11 @@ export async function executeStep(
           summary: string;
           records?: Array<Record<string, unknown>>;
         };
-        if (!process.env.MIRO_API_TOKEN) {
+        // Trim the token defensively — a stray newline or surrounding
+        // whitespace in the env var (it has happened) produces a malformed
+        // Authorization header and every Miro call 401s silently.
+        const miroToken = process.env.MIRO_API_TOKEN?.trim();
+        if (!miroToken) {
           return {
             status: "failed",
             result: null,
@@ -611,7 +615,7 @@ export async function executeStep(
           };
         }
         const miroHeaders = {
-          Authorization: `Bearer ${process.env.MIRO_API_TOKEN}`,
+          Authorization: `Bearer ${miroToken}`,
           Accept: "application/json",
           "Content-Type": "application/json",
         };
