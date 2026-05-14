@@ -13,7 +13,8 @@
 import Link from "next/link";
 import AgentTopologyShowcase from "@/app/components/AgentTopologyShowcase";
 import { HeroTexasMap } from "@/app/components/HeroTexasMap";
-import { FeatureCard, Shell, TerminalBlock } from "@/app/components/ds";
+import { Shell, TerminalBlock } from "@/app/components/ds";
+import { HomeHero } from "@/app/components/HomeHero";
 import { DataSourceBadge } from "@/app/components/ds/DataSourceBadge";
 import { loadDiscovery } from "@/app/lib/catalog-discovered";
 import { listRuns, type SavedRun } from "@/app/lib/run-archive";
@@ -34,121 +35,6 @@ import {
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
 
-const TOPICS = [
-  { num: "01", key: "housing",   label: "Housing & Permits",  blurb: "Construction, zoning, code enforcement.",     primaryDataset: "3syk-w9eu", count: "2.3M permits" },
-  { num: "02", key: "safety",    label: "Public Safety",      blurb: "Crime reports, traffic fatalities, 311.",     primaryDataset: "fdj4-gpfu", count: "2M+ incidents" },
-  { num: "03", key: "health",    label: "Public Health",      blurb: "Restaurant inspections, food-safety scoring.", primaryDataset: "ecmv-9xxi", count: "120K inspections" },
-  { num: "04", key: "transit",   label: "Transportation",     blurb: "Vision Zero, road incidents, mobility data.",  primaryDataset: "y2wy-tgr5", count: "1K+ fatal crashes" },
-  { num: "05", key: "civic",     label: "311 & Code",         blurb: "Service requests, code violations, response.", primaryDataset: "xwdj-i9he", count: "1.5M requests" },
-  { num: "06", key: "economy",   label: "Economy & Business", blurb: "Franchise tax, mixed beverage, expenditures.", primaryDataset: "9cir-efmm", count: "3M+ permits" },
-];
-
-// Topic tiles for the hero's "Browse by topic" grid. Each tile renders an
-// inline SVG icon and a seeded query so a click runs a useful lookup right
-// away. Colors map to the DS semantic palette via the agent-color scheme.
-const TOPIC_TILES: {
-  key: string;
-  label: string;
-  blurb: string;
-  count: string;
-  color: string;
-  tone: string;
-  seedQuery: string;
-  icon: React.ReactNode;
-}[] = [
-  {
-    key: "housing",
-    label: "Permits & Housing",
-    blurb: "Where is Austin building, and where isn't it?",
-    count: "2.3M permits",
-    color: "#F97316",
-    tone: "warm",
-    seedQuery: "Where are construction permits clustering in Austin in the last 30 days?",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
-        <path d="M3 10 L11 3 L19 10 L19 19 L13 19 L13 13 L9 13 L9 19 L3 19 Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    key: "health",
-    label: "Restaurant inspections",
-    blurb: "Which kitchens failed and which keep failing.",
-    count: "120K inspections",
-    color: "#10B981",
-    tone: "good",
-    seedQuery: "Restaurants near 78704 with failing inspections this year",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
-        <path d="M7 3 L7 11 M11 3 L11 11 M15 3 L15 11 M11 11 L11 19 M5 19 L17 19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    key: "salaries",
-    label: "Salaries & contracts",
-    blurb: "Who got paid what by your city government.",
-    count: "60K records",
-    color: "#A855F7",
-    tone: "purple",
-    seedQuery: "Who got the biggest city contract in Austin last year?",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
-        <circle cx="11" cy="11" r="7.5" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M11 7 L11 15 M8.5 9 C8.5 7.9 9.6 7 11 7 C12.4 7 13.5 7.9 13.5 9 C13.5 10.1 12.4 11 11 11 C9.6 11 8.5 11.9 8.5 13 C8.5 14.1 9.6 15 11 15 C12.4 15 13.5 14.1 13.5 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    key: "civic",
-    label: "311 & code violations",
-    blurb: "Potholes, noise, illegal dumping. What got reported.",
-    count: "1.5M requests",
-    color: "#5B8DEF",
-    tone: "accent",
-    seedQuery: "Where do 311 requests and code violations spike together in Austin this year?",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
-        <path d="M3.5 5.5 C3.5 4.4 4.4 3.5 5.5 3.5 L16.5 3.5 C17.6 3.5 18.5 4.4 18.5 5.5 L18.5 13 C18.5 14.1 17.6 15 16.5 15 L9 15 L5 18.5 L5 15 L5.5 15 C4.4 15 3.5 14.1 3.5 13 Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    key: "transit",
-    label: "Roads & traffic",
-    blurb: "Crashes, Vision Zero, mobility patterns.",
-    count: "1K+ fatal crashes",
-    color: "#F59E0B",
-    tone: "warn",
-    seedQuery: "Most dangerous intersections in Austin by traffic fatality count",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
-        <path d="M5 16 L5 11 L8 7 L14 7 L17 11 L17 16 M5 16 L5 17.5 L7 17.5 L7 16 M15 16 L15 17.5 L17 17.5 L17 16 M5 16 L17 16 M7.5 12 L14.5 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    key: "schools",
-    label: "Schools & education",
-    blurb: "Enrollment, ratings, district funding flows.",
-    count: "1,200+ TX districts",
-    color: "#EF4444",
-    tone: "bad",
-    seedQuery: "How does Pflugerville ISD funding compare to nearby districts?",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
-        <path d="M2.5 8 L11 4 L19.5 8 L11 12 L2.5 8 Z M6 9.8 L6 13.5 C6 14.9 8.5 16 11 16 C13.5 16 16 14.9 16 13.5 L16 9.8 M19.5 8 L19.5 13" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-];
-
-const SAMPLES = [
-  "Where do permits and code violations both spike together this year by zip?",
-  "How has Austin's permit mix shifted from residential to commercial since 2024?",
-  "Restaurants near 78704 with failing inspections this year",
-  "Build a Miro board mapping 311 hotspots by council district",
-];
 
 export default async function HomePage() {
   const [
@@ -203,103 +89,19 @@ export default async function HomePage() {
 
   return (
     <Shell active="/">
-      {/* HERO — single focused column. No decorative map (kicked into FEATURED
-          section instead), search bar lives inline below the body so the
-          flow is: hook -> ask. */}
-      <section className="relative overflow-hidden border-b border-[var(--ds-border)]">
-        <div className="relative mx-auto max-w-[920px] px-6 py-16 md:px-8 md:py-24">
-          <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
-            For curious Texans, journalists, and city staff
-          </p>
-          <h1 className="mt-5 max-w-[14ch] text-[52px] font-bold leading-[1.02] tracking-[-0.03em] text-white md:text-[96px]">
-            Look up Texas.
-          </h1>
-          <p className="mt-7 max-w-[58ch] text-[20px] leading-[1.55] text-white md:text-[23px] md:leading-[1.5]">
-            The records are public. The <span className="font-semibold">{discovery.totalKnown.toLocaleString()} spreadsheets</span> they live in aren&rsquo;t. Ask who&rsquo;s on the city payroll, which restaurants failed inspection, where the permits piled up. We find the answer in seconds and <span className="font-semibold">show you exactly where it came from</span>.
-          </p>
+      <HomeHero datasetCount={discovery.totalKnown} />
 
-          {/* Search unit: input + Ask + live status grouped inside one bordered card
-              so it reads as a single thing, not three stacked rows. */}
-          <form action="/q" method="GET" className="mt-10">
-            <div className="rounded-xl border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] p-2.5 transition-colors focus-within:border-[var(--ds-accent)]">
-              <div className="flex items-stretch gap-2">
-                <input
-                  name="q"
-                  type="text"
-                  required
-                  autoFocus
-                  placeholder="Ask anything about Texas..."
-                  className="flex-1 bg-transparent px-3 py-3 text-[17px] leading-tight text-white placeholder:text-[#9ca3af] focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  className="rounded-md bg-white px-7 text-[16px] font-semibold text-[var(--ds-bg)] hover:opacity-90"
-                >
-                  Ask
-                </button>
-              </div>
-              <div className="mt-1.5 flex items-center gap-2.5 border-t border-[var(--ds-border)] px-3 pb-1 pt-2.5 text-[13.5px] text-[var(--ds-text-mute)]">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ds-good)]" />
-                <span>Live across <span className="font-semibold text-white">{discovery.totalKnown.toLocaleString()}</span> Texas datasets</span>
-                <span className="ml-auto text-[var(--ds-text-dim)]">Free. No login.</span>
-              </div>
-            </div>
-          </form>
-
-          {/* Browse by topic — 6 icon tiles instead of the text-blob link list.
-              Each tile leads to a seeded search on that topic so the user
-              lands on /q already running a useful query. */}
-          <div className="mt-10">
-            <div className="flex items-baseline justify-between gap-4">
-              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-text-dim)]">
-                Browse by topic
-              </p>
-              <Link href="/datasets" className="text-[13px] text-white hover:text-[var(--ds-accent)]">
-                9 curated datasets →
-              </Link>
-            </div>
-            <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {TOPIC_TILES.map((t) => (
-                <li key={t.key}>
-                  <Link
-                    href={`/q?q=${encodeURIComponent(t.seedQuery)}`}
-                    className="group flex h-full items-start gap-3 rounded-lg border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4 transition-colors hover:border-[var(--ds-accent)]"
-                  >
-                    <span
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[var(--ds-bg-deep)] text-${t.tone} group-hover:bg-[var(--ds-bg)]`}
-                      style={{ color: t.color }}
-                    >
-                      {t.icon}
-                    </span>
-                    <div className="flex-1">
-                      <p className="text-[15px] font-semibold text-white">{t.label}</p>
-                      <p className="mt-0.5 text-[12.5px] leading-snug text-[var(--ds-text-mute)]">{t.blurb}</p>
-                      <p className="mt-1.5 font-mono text-[10.5px] uppercase tracking-wider text-[var(--ds-text-dim)]">{t.count}</p>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURED INVESTIGATIONS — the post-mortem "investigation as the
-          unit of work" lesson on the homepage. Pulls top cached lookups
-          and shows them as headline + finding + dataset + replay link. */}
+      {/* FEATURED INVESTIGATIONS — compact: top cached lookups as cards */}
       <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
-        <div className="mx-auto max-w-[1240px] px-6 py-14 md:px-8 md:py-20">
+        <div className="mx-auto max-w-[1100px] px-6 py-12 md:px-8 md:py-16">
           <div className="flex items-end justify-between gap-6">
             <div>
               <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
-                Featured investigations
+                Already answered
               </p>
-              <h2 className="mt-3 max-w-[26ch] text-[34px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[44px]">
-                Questions we&apos;ve already answered.
+              <h2 className="mt-3 max-w-[26ch] text-[28px] font-bold leading-[1.1] tracking-[-0.02em] text-white md:text-[36px]">
+                Click to replay the agent run.
               </h2>
-              <p className="mt-3 max-w-[60ch] text-[14.5px] leading-relaxed text-[var(--ds-text-mute)]">
-                Click any card to watch the agent run end-to-end — same UI a live query produces, replayed from the saved trace.
-              </p>
             </div>
             <Link
               href="/q"
@@ -309,7 +111,7 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <ul className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-8 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {featuredRuns.map((r) => {
               const finding = (r.answer || "").split(/\n\n+/)[0]?.slice(0, 180) ?? "";
               const events = (r.events ?? []) as Array<Record<string, unknown>>;
@@ -345,274 +147,13 @@ export default async function HomePage() {
             })}
           </ul>
 
-          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] text-[var(--ds-text-dim)]">
-            <span>Source classes: <span className="text-[var(--ds-good)]">authoritative</span> · <span className="text-[var(--ds-warm)]">modeled</span> · <span className="text-[var(--ds-accent)]">community</span></span>
-            <Link href="/q" className="text-[var(--ds-accent)] hover:underline md:hidden">All lookups →</Link>
-          </div>
-        </div>
-      </section>
-
-      {/* MOTIVATION — the problem the agent solves */}
-      <section className="border-b border-[var(--ds-border)]">
-        <div className="mx-auto max-w-[1240px] px-6 py-14 md:px-8 md:py-20">
-          <div className="grid gap-10 md:grid-cols-12 md:gap-14">
-            <div className="md:col-span-5">
-              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
-                The motivation
-              </p>
-              <h2 className="mt-3 max-w-[18ch] text-[36px] font-bold leading-[1.08] tracking-[-0.025em] text-[var(--ds-text)] md:text-[52px]">
-                Texas publishes everything.
-                <br />
-                <span className="text-[var(--ds-text-mute)]">Hard to navigate, until now.</span>
-              </h2>
-              <p className="mt-5 max-w-[48ch] text-[15.5px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
-                The state and its cities run six open-data portals. Together they expose <span className="font-semibold text-[var(--ds-text)]">{discovery.totalKnown.toLocaleString()} datasets</span> covering permits, inspections, 311 calls, code violations, traffic fatalities, franchise tax, contracts, library checkouts — millions of rows refreshed daily. All of it public. To use it directly you have to write SoQL by hand against six different APIs.
-              </p>
-            </div>
-
-            <div className="md:col-span-7">
-              <div className="grid gap-3 md:grid-cols-2">
-                {[
-                  {
-                    eyebrow: "Six portals",
-                    n: String(discovery.portals.length || 6),
-                    nLabel: "different APIs",
-                    body: "Austin runs Socrata. San Antonio runs CKAN. Houston runs CKAN. Dallas runs Socrata. Different IDs, different conventions, different filters.",
-                    tone: "var(--ds-accent)",
-                  },
-                  {
-                    eyebrow: "Schema drift",
-                    n: "180+",
-                    nLabel: "columns just for permits",
-                    body: "Each dataset has its own column names, types, code values. permittype vs work_class vs permit_class_mapped — same idea, three columns, three meanings.",
-                    tone: "var(--ds-warn)",
-                  },
-                  {
-                    eyebrow: "SoQL syntax",
-                    n: "Brutal",
-                    nLabel: "to hand-write",
-                    body: "$select, $where, $group, $order, $limit, date_extract_y, double-quoting strings, escaping single quotes. One typo and the whole query 400s.",
-                    tone: "var(--ds-bad)",
-                  },
-                  {
-                    eyebrow: "Download + sift",
-                    n: "Hours",
-                    nLabel: "of CSV manual review",
-                    body: "The current path: download a 200,000-row CSV, open it in a spreadsheet, filter by hand, hope you didn't miss a column. Most people give up before getting to an answer.",
-                    tone: "var(--ds-purple)",
-                  },
-                ].map((f) => (
-                  <div
-                    key={f.eyebrow}
-                    className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5"
-                  >
-                    <p
-                      className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em]"
-                      style={{ color: f.tone }}
-                    >
-                      {f.eyebrow}
-                    </p>
-                    <p
-                      className="mt-3 text-[28px] font-bold leading-none tabular-nums tracking-[-0.02em] md:text-[36px]"
-                      style={{ color: f.tone }}
-                    >
-                      {f.n}
-                    </p>
-                    <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
-                      {f.nLabel}
-                    </p>
-                    <p className="mt-3 text-[13px] leading-relaxed text-[var(--ds-text-mute)]">
-                      {f.body}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              <p className="mt-6 max-w-[64ch] text-[15px] leading-relaxed text-[var(--ds-text)]">
-                <span className="font-semibold text-[var(--ds-warm)]">A team of OpenAI-powered agents stands between you and {discovery.totalKnown.toLocaleString()} datasets.</span>{" "}
-                <span className="text-[var(--ds-text-mute)]">If you can search Google or read a news article, you can ask Texas civic data anything. The planner picks the dataset; the analyst writes the SoQL; the reporter composes the answer; the critic verifies citations. Same data the experts use — now reachable in plain English.</span>
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* WHAT PEOPLE ASK — varied auto-click question chips, grouped by domain */}
-      <section className="border-b border-[var(--ds-border)]">
-        <div className="mx-auto max-w-[1240px] px-6 py-14 md:px-8 md:py-20">
-          <div className="flex items-end justify-between gap-6">
-            <div>
-              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-purple)]">
-                What people ask
-              </p>
-              <h2 className="mt-3 max-w-[24ch] text-[34px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[44px]">
-                Pick a question. Skip the typing.
-              </h2>
-              <p className="mt-3 max-w-[60ch] text-[14.5px] leading-relaxed text-[var(--ds-text-mute)]">
-                Click anything below — the agent answers in 7 seconds with a citation. No login, no setup, no SoQL.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {[
-              {
-                eyebrow: "Housing",
-                tone: "var(--ds-accent)",
-                qs: [
-                  "Where do construction permits cluster in Austin in the last 30 days?",
-                  "How has Austin's permit mix shifted from residential to commercial since 2024?",
-                  "Top 5 zips by permit count, last 12 months",
-                ],
-              },
-              {
-                eyebrow: "Public health",
-                tone: "var(--ds-good)",
-                qs: [
-                  "Restaurants near 78704 with failing inspections this year",
-                  "Repeat-offender restaurants by address last 12 months",
-                  "Average inspection score by zip — best and worst 5",
-                ],
-              },
-              {
-                eyebrow: "311 + code",
-                tone: "var(--ds-warm)",
-                qs: [
-                  "Top 311 complaint types in Austin last month",
-                  "Open code violations in 78745",
-                  "Where do permits and code violations spike together by zip?",
-                ],
-              },
-              {
-                eyebrow: "Compare cities",
-                tone: "var(--ds-purple)",
-                qs: [
-                  "Compare 311 volume between Austin and Dallas last month",
-                  "Which Texas city has the most active franchise tax holders?",
-                  "How does Houston's open-data catalog compare to Austin's?",
-                ],
-              },
-              {
-                eyebrow: "Trends + outliers",
-                tone: "var(--ds-bad)",
-                qs: [
-                  "Most-improved restaurants over the last 2 years",
-                  "Which zip is heating up fastest by composite Heat Index?",
-                  "Top 5 outliers in permit valuation this year",
-                ],
-              },
-              {
-                eyebrow: "Meta · ask the system",
-                tone: "var(--ds-text-mute)",
-                qs: [
-                  "What datasets do you have for Dallas?",
-                  "How does the agent loop work end-to-end?",
-                  "What does permit_class_mapped mean?",
-                ],
-              },
-            ].map((g) => (
-              <div
-                key={g.eyebrow}
-                className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5"
-              >
-                <p
-                  className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em]"
-                  style={{ color: g.tone }}
-                >
-                  {g.eyebrow}
-                </p>
-                <ul className="mt-4 space-y-2">
-                  {g.qs.map((q) => (
-                    <li key={q}>
-                      <a
-                        href={`/q?q=${encodeURIComponent(q)}`}
-                        className="group flex items-start justify-between gap-3 rounded border border-[var(--ds-border)] bg-[var(--ds-bg)] px-3.5 py-2.5 text-[13.5px] leading-snug text-[var(--ds-text)] transition-colors hover:border-[var(--ds-purple)] hover:bg-[var(--ds-bg-elev)]"
-                      >
-                        <span>{q}</span>
-                        <span
-                          className="shrink-0 font-mono text-[11px] opacity-50 transition-opacity group-hover:opacity-100"
-                          style={{ color: g.tone }}
-                          aria-hidden
-                        >
-                          →
-                        </span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          {/* Bridge to /chat for the conversational surface */}
-          <div className="mt-8 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-purple)]">
-                  Conversational
-                </p>
-                <p className="mt-2 max-w-[48ch] text-[14.5px] leading-relaxed text-[var(--ds-text-mute)]">
-                  Want to chat about the data instead? <Link href="/chat" className="text-[var(--ds-text)] underline decoration-[var(--ds-purple)] underline-offset-4 hover:text-[var(--ds-purple)]">Open <code className="font-mono text-[12.5px]">/chat</code></Link> — same agent, multi-turn. Ask what we have, what a column means, which dataset fits.
-                </p>
-              </div>
-              <Link
-                href="/chat"
-                className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-bg)] hover:opacity-90"
-              >
-                Open chat →
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* TOPIC GRID — numbered, larger, links to dataset detail pages */}
-      <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
-        <div className="mx-auto max-w-[1240px] px-6 py-14 md:px-8 md:py-20">
-          <div className="flex items-end justify-between gap-6">
-            <div>
-              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-text-dim)]">
-                Browse by topic
-              </p>
-              <h2 className="mt-3 max-w-[20ch] text-[38px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[52px]">
-                Six domains, hundreds of datasets.
-              </h2>
-            </div>
-            <Link href="/datasets" className="hidden md:inline-flex items-center font-mono text-[12px] uppercase tracking-[0.14em] text-[var(--ds-accent)] hover:text-[var(--ds-text)]">
-              All datasets →
-            </Link>
-          </div>
-          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {TOPICS.map((t) => (
-              <Link
-                key={t.key}
-                href={`/datasets/${t.primaryDataset}`}
-                className="group flex flex-col rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg)] p-6 transition-colors hover:border-[var(--ds-accent)]/50"
-              >
-                <p className="font-mono text-[18px] font-bold tabular-nums text-[var(--ds-accent)]">
-                  {t.num}
-                </p>
-                <h3 className="mt-3 text-[20px] font-bold tracking-tight text-[var(--ds-text)]">
-                  {t.label}
-                </h3>
-                <p className="mt-2 flex-1 text-[14px] leading-relaxed text-[var(--ds-text-mute)]">
-                  {t.blurb}
-                </p>
-                <div className="mt-5 flex items-center justify-between border-t border-[var(--ds-border)] pt-3 font-mono text-[11px] uppercase tracking-wider">
-                  <span className="text-[var(--ds-text-dim)]">{t.count}</span>
-                  <span className="text-[var(--ds-accent)] group-hover:text-[var(--ds-text)]">
-                    Open →
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <Link href="/q" className="mt-6 inline-flex text-[13px] text-[var(--ds-accent)] hover:underline md:hidden">All lookups →</Link>
         </div>
       </section>
 
       {/* MAP + MULTI-CITY LIVE — side by side, single row */}
       <section className="border-b border-[var(--ds-border)]">
-        <div className="mx-auto max-w-[1240px] px-6 py-12 md:px-8 md:py-16">
+        <div className="mx-auto max-w-[1100px] px-6 py-10 md:px-8 md:py-14">
           <div className="grid gap-10 md:grid-cols-12 md:gap-12">
             <div className="md:col-span-5">
               <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.16em] text-[var(--ds-good)]">
@@ -706,70 +247,9 @@ export default async function HomePage() {
       {/* MULTI-AGENT TOPOLOGY */}
       <AgentTopologyShowcase />
 
-      {/* BRING YOUR OWN PORTAL — compact 3-card */}
-      <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
-        <div className="mx-auto max-w-[1240px] px-6 py-12 md:px-8 md:py-16">
-          <div className="grid items-end gap-8 md:grid-cols-12">
-            <div className="md:col-span-5">
-              <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.16em] text-[var(--ds-good)]">
-                The selling point
-              </p>
-              <h2 className="mt-2 max-w-[20ch] text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[44px]">
-                Any dataset. Any portal.{" "}
-                <span className="text-[var(--ds-text-mute)]">Knowledge in 24 hours.</span>
-              </h2>
-              <p className="mt-4 max-w-[40ch] text-[14px] leading-relaxed text-[var(--ds-text-mute)]">
-                The scout + ingestor + multi-agent loop is portable. Texas is the demo corpus — the same pipeline ingests Chicago, NYC, federal data.gov, anywhere with a Socrata-compatible API.
-              </p>
-            </div>
-            <div className="md:col-span-7">
-              <div className="grid gap-2 md:grid-cols-3">
-                <FeatureCard
-                  tone="accent"
-                  icon={<span className="text-[14px]">▷</span>}
-                  title="1. Point at portal"
-                  body="Open an issue. The scout's next 6h tick discovers every dataset, scores it, and proposes a catalog entry."
-                  href="https://github.com/ATX-TXLookup/TXLookup/issues/new?labels=area%3Adata%2Cdataset-request&title=Add+portal%3A+"
-                  ctaLabel="File a portal request →"
-                />
-                <FeatureCard
-                  tone="purple"
-                  icon={<span className="text-[14px]">⌽</span>}
-                  title="2. Ingestor populates"
-                  body="The ingestor cron pulls deltas into a local SQLite cache so cross-dataset SQL JOINs work that Socrata SoQL can't."
-                  href="/agents/ingestor"
-                  ctaLabel="See the ingestor →"
-                />
-                <FeatureCard
-                  tone="warm"
-                  icon={<span className="text-[14px]">⌖</span>}
-                  title="3. Anyone asks"
-                  body="Type a question. Orchestrator dispatches. Critic rejects ungrounded. Reporter composes. Citation enforced."
-                  href="/q"
-                  ctaLabel="Try a question →"
-                />
-              </div>
-              <div className="mt-3 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg)] p-3">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-[var(--ds-good)]">
-                    Scout queue
-                  </span>
-                  <span className="font-mono text-[11px] text-[var(--ds-text-mute)]">
-                    San Antonio · Houston · El Paso · data.gov (federal pilot)
-                  </span>
-                  <Link href="/agents/dataset-scout" className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-[var(--ds-good)] hover:text-[var(--ds-text)]">
-                    watch →
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* INSTALL — split, compact */}
       <section className="border-b border-[var(--ds-border)]">
-        <div className="mx-auto max-w-[1240px] px-6 py-12 md:px-8 md:py-16">
+        <div className="mx-auto max-w-[1100px] px-6 py-10 md:px-8 md:py-14">
           <div className="grid gap-8 md:grid-cols-12">
             <div className="md:col-span-4">
               <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.16em] text-[var(--ds-accent)]">
