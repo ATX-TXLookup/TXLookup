@@ -754,18 +754,11 @@ export function AgentRunner({
                     </p>
                   )}
 
-                  {/* Action row — answer actions only. Data-source actions
-                      (Open dataset, API endpoint) live in the Primary Source
-                      aside on the right to avoid duplication. */}
-                  <div className="mt-7 flex flex-wrap items-center gap-3">
-                    {!miroLink && state.phase === "done" && (
-                      <Link
-                        href={`/q?q=${encodeURIComponent(query + " — render this to a Miro board")}`}
-                        className="inline-flex items-center rounded-md bg-white px-5 py-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-[var(--ds-bg)] hover:opacity-90"
-                      >
-                        Render to Miro ↗
-                      </Link>
-                    )}
+                  {/* Action row — quiet, equal-weight secondary actions. No
+                      filled/primary button here; the one primary action on
+                      this view is "Open dataset" in the Primary Source aside.
+                      Keeps the answer itself the focal point. */}
+                  <div className="mt-7 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px]">
                     <button
                       type="button"
                       onClick={() => {
@@ -773,7 +766,7 @@ export function AgentRunner({
                           navigator.clipboard.writeText(state.answer ?? "");
                         }
                       }}
-                      className="inline-flex items-center rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-5 py-2 text-[13px] font-semibold text-[var(--ds-text)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
+                      className="text-[var(--ds-text-mute)] hover:text-[var(--ds-accent)]"
                     >
                       Copy insight
                     </button>
@@ -788,10 +781,18 @@ export function AgentRunner({
                           navigator.clipboard.writeText(window.location.href);
                         }
                       }}
-                      className="inline-flex items-center rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-5 py-2 text-[13px] font-semibold text-[var(--ds-text)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
+                      className="text-[var(--ds-text-mute)] hover:text-[var(--ds-accent)]"
                     >
-                      Share
+                      Share link
                     </button>
+                    {!miroLink && state.phase === "done" && (
+                      <Link
+                        href={`/q?q=${encodeURIComponent(query + " — render this to a Miro board")}`}
+                        className="text-[var(--ds-text-mute)] hover:text-[var(--ds-accent)]"
+                      >
+                        Render to Miro ↗
+                      </Link>
+                    )}
                   </div>
 
                   {/* Meta strip — gold insight badges per BRAND §7 */}
@@ -867,28 +868,35 @@ export function AgentRunner({
                         Open dataset →
                       </Link>
 
-                      <div className="mt-3 grid grid-cols-3 gap-1 border-t border-[var(--ds-border)] pt-3">
+                      {/* Developer-detail links — quiet dotted text row, not
+                          three competing bordered boxes. "Open dataset" above
+                          is the single primary action in this aside. */}
+                      <div className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1 border-t border-[var(--ds-border)] pt-3 font-mono text-[10.5px] uppercase tracking-wider text-[var(--ds-text-dim)]">
                         <Link
                           href={`/datasets/${state.citation.dataset_id}#schema`}
-                          className="rounded-sm border border-[var(--ds-border)] px-2 py-1.5 text-center font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-mute)] hover:border-[var(--ds-text-dim)] hover:text-[var(--ds-text)]"
+                          className="hover:text-[var(--ds-text)]"
                         >
-                          View schema
+                          Schema
                         </Link>
                         {state.citation.api_url && (
-                          <a
-                            href={state.citation.api_url}
-                            target="_blank"
-                            rel="noopener"
-                            className="rounded-sm border border-[var(--ds-border)] px-2 py-1.5 text-center font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-mute)] hover:border-[var(--ds-text-dim)] hover:text-[var(--ds-text)]"
-                          >
-                            Raw JSON
-                          </a>
+                          <>
+                            <span aria-hidden>·</span>
+                            <a
+                              href={state.citation.api_url}
+                              target="_blank"
+                              rel="noopener"
+                              className="hover:text-[var(--ds-text)]"
+                            >
+                              Raw JSON
+                            </a>
+                          </>
                         )}
+                        <span aria-hidden>·</span>
                         <a
                           href={`https://${state.citation.portal_host}/d/${state.citation.dataset_id}`}
                           target="_blank"
                           rel="noopener"
-                          className="rounded-sm border border-[var(--ds-border)] px-2 py-1.5 text-center font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-mute)] hover:border-[var(--ds-text-dim)] hover:text-[var(--ds-text)]"
+                          className="hover:text-[var(--ds-text)]"
                         >
                           Docs
                         </a>
