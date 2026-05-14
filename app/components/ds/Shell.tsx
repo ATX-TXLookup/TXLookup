@@ -62,7 +62,7 @@ export function ShellHeader({ active }: { active?: string }) {
             v0.1
           </span>
         </Link>
-        <nav className="hidden items-center gap-6 text-[13px] md:flex">
+        <nav className="hidden items-center gap-6 text-[13.5px] md:flex">
           {NAV.map((n) => {
             if (n.kind === "link") {
               const a = isActive(n.href, active);
@@ -71,7 +71,7 @@ export function ShellHeader({ active }: { active?: string }) {
                   key={n.href}
                   href={n.href}
                   className={`transition-colors ${
-                    a ? "text-[var(--ds-text)]" : "text-[var(--ds-text-mute)] hover:text-[var(--ds-text)]"
+                    a ? "font-semibold text-[var(--ds-accent)]" : "text-[var(--ds-text)] hover:text-[var(--ds-accent)]"
                   }`}
                 >
                   {n.label}
@@ -85,7 +85,7 @@ export function ShellHeader({ active }: { active?: string }) {
                 <button
                   type="button"
                   className={`flex items-center gap-1 transition-colors ${
-                    anyActive ? "text-[var(--ds-text)]" : "text-[var(--ds-text-mute)] hover:text-[var(--ds-text)]"
+                    anyActive ? "font-semibold text-[var(--ds-accent)]" : "text-[var(--ds-text)] hover:text-[var(--ds-accent)]"
                   }`}
                   aria-haspopup="menu"
                 >
@@ -150,7 +150,7 @@ export function ShellFooter() {
           <p className="text-[13px] font-semibold text-[var(--ds-text)]">TXLookup</p>
           <nav className="flex flex-wrap items-center gap-5 text-[12px]">
             {FLAT_NAV.map((n) => (
-              <Link key={n.href} href={n.href} className="text-[var(--ds-text-dim)] hover:text-[var(--ds-text)]">
+              <Link key={n.href} href={n.href} className="text-[var(--ds-text-mute)] hover:text-[var(--ds-text)]">
                 {n.label}
               </Link>
             ))}
