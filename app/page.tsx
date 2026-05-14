@@ -59,12 +59,64 @@ export default async function HomePage() {
     loadDiscovery(),
   ]);
 
-  // Pull top 6 cached investigations to feature on the homepage (post-mortem:
-  // investigation as the unit of work). Drop bad-status runs + ones without
-  // a real answer / duration.
-  const featuredRuns = (await listRuns(50))
-    .filter((r) => r.status !== "bad" && r.answer && r.durationMs > 0)
-    .slice(0, 6);
+  // Pull 6 cached investigations to feature. Curation matters here — the
+  // raw archive is full of failed runs, null results, and near-duplicate
+  // QA queries. Quality gate:
+  //   - drop bad-status + zero-duration
+  //   - drop answers that signal failure or an empty result
+  //   - require a real number in the answer (an actual finding)
+  //   - require a substantive answer length
+  //   - dedupe by dataset so it's not 4 rows of the same source
+  //   - prefer answers with more concrete numbers (denser findings)
+  const FAILURE_SIGNALS = [
+    "does not include",
+    "cannot be completed",
+    "data provided does not",
+    "ran into a problem",
+    "couldn't recover",
+    "could not recover",
+    "i tried to answer",
+    "there have been no",
+    "there are no",
+    "no data",
+    "not available",
+    "unable to",
+    "insufficient",
+  ];
+  const numberDensity = (s: string) => (s.match(/[0-9][0-9,]{2,}/g) ?? []).length;
+  const datasetOf = (r: SavedRun): string => {
+    for (const ev of (r.events ?? []) as Array<Record<string, unknown>>) {
+      if (ev.phase === "executing" && ev.args && typeof ev.args === "object") {
+        const d = (ev.args as Record<string, unknown>).datasetId;
+        if (typeof d === "string") return d;
+      }
+    }
+    return "";
+  };
+  const allRunsForFeature = await listRuns(200);
+  const featuredRuns = (() => {
+    const candidates = allRunsForFeature
+      .filter((r) => {
+        if (r.status === "bad" || !r.answer || r.durationMs <= 0) return false;
+        const low = r.answer.toLowerCase();
+        if (FAILURE_SIGNALS.some((s) => low.includes(s))) return false;
+        if (r.answer.trim().length < 80) return false;
+        if (numberDensity(r.answer) < 1) return false;
+        return true;
+      })
+      .sort((a, b) => numberDensity(b.answer) - numberDensity(a.answer));
+    // Dedupe by dataset — one strong run per source.
+    const seen = new Set<string>();
+    const picked: SavedRun[] = [];
+    for (const r of candidates) {
+      const ds = datasetOf(r);
+      if (ds && seen.has(ds)) continue;
+      if (ds) seen.add(ds);
+      picked.push(r);
+      if (picked.length === 6) break;
+    }
+    return picked;
+  })();
 
   // Unwrap StatResult shape into legacy plain values for the renderer below.
   const permitsSpark = permitsSparkRes.value ?? [];
