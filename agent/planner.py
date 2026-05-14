@@ -293,6 +293,8 @@ _DATE_PHRASES: tuple[tuple[str, str], ...] = (
     (r"\blast (six|6) months\b", "last six months"),
     (r"\blast 30 days\b", "last 30 days"),
     (r"\blast (twelve|12) months\b", "last twelve months"),
+    (r"\blast (24|twenty[- ]?four) months\b", "last 24 months"),
+    (r"\bover the last \d+ (month|quarter|year)s?\b", "rolling window"),
     (r"\bytd\b", "year to date"),
 )
 
@@ -308,9 +310,44 @@ _DATE_COLUMNS: tuple[str, ...] = (
     "responsibility_beginning_date",
 )
 
+# Council-district columns that actually exist on TX civic datasets. A
+# "District N" question must scope on one of these. The 2026-05-13 corpus
+# audit found the agent repeatedly pinning "District 3" onto a department
+# column (Austin 311, xwdj-i9he, has no district column at all), which
+# silently returns zero rows and the agent then fabricates a finding.
+_DISTRICT_COLUMNS: tuple[str, ...] = (
+    "council_district",
+    "city_council_district",
+)
+# A where-clause that pins a district onto a non-district column.
+_DISTRICT_MISMAP_RE = re.compile(
+    r"(sr_department_desc|department|dept)\s*=\s*'?\s*(council\s+)?district",
+    re.IGNORECASE,
+)
+_DISTRICT_QUERY_RE = re.compile(r"\b(council\s+)?district\s+\d+\b", re.IGNORECASE)
+# "join X with Y" — a question that needs >= 2 datasets merged.
+_JOIN_QUERY_RE = re.compile(r"\b(join|combine|merge)\b", re.IGNORECASE)
+# Ranking / outlier questions — the scoped step must carry an `order` arg.
+_RANKING_QUERY_RE = re.compile(
+    r"\b(top\s+\d+|outliers?|highest|lowest|fastest|slowest|largest|"
+    r"smallest|ranked?|leading)\b",
+    re.IGNORECASE,
+)
+
+
+def _dataset_id_of(step: "Step") -> str:
+    """Read a step's dataset id, tolerating camelCase and snake_case."""
+    return str(step.args.get("datasetId") or step.args.get("dataset_id") or "")
+
 
 def validate_plan_scope(query: str, plan: Plan) -> list[dict[str, Any]]:
-    """Return a list of scope-violation issues. Empty list = plan looks scoped."""
+    """Return a list of scope-violation issues. Empty list = plan looks scoped.
+
+    Catches the ungrounded-plan classes found in the 2026-05-13 corpus audit:
+    unscoped zip/date queries, "District N" mis-mapped onto a department
+    column, "join" queries that touch only one dataset, and ranking/outlier
+    queries with no `order` argument.
+    """
     issues: list[dict[str, Any]] = []
     zip_match = re.search(r"\b(\d{5})\b", query)
     date_hit: Optional[str] = None
@@ -356,6 +393,83 @@ def validate_plan_scope(query: str, plan: Plan) -> list[dict[str, Any]]:
                     ),
                 }
             )
+
+    # --- District scoping (audit 2026-05-13) ---
+    if _DISTRICT_QUERY_RE.search(query):
+        district_scoped = False
+        district_mismapped = False
+        for i, step in enumerate(plan.steps):
+            if step.tool not in _SCOPED_TOOLS:
+                continue
+            where = str(step.args.get("where", ""))
+            if _DISTRICT_MISMAP_RE.search(where):
+                district_mismapped = True
+                issues.append(
+                    {
+                        "step": i + 1,
+                        "tool": step.tool,
+                        "reason": (
+                            "question scopes to a council district but "
+                            "step.where pins the district onto a department "
+                            "column — that is not a district field and "
+                            "returns zero rows"
+                        ),
+                    }
+                )
+            if any(c in where.lower() for c in _DISTRICT_COLUMNS):
+                district_scoped = True
+        if not district_scoped and not district_mismapped:
+            issues.append(
+                {
+                    "step": 0,
+                    "tool": "(plan)",
+                    "reason": (
+                        "question names a council district but no scoped "
+                        "step constrains a council_district column"
+                    ),
+                }
+            )
+
+    # --- Join queries need >= 2 datasets (audit 2026-05-13) ---
+    if _JOIN_QUERY_RE.search(query):
+        dataset_ids = {
+            _dataset_id_of(s) for s in plan.steps if s.tool in _SCOPED_TOOLS
+        }
+        dataset_ids.discard("")
+        if len(dataset_ids) < 2:
+            issues.append(
+                {
+                    "step": 0,
+                    "tool": "(plan)",
+                    "reason": (
+                        f"question asks to join/combine datasets but the "
+                        f"plan touches {len(dataset_ids)} dataset(s) — a real "
+                        "join needs at least two"
+                    ),
+                }
+            )
+
+    # --- Ranking / outlier queries need an explicit order (audit 2026-05-13) ---
+    if _RANKING_QUERY_RE.search(query):
+        has_order = any(
+            step.tool in _SCOPED_TOOLS
+            and str(step.args.get("order", "")).strip()
+            for step in plan.steps
+        )
+        if not has_order:
+            issues.append(
+                {
+                    "step": 0,
+                    "tool": "(plan)",
+                    "reason": (
+                        "question asks for a ranking/outliers (top N / "
+                        "highest / outliers) but no scoped step carries an "
+                        "`order` argument — results will not be sorted by "
+                        "the relevant metric"
+                    ),
+                }
+            )
+
     return issues
 
 
