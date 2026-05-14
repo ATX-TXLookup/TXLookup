@@ -115,46 +115,46 @@ export default async function HomePage() {
                 Look up Texas.
               </h1>
               <p className="mt-6 max-w-[60ch] text-[17px] leading-[1.6] text-[var(--ds-text-mute)] md:text-[18px]">
-                Ask anything about Texas. Permits, inspections, salaries, restaurant scores, school stats, who got paid what. We pull from {discovery.totalKnown.toLocaleString()} public records and bring back a <span className="text-[var(--ds-text)]">sourced answer in seconds</span>.
+                The records are public. The <span className="text-[var(--ds-text)]">{discovery.totalKnown.toLocaleString()} spreadsheets</span> they live in aren&rsquo;t. Ask who&rsquo;s on the city payroll, which restaurants failed inspection, where the permits piled up. We find the answer in seconds and <span className="text-[var(--ds-text)]">show you exactly where it came from</span>.
               </p>
             </div>
             <div className="md:col-span-6 md:-mx-2">
               <HeroTexasMap />
             </div>
             <div className="md:col-span-12">
-              <form action="/q" method="GET" className="mt-2">
-                <div className="flex items-center gap-2 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-1.5 transition-colors focus-within:border-[var(--ds-accent)]">
+              <form action="/q" method="GET" className="mt-8">
+                <div className="flex items-stretch gap-2 rounded-lg border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-2 transition-colors focus-within:border-[var(--ds-accent)]">
                   <input
                     name="q"
                     type="text"
                     required
                     autoFocus
-                    placeholder="Search Texas civic data · plain English"
-                    className="flex-1 bg-transparent px-3 py-2 font-mono text-[12.5px] text-[var(--ds-text)] placeholder:text-[var(--ds-text-dim)] focus:outline-none"
+                    placeholder="Try: who got the biggest city contract last year?"
+                    className="flex-1 bg-transparent px-3 py-3 text-[15.5px] leading-tight text-[var(--ds-text)] placeholder:text-[var(--ds-text-dim)] focus:outline-none"
                   />
                   <button
                     type="submit"
-                    className="rounded-md bg-white px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-bg)] hover:opacity-90"
+                    className="rounded-md bg-white px-6 text-[14px] font-semibold text-[var(--ds-bg)] hover:opacity-90"
                   >
-                    Ask →
+                    Ask
                   </button>
                 </div>
               </form>
-              <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px]">
-                <span className="font-mono uppercase tracking-wider text-[var(--ds-text-dim)]">try</span>
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <span className="text-[13px] text-[var(--ds-text-dim)]">Or try:</span>
                 {SAMPLES.slice(0, 3).map((q) => (
                   <a
                     key={q}
                     href={`/q?q=${encodeURIComponent(q)}`}
-                    className="text-[var(--ds-text-mute)] hover:text-[var(--ds-accent)] hover:underline"
+                    className="rounded-full border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-3 py-1.5 text-[13px] text-[var(--ds-text-mute)] transition-colors hover:border-[var(--ds-accent)] hover:text-[var(--ds-text)]"
                   >
-                    {q.length > 44 ? q.slice(0, 42) + "…" : q}
+                    {q}
                   </a>
                 ))}
               </div>
-              <div className="mt-3 flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+              <div className="mt-5 flex items-center gap-2 text-[13px] text-[var(--ds-text-mute)]">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ds-good)]" />
-                <span>agent online · 7 specialists · 9 curated · {discovery.totalKnown.toLocaleString()} indexed</span>
+                <span>Live across {discovery.totalKnown.toLocaleString()} Texas datasets right now</span>
               </div>
             </div>
           </div>
