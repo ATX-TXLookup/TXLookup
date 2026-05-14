@@ -78,7 +78,22 @@ function extractEvidence(
 
 // ------- views -------
 
-function ListView({ runs, datasetCount }: { runs: SavedRun[]; datasetCount: number }) {
+function ListView({
+  runs,
+  totalCount,
+  currentPage,
+  totalPages,
+  datasetCount,
+}: {
+  runs: SavedRun[];
+  totalCount: number;
+  currentPage: number;
+  totalPages: number;
+  datasetCount: number;
+}) {
+  const pageSize = 25;
+  const start = (currentPage - 1) * pageSize + 1;
+  const end = Math.min(totalCount, start + runs.length - 1);
   return (
     <Shell active="/q">
       <HomeHero datasetCount={datasetCount} searchOnly />
@@ -91,9 +106,12 @@ function ListView({ runs, datasetCount }: { runs: SavedRun[]; datasetCount: numb
                 All lookups
               </p>
               <h2 className="mt-2 text-[24px] font-bold leading-[1.1] tracking-[-0.02em] text-white md:text-[30px]">
-                {runs.length} answered. Click a row to replay.
+                {totalCount} answered. Click a row to replay.
               </h2>
             </div>
+            <p className="hidden font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-dim)] md:block">
+              Showing <span className="text-white">{start}&ndash;{end}</span> of {totalCount}
+            </p>
           </div>
         </div>
       </section>
@@ -163,10 +181,77 @@ function ListView({ runs, datasetCount }: { runs: SavedRun[]; datasetCount: numb
               </table>
             </div>
           )}
+
+          {totalPages > 1 && (
+            <Pagination currentPage={currentPage} totalPages={totalPages} />
+          )}
         </div>
       </section>
 
     </Shell>
+  );
+}
+
+function Pagination({ currentPage, totalPages }: { currentPage: number; totalPages: number }) {
+  const pages: (number | "ellipsis")[] = [];
+  // Always show first + last; window of 1 around current; ellipsis between gaps.
+  const window = new Set<number>([1, totalPages, currentPage - 1, currentPage, currentPage + 1]);
+  let prev = 0;
+  for (let i = 1; i <= totalPages; i++) {
+    if (!window.has(i)) continue;
+    if (i - prev > 1) pages.push("ellipsis");
+    pages.push(i);
+    prev = i;
+  }
+  const linkFor = (n: number) => (n === 1 ? "/q" : `/q?page=${n}`);
+  return (
+    <nav className="mt-6 flex items-center justify-between gap-3" aria-label="Pagination">
+      <Link
+        href={currentPage > 1 ? linkFor(currentPage - 1) : "#"}
+        aria-disabled={currentPage === 1}
+        className={`rounded-md border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider ${
+          currentPage === 1
+            ? "pointer-events-none border-[var(--ds-border)] text-[var(--ds-text-dim)]"
+            : "border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] text-white hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
+        }`}
+      >
+        ← Prev
+      </Link>
+      <ul className="flex items-center gap-1.5">
+        {pages.map((p, idx) =>
+          p === "ellipsis" ? (
+            <li key={`e${idx}`} className="px-1 font-mono text-[12px] text-[var(--ds-text-dim)]">
+              …
+            </li>
+          ) : (
+            <li key={p}>
+              <Link
+                href={linkFor(p)}
+                aria-current={p === currentPage ? "page" : undefined}
+                className={`flex h-8 min-w-[2rem] items-center justify-center rounded-md px-2 font-mono text-[12px] tabular-nums ${
+                  p === currentPage
+                    ? "bg-white text-[var(--ds-bg)]"
+                    : "border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] text-white hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
+                }`}
+              >
+                {p}
+              </Link>
+            </li>
+          ),
+        )}
+      </ul>
+      <Link
+        href={currentPage < totalPages ? linkFor(currentPage + 1) : "#"}
+        aria-disabled={currentPage === totalPages}
+        className={`rounded-md border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider ${
+          currentPage === totalPages
+            ? "pointer-events-none border-[var(--ds-border)] text-[var(--ds-text-dim)]"
+            : "border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] text-white hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
+        }`}
+      >
+        Next →
+      </Link>
+    </nav>
   );
 }
 
@@ -261,17 +346,30 @@ function GateView({ query, libraryCount }: { query: string; libraryCount: number
 export default async function QPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string }>;
 }) {
-  const { q } = await searchParams;
+  const { q, page } = await searchParams;
   const query = q?.trim() || "";
 
   if (!query) {
-    const [runs, discovery] = await Promise.all([
+    const [allRuns, discovery] = await Promise.all([
       listRuns(500).then((all) => all.filter((r) => r.status !== "bad" && r.answer)),
       loadDiscovery(),
     ]);
-    return <ListView runs={runs} datasetCount={discovery.totalKnown} />;
+    const pageSize = 25;
+    const totalPages = Math.max(1, Math.ceil(allRuns.length / pageSize));
+    const requestedPage = Math.max(1, Math.min(totalPages, Number.parseInt(page || "1", 10) || 1));
+    const start = (requestedPage - 1) * pageSize;
+    const runs = allRuns.slice(start, start + pageSize);
+    return (
+      <ListView
+        runs={runs}
+        totalCount={allRuns.length}
+        currentPage={requestedPage}
+        totalPages={totalPages}
+        datasetCount={discovery.totalKnown}
+      />
+    );
   }
 
   const cached = await findRun(query);
