@@ -118,41 +118,54 @@ export default async function HomePage() {
             The records are public. The <span className="font-semibold">{discovery.totalKnown.toLocaleString()} spreadsheets</span> they live in aren&rsquo;t. Ask who&rsquo;s on the city payroll, which restaurants failed inspection, where the permits piled up. We find the answer in seconds and <span className="font-semibold">show you exactly where it came from</span>.
           </p>
 
+          {/* Search unit: input + Ask + live status grouped inside one bordered card
+              so it reads as a single thing, not three stacked rows. */}
           <form action="/q" method="GET" className="mt-10">
-            <div className="flex items-stretch gap-2 rounded-lg border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] p-2.5 transition-colors focus-within:border-[var(--ds-accent)]">
-              <input
-                name="q"
-                type="text"
-                required
-                autoFocus
-                placeholder="Try: who got the biggest city contract last year?"
-                className="flex-1 bg-transparent px-3 py-3 text-[17px] leading-tight text-white placeholder:text-[#9ca3af] focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="rounded-md bg-white px-7 text-[16px] font-semibold text-[var(--ds-bg)] hover:opacity-90"
-              >
-                Ask
-              </button>
+            <div className="rounded-xl border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] p-2.5 transition-colors focus-within:border-[var(--ds-accent)]">
+              <div className="flex items-stretch gap-2">
+                <input
+                  name="q"
+                  type="text"
+                  required
+                  autoFocus
+                  placeholder="Ask anything about Texas..."
+                  className="flex-1 bg-transparent px-3 py-3 text-[17px] leading-tight text-white placeholder:text-[#9ca3af] focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="rounded-md bg-white px-7 text-[16px] font-semibold text-[var(--ds-bg)] hover:opacity-90"
+                >
+                  Ask
+                </button>
+              </div>
+              <div className="mt-1.5 flex items-center gap-2.5 border-t border-[var(--ds-border)] px-3 pb-1 pt-2.5 text-[13.5px] text-[var(--ds-text-mute)]">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ds-good)]" />
+                <span>Live across <span className="font-semibold text-white">{discovery.totalKnown.toLocaleString()}</span> Texas datasets</span>
+                <span className="ml-auto text-[var(--ds-text-dim)]">Free. No login.</span>
+              </div>
             </div>
           </form>
 
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            <span className="text-[15px] font-medium text-white">Or try:</span>
-            {SAMPLES.slice(0, 3).map((q) => (
-              <a
-                key={q}
-                href={`/q?q=${encodeURIComponent(q)}`}
-                className="rounded-full border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] px-4 py-2 text-[14.5px] text-white transition-colors hover:border-[var(--ds-accent)] hover:bg-[var(--ds-bg-deep)]"
-              >
-                {q}
-              </a>
-            ))}
-          </div>
-
-          <div className="mt-7 flex items-center gap-2.5 text-[15px] text-white">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--ds-good)]" />
-            <span>Live across <span className="font-semibold">{discovery.totalKnown.toLocaleString()}</span> Texas datasets right now</span>
+          {/* Popular questions: full-width link rows, no chip wrapping/truncation.
+              Each row is one example, with a faint number and an arrow. */}
+          <div className="mt-10">
+            <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-text-dim)]">
+              Popular questions
+            </p>
+            <ul className="mt-3 divide-y divide-[var(--ds-border)] border-y border-[var(--ds-border)]">
+              {SAMPLES.slice(0, 3).map((q, i) => (
+                <li key={q}>
+                  <a
+                    href={`/q?q=${encodeURIComponent(q)}`}
+                    className="group flex items-center gap-4 py-3.5 text-[16px] text-white transition-colors hover:text-[var(--ds-accent)]"
+                  >
+                    <span className="w-6 font-mono text-[13px] text-[var(--ds-text-dim)] group-hover:text-[var(--ds-accent)]">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="flex-1 leading-snug">{q}</span>
+                    <span className="font-mono text-[14px] text-[var(--ds-text-dim)] transition-transform group-hover:translate-x-1 group-hover:text-[var(--ds-accent)]">→</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
