@@ -120,7 +120,7 @@ export function HomeHero({
               Look up Texas.
             </h1>
             <p className={`mt-7 max-w-[58ch] text-white ${compact ? "text-[17px] leading-[1.5] md:text-[19px]" : "text-[20px] leading-[1.55] md:text-[23px] md:leading-[1.5]"}`}>
-              The records are public. The <span className="font-semibold">{datasetCount.toLocaleString()} spreadsheets</span> they live in aren&rsquo;t. Ask who&rsquo;s on the city payroll, which restaurants failed inspection, where the permits piled up. We find the answer in seconds and <span className="font-semibold">show you exactly where it came from</span>.
+              Texas publishes <span className="font-semibold">{datasetCount.toLocaleString()} open datasets</span>. Permits, inspections, salaries, 311 calls. Technically public, practically unusable: getting an answer means writing SoQL queries against an API. TXLookup makes them <span className="font-semibold">askable in plain English</span>. AI agents pick the dataset, write the query, check the result, and cite the source.
             </p>
           </>
         )}
