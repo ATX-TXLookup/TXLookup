@@ -94,23 +94,39 @@ const TOPIC_TILES: {
   },
 ];
 
-export function HomeHero({ datasetCount, compact }: { datasetCount: number; compact?: boolean }) {
-  const padY = compact ? "py-10 md:py-14" : "py-16 md:py-24";
+export function HomeHero({
+  datasetCount,
+  compact,
+  searchOnly,
+}: {
+  datasetCount: number;
+  compact?: boolean;
+  searchOnly?: boolean;
+}) {
+  const padY = searchOnly
+    ? "py-8 md:py-10"
+    : compact
+      ? "py-10 md:py-14"
+      : "py-16 md:py-24";
   return (
     <section className="relative overflow-hidden border-b border-[var(--ds-border)]">
       <div className={`relative mx-auto max-w-[920px] px-6 md:px-8 ${padY}`}>
-        <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
-          For curious Texans, journalists, and city staff
-        </p>
-        <h1 className={`mt-5 max-w-[14ch] font-bold leading-[1.02] tracking-[-0.03em] text-white ${compact ? "text-[40px] md:text-[64px]" : "text-[52px] md:text-[96px]"}`}>
-          Look up Texas.
-        </h1>
-        <p className={`mt-7 max-w-[58ch] text-white ${compact ? "text-[17px] leading-[1.5] md:text-[19px]" : "text-[20px] leading-[1.55] md:text-[23px] md:leading-[1.5]"}`}>
-          The records are public. The <span className="font-semibold">{datasetCount.toLocaleString()} spreadsheets</span> they live in aren&rsquo;t. Ask who&rsquo;s on the city payroll, which restaurants failed inspection, where the permits piled up. We find the answer in seconds and <span className="font-semibold">show you exactly where it came from</span>.
-        </p>
+        {!searchOnly && (
+          <>
+            <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
+              For curious Texans, journalists, and city staff
+            </p>
+            <h1 className={`mt-5 max-w-[14ch] font-bold leading-[1.02] tracking-[-0.03em] text-white ${compact ? "text-[40px] md:text-[64px]" : "text-[52px] md:text-[96px]"}`}>
+              Look up Texas.
+            </h1>
+            <p className={`mt-7 max-w-[58ch] text-white ${compact ? "text-[17px] leading-[1.5] md:text-[19px]" : "text-[20px] leading-[1.55] md:text-[23px] md:leading-[1.5]"}`}>
+              The records are public. The <span className="font-semibold">{datasetCount.toLocaleString()} spreadsheets</span> they live in aren&rsquo;t. Ask who&rsquo;s on the city payroll, which restaurants failed inspection, where the permits piled up. We find the answer in seconds and <span className="font-semibold">show you exactly where it came from</span>.
+            </p>
+          </>
+        )}
 
         {/* Search unit */}
-        <form action="/q" method="GET" className={compact ? "mt-8" : "mt-10"}>
+        <form action="/q" method="GET" className={searchOnly ? "" : compact ? "mt-8" : "mt-10"}>
           <div className="rounded-xl border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] p-2.5 transition-colors focus-within:border-[var(--ds-accent)]">
             <div className="flex items-stretch gap-2">
               <input

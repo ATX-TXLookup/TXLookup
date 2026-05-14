@@ -97,11 +97,14 @@ export default async function HomePage() {
           <div className="flex items-end justify-between gap-6">
             <div>
               <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
-                Already answered
+                Agent insights
               </p>
               <h2 className="mt-3 max-w-[26ch] text-[28px] font-bold leading-[1.1] tracking-[-0.02em] text-white md:text-[36px]">
-                Click to replay the agent run.
+                What did the data reveal?
               </h2>
+              <p className="mt-3 max-w-[52ch] text-[14.5px] leading-relaxed text-[var(--ds-text-mute)]">
+                Pulled from public records, written by the agents. Click any card to watch the work.
+              </p>
             </div>
             <Link
               href="/q"
@@ -151,20 +154,21 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* MAP + MULTI-CITY LIVE — side by side, single row */}
+      {/* LIVE ACROSS TEXAS — multi-city pulse, real numbers right now.
+          Dropped the SQLite/mirror jargon; section now reads as a "see it
+          moving" snapshot of the major Texas cities + state. */}
       <section className="border-b border-[var(--ds-border)]">
         <div className="mx-auto max-w-[1100px] px-6 py-10 md:px-8 md:py-14">
           <div className="grid gap-10 md:grid-cols-12 md:gap-12">
             <div className="md:col-span-5">
-              <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.16em] text-[var(--ds-good)]">
-                Local mirror · refreshed every 6h
+              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-good)]">
+                Live across Texas
               </p>
-              <h2 className="mt-2 max-w-[20ch] text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[44px]">
-                9 curated, locally mirrored.{" "}
-                <span className="text-[var(--ds-text-mute)]">The other {(discovery.totalKnown - 9).toLocaleString()} answered live.</span>
+              <h2 className="mt-2 max-w-[20ch] text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-white md:text-[44px]">
+                Austin. Dallas. San Antonio. Houston. The state.
               </h2>
-              <p className="mt-4 max-w-[44ch] text-[14px] leading-relaxed text-[var(--ds-text-mute)]">
-                The 9 datasets behind these tiles are mirrored to a local SQLite store every 6 hours by an autonomous ingestor cron. Pages render from the mirror in milliseconds and survive upstream throttling. The remaining {discovery.totalKnown.toLocaleString() }-dataset catalog across {discovery.portals.length} portals is queried on demand — each tile shows a freshness badge so the source is never ambiguous.
+              <p className="mt-4 max-w-[44ch] text-[15px] leading-relaxed text-[var(--ds-text-mute)]">
+                Real numbers, pulled fresh from each city&rsquo;s open-data portal. The big tiles update on every page load; freshness shown on each one. {(discovery.totalKnown - 9).toLocaleString()}+ more datasets are one question away.
               </p>
               <HeroTexasMap />
             </div>
