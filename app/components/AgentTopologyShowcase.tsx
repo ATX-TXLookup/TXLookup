@@ -1,21 +1,22 @@
 "use client";
 
-// AgentTopologyShowcase — homepage centerpiece. White editorial aesthetic
-// matching the VCAP-inspired homepage. Diagram lives inside a clean
-// bordered card; nodes are minimal circles with thin connecting lines.
+// AgentTopologyShowcase — the agentic flow as a clean top-down flowchart.
+// Static layout (no spinning/sweeping); a gentle highlight steps through
+// the nodes as the cycle timer advances. Critic -> Data Analyst re-plan
+// loop is drawn explicitly. Support is an off-path helper node.
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 type LaneKey = "orchestrator" | "data_analyst" | "reporter" | "support" | "critic";
 
-const LANES: { key: LaneKey; label: string; color: string; sub: string }[] = [
-  { key: "orchestrator", label: "Orchestrator", color: "#2563EB", sub: "router · planner" },
-  { key: "data_analyst", label: "Data Analyst", color: "#10B981", sub: "SoQL · stats" },
-  { key: "critic",       label: "Critic",       color: "#F59E0B", sub: "self-correct" },
-  { key: "reporter",     label: "Reporter",     color: "#A855F7", sub: "compose · cite" },
-  { key: "support",      label: "Support",      color: "#EC4899", sub: "disambiguate" },
-];
+const LANES: Record<LaneKey, { label: string; role: string; color: string; timing: string }> = {
+  orchestrator: { label: "Orchestrator", role: "router · decomposer", color: "#2563EB", timing: "~0.6s" },
+  data_analyst: { label: "Data Analyst", role: "SoQL · Socrata exec", color: "#10B981", timing: "~1.2s" },
+  critic:       { label: "Critic",       role: "verify · grounding",  color: "#F59E0B", timing: "~0.4s" },
+  reporter:     { label: "Reporter",     role: "prose · data viz",    color: "#A855F7", timing: "~0.9s" },
+  support:      { label: "Support",      role: "schema · disambig",   color: "#EC4899", timing: "as-needed" },
+};
 
 type Evt = {
   t: number;
@@ -48,17 +49,106 @@ const SEQUENCE: Evt[] = [
 ];
 
 const TOTAL_MS = 7400;
-const CYCLE_MS = TOTAL_MS + 1200;
-const VB_W = 1100;
-const LANE_H = 56;
-const LANE_LEFT = 168;
-const LANE_RIGHT = VB_W - 24;
-const LANE_TRACK = LANE_RIGHT - LANE_LEFT;
-const VB_H = LANES.length * LANE_H + 24;
+const CYCLE_MS = TOTAL_MS + 1400;
 
-function laneIndex(k: LaneKey) { return LANES.findIndex((l) => l.key === k); }
-function laneY(idx: number) { return 12 + idx * LANE_H + LANE_H / 2; }
-function tToX(ms: number) { return LANE_LEFT + (ms / TOTAL_MS) * LANE_TRACK; }
+// Flowchart node — boxed agent step with color stripe + role + timing.
+function FlowNode({
+  laneKey,
+  active,
+  citing,
+}: {
+  laneKey: LaneKey;
+  active: boolean;
+  citing?: boolean;
+}) {
+  const lane = LANES[laneKey];
+  return (
+    <div
+      className={`flex w-full items-stretch overflow-hidden rounded-md border transition-all duration-300 ${
+        active
+          ? "border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)]"
+          : "border-[var(--ds-border)] bg-[var(--ds-bg)]"
+      }`}
+      style={active ? { boxShadow: `0 0 0 1px ${lane.color}66, 0 6px 20px ${lane.color}1f` } : undefined}
+    >
+      <span
+        aria-hidden
+        className="w-1.5 shrink-0 transition-opacity"
+        style={{ background: lane.color, opacity: active ? 1 : 0.5 }}
+      />
+      <div className="flex flex-1 items-center justify-between gap-3 px-4 py-3">
+        <div>
+          <p className="font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+            {lane.role}
+          </p>
+          <p
+            className="mt-0.5 text-[14px] font-semibold leading-tight"
+            style={{ color: active ? lane.color : "var(--ds-text)" }}
+          >
+            {lane.label}
+          </p>
+        </div>
+        <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+          {citing ? "+ cite" : lane.timing}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// Terminal pill — question (top) / answer (bottom).
+function FlowPill({ kind }: { kind: "question" | "answer" }) {
+  const isAnswer = kind === "answer";
+  return (
+    <div
+      className={`inline-flex items-center gap-2 rounded-full border px-5 py-2 ${
+        isAnswer
+          ? "border-[var(--ds-good)] bg-[var(--ds-good)]/10"
+          : "border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)]"
+      }`}
+    >
+      <span
+        className={`font-mono text-[13px] ${isAnswer ? "text-[var(--ds-good)]" : "text-[var(--ds-text-mute)]"}`}
+      >
+        {isAnswer ? "✓" : "?"}
+      </span>
+      <span
+        className={`text-[13px] font-semibold ${isAnswer ? "text-[var(--ds-good)]" : "text-white"}`}
+      >
+        {isAnswer ? "Sourced answer" : "User question"}
+      </span>
+      {isAnswer && (
+        <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+          cited · replayable
+        </span>
+      )}
+    </div>
+  );
+}
+
+// Vertical connector arrow with optional mid-label.
+function FlowArrow({ label, color }: { label?: string; color?: string }) {
+  return (
+    <div className="flex flex-col items-center py-1.5" aria-hidden>
+      <span className="h-4 w-px bg-[var(--ds-border-strong)]" />
+      {label && (
+        <span
+          className="my-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.14em]"
+          style={{ color: color ?? "var(--ds-text-dim)" }}
+        >
+          {label}
+        </span>
+      )}
+      <span className="h-4 w-px bg-[var(--ds-border-strong)]" />
+      <span
+        className="-mt-1 text-[10px] leading-none text-[var(--ds-border-strong)]"
+        style={{ transform: "scaleX(1.6)" }}
+      >
+        ▼
+      </span>
+    </div>
+  );
+}
 
 export default function AgentTopologyShowcase({ replayHash = "a8f3c19d2e7b" }: { replayHash?: string }) {
   const [now, setNow] = useState(0);
@@ -67,8 +157,7 @@ export default function AgentTopologyShowcase({ replayHash = "a8f3c19d2e7b" }: {
     const start = performance.now();
     let raf = 0;
     const tick = (t: number) => {
-      const elapsed = (t - start) % CYCLE_MS;
-      setNow(elapsed);
+      setNow((t - start) % CYCLE_MS);
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -84,151 +173,130 @@ export default function AgentTopologyShowcase({ replayHash = "a8f3c19d2e7b" }: {
     return i;
   }, [now]);
   const active = SEQUENCE[activeIdx];
-
-  const playheadX = tToX(Math.min(now, TOTAL_MS));
-
-  // Wheel geometry — 5 agents around a centered circle. Each lane sits at
-  // -90 + i*72 degrees (Orchestrator at top, going clockwise: Data Analyst,
-  // Critic, Reporter, Support).
-  const W = 520;
-  const H = 520;
-  const CX = W / 2;
-  const CY = H / 2;
-  const R = 180; // node ring radius
-  const NODE_R_BASE = 38;
-  const NODE_R_ACTIVE = 46;
-  const polar = (i: number) => {
-    const angle = (-90 + i * (360 / LANES.length)) * (Math.PI / 180);
-    return { x: CX + R * Math.cos(angle), y: CY + R * Math.sin(angle) };
-  };
-  const progress = Math.min(now, TOTAL_MS) / TOTAL_MS; // 0..1 around the wheel
-  const sweepEndAngle = -90 + progress * 360;
+  const activeLane = active.from;
+  const inCritique = active.kind === "critique";
+  const inCite = active.kind === "cite";
 
   return (
     <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
-      <div className="mx-auto max-w-[920px] px-6 py-14 md:px-8 md:py-20">
+      <div className="mx-auto max-w-[1100px] px-6 py-14 md:px-8 md:py-20">
         <div className="text-center">
           <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
-            Improvement flywheel
+            Agentic flow
           </p>
-          <h2 className="mx-auto mt-3 max-w-[20ch] text-[28px] font-bold leading-[1.1] tracking-[-0.02em] text-white md:text-[36px]">
-            Five agents. One sourced answer.
+          <h2 className="mx-auto mt-3 max-w-[24ch] text-[28px] font-bold leading-[1.1] tracking-[-0.02em] text-white md:text-[36px]">
+            How a question becomes a sourced answer.
           </h2>
-          <p className="mx-auto mt-3 max-w-[48ch] text-[14.5px] leading-relaxed text-[var(--ds-text-mute)]">
-            The orchestrator dispatches. The critic self-corrects. The reporter cites. The cycle loops on autoplay — a real run, replayed.
-          </p>
         </div>
 
-        {/* Wheel — centered SVG; 5 agents around the rim, sweep arc shows
-            cycle progress, active node enlarges + glows. */}
-        <div className="relative mx-auto mt-10 w-full max-w-[520px]">
-          <svg viewBox={`0 0 ${W} ${H}`} className="block w-full" aria-hidden>
-            {/* Outer ring (very faint) */}
-            <circle cx={CX} cy={CY} r={R} fill="none" stroke="var(--ds-border)" strokeWidth={1} />
+        {/* Flowchart — centered spine, Support off to the right, re-plan
+            loop on the left. Stacks cleanly on mobile. */}
+        <div className="relative mx-auto mt-10 max-w-[760px]">
+          <div className="flex flex-col items-center">
+            <FlowPill kind="question" />
+            <FlowArrow />
+            <div className="w-full max-w-[400px]">
+              <FlowNode laneKey="orchestrator" active={activeLane === "orchestrator" && !inCite} />
+            </div>
+            <FlowArrow />
+            <div className="w-full max-w-[400px]">
+              <FlowNode laneKey="data_analyst" active={activeLane === "data_analyst"} />
+            </div>
+            <FlowArrow />
+            <div className="w-full max-w-[400px]">
+              <FlowNode laneKey="critic" active={activeLane === "critic"} />
+            </div>
+            <FlowArrow label="pass" color="var(--ds-good)" />
+            <div className="w-full max-w-[400px]">
+              <FlowNode laneKey="reporter" active={activeLane === "reporter"} />
+            </div>
+            <FlowArrow />
+            <div className="w-full max-w-[400px]">
+              <div
+                className={`flex items-center justify-between rounded-md border px-4 py-3 transition-all duration-300 ${
+                  inCite
+                    ? "border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)]"
+                    : "border-[var(--ds-border)] bg-[var(--ds-bg)]"
+                }`}
+              >
+                <div>
+                  <p className="font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+                    provenance lock
+                  </p>
+                  <p className="mt-0.5 text-[14px] font-semibold leading-tight text-[var(--ds-text)]">
+                    Citation step
+                  </p>
+                </div>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+                  ~0.1s
+                </span>
+              </div>
+            </div>
+            <FlowArrow />
+            <FlowPill kind="answer" />
+          </div>
 
-            {/* Cycle progress arc */}
-            <path
-              d={describeArc(CX, CY, R, -90, sweepEndAngle)}
-              fill="none"
-              stroke="var(--ds-accent)"
-              strokeWidth={2}
-              strokeLinecap="round"
-              opacity={0.7}
-            />
+          {/* Re-plan loop — left side, spans Critic back up to Data Analyst.
+              Highlights amber while the Critic is mid-critique. */}
+          <div className="pointer-events-none absolute left-0 top-[150px] hidden h-[150px] w-[90px] md:block">
+            <svg viewBox="0 0 90 150" className="h-full w-full" aria-hidden>
+              <path
+                d="M84 142 L40 142 Q22 142 22 124 L22 26 Q22 8 40 8 L84 8"
+                fill="none"
+                stroke={inCritique ? "var(--ds-warn)" : "var(--ds-border-strong)"}
+                strokeWidth={1.5}
+                strokeDasharray="4 4"
+              />
+              <path
+                d="M84 8 L78 4 M84 8 L78 12"
+                fill="none"
+                stroke={inCritique ? "var(--ds-warn)" : "var(--ds-border-strong)"}
+                strokeWidth={1.5}
+              />
+            </svg>
+            <span
+              className="absolute left-0 top-1/2 -translate-y-1/2 font-mono text-[9px] font-semibold uppercase tracking-[0.12em]"
+              style={{ color: inCritique ? "var(--ds-warn)" : "var(--ds-text-dim)" }}
+            >
+              ↺ re-plan
+            </span>
+          </div>
 
-            {/* Connector segments between consecutive nodes (very faint) */}
-            {LANES.map((_, i) => {
-              const a = polar(i);
-              const b = polar((i + 1) % LANES.length);
-              return (
-                <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="var(--ds-border-strong)" strokeWidth={1} strokeDasharray="3 4" />
-              );
-            })}
-
-            {/* Center medallion */}
-            <circle cx={CX} cy={CY} r={62} fill="var(--ds-bg-elev)" stroke="var(--ds-border-strong)" strokeWidth={1} />
-            <text x={CX} y={CY - 10} textAnchor="middle" fontFamily="ui-monospace, monospace" fontSize="10" fill="#71717A" letterSpacing="1.5">
-              CYCLE
-            </text>
-            <text x={CX} y={CY + 8} textAnchor="middle" fontFamily="ui-sans-serif, system-ui" fontSize="18" fontWeight={700} fill="#F5F5F7">
-              {(now / 1000).toFixed(1)}s
-            </text>
-            <text x={CX} y={CY + 24} textAnchor="middle" fontFamily="ui-monospace, monospace" fontSize="9" fill="#71717A">
-              of {(TOTAL_MS / 1000).toFixed(1)}s
-            </text>
-
-            {/* Agent nodes */}
-            {LANES.map((lane, i) => {
-              const { x, y } = polar(i);
-              const isActive = active.from === lane.key;
-              const r = isActive ? NODE_R_ACTIVE : NODE_R_BASE;
-              return (
-                <g key={lane.key}>
-                  {isActive && (
-                    <circle cx={x} cy={y} r={r + 10} fill={lane.color} opacity={0.18} />
-                  )}
-                  <circle
-                    cx={x}
-                    cy={y}
-                    r={r}
-                    fill={isActive ? lane.color : "var(--ds-bg-elev)"}
-                    stroke={lane.color}
-                    strokeWidth={isActive ? 0 : 1.5}
-                  />
-                  <text
-                    x={x}
-                    y={y - 2}
-                    textAnchor="middle"
-                    fontFamily="ui-sans-serif, system-ui"
-                    fontSize={isActive ? 12 : 11}
-                    fontWeight={700}
-                    fill={isActive ? "#0E1014" : "#F5F5F7"}
-                  >
-                    {lane.label.split(" ")[0]}
-                  </text>
-                  {lane.label.split(" ").length > 1 && (
-                    <text
-                      x={x}
-                      y={y + 11}
-                      textAnchor="middle"
-                      fontFamily="ui-sans-serif, system-ui"
-                      fontSize={isActive ? 12 : 11}
-                      fontWeight={700}
-                      fill={isActive ? "#0E1014" : "#F5F5F7"}
-                    >
-                      {lane.label.split(" ").slice(1).join(" ")}
-                    </text>
-                  )}
-                  <text
-                    x={x}
-                    y={y + 24}
-                    textAnchor="middle"
-                    fontFamily="ui-monospace, monospace"
-                    fontSize={8.5}
-                    letterSpacing={0.5}
-                    fill={isActive ? "#0E1014" : "#71717A"}
-                    opacity={0.85}
-                  >
-                    {lane.sub.toUpperCase()}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
+          {/* Support agent — off-path helper on the right. */}
+          <div className="absolute right-0 top-[200px] hidden w-[180px] md:block">
+            <div className="flex items-stretch overflow-hidden rounded-md border border-dashed border-[var(--ds-border-strong)] bg-[var(--ds-bg)]">
+              <span
+                aria-hidden
+                className="w-1.5 shrink-0"
+                style={{ background: LANES.support.color, opacity: 0.6 }}
+              />
+              <div className="px-3 py-2.5">
+                <p className="font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+                  {LANES.support.role}
+                </p>
+                <p className="mt-0.5 text-[13px] font-semibold text-[var(--ds-text)]">
+                  {LANES.support.label}
+                </p>
+                <p className="mt-1 text-[10.5px] leading-snug text-[var(--ds-text-dim)]">
+                  Called by any agent for schema lookups + disambiguation.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Live readout strip below the wheel */}
-        <div className="mx-auto mt-6 max-w-[640px] rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] px-5 py-3">
+        {/* Live readout — current step in the cycle. */}
+        <div className="mx-auto mt-8 max-w-[640px] rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] px-5 py-3">
           <div className="flex items-center gap-3">
             <span
               className="inline-block h-1.5 w-1.5 animate-pulse rounded-full"
-              style={{ backgroundColor: LANES[laneIndex(active.from)].color }}
+              style={{ backgroundColor: LANES[activeLane].color }}
             />
             <span
               className="text-[10.5px] font-semibold uppercase tracking-[0.16em]"
-              style={{ color: LANES[laneIndex(active.from)].color }}
+              style={{ color: LANES[activeLane].color }}
             >
-              {LANES[laneIndex(active.from)].label}
+              {LANES[activeLane].label}
             </span>
             <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
               {(active.t / 1000).toFixed(2)}s
@@ -239,20 +307,11 @@ export default function AgentTopologyShowcase({ replayHash = "a8f3c19d2e7b" }: {
           </p>
         </div>
 
-        {/* Stats row + quiet text links */}
+        {/* Footer — cycle facts + quiet links. */}
         <div className="mx-auto mt-6 flex max-w-[640px] flex-wrap items-center justify-between gap-4 border-t border-[var(--ds-border)] pt-5 text-[12px] text-[var(--ds-text-mute)]">
-          <div className="flex gap-6">
-            {[
-              { n: "5", l: "agents" },
-              { n: "1", l: "self-correct" },
-              { n: "7.3s", l: "end-to-end" },
-            ].map((s) => (
-              <div key={s.l}>
-                <span className="font-semibold tabular-nums text-white">{s.n}</span>
-                <span className="ml-1.5 font-mono text-[10.5px] uppercase tracking-wider text-[var(--ds-text-dim)]">{s.l}</span>
-              </div>
-            ))}
-          </div>
+          <p className="font-mono text-[10.5px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+            Typical cycle · <span className="text-white">7.3s</span> · 0&ndash;3 re-plan loops
+          </p>
           <div className="flex gap-5">
             <Link href={`/admin/replay/${replayHash}`} className="text-[var(--ds-accent)] hover:underline">
               Watch a real run →
@@ -265,14 +324,4 @@ export default function AgentTopologyShowcase({ replayHash = "a8f3c19d2e7b" }: {
       </div>
     </section>
   );
-}
-
-// Arc-path helper. Standard polar-to-Cartesian SVG arc.
-function describeArc(cx: number, cy: number, r: number, startAngle: number, endAngle: number): string {
-  const toRad = (a: number) => (a * Math.PI) / 180;
-  const start = { x: cx + r * Math.cos(toRad(startAngle)), y: cy + r * Math.sin(toRad(startAngle)) };
-  const end = { x: cx + r * Math.cos(toRad(endAngle)), y: cy + r * Math.sin(toRad(endAngle)) };
-  const sweep = endAngle - startAngle;
-  const largeArc = Math.abs(sweep) > 180 ? 1 : 0;
-  return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 1 ${end.x} ${end.y}`;
 }
