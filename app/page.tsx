@@ -43,6 +43,106 @@ const TOPICS = [
   { num: "06", key: "economy",   label: "Economy & Business", blurb: "Franchise tax, mixed beverage, expenditures.", primaryDataset: "9cir-efmm", count: "3M+ permits" },
 ];
 
+// Topic tiles for the hero's "Browse by topic" grid. Each tile renders an
+// inline SVG icon and a seeded query so a click runs a useful lookup right
+// away. Colors map to the DS semantic palette via the agent-color scheme.
+const TOPIC_TILES: {
+  key: string;
+  label: string;
+  blurb: string;
+  count: string;
+  color: string;
+  tone: string;
+  seedQuery: string;
+  icon: React.ReactNode;
+}[] = [
+  {
+    key: "housing",
+    label: "Permits & Housing",
+    blurb: "Where is Austin building, and where isn't it?",
+    count: "2.3M permits",
+    color: "#F97316",
+    tone: "warm",
+    seedQuery: "Where are construction permits clustering in Austin in the last 30 days?",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
+        <path d="M3 10 L11 3 L19 10 L19 19 L13 19 L13 13 L9 13 L9 19 L3 19 Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    key: "health",
+    label: "Restaurant inspections",
+    blurb: "Which kitchens failed and which keep failing.",
+    count: "120K inspections",
+    color: "#10B981",
+    tone: "good",
+    seedQuery: "Restaurants near 78704 with failing inspections this year",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
+        <path d="M7 3 L7 11 M11 3 L11 11 M15 3 L15 11 M11 11 L11 19 M5 19 L17 19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    key: "salaries",
+    label: "Salaries & contracts",
+    blurb: "Who got paid what by your city government.",
+    count: "60K records",
+    color: "#A855F7",
+    tone: "purple",
+    seedQuery: "Who got the biggest city contract in Austin last year?",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
+        <circle cx="11" cy="11" r="7.5" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M11 7 L11 15 M8.5 9 C8.5 7.9 9.6 7 11 7 C12.4 7 13.5 7.9 13.5 9 C13.5 10.1 12.4 11 11 11 C9.6 11 8.5 11.9 8.5 13 C8.5 14.1 9.6 15 11 15 C12.4 15 13.5 14.1 13.5 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    key: "civic",
+    label: "311 & code violations",
+    blurb: "Potholes, noise, illegal dumping. What got reported.",
+    count: "1.5M requests",
+    color: "#5B8DEF",
+    tone: "accent",
+    seedQuery: "Where do 311 requests and code violations spike together in Austin this year?",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
+        <path d="M3.5 5.5 C3.5 4.4 4.4 3.5 5.5 3.5 L16.5 3.5 C17.6 3.5 18.5 4.4 18.5 5.5 L18.5 13 C18.5 14.1 17.6 15 16.5 15 L9 15 L5 18.5 L5 15 L5.5 15 C4.4 15 3.5 14.1 3.5 13 Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    key: "transit",
+    label: "Roads & traffic",
+    blurb: "Crashes, Vision Zero, mobility patterns.",
+    count: "1K+ fatal crashes",
+    color: "#F59E0B",
+    tone: "warn",
+    seedQuery: "Most dangerous intersections in Austin by traffic fatality count",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
+        <path d="M5 16 L5 11 L8 7 L14 7 L17 11 L17 16 M5 16 L5 17.5 L7 17.5 L7 16 M15 16 L15 17.5 L17 17.5 L17 16 M5 16 L17 16 M7.5 12 L14.5 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    key: "schools",
+    label: "Schools & education",
+    blurb: "Enrollment, ratings, district funding flows.",
+    count: "1,200+ TX districts",
+    color: "#EF4444",
+    tone: "bad",
+    seedQuery: "How does Pflugerville ISD funding compare to nearby districts?",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
+        <path d="M2.5 8 L11 4 L19.5 8 L11 12 L2.5 8 Z M6 9.8 L6 13.5 C6 14.9 8.5 16 11 16 C13.5 16 16 14.9 16 13.5 L16 9.8 M19.5 8 L19.5 13" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+];
+
 const SAMPLES = [
   "Where do permits and code violations both spike together this year by zip?",
   "How has Austin's permit mix shifted from residential to commercial since 2024?",
@@ -146,23 +246,37 @@ export default async function HomePage() {
             </div>
           </form>
 
-          {/* Popular questions: full-width link rows, no chip wrapping/truncation.
-              Each row is one example, with a faint number and an arrow. */}
+          {/* Browse by topic — 6 icon tiles instead of the text-blob link list.
+              Each tile leads to a seeded search on that topic so the user
+              lands on /q already running a useful query. */}
           <div className="mt-10">
-            <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-text-dim)]">
-              Popular questions
-            </p>
-            <ul className="mt-3 divide-y divide-[var(--ds-border)] border-y border-[var(--ds-border)]">
-              {SAMPLES.slice(0, 3).map((q, i) => (
-                <li key={q}>
-                  <a
-                    href={`/q?q=${encodeURIComponent(q)}`}
-                    className="group flex items-center gap-4 py-3.5 text-[16px] text-white transition-colors hover:text-[var(--ds-accent)]"
+            <div className="flex items-baseline justify-between gap-4">
+              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-text-dim)]">
+                Browse by topic
+              </p>
+              <Link href="/datasets" className="text-[13px] text-white hover:text-[var(--ds-accent)]">
+                9 curated datasets →
+              </Link>
+            </div>
+            <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {TOPIC_TILES.map((t) => (
+                <li key={t.key}>
+                  <Link
+                    href={`/q?q=${encodeURIComponent(t.seedQuery)}`}
+                    className="group flex h-full items-start gap-3 rounded-lg border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4 transition-colors hover:border-[var(--ds-accent)]"
                   >
-                    <span className="w-6 font-mono text-[13px] text-[var(--ds-text-dim)] group-hover:text-[var(--ds-accent)]">{String(i + 1).padStart(2, "0")}</span>
-                    <span className="flex-1 leading-snug">{q}</span>
-                    <span className="font-mono text-[14px] text-[var(--ds-text-dim)] transition-transform group-hover:translate-x-1 group-hover:text-[var(--ds-accent)]">→</span>
-                  </a>
+                    <span
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[var(--ds-bg-deep)] text-${t.tone} group-hover:bg-[var(--ds-bg)]`}
+                      style={{ color: t.color }}
+                    >
+                      {t.icon}
+                    </span>
+                    <div className="flex-1">
+                      <p className="text-[15px] font-semibold text-white">{t.label}</p>
+                      <p className="mt-0.5 text-[12.5px] leading-snug text-[var(--ds-text-mute)]">{t.blurb}</p>
+                      <p className="mt-1.5 font-mono text-[10.5px] uppercase tracking-wider text-[var(--ds-text-dim)]">{t.count}</p>
+                    </div>
+                  </Link>
                 </li>
               ))}
             </ul>
