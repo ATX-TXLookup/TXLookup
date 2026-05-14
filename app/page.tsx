@@ -99,9 +99,6 @@ export default async function HomePage() {
               <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
                 Agent insights
               </p>
-              <h2 className="mt-3 max-w-[26ch] text-[28px] font-bold leading-[1.1] tracking-[-0.02em] text-white md:text-[36px]">
-                What did the data reveal?
-              </h2>
               <p className="mt-3 max-w-[52ch] text-[14.5px] leading-relaxed text-[var(--ds-text-mute)]">
                 Pulled from public records, written by the agents. Click any card to watch the work.
               </p>
