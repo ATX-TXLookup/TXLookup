@@ -87,160 +87,192 @@ export default function AgentTopologyShowcase({ replayHash = "a8f3c19d2e7b" }: {
 
   const playheadX = tToX(Math.min(now, TOTAL_MS));
 
+  // Wheel geometry — 5 agents around a centered circle. Each lane sits at
+  // -90 + i*72 degrees (Orchestrator at top, going clockwise: Data Analyst,
+  // Critic, Reporter, Support).
+  const W = 520;
+  const H = 520;
+  const CX = W / 2;
+  const CY = H / 2;
+  const R = 180; // node ring radius
+  const NODE_R_BASE = 38;
+  const NODE_R_ACTIVE = 46;
+  const polar = (i: number) => {
+    const angle = (-90 + i * (360 / LANES.length)) * (Math.PI / 180);
+    return { x: CX + R * Math.cos(angle), y: CY + R * Math.sin(angle) };
+  };
+  const progress = Math.min(now, TOTAL_MS) / TOTAL_MS; // 0..1 around the wheel
+  const sweepEndAngle = -90 + progress * 360;
+
   return (
     <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
-      <div className="mx-auto max-w-[1200px] px-6 py-20 md:px-8 md:py-28">
-        <div className="grid gap-12 md:grid-cols-12">
-          <div className="md:col-span-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-accent)]">
-              Improvement flywheel
-            </p>
-            <h2 className="mt-3 max-w-[18ch] text-[34px] font-bold leading-[1.05] tracking-tight text-[var(--ds-text)] md:text-[44px]">
-              Five agents.<br />
-              One sourced answer.
-            </h2>
-            <p className="mt-6 max-w-[36ch] text-[14px] leading-relaxed text-[var(--ds-text-mute)]">
-              The orchestrator dispatches parallel queries. The critic catches a window bug. The reporter composes the answer. The citation locks in. A real run, looped on autoplay.
-            </p>
-            <div className="mt-7 flex flex-col gap-2">
-              <Link
-                href={`/admin/replay/${replayHash}`}
-                className="inline-flex w-fit items-center rounded-md bg-white px-5 py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-bg)] hover:opacity-90"
-              >
-                Watch a real run →
-              </Link>
-              <Link
-                href="/agents"
-                className="inline-flex w-fit items-center text-[13px] font-medium text-[var(--ds-accent)] hover:underline"
-              >
-                See every agent at work →
-              </Link>
-            </div>
-            <div className="mt-9 grid grid-cols-3 gap-3 border-t border-[var(--ds-border)] pt-5">
-              {[
-                { n: "5", l: "agents" },
-                { n: "1", l: "self-correct" },
-                { n: "7.3s", l: "end-to-end" },
-              ].map((s) => (
-                <div key={s.l}>
-                  <div className="text-[24px] font-bold tabular-nums tracking-tight text-[var(--ds-text)]">{s.n}</div>
-                  <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[var(--ds-text-mute)]">{s.l}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+      <div className="mx-auto max-w-[920px] px-6 py-14 md:px-8 md:py-20">
+        <div className="text-center">
+          <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
+            Improvement flywheel
+          </p>
+          <h2 className="mx-auto mt-3 max-w-[20ch] text-[28px] font-bold leading-[1.1] tracking-[-0.02em] text-white md:text-[36px]">
+            Five agents. One sourced answer.
+          </h2>
+          <p className="mx-auto mt-3 max-w-[48ch] text-[14.5px] leading-relaxed text-[var(--ds-text-mute)]">
+            The orchestrator dispatches. The critic self-corrects. The reporter cites. The cycle loops on autoplay — a real run, replayed.
+          </p>
+        </div>
 
-          <div className="md:col-span-8">
-            <div className="overflow-hidden rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg)]">
-              <div className="flex items-baseline justify-between border-b border-[var(--ds-border)] px-5 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-text-mute)]">
-                  Live replay · marquee question
-                </p>
-                <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
-                  cycle: {(now / 1000).toFixed(2)}s / {(TOTAL_MS / 1000).toFixed(1)}s
-                </p>
-              </div>
+        {/* Wheel — centered SVG; 5 agents around the rim, sweep arc shows
+            cycle progress, active node enlarges + glows. */}
+        <div className="relative mx-auto mt-10 w-full max-w-[520px]">
+          <svg viewBox={`0 0 ${W} ${H}`} className="block w-full" aria-hidden>
+            {/* Outer ring (very faint) */}
+            <circle cx={CX} cy={CY} r={R} fill="none" stroke="var(--ds-border)" strokeWidth={1} />
 
-              {/* Top-down agent flow. Vertical stack, color stripes per lane,
-                  current agent glows. A side curve loops Critic back to Data
-                  Analyst on critique events to show the self-correct cycle. */}
-              <div className="relative px-5 py-6">
-                <ol className="space-y-2">
-                  {LANES.map((lane) => {
-                    const isActive = active.from === lane.key;
-                    const isCritiqueLoop =
-                      active.kind === "critique" && lane.key === "data_analyst";
-                    return (
-                      <li
-                        key={lane.key}
-                        className={`relative flex items-center gap-4 overflow-hidden rounded-md border transition-all duration-200 ${
-                          isActive
-                            ? "border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] shadow-lg"
-                            : "border-[var(--ds-border)] bg-[var(--ds-bg)]"
-                        }`}
-                        style={
-                          isActive
-                            ? { boxShadow: `0 0 0 1px ${lane.color}55, 0 8px 24px ${lane.color}22` }
-                            : undefined
-                        }
-                      >
-                        <span
-                          aria-hidden
-                          className="w-1.5 self-stretch"
-                          style={{
-                            background: lane.color,
-                            opacity: isActive ? 1 : 0.45,
-                          }}
-                        />
-                        <div className="flex flex-1 items-center justify-between gap-4 py-3 pr-4">
-                          <div>
-                            <p
-                              className="text-[14px] font-semibold leading-tight"
-                              style={{ color: isActive ? lane.color : "var(--ds-text)" }}
-                            >
-                              {lane.label}
-                            </p>
-                            <p className="mt-0.5 font-mono text-[10.5px] uppercase tracking-wider text-[var(--ds-text-dim)]">
-                              {lane.sub}
-                            </p>
-                          </div>
-                          {isActive && (
-                            <div className="flex items-center gap-2">
-                              <span
-                                className="h-1.5 w-1.5 animate-pulse rounded-full"
-                                style={{ backgroundColor: lane.color }}
-                              />
-                              <span
-                                className="font-mono text-[10px] uppercase tracking-wider"
-                                style={{ color: lane.color }}
-                              >
-                                {(active.t / 1000).toFixed(2)}s
-                              </span>
-                            </div>
-                          )}
-                          {isCritiqueLoop && (
-                            <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-warn)]">
-                              ↺ re-plan
-                            </span>
-                          )}
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ol>
+            {/* Cycle progress arc */}
+            <path
+              d={describeArc(CX, CY, R, -90, sweepEndAngle)}
+              fill="none"
+              stroke="var(--ds-accent)"
+              strokeWidth={2}
+              strokeLinecap="round"
+              opacity={0.7}
+            />
 
-                {/* Sourced answer terminal node */}
-                <div className="mt-4 flex items-center justify-center gap-2 border-t border-[var(--ds-border)] pt-4 font-mono text-[10.5px] uppercase tracking-wider text-[var(--ds-good)]">
-                  <span>✓ sourced answer</span>
-                  <span className="text-[var(--ds-text-dim)]">· cited · replayable</span>
-                </div>
-              </div>
+            {/* Connector segments between consecutive nodes (very faint) */}
+            {LANES.map((_, i) => {
+              const a = polar(i);
+              const b = polar((i + 1) % LANES.length);
+              return (
+                <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="var(--ds-border-strong)" strokeWidth={1} strokeDasharray="3 4" />
+              );
+            })}
 
-              {/* Live readout */}
-              <div className="border-t border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-5 py-3.5">
-                <div className="flex items-center gap-3">
-                  <span
-                    className="inline-block h-1.5 w-1.5 animate-pulse rounded-full"
-                    style={{ backgroundColor: LANES[laneIndex(active.from)].color }}
+            {/* Center medallion */}
+            <circle cx={CX} cy={CY} r={62} fill="var(--ds-bg-elev)" stroke="var(--ds-border-strong)" strokeWidth={1} />
+            <text x={CX} y={CY - 10} textAnchor="middle" fontFamily="ui-monospace, monospace" fontSize="10" fill="#71717A" letterSpacing="1.5">
+              CYCLE
+            </text>
+            <text x={CX} y={CY + 8} textAnchor="middle" fontFamily="ui-sans-serif, system-ui" fontSize="18" fontWeight={700} fill="#F5F5F7">
+              {(now / 1000).toFixed(1)}s
+            </text>
+            <text x={CX} y={CY + 24} textAnchor="middle" fontFamily="ui-monospace, monospace" fontSize="9" fill="#71717A">
+              of {(TOTAL_MS / 1000).toFixed(1)}s
+            </text>
+
+            {/* Agent nodes */}
+            {LANES.map((lane, i) => {
+              const { x, y } = polar(i);
+              const isActive = active.from === lane.key;
+              const r = isActive ? NODE_R_ACTIVE : NODE_R_BASE;
+              return (
+                <g key={lane.key}>
+                  {isActive && (
+                    <circle cx={x} cy={y} r={r + 10} fill={lane.color} opacity={0.18} />
+                  )}
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={r}
+                    fill={isActive ? lane.color : "var(--ds-bg-elev)"}
+                    stroke={lane.color}
+                    strokeWidth={isActive ? 0 : 1.5}
                   />
-                  <span
-                    className="text-[10px] font-semibold uppercase tracking-[0.16em]"
-                    style={{ color: LANES[laneIndex(active.from)].color }}
+                  <text
+                    x={x}
+                    y={y - 2}
+                    textAnchor="middle"
+                    fontFamily="ui-sans-serif, system-ui"
+                    fontSize={isActive ? 12 : 11}
+                    fontWeight={700}
+                    fill={isActive ? "#0E1014" : "#F5F5F7"}
                   >
-                    {LANES[laneIndex(active.from)].label}
-                  </span>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
-                    {(active.t / 1000).toFixed(2)}s
-                  </span>
-                </div>
-                <p className="mt-1.5 font-mono text-[12px] text-[var(--ds-text)]">
-                  <span className="text-[var(--ds-text-mute)]">{active.tool}:</span> {active.text}
-                </p>
+                    {lane.label.split(" ")[0]}
+                  </text>
+                  {lane.label.split(" ").length > 1 && (
+                    <text
+                      x={x}
+                      y={y + 11}
+                      textAnchor="middle"
+                      fontFamily="ui-sans-serif, system-ui"
+                      fontSize={isActive ? 12 : 11}
+                      fontWeight={700}
+                      fill={isActive ? "#0E1014" : "#F5F5F7"}
+                    >
+                      {lane.label.split(" ").slice(1).join(" ")}
+                    </text>
+                  )}
+                  <text
+                    x={x}
+                    y={y + 24}
+                    textAnchor="middle"
+                    fontFamily="ui-monospace, monospace"
+                    fontSize={8.5}
+                    letterSpacing={0.5}
+                    fill={isActive ? "#0E1014" : "#71717A"}
+                    opacity={0.85}
+                  >
+                    {lane.sub.toUpperCase()}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+
+        {/* Live readout strip below the wheel */}
+        <div className="mx-auto mt-6 max-w-[640px] rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] px-5 py-3">
+          <div className="flex items-center gap-3">
+            <span
+              className="inline-block h-1.5 w-1.5 animate-pulse rounded-full"
+              style={{ backgroundColor: LANES[laneIndex(active.from)].color }}
+            />
+            <span
+              className="text-[10.5px] font-semibold uppercase tracking-[0.16em]"
+              style={{ color: LANES[laneIndex(active.from)].color }}
+            >
+              {LANES[laneIndex(active.from)].label}
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+              {(active.t / 1000).toFixed(2)}s
+            </span>
+          </div>
+          <p className="mt-1.5 font-mono text-[12px] text-white">
+            <span className="text-[var(--ds-text-mute)]">{active.tool}:</span> {active.text}
+          </p>
+        </div>
+
+        {/* Stats row + quiet text links */}
+        <div className="mx-auto mt-6 flex max-w-[640px] flex-wrap items-center justify-between gap-4 border-t border-[var(--ds-border)] pt-5 text-[12px] text-[var(--ds-text-mute)]">
+          <div className="flex gap-6">
+            {[
+              { n: "5", l: "agents" },
+              { n: "1", l: "self-correct" },
+              { n: "7.3s", l: "end-to-end" },
+            ].map((s) => (
+              <div key={s.l}>
+                <span className="font-semibold tabular-nums text-white">{s.n}</span>
+                <span className="ml-1.5 font-mono text-[10.5px] uppercase tracking-wider text-[var(--ds-text-dim)]">{s.l}</span>
               </div>
-            </div>
+            ))}
+          </div>
+          <div className="flex gap-5">
+            <Link href={`/admin/replay/${replayHash}`} className="text-[var(--ds-accent)] hover:underline">
+              Watch a real run →
+            </Link>
+            <Link href="/agents" className="text-[var(--ds-accent)] hover:underline">
+              All agents →
+            </Link>
           </div>
         </div>
       </div>
     </section>
   );
+}
+
+// Arc-path helper. Standard polar-to-Cartesian SVG arc.
+function describeArc(cx: number, cy: number, r: number, startAngle: number, endAngle: number): string {
+  const toRad = (a: number) => (a * Math.PI) / 180;
+  const start = { x: cx + r * Math.cos(toRad(startAngle)), y: cy + r * Math.sin(toRad(startAngle)) };
+  const end = { x: cx + r * Math.cos(toRad(endAngle)), y: cy + r * Math.sin(toRad(endAngle)) };
+  const sweep = endAngle - startAngle;
+  const largeArc = Math.abs(sweep) > 180 ? 1 : 0;
+  return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 1 ${end.x} ${end.y}`;
 }
