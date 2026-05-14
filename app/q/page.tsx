@@ -81,68 +81,87 @@ function extractEvidence(
 function ListView({ runs, datasetCount }: { runs: SavedRun[]; datasetCount: number }) {
   return (
     <Shell active="/q">
-      <HomeHero datasetCount={datasetCount} compact />
+      <HomeHero datasetCount={datasetCount} searchOnly />
 
       <section className="bg-[var(--ds-bg)]">
-        <div className="mx-auto max-w-[1100px] px-6 pt-10 md:px-8">
-          <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
-            All lookups
-          </p>
-          <h2 className="mt-2 text-[26px] font-bold leading-[1.1] tracking-[-0.02em] text-white md:text-[32px]">
-            {runs.length} answered. Click to replay.
-          </h2>
+        <div className="mx-auto max-w-[1200px] px-6 pt-10 md:px-8">
+          <div className="flex items-baseline justify-between gap-4">
+            <div>
+              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
+                All lookups
+              </p>
+              <h2 className="mt-2 text-[24px] font-bold leading-[1.1] tracking-[-0.02em] text-white md:text-[30px]">
+                {runs.length} answered. Click a row to replay.
+              </h2>
+            </div>
+          </div>
         </div>
       </section>
 
       <section className="bg-[var(--ds-bg)]">
-        <div className="mx-auto max-w-[1100px] px-6 py-12 md:px-8">
+        <div className="mx-auto max-w-[1200px] px-6 py-8 md:px-8">
           {runs.length === 0 ? (
             <div className="rounded-sm border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-8 text-center">
               <p className="text-[var(--ds-text-mute)]">No lookups yet.</p>
             </div>
           ) : (
-            <ul className="space-y-0 divide-y divide-[var(--ds-border)] border-y border-[var(--ds-border)]">
-              {runs.map((r) => {
-                const finding = extractFinding(r);
-                const dataset = extractDataset(r);
-                return (
-                  <li key={r.hash}>
-                    <Link
-                      href={`/q?q=${encodeURIComponent(r.query)}`}
-                      className="block py-7 transition-colors hover:bg-[var(--ds-bg-elev)]"
-                    >
-                      <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-baseline md:gap-8">
-                        <div className="min-w-0">
-                          <h2 className="text-xl font-semibold leading-snug text-[var(--ds-text)] md:text-2xl">
+            <div className="overflow-x-auto rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
+              <table className="w-full border-collapse text-[13.5px]">
+                <thead>
+                  <tr className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-deep)]">
+                    <th className="px-4 py-3 text-left font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+                      Question
+                    </th>
+                    <th className="px-4 py-3 text-left font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+                      Dataset
+                    </th>
+                    <th className="px-4 py-3 text-right font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+                      Time
+                    </th>
+                    <th className="px-4 py-3 text-right font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+                      Asked
+                    </th>
+                    <th className="px-4 py-3 text-right font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+                      Status
+                    </th>
+                    <th className="px-2 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {runs.map((r) => {
+                    const dataset = extractDataset(r);
+                    return (
+                      <tr key={r.hash} className="group border-b border-[var(--ds-border)] last:border-0 transition-colors hover:bg-[var(--ds-bg)]">
+                        <td className="max-w-[520px] px-4 py-3 align-top">
+                          <Link href={`/q?q=${encodeURIComponent(r.query)}`} className="block text-[14px] font-medium leading-snug text-white group-hover:text-[var(--ds-accent)]">
                             {r.query}
-                          </h2>
-                          {finding && (
-                            <p className="mt-2 max-w-[62ch] text-[15px] leading-relaxed text-[var(--ds-text-mute)]">
-                              {finding}
-                            </p>
+                          </Link>
+                        </td>
+                        <td className="px-4 py-3 align-top font-mono text-[11px] uppercase tracking-wider text-[var(--ds-accent)]">
+                          {dataset || "—"}
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-3 text-right align-top font-mono text-[11px] text-[var(--ds-text-mute)] tabular-nums">
+                          {(r.durationMs / 1000).toFixed(1)}s
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-3 text-right align-top font-mono text-[11px] text-[var(--ds-text-mute)]">
+                          {timeAgo(r.savedAt)}
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-3 text-right align-top">
+                          {r.status === "good" ? (
+                            <span className="font-mono text-[10.5px] uppercase tracking-wider text-[var(--ds-good)]">verified</span>
+                          ) : (
+                            <span className="font-mono text-[10.5px] uppercase tracking-wider text-[var(--ds-text-dim)]">—</span>
                           )}
-                          <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-dim)]">
-                            <span>{timeAgo(r.savedAt)}</span>
-                            {dataset && <span className="text-[var(--ds-accent)]">{dataset}</span>}
-                            <span>{r.durationMs.toLocaleString()}ms</span>
-                            <span>{r.tokenTotal.toLocaleString()} tok</span>
-                            {r.status === "good" && (
-                              <span className="text-[var(--ds-good)]">verified</span>
-                            )}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3 self-start">
+                        </td>
+                        <td className="whitespace-nowrap px-2 py-3 pr-4 text-right align-top">
                           <WatchStar slug={slugifyQuery(r.query)} />
-                          <span className="font-mono text-[11px] uppercase tracking-wider text-[var(--ds-accent)]">
-                            replay →
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </section>
