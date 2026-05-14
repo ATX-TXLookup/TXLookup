@@ -109,16 +109,13 @@ export default async function HomePage() {
           <div className="grid items-start gap-8 md:grid-cols-12 md:gap-12">
             <div className="md:col-span-6">
               <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
-                For journalists, civic researchers, and city staff
+                For curious Texans, journalists, and city staff
               </p>
               <h1 className="mt-4 max-w-[14ch] text-[44px] font-bold leading-[1.02] tracking-[-0.03em] text-[var(--ds-text)] md:text-[88px]">
                 Look up Texas.
               </h1>
               <p className="mt-6 max-w-[60ch] text-[17px] leading-[1.6] text-[var(--ds-text-mute)] md:text-[18px]">
-                Plain-English questions over {discovery.totalKnown.toLocaleString()} Texas civic datasets. A team of agents picks the right one, writes the query, runs it live, lets a critic verify, and hands you a sourced answer in seconds. Every source tagged{" "}
-                <span className="font-mono text-[var(--ds-good)]">authoritative</span>{" "}
-                <span className="font-mono text-[var(--ds-warm)]">modeled</span>{" "}
-                <span className="font-mono text-[var(--ds-accent)]">community</span>. <span className="text-[var(--ds-text)]">Every step replayable.</span>
+                Ask anything about Texas. Permits, inspections, salaries, restaurant scores, school stats, who got paid what. We pull from {discovery.totalKnown.toLocaleString()} public records and bring back a <span className="text-[var(--ds-text)]">sourced answer in seconds</span>.
               </p>
             </div>
             <div className="md:col-span-6 md:-mx-2">
