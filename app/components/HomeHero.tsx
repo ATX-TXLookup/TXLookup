@@ -110,7 +110,7 @@ export function HomeHero({
       : "py-16 md:py-24";
   return (
     <section className="relative overflow-hidden border-b border-[var(--ds-border)]">
-      <div className={`relative mx-auto max-w-[920px] px-6 md:px-8 ${padY}`}>
+      <div className={`relative mx-auto max-w-[1100px] px-6 md:px-8 ${padY}`}>
         {!searchOnly && (
           <>
             <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
