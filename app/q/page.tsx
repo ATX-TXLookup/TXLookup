@@ -7,6 +7,8 @@
 import Link from "next/link";
 
 import { Shell } from "@/app/components/ds";
+import { HomeHero } from "@/app/components/HomeHero";
+import { loadDiscovery } from "@/app/lib/catalog-discovered";
 import {
   findRun,
   listRuns,
@@ -76,34 +78,19 @@ function extractEvidence(
 
 // ------- views -------
 
-function ListView({ runs }: { runs: SavedRun[] }) {
+function ListView({ runs, datasetCount }: { runs: SavedRun[]; datasetCount: number }) {
   return (
     <Shell active="/q">
-      <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
-        <div className="mx-auto max-w-[1100px] px-6 py-16 md:px-8 md:py-20">
+      <HomeHero datasetCount={datasetCount} compact />
+
+      <section className="bg-[var(--ds-bg)]">
+        <div className="mx-auto max-w-[1100px] px-6 pt-10 md:px-8">
           <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
-            For journalists, civic researchers, and city staff
+            All lookups
           </p>
-          <h1 className="mt-4 max-w-[22ch] text-[44px] font-bold leading-[1.04] tracking-[-0.025em] text-[var(--ds-text)] md:text-[56px]">
-            Austin permits, inspections, 311 — answered with sourced data.
-          </h1>
-          <p className="mt-5 max-w-[60ch] text-lg leading-relaxed text-[var(--ds-text-mute)]">
-            A multi-agent loop reads the question, picks the dataset, queries it live, lets a critic verify, and writes a sourced answer. Every step is preserved and replayable. Each source is tagged{" "}
-            <span className="font-mono text-[var(--ds-good)]">authoritative</span>{" "}
-            <span className="font-mono text-[var(--ds-warm)]">modeled</span>{" "}
-            <span className="font-mono text-[var(--ds-accent)]">community</span>{" "}
-            so you can cite with confidence.
-          </p>
-          <p className="mt-3 max-w-[58ch] font-mono text-[12px] uppercase tracking-wider text-[var(--ds-text-dim)]">
-            {runs.length} lookup{runs.length === 1 ? "" : "s"} · refreshed every 60s ·{" "}
-            <Link href="/byok" className="text-[var(--ds-accent)] hover:underline">
-              Ask your own →
-            </Link>{" "}
-            ·{" "}
-            <Link href="/about" className="text-[var(--ds-accent)] hover:underline">
-              How it works
-            </Link>
-          </p>
+          <h2 className="mt-2 text-[26px] font-bold leading-[1.1] tracking-[-0.02em] text-white md:text-[32px]">
+            {runs.length} answered. Click to replay.
+          </h2>
         </div>
       </section>
 
@@ -160,16 +147,6 @@ function ListView({ runs }: { runs: SavedRun[] }) {
         </div>
       </section>
 
-      <section className="border-t border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
-        <div className="mx-auto max-w-[1100px] px-6 py-12 md:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ds-text-mute)]">
-            Methodology
-          </p>
-          <p className="mt-3 max-w-[62ch] text-[15px] leading-relaxed text-[var(--ds-text)]">
-            Each lookup passes through a planner → executor → critic → synthesizer loop. The critic must approve the plan and the answer before publication. Source datasets are queried live with cache-resilient fallback; raw SoQL and every tool call are preserved per run.
-          </p>
-        </div>
-      </section>
     </Shell>
   );
 }
@@ -271,8 +248,11 @@ export default async function QPage({
   const query = q?.trim() || "";
 
   if (!query) {
-    const runs = (await listRuns(500)).filter((r) => r.status !== "bad" && r.answer);
-    return <ListView runs={runs} />;
+    const [runs, discovery] = await Promise.all([
+      listRuns(500).then((all) => all.filter((r) => r.status !== "bad" && r.answer)),
+      loadDiscovery(),
+    ]);
+    return <ListView runs={runs} datasetCount={discovery.totalKnown} />;
   }
 
   const cached = await findRun(query);
