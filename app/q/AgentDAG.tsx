@@ -362,17 +362,17 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
     );
   }
 
-  // Geometry tuned to fit the right-column sidebar (~380-420px) without
-  // overflowing or shrinking text below readability. Was sized for desktop
-  // SVG which made boxes balloon outside the sidebar viewport.
-  // Nodes widened to 150px so two-word labels like "critic · plan" and
-  // "revise · answer" stop truncating at the 16-char ceiling.
+  // Geometry tuned to fit the right-column sidebar (~380-420px). The SVG
+  // renders w-full, so effective text size = fontSize x (renderWidth /
+  // viewBoxW). Earlier the viewBox was 550 wide -> ~0.7x downscale -> sub-8px
+  // text, unreadable. COL_W tightened so viewBox W ~= sidebar width (near
+  // 1:1 render), and every fontSize bumped (see node rendering below).
   const NODE_W = 150;
-  const NODE_H = 42;
-  const COL_W = 174;
-  const ROW_H = 64;
+  const NODE_H = 54;
+  const COL_W = 156;
+  const ROW_H = 82;
   const PAD_X = 14;
-  const PAD_Y = 18;
+  const PAD_Y = 20;
   const cols = 3;
   const innerW = cols * COL_W;
   const W = PAD_X * 2 + innerW;
@@ -493,17 +493,17 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
                   stroke={ring}
                   strokeWidth={1.5}
                 />
-                <text x={x} y={y - 2} textAnchor="middle" fontSize={9.5} fontFamily="JetBrains Mono, monospace" fill={agentTone} fontWeight={700}>
+                <text x={x} y={y - 2} textAnchor="middle" fontSize={13} fontFamily="JetBrains Mono, monospace" fill={agentTone} fontWeight={700}>
                   {diamondLabel}
                 </text>
                 {n.sub && (
-                  <text x={x} y={y + 11} textAnchor="middle" fontSize={8.5} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA">
+                  <text x={x} y={y + 11} textAnchor="middle" fontSize={11} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA">
                     {n.sub}
                   </text>
                 )}
                 {/* (i) icon — top-right corner of the diamond's bbox */}
                 <circle cx={x + r * 1.4 - 5} cy={y - r + 5} r={4} fill="#15171C" stroke="#71717A" strokeWidth={0.75} />
-                <text x={x + r * 1.4 - 5} y={y - r + 7.5} textAnchor="middle" fontSize={6.5} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={700}>i</text>
+                <text x={x + r * 1.4 - 5} y={y - r + 7.5} textAnchor="middle" fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={700}>i</text>
               </g>
             );
           }
@@ -522,12 +522,12 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
                 <title>{`${n.label} — ${tip}`}</title>
                 <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={h / 2} fill={fill} stroke={ring} strokeWidth={1.5} />
                 <circle cx={x - w / 2 + 11} cy={y} r={3} fill={agentTone} />
-                <text x={x - w / 2 + 20} y={y + 4} fontSize={10.5} fontFamily="JetBrains Mono, monospace" fill="#F5F5F7" fontWeight={500}>
+                <text x={x - w / 2 + 20} y={y + 4} fontSize={13.5} fontFamily="JetBrains Mono, monospace" fill="#F5F5F7" fontWeight={500}>
                   {pillLabel}
                 </text>
                 {/* (i) icon — top-right of the pill */}
                 <circle cx={x + w / 2 - 7} cy={y - h / 2 + 7} r={4} fill="#15171C" stroke="#71717A" strokeWidth={0.75} />
-                <text x={x + w / 2 - 7} y={y - h / 2 + 9.5} textAnchor="middle" fontSize={6.5} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={700}>i</text>
+                <text x={x + w / 2 - 7} y={y - h / 2 + 9.5} textAnchor="middle" fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={700}>i</text>
               </g>
             );
           }
@@ -551,21 +551,21 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
               <title>{`${n.label} — ${tip}`}</title>
               <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={6} fill={fill} stroke={ring} strokeWidth={1.5} />
               <rect x={x - w / 2} y={y - h / 2} width={3} height={h} fill={agentTone} rx={1.5} />
-              <text x={x - w / 2 + 10} y={y - 3} fontSize={10.5} fontFamily="JetBrains Mono, monospace" fill="#F5F5F7" fontWeight={600}>
+              <text x={x - w / 2 + 10} y={y - 3} fontSize={13.5} fontFamily="JetBrains Mono, monospace" fill="#F5F5F7" fontWeight={600}>
                 {labelDisplay}
               </text>
-              <text x={x - w / 2 + 10} y={y + 10} fontSize={8.5} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA">
+              <text x={x - w / 2 + 10} y={y + 10} fontSize={11} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA">
                 {subDisplayClipped}
               </text>
               {/* (i) icon — bottom-right corner. Don't overlap the source pill which is top-right. */}
               <circle cx={x + w / 2 - 6} cy={y + h / 2 - 6} r={4} fill="#15171C" stroke="#71717A" strokeWidth={0.75} />
-              <text x={x + w / 2 - 6} y={y + h / 2 - 3.5} textAnchor="middle" fontSize={6.5} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={700}>i</text>
+              <text x={x + w / 2 - 6} y={y + h / 2 - 3.5} textAnchor="middle" fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={700}>i</text>
               {n.source && (() => {
                 const p = SOURCE_COLOR[n.source];
                 return (
                   <g>
                     <rect x={x + w / 2 - 32} y={y - h / 2 + 4} width={28} height={11} rx={2} fill={p.bg} />
-                    <text x={x + w / 2 - 18} y={y - h / 2 + 12.5} textAnchor="middle" fontSize={7} fontFamily="JetBrains Mono, monospace" fill={p.fg} fontWeight={700}>
+                    <text x={x + w / 2 - 18} y={y - h / 2 + 12.5} textAnchor="middle" fontSize={9.5} fontFamily="JetBrains Mono, monospace" fill={p.fg} fontWeight={700}>
                       {p.label.slice(0, 5)}
                     </text>
                   </g>
