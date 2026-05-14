@@ -757,13 +757,7 @@ export function AgentRunner({
                   {/* Action row — quiet, equal-weight secondary actions. No
                       filled/primary button here; the one primary action on
                       this view is "Open dataset" in the Primary Source aside.
-                      Keeps the answer itself the focal point.
-
-                      "Render to Miro" was removed: it linked to an uncached
-                      query (dead-ended on the gate) and render_to_miro has a
-                      0/9 success rate in the corpus. The Miro embed block
-                      below still renders if a run ever produces a real
-                      miroLink — so the path is ready when Miro is fixed. */}
+                      Keeps the answer itself the focal point. */}
                   <div className="mt-7 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px]">
                     <button
                       type="button"
@@ -791,6 +785,14 @@ export function AgentRunner({
                     >
                       Share link
                     </button>
+                    {!miroLink && state.phase === "done" && (
+                      <Link
+                        href={`/q?q=${encodeURIComponent(query + " render this to a Miro board")}`}
+                        className="text-[var(--ds-text-mute)] hover:text-[var(--ds-accent)]"
+                      >
+                        Render to Miro ↗
+                      </Link>
+                    )}
                   </div>
 
                   {/* Meta strip — gold insight badges per BRAND §7 */}
