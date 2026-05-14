@@ -103,60 +103,56 @@ export default async function HomePage() {
 
   return (
     <Shell active="/">
-      {/* HERO — tight: headline left, search right; subtle Texas map backdrop */}
+      {/* HERO — single focused column. No decorative map (kicked into FEATURED
+          section instead), search bar lives inline below the body so the
+          flow is: hook -> ask. */}
       <section className="relative overflow-hidden border-b border-[var(--ds-border)]">
-        <div className="relative mx-auto max-w-[1240px] px-6 py-12 md:px-8 md:py-16">
-          <div className="grid items-start gap-8 md:grid-cols-12 md:gap-12">
-            <div className="md:col-span-6">
-              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
-                For curious Texans, journalists, and city staff
-              </p>
-              <h1 className="mt-4 max-w-[14ch] text-[44px] font-bold leading-[1.02] tracking-[-0.03em] text-[var(--ds-text)] md:text-[88px]">
-                Look up Texas.
-              </h1>
-              <p className="mt-6 max-w-[60ch] text-[17px] leading-[1.6] text-[var(--ds-text-mute)] md:text-[18px]">
-                The records are public. The <span className="text-[var(--ds-text)]">{discovery.totalKnown.toLocaleString()} spreadsheets</span> they live in aren&rsquo;t. Ask who&rsquo;s on the city payroll, which restaurants failed inspection, where the permits piled up. We find the answer in seconds and <span className="text-[var(--ds-text)]">show you exactly where it came from</span>.
-              </p>
+        <div className="relative mx-auto max-w-[920px] px-6 py-16 md:px-8 md:py-24">
+          <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
+            For curious Texans, journalists, and city staff
+          </p>
+          <h1 className="mt-5 max-w-[14ch] text-[52px] font-bold leading-[1.02] tracking-[-0.03em] text-white md:text-[96px]">
+            Look up Texas.
+          </h1>
+          <p className="mt-7 max-w-[58ch] text-[20px] leading-[1.55] text-white md:text-[23px] md:leading-[1.5]">
+            The records are public. The <span className="font-semibold">{discovery.totalKnown.toLocaleString()} spreadsheets</span> they live in aren&rsquo;t. Ask who&rsquo;s on the city payroll, which restaurants failed inspection, where the permits piled up. We find the answer in seconds and <span className="font-semibold">show you exactly where it came from</span>.
+          </p>
+
+          <form action="/q" method="GET" className="mt-10">
+            <div className="flex items-stretch gap-2 rounded-lg border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] p-2.5 transition-colors focus-within:border-[var(--ds-accent)]">
+              <input
+                name="q"
+                type="text"
+                required
+                autoFocus
+                placeholder="Try: who got the biggest city contract last year?"
+                className="flex-1 bg-transparent px-3 py-3 text-[17px] leading-tight text-white placeholder:text-[#9ca3af] focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="rounded-md bg-white px-7 text-[16px] font-semibold text-[var(--ds-bg)] hover:opacity-90"
+              >
+                Ask
+              </button>
             </div>
-            <div className="md:col-span-6 md:-mx-2">
-              <HeroTexasMap />
-            </div>
-            <div className="md:col-span-12">
-              <form action="/q" method="GET" className="mt-8">
-                <div className="flex items-stretch gap-2 rounded-lg border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-2 transition-colors focus-within:border-[var(--ds-accent)]">
-                  <input
-                    name="q"
-                    type="text"
-                    required
-                    autoFocus
-                    placeholder="Try: who got the biggest city contract last year?"
-                    className="flex-1 bg-transparent px-3 py-3 text-[15.5px] leading-tight text-[var(--ds-text)] placeholder:text-[var(--ds-text-dim)] focus:outline-none"
-                  />
-                  <button
-                    type="submit"
-                    className="rounded-md bg-white px-6 text-[14px] font-semibold text-[var(--ds-bg)] hover:opacity-90"
-                  >
-                    Ask
-                  </button>
-                </div>
-              </form>
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                <span className="text-[13px] text-[var(--ds-text-dim)]">Or try:</span>
-                {SAMPLES.slice(0, 3).map((q) => (
-                  <a
-                    key={q}
-                    href={`/q?q=${encodeURIComponent(q)}`}
-                    className="rounded-full border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-3 py-1.5 text-[13px] text-[var(--ds-text-mute)] transition-colors hover:border-[var(--ds-accent)] hover:text-[var(--ds-text)]"
-                  >
-                    {q}
-                  </a>
-                ))}
-              </div>
-              <div className="mt-5 flex items-center gap-2 text-[13px] text-[var(--ds-text-mute)]">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ds-good)]" />
-                <span>Live across {discovery.totalKnown.toLocaleString()} Texas datasets right now</span>
-              </div>
-            </div>
+          </form>
+
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <span className="text-[15px] font-medium text-white">Or try:</span>
+            {SAMPLES.slice(0, 3).map((q) => (
+              <a
+                key={q}
+                href={`/q?q=${encodeURIComponent(q)}`}
+                className="rounded-full border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] px-4 py-2 text-[14.5px] text-white transition-colors hover:border-[var(--ds-accent)] hover:bg-[var(--ds-bg-deep)]"
+              >
+                {q}
+              </a>
+            ))}
+          </div>
+
+          <div className="mt-7 flex items-center gap-2.5 text-[15px] text-white">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--ds-good)]" />
+            <span>Live across <span className="font-semibold">{discovery.totalKnown.toLocaleString()}</span> Texas datasets right now</span>
           </div>
         </div>
       </section>
