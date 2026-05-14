@@ -95,6 +95,12 @@
       "candidates_qualified": 0,
       "candidates_total": 5,
       "started_at": "2026-05-14T08:34:52.094403+00:00"
+    },
+    {
+      "candidates_filed": 0,
+      "candidates_qualified": 0,
+      "candidates_total": 58,
+      "started_at": "2026-05-14T14:04:36.523546+00:00"
     }
   ],
   "seen": {
@@ -135,8 +141,8 @@
     },
     "data.austintexas.gov/3iy3-r5vp": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778678900
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778753083
     },
     "data.austintexas.gov/3jrq-iyjv": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -245,13 +251,13 @@
     },
     "data.austintexas.gov/6pm5-am5m": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778680813
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778767214
     },
     "data.austintexas.gov/6tqb-9an3": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778680884
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778767222
     },
     "data.austintexas.gov/6usq-vp8q": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -275,8 +281,8 @@
     },
     "data.austintexas.gov/7fq8-wig2": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778680809
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778767212
     },
     "data.austintexas.gov/7fsp-f7k8": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -305,8 +311,8 @@
     },
     "data.austintexas.gov/82if-xvtj": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778678363
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778765233
     },
     "data.austintexas.gov/88ps-mc9i": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -315,8 +321,8 @@
     },
     "data.austintexas.gov/89sb-kjjq": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778680884
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778767222
     },
     "data.austintexas.gov/8da5-5w56": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -375,8 +381,8 @@
     },
     "data.austintexas.gov/9vvh-zadf": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778680884
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778767222
     },
     "data.austintexas.gov/9xt3-pest": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -445,8 +451,8 @@
     },
     "data.austintexas.gov/c52z-3pm6": {
       "first_seen": "2026-05-14T02:52:16.859008+00:00",
-      "last_scout_run": "2026-05-14T02:52:16.859008+00:00",
-      "last_updated_at": 1778664820
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778751223
     },
     "data.austintexas.gov/cbtm-qubf": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -460,8 +466,8 @@
     },
     "data.austintexas.gov/ch37-wetd": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778678363
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778765233
     },
     "data.austintexas.gov/cxgp-hyzm": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -700,8 +706,8 @@
     },
     "data.austintexas.gov/ka4c-n77w": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778678363
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778765233
     },
     "data.austintexas.gov/kfpd-xeep": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -925,8 +931,8 @@
     },
     "data.austintexas.gov/tdkw-uicu": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778680884
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778767222
     },
     "data.austintexas.gov/tgsq-5m6e": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1005,8 +1011,8 @@
     },
     "data.austintexas.gov/vyik-7aim": {
       "first_seen": "2026-05-14T02:52:16.859008+00:00",
-      "last_scout_run": "2026-05-14T02:52:16.859008+00:00",
-      "last_updated_at": 1778664820
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778751223
     },
     "data.austintexas.gov/w9p4-87ys": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1115,8 +1121,8 @@
     },
     "data.texas.gov/2mm8-rqyi": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778677465
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778763865
     },
     "data.texas.gov/2zpi-yjjs": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1125,8 +1131,8 @@
     },
     "data.texas.gov/32b9-xz9p": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778679932
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778766338
     },
     "data.texas.gov/36xq-2n6m": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1135,13 +1141,13 @@
     },
     "data.texas.gov/3iy3-r5vp": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778678900
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778753083
     },
     "data.texas.gov/3p42-m5cn": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778663572
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778750002
     },
     "data.texas.gov/3q5f-zxu3": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1150,8 +1156,8 @@
     },
     "data.texas.gov/3qgy-p3sr": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778679932
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778766338
     },
     "data.texas.gov/3qrv-yppp": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1220,8 +1226,8 @@
     },
     "data.texas.gov/5eqq-7nad": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778678832
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778765714
     },
     "data.texas.gov/5jub-4mgq": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1280,8 +1286,8 @@
     },
     "data.texas.gov/6pm5-am5m": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778680813
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778767214
     },
     "data.texas.gov/6rig-t669": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1300,8 +1306,8 @@
     },
     "data.texas.gov/6tqb-9an3": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778680884
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778767222
     },
     "data.texas.gov/6ygv-mity": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1310,8 +1316,8 @@
     },
     "data.texas.gov/7fq8-wig2": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778680809
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778767212
     },
     "data.texas.gov/7fsp-f7k8": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1325,8 +1331,8 @@
     },
     "data.texas.gov/7k4b-rebm": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778663540
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778749972
     },
     "data.texas.gov/7ke6-qib4": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1355,8 +1361,8 @@
     },
     "data.texas.gov/82if-xvtj": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778678363
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778765233
     },
     "data.texas.gov/87eh-wyyj": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1365,8 +1371,8 @@
     },
     "data.texas.gov/89sb-kjjq": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778680884
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778767222
     },
     "data.texas.gov/8amv-s5xb": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1400,8 +1406,8 @@
     },
     "data.texas.gov/9iad-hrn8": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778678101
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778764621
     },
     "data.texas.gov/9msv-cb2h": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1415,8 +1421,8 @@
     },
     "data.texas.gov/9vvh-zadf": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778680884
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778767222
     },
     "data.texas.gov/9xaa-z2ud": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1470,8 +1476,8 @@
     },
     "data.texas.gov/bf5n-799f": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778671138
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778757507
     },
     "data.texas.gov/bk4a-yqyq": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1485,8 +1491,8 @@
     },
     "data.texas.gov/bssc-pq4k": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778677464
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778763860
     },
     "data.texas.gov/bv8a-53i5": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1515,8 +1521,8 @@
     },
     "data.texas.gov/ch37-wetd": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778678363
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778765233
     },
     "data.texas.gov/ctgj-j57k": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1555,8 +1561,8 @@
     },
     "data.texas.gov/drau-zphx": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T19:51:16.802661+00:00",
-      "last_updated_at": 1778697084
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778761874
     },
     "data.texas.gov/e5pp-jbjt": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1565,13 +1571,13 @@
     },
     "data.texas.gov/e67c-q3mr": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778663554
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778749978
     },
     "data.texas.gov/e97f-7pag": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778679932
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778766410
     },
     "data.texas.gov/eezu-z548": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1610,8 +1616,8 @@
     },
     "data.texas.gov/ftvp-5fsy": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778679932
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778766338
     },
     "data.texas.gov/g2km-y3fi": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1670,8 +1676,8 @@
     },
     "data.texas.gov/hqb9-8dh4": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778680025
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778766562
     },
     "data.texas.gov/ineh-5jnm": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1680,8 +1686,8 @@
     },
     "data.texas.gov/inks-xbpw": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778680810
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778767210
     },
     "data.texas.gov/jnzg-cr4w": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1700,8 +1706,8 @@
     },
     "data.texas.gov/ka4c-n77w": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778678363
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778765233
     },
     "data.texas.gov/kfpd-xeep": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1740,8 +1746,8 @@
     },
     "data.texas.gov/msah-s2rv": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778678562
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778764850
     },
     "data.texas.gov/n8r9-x8nx": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1755,8 +1761,8 @@
     },
     "data.texas.gov/nmqp-zmi7": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778663566
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778750000
     },
     "data.texas.gov/nzvj-29aj": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1815,8 +1821,8 @@
     },
     "data.texas.gov/q9ze-49nx": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778679932
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778766410
     },
     "data.texas.gov/qch3-5is6": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1830,8 +1836,8 @@
     },
     "data.texas.gov/qurn-xwim": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778664607
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778751007
     },
     "data.texas.gov/qxfy-wcfs": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1845,8 +1851,8 @@
     },
     "data.texas.gov/r2z5-6df9": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778679932
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778766338
     },
     "data.texas.gov/rmdp-89uf": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1870,8 +1876,8 @@
     },
     "data.texas.gov/s7ft-44qi": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778671087
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778757472
     },
     "data.texas.gov/sam8-9wzi": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1885,13 +1891,13 @@
     },
     "data.texas.gov/t34q-qzi3": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778678842
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778765134
     },
     "data.texas.gov/t37e-qpsx": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778675906
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778762008
     },
     "data.texas.gov/t3jr-vyxe": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1900,8 +1906,8 @@
     },
     "data.texas.gov/tayf-xfe5": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778680025
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778766562
     },
     "data.texas.gov/tbs7-dnx4": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1915,8 +1921,8 @@
     },
     "data.texas.gov/tdkw-uicu": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778680884
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778767222
     },
     "data.texas.gov/tgb2-j935": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1930,13 +1936,13 @@
     },
     "data.texas.gov/tpyu-226h": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778680810
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778767210
     },
     "data.texas.gov/tzyg-j7q4": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778679327
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778766179
     },
     "data.texas.gov/u4fj-has6": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -1955,8 +1961,8 @@
     },
     "data.texas.gov/ub2y-4i6h": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778680810
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778767210
     },
     "data.texas.gov/udzw-f4ka": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -2405,8 +2411,8 @@
     },
     "datahub.austintexas.gov/bh9a-h575": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778661731
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778748173
     },
     "datahub.austintexas.gov/bhzr-h83s": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -2435,8 +2441,8 @@
     },
     "datahub.austintexas.gov/c52z-3pm6": {
       "first_seen": "2026-05-14T02:52:16.859008+00:00",
-      "last_scout_run": "2026-05-14T02:52:16.859008+00:00",
-      "last_updated_at": 1778664820
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778751223
     },
     "datahub.austintexas.gov/cbwd-5vf6": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -2820,8 +2826,8 @@
     },
     "datahub.austintexas.gov/pvy4-dzri": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778676915
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778763314
     },
     "datahub.austintexas.gov/pzd6-nzny": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3030,8 +3036,8 @@
     },
     "datahub.austintexas.gov/vyik-7aim": {
       "first_seen": "2026-05-14T02:52:16.859008+00:00",
-      "last_scout_run": "2026-05-14T02:52:16.859008+00:00",
-      "last_updated_at": 1778664820
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778751223
     },
     "datahub.austintexas.gov/w9p4-87ys": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3210,8 +3216,8 @@
     },
     "www.dallasopendata.com/4n3h-rfqm": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778663644
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778748855
     },
     "www.dallasopendata.com/4p2u-u3vh": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3325,8 +3331,8 @@
     },
     "www.dallasopendata.com/8r5a-qz5k": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778677305
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778763683
     },
     "www.dallasopendata.com/8y6i-ds2p": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3485,8 +3491,8 @@
     },
     "www.dallasopendata.com/daf9-e2zy": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778663231
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778749278
     },
     "www.dallasopendata.com/dcir-mtfz": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3905,8 +3911,8 @@
     },
     "www.dallasopendata.com/s8ga-2yn6": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-14T08:34:52.094403+00:00",
-      "last_updated_at": 1778747696
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778767376
     },
     "www.dallasopendata.com/sgg9-e5yn": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -4125,8 +4131,8 @@
     },
     "www.dallasopendata.com/yuwv-wm7a": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-13T14:27:56.572014+00:00",
-      "last_updated_at": 1778670633
+      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
+      "last_updated_at": 1778757426
     }
   }
 }
