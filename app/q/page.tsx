@@ -1,6 +1,6 @@
 // /q — the single public surface.
 // Three states based on ?q=:
-//   no q          → list view (all cached investigations)
+//   no q          → list view (all cached lookups)
 //   q matches     → detail view (live agent replay + finding + evidence)
 //   q is uncached → gate view (BYOK / suggest — no public fresh runs)
 

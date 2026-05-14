@@ -1,4 +1,4 @@
-// POST /api/suggest { email, question } — capture suggested investigations.
+// POST /api/suggest { email, question } — capture suggested lookups.
 // Stores to data/suggestions/{timestamp}-{hash}.json for admin review.
 // No email sent today (no transactional provider wired) — admin polls /admin.
 

@@ -40,7 +40,7 @@ export function SuggestForm() {
           Got it
         </p>
         <p className="mt-2 text-[16px] text-[var(--ds-text)]">
-          We'll email you when this lands in the library. Browse <a href="/answers" className="text-[var(--ds-accent)] hover:underline">current investigations</a> while you wait.
+          We'll email you when this lands in the library. Browse <a href="/q" className="text-[var(--ds-accent)] hover:underline">current lookups</a> while you wait.
         </p>
       </div>
     );
