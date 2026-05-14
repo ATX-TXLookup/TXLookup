@@ -1,6 +1,11 @@
 // HomeHero — shared entry hero used on / and /q.
 // Eyebrow + headline + body + search unit + topic tiles.
 // Server component — no client state, safe to render anywhere.
+//
+// IMPORTANT: every seedQuery below MUST be an exact-string match to a
+// cached run in data/runs/. /q resolves ?q= via hashQuery() (exact hash),
+// so any drift drops the click straight to the BYOK/suggest gate. These
+// six were verified against the corpus on 2026-05-14.
 
 import Link from "next/link";
 
@@ -19,7 +24,7 @@ const TOPIC_TILES: {
     blurb: "Where is Austin building, and where isn't it?",
     count: "2.3M permits",
     color: "#F97316",
-    seedQuery: "Where are construction permits clustering in Austin in the last 30 days?",
+    seedQuery: "Where do permits and code violations both spike together this year by zip?",
     icon: (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
         <path d="M3 10 L11 3 L19 10 L19 19 L13 19 L13 13 L9 13 L9 19 L3 19 Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
@@ -29,10 +34,10 @@ const TOPIC_TILES: {
   {
     key: "health",
     label: "Restaurant inspections",
-    blurb: "Which kitchens failed and which keep failing.",
+    blurb: "Which kitchens failed, and is it getting worse.",
     count: "120K inspections",
     color: "#10B981",
-    seedQuery: "Restaurants near 78704 with failing inspections this year",
+    seedQuery: "How do food inspection failures this year compare to last year?",
     icon: (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
         <path d="M7 3 L7 11 M11 3 L11 11 M15 3 L15 11 M11 11 L11 19 M5 19 L17 19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -40,12 +45,12 @@ const TOPIC_TILES: {
     ),
   },
   {
-    key: "salaries",
-    label: "Salaries & contracts",
-    blurb: "Who got paid what by your city government.",
-    count: "60K records",
+    key: "spending",
+    label: "State spending",
+    blurb: "Where Texas agency dollars actually go.",
+    count: "$100B+ tracked",
     color: "#A855F7",
-    seedQuery: "Who got the biggest city contract in Austin last year?",
+    seedQuery: "Top 10 state agencies by total 2024 expenditures",
     icon: (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
         <circle cx="11" cy="11" r="7.5" stroke="currentColor" strokeWidth="1.5" />
@@ -56,10 +61,10 @@ const TOPIC_TILES: {
   {
     key: "civic",
     label: "311 & code violations",
-    blurb: "Potholes, noise, illegal dumping. What got reported.",
+    blurb: "Potholes, noise, dumping. What got reported.",
     count: "1.5M requests",
     color: "#5B8DEF",
-    seedQuery: "Where do 311 requests and code violations spike together in Austin this year?",
+    seedQuery: "How does 311 volume in flood-prone zips compare to the last year?",
     icon: (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
         <path d="M3.5 5.5 C3.5 4.4 4.4 3.5 5.5 3.5 L16.5 3.5 C17.6 3.5 18.5 4.4 18.5 5.5 L18.5 13 C18.5 14.1 17.6 15 16.5 15 L9 15 L5 18.5 L5 15 L5.5 15 C4.4 15 3.5 14.1 3.5 13 Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
@@ -69,10 +74,10 @@ const TOPIC_TILES: {
   {
     key: "transit",
     label: "Roads & traffic",
-    blurb: "Crashes, Vision Zero, mobility patterns.",
+    blurb: "Crash trends across the last two years.",
     count: "1K+ fatal crashes",
     color: "#F59E0B",
-    seedQuery: "Most dangerous intersections in Austin by traffic fatality count",
+    seedQuery: "Show austin crash report data trend over the last 24 months by quarter",
     icon: (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
         <path d="M5 16 L5 11 L8 7 L14 7 L17 11 L17 16 M5 16 L5 17.5 L7 17.5 L7 16 M15 16 L15 17.5 L17 17.5 L17 16 M5 16 L17 16 M7.5 12 L14.5 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -80,15 +85,16 @@ const TOPIC_TILES: {
     ),
   },
   {
-    key: "schools",
-    label: "Schools & education",
-    blurb: "Enrollment, ratings, district funding flows.",
-    count: "1,200+ TX districts",
+    key: "crime",
+    label: "Crime reports",
+    blurb: "What's getting reported, and the outliers.",
+    count: "2M+ incidents",
     color: "#EF4444",
-    seedQuery: "How does Pflugerville ISD funding compare to nearby districts?",
+    seedQuery: "Top 5 outliers in crime reports this year",
     icon: (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
-        <path d="M2.5 8 L11 4 L19.5 8 L11 12 L2.5 8 Z M6 9.8 L6 13.5 C6 14.9 8.5 16 11 16 C13.5 16 16 14.9 16 13.5 L16 9.8 M19.5 8 L19.5 13" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+        <path d="M11 2.5 L17.5 5 L17.5 11 C17.5 15 14.5 18 11 19.5 C7.5 18 4.5 15 4.5 11 L4.5 5 Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+        <path d="M8.5 10.5 L10.5 12.5 L14 8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   },
