@@ -7,31 +7,41 @@ type NavGroup =
   | { kind: "link"; href: string; label: string }
   | { kind: "group"; label: string; items: { href: string; label: string; blurb?: string }[] };
 
+// 4-item nav (logo is "Home"). Reports + Agents + Ask-your-own + About
+// moved to the footer to cut header noise per user feedback 2026-05-13.
 const NAV: NavGroup[] = [
-  { kind: "link", href: "/", label: "Home" },
   { kind: "link", href: "/q", label: "Lookups" },
-  { kind: "link", href: "/byok", label: "Ask your own" },
   { kind: "link", href: "/datasets", label: "Datasets" },
-  { kind: "link", href: "/reports", label: "Reports" },
-  { kind: "link", href: "/agents", label: "Agents" },
   {
     kind: "group",
-    label: "Developer resources",
+    label: "Developers",
     items: [
-      { href: "/use-as-agent", label: "Install", blurb: "Add the MCP server to Claude Code, Cursor, Codex." },
+      { href: "/use-as-agent", label: "Install MCP", blurb: "Add the MCP server to Claude Code, Cursor, Codex." },
       { href: "/architecture", label: "Architecture", blurb: "Dataset → Ingest → Cache → Agent → UI. The whole system." },
       { href: "/docs", label: "Docs", blurb: "Tools, skill, integration. Long-form reference." },
-      { href: "/developer", label: "Developer", blurb: "API reference + replay console." },
-      { href: "/sources", label: "Sources", blurb: "Datasets, glossaries, license, attribution." },
+      { href: "/developer", label: "API + replay", blurb: "API reference + replay console." },
+      { href: "/agents", label: "Agents", blurb: "The 7 specialists that make up the runtime." },
     ],
   },
   { kind: "link", href: "/about", label: "About" },
 ];
 
-// Flat list for the footer + active-state matching
-const FLAT_NAV: { href: string; label: string }[] = NAV.flatMap((n) =>
-  n.kind === "link" ? [{ href: n.href, label: n.label }] : n.items.map((i) => ({ href: i.href, label: i.label })),
-);
+// Footer-only links — secondary surfaces still reachable, just not in header
+const FOOTER_EXTRA: { href: string; label: string }[] = [
+  { href: "/reports", label: "Reports" },
+  { href: "/byok", label: "Ask your own" },
+  { href: "/sources", label: "Sources" },
+];
+
+// Flat list for the footer + active-state matching. Includes the header
+// nav, the dropdown items, and the FOOTER_EXTRA links so secondary surfaces
+// stay reachable from the footer even though they're not in the header.
+const FLAT_NAV: { href: string; label: string }[] = [
+  ...NAV.flatMap((n) =>
+    n.kind === "link" ? [{ href: n.href, label: n.label }] : n.items.map((i) => ({ href: i.href, label: i.label })),
+  ),
+  ...FOOTER_EXTRA,
+];
 
 function isActive(href: string, active?: string): boolean {
   if (!active) return false;
