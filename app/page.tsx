@@ -59,7 +59,7 @@ export default async function HomePage() {
     loadDiscovery(),
   ]);
 
-  // Pull 6 cached investigations to feature. Curation matters here — the
+  // Pull 6 cached lookups to feature. Curation matters here — the
   // raw archive is full of failed runs, null results, and near-duplicate
   // QA queries. Quality gate:
   //   - drop bad-status + zero-duration
@@ -143,7 +143,7 @@ export default async function HomePage() {
     <Shell active="/">
       <HomeHero datasetCount={discovery.totalKnown} />
 
-      {/* FEATURED INVESTIGATIONS — compact: top cached lookups as cards */}
+      {/* AGENT INSIGHTS — compact: top cached lookups as cards */}
       <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
         <div className="mx-auto max-w-[1100px] px-6 py-12 md:px-8 md:py-16">
           <div className="flex items-end justify-between gap-6">

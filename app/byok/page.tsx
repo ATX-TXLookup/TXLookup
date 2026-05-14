@@ -20,7 +20,7 @@ export default async function ByokPage() {
             Want to ask your own question?
           </h1>
           <p className="mt-5 max-w-[58ch] text-[17px] leading-[1.6] text-[var(--ds-text-mute)]">
-            The investigations on this site are curated — we pre-run them on our balance to keep the public library fast and free. To ask your own question, paste your own OpenAI API key below. Your key is stored in an HTTP-only cookie and used only when you submit a question. It is never sent to a database, logged, or shared.
+            The lookups on this site are curated — we pre-run them on our balance to keep the public library fast and free. To ask your own question, paste your own OpenAI API key below. Your key is stored in an HTTP-only cookie and used only when you submit a question. It is never sent to a database, logged, or shared.
           </p>
 
           <ByokForm />
@@ -42,7 +42,7 @@ export default async function ByokPage() {
                 Don't want to bring a key?
               </p>
               <p className="mt-3 text-[14px] text-[var(--ds-text)]">
-                Leave us your email — we'll let you know when an investigation gets added to the public library that matches your interest.
+                Leave us your email — we'll let you know when a lookup gets added to the public library that matches your interest.
               </p>
               <a
                 href="/suggest"
