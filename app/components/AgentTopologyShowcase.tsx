@@ -140,103 +140,81 @@ export default function AgentTopologyShowcase({ replayHash = "a8f3c19d2e7b" }: {
                   cycle: {(now / 1000).toFixed(2)}s / {(TOTAL_MS / 1000).toFixed(1)}s
                 </p>
               </div>
-              <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="block w-full" aria-hidden>
-                {/* Lane labels + thin baselines */}
-                {LANES.map((lane, i) => (
-                  <g key={lane.key}>
-                    <text
-                      x={20}
-                      y={laneY(i) - 3}
-                      fontSize={11}
-                      fontFamily="Inter, ui-sans-serif"
-                      fill="#0A0A0F"
-                      fontWeight={700}
-                    >
-                      {lane.label}
-                    </text>
-                    <text
-                      x={20}
-                      y={laneY(i) + 11}
-                      fontSize={9}
-                      fontFamily="Inter, ui-sans-serif"
-                      fill="#9CA3AF"
-                    >
-                      {lane.sub}
-                    </text>
-                    <line
-                      x1={LANE_LEFT}
-                      x2={LANE_RIGHT}
-                      y1={laneY(i)}
-                      y2={laneY(i)}
-                      stroke="#E4E5E8"
-                      strokeWidth={1}
-                    />
-                  </g>
-                ))}
 
-                {/* Edges between consecutive events (lane-to-lane curves) */}
-                {SEQUENCE.slice(1).map((e, i) => {
-                  const fired = e.t <= now;
-                  if (!fired) return null;
-                  const prev = SEQUENCE[i];
-                  const x1 = tToX(prev.t);
-                  const y1 = laneY(laneIndex(prev.from));
-                  const x2 = tToX(e.t);
-                  const y2 = laneY(laneIndex(e.to ?? e.from));
-                  if (Math.abs(y1 - y2) < 1) {
-                    return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#CBD5E1" strokeWidth={1} />;
-                  }
-                  const mx = (x1 + x2) / 2;
-                  const path = `M${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`;
-                  return <path key={i} d={path} fill="none" stroke="#CBD5E1" strokeWidth={1} />;
-                })}
-
-                {/* Playhead */}
-                <line
-                  x1={playheadX}
-                  x2={playheadX}
-                  y1={4}
-                  y2={VB_H - 4}
-                  stroke="#2563EB"
-                  strokeWidth={1}
-                  strokeOpacity={0.5}
-                  strokeDasharray="2 4"
-                />
-
-                {/* Event nodes */}
-                {SEQUENCE.map((e, i) => {
-                  const fired = e.t <= now;
-                  if (!fired) return null;
-                  const isActive = i === activeIdx;
-                  const lane = LANES[laneIndex(e.from)];
-                  const x = tToX(e.t);
-                  const y = laneY(laneIndex(e.from));
-                  return (
-                    <g key={i}>
-                      {isActive && (
-                        <circle cx={x} cy={y} r={12} fill={lane.color} opacity={0.18} />
-                      )}
-                      {(e.kind === "critique" || e.kind === "approve") ? (
-                        <polygon
-                          points={`${x},${y - 6} ${x + 6},${y} ${x},${y + 6} ${x - 6},${y}`}
-                          fill={isActive ? lane.color : "white"}
-                          stroke={lane.color}
-                          strokeWidth={1.5}
+              {/* Top-down agent flow. Vertical stack, color stripes per lane,
+                  current agent glows. A side curve loops Critic back to Data
+                  Analyst on critique events to show the self-correct cycle. */}
+              <div className="relative px-5 py-6">
+                <ol className="space-y-2">
+                  {LANES.map((lane) => {
+                    const isActive = active.from === lane.key;
+                    const isCritiqueLoop =
+                      active.kind === "critique" && lane.key === "data_analyst";
+                    return (
+                      <li
+                        key={lane.key}
+                        className={`relative flex items-center gap-4 overflow-hidden rounded-md border transition-all duration-200 ${
+                          isActive
+                            ? "border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] shadow-lg"
+                            : "border-[var(--ds-border)] bg-[var(--ds-bg)]"
+                        }`}
+                        style={
+                          isActive
+                            ? { boxShadow: `0 0 0 1px ${lane.color}55, 0 8px 24px ${lane.color}22` }
+                            : undefined
+                        }
+                      >
+                        <span
+                          aria-hidden
+                          className="w-1.5 self-stretch"
+                          style={{
+                            background: lane.color,
+                            opacity: isActive ? 1 : 0.45,
+                          }}
                         />
-                      ) : (
-                        <circle
-                          cx={x}
-                          cy={y}
-                          r={isActive ? 5 : 3.5}
-                          fill={isActive ? lane.color : "white"}
-                          stroke={lane.color}
-                          strokeWidth={1.5}
-                        />
-                      )}
-                    </g>
-                  );
-                })}
-              </svg>
+                        <div className="flex flex-1 items-center justify-between gap-4 py-3 pr-4">
+                          <div>
+                            <p
+                              className="text-[14px] font-semibold leading-tight"
+                              style={{ color: isActive ? lane.color : "var(--ds-text)" }}
+                            >
+                              {lane.label}
+                            </p>
+                            <p className="mt-0.5 font-mono text-[10.5px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+                              {lane.sub}
+                            </p>
+                          </div>
+                          {isActive && (
+                            <div className="flex items-center gap-2">
+                              <span
+                                className="h-1.5 w-1.5 animate-pulse rounded-full"
+                                style={{ backgroundColor: lane.color }}
+                              />
+                              <span
+                                className="font-mono text-[10px] uppercase tracking-wider"
+                                style={{ color: lane.color }}
+                              >
+                                {(active.t / 1000).toFixed(2)}s
+                              </span>
+                            </div>
+                          )}
+                          {isCritiqueLoop && (
+                            <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-warn)]">
+                              ↺ re-plan
+                            </span>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+
+                {/* Sourced answer terminal node */}
+                <div className="mt-4 flex items-center justify-center gap-2 border-t border-[var(--ds-border)] pt-4 font-mono text-[10.5px] uppercase tracking-wider text-[var(--ds-good)]">
+                  <span>✓ sourced answer</span>
+                  <span className="text-[var(--ds-text-dim)]">· cited · replayable</span>
+                </div>
+              </div>
 
               {/* Live readout */}
               <div className="border-t border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-5 py-3.5">
