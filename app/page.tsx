@@ -163,9 +163,10 @@ export default async function HomePage() {
             </Link>
           </div>
 
+          {/* Cards tease — the question carries it, the meta row proves it
+              ran. The full finding lives behind the click, not on the card. */}
           <ul className="mt-8 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {featuredRuns.map((r) => {
-              const finding = (r.answer || "").split(/\n\n+/)[0]?.slice(0, 180) ?? "";
               const events = (r.events ?? []) as Array<Record<string, unknown>>;
               let dsId: string | null = null;
               for (const ev of events) {
@@ -183,12 +184,7 @@ export default async function HomePage() {
                     <h3 className="text-[16px] font-semibold leading-snug text-[var(--ds-text)]">
                       {r.query}
                     </h3>
-                    {finding && (
-                      <p className="mt-2 line-clamp-3 text-[13px] leading-relaxed text-[var(--ds-text-mute)]">
-                        {finding}
-                      </p>
-                    )}
-                    <div className="mt-4 flex items-baseline gap-3 font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+                    <div className="mt-auto flex items-baseline gap-3 pt-5 font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
                       {dsId && <span className="text-[var(--ds-accent)]">{dsId}</span>}
                       <span>{(r.durationMs / 1000).toFixed(1)}s</span>
                       <span>{r.tokenTotal.toLocaleString()} tok</span>
@@ -216,8 +212,8 @@ export default async function HomePage() {
               <h2 className="mt-2 max-w-[20ch] text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-white md:text-[44px]">
                 Austin. Dallas. San Antonio. Houston. The state.
               </h2>
-              <p className="mt-4 max-w-[44ch] text-[15px] leading-relaxed text-[var(--ds-text-mute)]">
-                Real numbers, pulled fresh from each city&rsquo;s open-data portal. The big tiles update on every page load; freshness shown on each one. {(discovery.totalKnown - 9).toLocaleString()}+ more datasets are one question away.
+              <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+                Live from 6 portals · refreshed on load
               </p>
               <HeroTexasMap />
             </div>
