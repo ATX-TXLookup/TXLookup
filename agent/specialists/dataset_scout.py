@@ -96,17 +96,68 @@ def _http_get_json(url: str) -> Any:
 
 
 def list_portal_datasets(host: str, limit: int = 200) -> Iterable[dict]:
-    """Pull `limit` most-recent datasets from a Socrata portal's catalog API.
+    """Pull `limit` most-recent datasets from a Socrata portal via the
+    Discovery API (`api.us.socrata.com/api/catalog/v1`).
 
-    Uses Socrata's `/api/views.json` which returns a flat list. We sort by
-    most-recently-updated to surface fresh candidates first.
+    Why Discovery API and not `/api/views.json`: the per-portal views.json
+    catalog endpoint returns SUMMARIES that omit `columns` and `license`.
+    Without column info, the temporal / geographic scoring signals can
+    never fire (root cause of the zero-yield rubric, see #161). Discovery
+    API inlines `columns_field_name` / `columns_datatype` / `columns_name`
+    as parallel arrays per resource.
+
+    Returns dicts normalized to the legacy views.json shape so the rest of
+    the scoring code can stay unchanged: each dict has `id`, `name`,
+    `description`, `columns` (list of {fieldName, name, dataTypeName}),
+    `viewCount`, `downloadCount`, `rowsUpdatedAt` (epoch), `license`.
     """
-    qs = urllib.parse.urlencode({"limit": limit, "orderBy": "updatedAt", "orderDir": "DESC"})
-    url = f"https://{host}/api/views.json?{qs}"
+    qs = urllib.parse.urlencode(
+        {"domains": host, "limit": limit, "order": "page_views_last_month"}
+    )
+    url = f"https://api.us.socrata.com/api/catalog/v1?{qs}"
     data = _http_get_json(url)
-    if not isinstance(data, list):
+    if not isinstance(data, dict):
         return []
-    return data
+    results = data.get("results") or []
+    normalized: list[dict] = []
+    for r in results:
+        res = r.get("resource") or {}
+        meta = r.get("metadata") or {}
+        # Reconstruct columns from parallel arrays
+        field_names = res.get("columns_field_name") or []
+        display_names = res.get("columns_name") or []
+        datatypes = res.get("columns_datatype") or []
+        columns = []
+        for i in range(max(len(field_names), len(display_names), len(datatypes))):
+            columns.append(
+                {
+                    "fieldName": field_names[i] if i < len(field_names) else None,
+                    "name": display_names[i] if i < len(display_names) else None,
+                    "dataTypeName": (datatypes[i] if i < len(datatypes) else "").lower().replace(" ", "_") or None,
+                }
+            )
+        # data_updated_at is ISO; convert to epoch for backward compat
+        updated_iso = res.get("data_updated_at") or res.get("updatedAt")
+        updated_epoch = None
+        if updated_iso:
+            try:
+                updated_epoch = int(datetime.fromisoformat(updated_iso.replace("Z", "+00:00")).timestamp())
+            except (ValueError, TypeError):
+                pass
+        page_views = res.get("page_views") or {}
+        normalized.append(
+            {
+                "id": res.get("id"),
+                "name": res.get("name") or "",
+                "description": res.get("description") or "",
+                "columns": columns,
+                "viewCount": page_views.get("page_views_total") or 0,
+                "downloadCount": res.get("download_count") or 0,
+                "rowsUpdatedAt": updated_epoch,
+                "license": meta.get("license"),
+            }
+        )
+    return normalized
 
 
 def detect_temporal_columns(columns: list[dict]) -> list[str]:
@@ -275,11 +326,12 @@ Auto-filed by the **dataset scout** at `agent/specialists/dataset_scout.py`. To 
 """
 
 
-def scout_once(verbose: bool = False) -> tuple[list[Candidate], dict]:
+def scout_once(verbose: bool = False, force_all: bool = False) -> tuple[list[Candidate], dict]:
     state = load_state()
     seen: dict = state.get("seen", {})
     all_candidates: list[Candidate] = []
     run_started = datetime.now(timezone.utc).isoformat()
+    score_histogram: dict[int, int] = {}
 
     for p in PORTALS:
         host, city = p["host"], p["city"]
@@ -297,15 +349,27 @@ def scout_once(verbose: bool = False) -> tuple[list[Candidate], dict]:
             is_refreshed = (
                 already is not None and updated and updated > already.get("last_updated_at", 0)
             )
-            if not (is_new or is_refreshed):
+            if not (is_new or is_refreshed) and not force_all:
                 continue
             candidate = to_candidate(view, host, city)
             all_candidates.append(candidate)
-            seen[seen_key] = {
-                "first_seen": already.get("first_seen") if already else run_started,
-                "last_updated_at": updated,
-                "last_scout_run": run_started,
-            }
+            score_histogram[candidate.score] = score_histogram.get(candidate.score, 0) + 1
+            if verbose:
+                reasons_str = ", ".join(candidate.reasons) if candidate.reasons else "(none)"
+                print(
+                    f"  score={candidate.score}/5  {host}/{ds_id}  '{candidate.name[:50]}'  reasons: {reasons_str}",
+                    file=sys.stderr,
+                )
+            if not force_all:
+                seen[seen_key] = {
+                    "first_seen": already.get("first_seen") if already else run_started,
+                    "last_updated_at": updated,
+                    "last_scout_run": run_started,
+                }
+
+    if verbose:
+        hist_line = "  ".join(f"{s}:{score_histogram.get(s, 0)}" for s in range(6))
+        print(f"\n  score histogram (score:count): {hist_line}", file=sys.stderr)
 
     # Filter + sort top-N
     qualified = [c for c in all_candidates if c.score >= SCORE_THRESHOLD]
@@ -331,10 +395,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="TXLookup dataset scout")
     parser.add_argument("--dry-run", action="store_true", help="Don't write state or output issue bodies")
     parser.add_argument("--verbose", action="store_true")
+    parser.add_argument("--force-all", action="store_true", help="Score every dataset on the portal, ignoring seen-state cache (diagnostic)")
     parser.add_argument("--issue-bodies-out", default="data/scout/pending_issues.json", help="Where to dump pending issue bodies for the workflow to pick up")
     args = parser.parse_args()
 
-    top, state = scout_once(verbose=args.verbose)
+    top, state = scout_once(verbose=args.verbose, force_all=args.force_all)
     print(f"Scout: {len(top)} candidate(s) above threshold {SCORE_THRESHOLD}", file=sys.stderr)
     for c in top:
         print(f"  · {c.portal}/{c.dataset_id}  score={c.score}  '{c.name[:60]}'", file=sys.stderr)
