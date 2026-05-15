@@ -26,3 +26,13 @@ jobs:
           node-version: '20'
       - run: npm ci
       - run: npx tsc --noEmit
+
+  catalog-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pytest
+      - run: CATALOG_OFFLINE=1 python -m pytest tests/test_catalog_integrity.py tests/test_catalog_parity.py -q
