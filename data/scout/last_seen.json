@@ -113,6 +113,12 @@
       "candidates_qualified": 0,
       "candidates_total": 4,
       "started_at": "2026-05-15T02:55:02.593354+00:00"
+    },
+    {
+      "candidates_filed": 0,
+      "candidates_qualified": 0,
+      "candidates_total": 7,
+      "started_at": "2026-05-15T08:45:59.369172+00:00"
     }
   ],
   "seen": {
@@ -2253,8 +2259,8 @@
     },
     "datahub.austintexas.gov/4zky-76x4": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-14T08:34:52.094403+00:00",
-      "last_updated_at": 1778730257
+      "last_scout_run": "2026-05-15T08:45:59.369172+00:00",
+      "last_updated_at": 1778816662
     },
     "datahub.austintexas.gov/59th-gws4": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -2438,8 +2444,8 @@
     },
     "datahub.austintexas.gov/bh9a-h575": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
-      "last_updated_at": 1778748173
+      "last_scout_run": "2026-05-15T08:45:59.369172+00:00",
+      "last_updated_at": 1778833854
     },
     "datahub.austintexas.gov/bhzr-h83s": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3258,8 +3264,8 @@
     },
     "www.dallasopendata.com/4n3h-rfqm": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-14T14:04:36.523546+00:00",
-      "last_updated_at": 1778748855
+      "last_scout_run": "2026-05-15T08:45:59.369172+00:00",
+      "last_updated_at": 1778834774
     },
     "www.dallasopendata.com/4p2u-u3vh": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3878,8 +3884,8 @@
     },
     "www.dallasopendata.com/pxcj-qffj": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-14T08:34:52.094403+00:00",
-      "last_updated_at": 1778747605
+      "last_scout_run": "2026-05-15T08:45:59.369172+00:00",
+      "last_updated_at": 1778834167
     },
     "www.dallasopendata.com/pye7-mde4": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -3953,8 +3959,8 @@
     },
     "www.dallasopendata.com/s8ga-2yn6": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-15T02:55:02.593354+00:00",
-      "last_updated_at": 1778813696
+      "last_scout_run": "2026-05-15T08:45:59.369172+00:00",
+      "last_updated_at": 1778834696
     },
     "www.dallasopendata.com/sgg9-e5yn": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -4033,8 +4039,8 @@
     },
     "www.dallasopendata.com/uyte-zi7f": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-14T08:34:52.094403+00:00",
-      "last_updated_at": 1778747715
+      "last_scout_run": "2026-05-15T08:45:59.369172+00:00",
+      "last_updated_at": 1778834120
     },
     "www.dallasopendata.com/v64b-hbfa": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
@@ -4123,8 +4129,8 @@
     },
     "www.dallasopendata.com/y4qc-xp55": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
-      "last_scout_run": "2026-05-14T08:34:52.094403+00:00",
-      "last_updated_at": 1778744227
+      "last_scout_run": "2026-05-15T08:45:59.369172+00:00",
+      "last_updated_at": 1778830711
     },
     "www.dallasopendata.com/y4wx-65x4": {
       "first_seen": "2026-05-10T11:40:25.445086+00:00",
