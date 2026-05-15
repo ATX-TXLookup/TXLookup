@@ -7,6 +7,8 @@ import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
+import { recordSuggestion } from "@/app/lib/demand";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -42,6 +44,12 @@ export async function POST(req: NextRequest) {
     status: "new" as const,
   };
   await fs.writeFile(path.join(DIR, filename), JSON.stringify(payload, null, 2), "utf8");
+
+  // Also feed the demand queue — a suggestion is a demand row someone cared
+  // enough to type, so it lands on /wanted seeded with one upvote. (The
+  // file write above is the legacy admin-review path; it's a no-op in prod
+  // anyway since Vercel's FS is ephemeral. The queue is the real home.)
+  await recordSuggestion(question);
 
   return Response.json({ ok: true });
 }

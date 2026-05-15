@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Shell } from "@/app/components/ds";
 import { HomeHero } from "@/app/components/HomeHero";
 import { loadDiscovery } from "@/app/lib/catalog-discovered";
+import { recordGateHit } from "@/app/lib/demand";
 import {
   findRun,
   listRuns,
@@ -362,9 +363,20 @@ function GateView({ query, libraryCount }: { query: string; libraryCount: number
             &quot;{query}&quot;
           </h1>
           <p className="mt-5 max-w-[58ch] text-[16px] leading-[1.65] text-[var(--ds-text-mute)]">
-            We curate the public library by hand. This question hasn&apos;t been answered yet — two ways to get to one:
+            We curate the public library by hand. This question hasn&apos;t been answered yet. We&apos;ve logged it to the demand queue. Three ways forward:
           </p>
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <Link
+              href="/wanted"
+              className="block rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-6 transition-colors hover:border-[var(--ds-accent)]"
+            >
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--ds-accent)]">
+                Upvote it
+              </p>
+              <p className="mt-2 text-[15px] text-[var(--ds-text)]">
+                It&apos;s in the queue. Upvote it and the most-wanted question runs at the top of the hour.
+              </p>
+            </Link>
             <Link
               href={`/byok`}
               className="block rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-6 transition-colors hover:border-[var(--ds-accent)]"
@@ -384,7 +396,7 @@ function GateView({ query, libraryCount }: { query: string; libraryCount: number
                 Suggest it
               </p>
               <p className="mt-2 text-[15px] text-[var(--ds-text)]">
-                Leave us your email. We&apos;ll run high-signal questions on our balance and notify you when they land.
+                Leave your email. We&apos;ll notify you when it lands in the library.
               </p>
             </Link>
           </div>
@@ -452,6 +464,12 @@ export default async function QPage({
   if (cached && cached.answer) {
     return <DetailView run={cached} />;
   }
+
+  // Uncached query — record the demand signal before showing the gate, so
+  // the /wanted queue captures every ask, not just the few who suggest.
+  // recordGateHit is wrapped in withDb and never throws; awaiting it costs
+  // a few ms and guarantees it flushes in the serverless runtime.
+  await recordGateHit(query);
 
   const libraryCount = (await listRuns(200)).length;
   return <GateView query={query} libraryCount={libraryCount} />;
