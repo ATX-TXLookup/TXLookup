@@ -18,7 +18,14 @@ let _schemaReady = false;
 
 function getSql(): NeonQueryFunction<false, false> | null {
   if (_sql !== undefined) return _sql;
-  const url = process.env.DATABASE_URL?.trim();
+  // Accept the common connection-string env var names. Local dev uses a
+  // plain DATABASE_URL in .env.local; the Vercel Neon integration with a
+  // DATABASE prefix injects DATABASE_POSTGRES_URL; stock Vercel Postgres
+  // uses POSTGRES_URL. Use whichever is present.
+  const url =
+    process.env.DATABASE_URL?.trim() ||
+    process.env.DATABASE_POSTGRES_URL?.trim() ||
+    process.env.POSTGRES_URL?.trim();
   if (!url) return (_sql = null);
   try {
     return (_sql = neon(url));
