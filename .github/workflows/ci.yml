@@ -26,3 +26,15 @@ jobs:
           node-version: '20'
       - run: npm ci
       - run: npx tsc --noEmit
+
+  catalog-parity:
+    # Closes #164 — pin parity between config/datasets.yaml (Python) and
+    # app/lib/catalog.ts (frontend). Drift = silent 4xx in production.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pytest
+      - run: CATALOG_OFFLINE=1 python -m pytest tests/test_catalog_parity.py -v
