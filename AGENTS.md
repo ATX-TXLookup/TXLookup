@@ -119,11 +119,6 @@ GET https://data.austintexas.gov/resource/{dataset-id}.json
 | TX Comptroller | comptroller.texas.gov | Tax data, revenue, economic indicators |
 | US Census (TX) | data.census.gov | Demographics, housing, business patterns |
 
-### Catalog parity
-- Keep `config/datasets.yaml` and `app/lib/catalog.ts` synchronized for dataset IDs, portal hosts, and key columns.
-- Run `CATALOG_OFFLINE=1 python -m pytest tests/test_catalog_integrity.py tests/test_catalog_parity.py -q` after touching either catalog file.
-- If one catalog becomes generated from the other, update this note and the parity test in the same PR.
-
 ## How to Contribute (for agents)
 
 1. **Read this file first** — understand the architecture before writing code
