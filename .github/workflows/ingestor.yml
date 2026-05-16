@@ -45,4 +45,12 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/cache.db
           git commit -m "chore(cache): refresh @ $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          git push
+          # Race-resilient push: scout + ingestor share main and can run
+          # concurrently or get manually re-run. Without rebase-retry, a
+          # collision leaves one cron in `! [rejected] (fetch first)`
+          # failure state. Mirrors dataset-scout.yml's pattern.
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push origin main && break
+            echo "push retry $i — sleeping 5s"
+            sleep 5
+          done
