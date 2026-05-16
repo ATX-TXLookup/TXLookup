@@ -57,7 +57,7 @@ type Event =
       agent?: string;
       // Issue #90 — origin of the data (cache hit / live fetch / fallback).
       // Only set on Socrata-touching tool steps.
-      tool_source?: "cache" | "live" | "cache-fallback";
+      tool_source?: "cache" | "live" | "cache-fallback" | "unknown";
       // Full structured result envelope, ONLY emitted for delegate_to steps
       // where the UI needs to render the specialist payload (chips,
       // findings, composed report). The 240-char `preview` field above is
@@ -132,7 +132,7 @@ type Event =
       // back to live after a cache miss.
       phase: "tool_source";
       step: number;
-      source: "cache" | "live" | "cache-fallback";
+      source: "cache" | "live" | "cache-fallback" | "unknown";
     }
   | { phase: "completing"; message: string }
   | {
@@ -712,7 +712,7 @@ async function handlePost(req: NextRequest): Promise<Response> {
           stepTrace.push({ tool: step.tool, status: r.status, duration_ms });
 
           // Issue #90 + #97 — Socrata wrapper flags the source on the result
-          // envelope (`_source: "cache" | "live" | "cache-fallback"`). The
+          // envelope (`_source: "cache" | "live" | "cache-fallback" | "unknown"`). The
           // cache layer landed in #97; every Socrata tool must declare its
           // source. If a Socrata tool result is missing `_source`, that's a
           // tool-side bug — surface it as `unknown` so the DAG renders an
@@ -729,7 +729,7 @@ async function handlePost(req: NextRequest): Promise<Response> {
               "_source" in (r.result as Record<string, unknown>)
                 ? String((r.result as { _source: unknown })._source)
                 : null;
-            const source: "cache" | "live" | "cache-fallback" | "unknown" =
+            const source: "cache" | "live" | "cache-fallback" | "unknown" | "unknown" =
               declared === "cache" ||
               declared === "live" ||
               declared === "cache-fallback"
