@@ -54,7 +54,7 @@ def _miro_color(name: str) -> str:
 
 
 def _token() -> str:
-    token = os.environ.get("MIRO_API_TOKEN")
+    token = (os.environ.get("MIRO_API_TOKEN") or "").strip()
     if not token:
         raise RuntimeError(
             "MIRO_API_TOKEN missing from env. Get one from "
@@ -239,12 +239,23 @@ async def render_board_from_layout(layout: dict[str, Any]) -> dict[str, Any]:
         items_created += 1
 
         for sticky_spec in frame_spec.get("stickies", []):
+            # Miro v2 interprets parented item positions in frame-local
+            # coordinates. Layouts are authored around the frame center, so
+            # translate them into the positive frame box before parenting.
+            sticky_x = (
+                int(sticky_spec.get("x", 0))
+                + int(frame_spec.get("width", 1500)) // 2
+            )
+            sticky_y = (
+                int(sticky_spec.get("y", 0))
+                + int(frame_spec.get("height", 1000)) // 2
+            )
             sticky_res = await add_sticky(
                 board_id=board_id,
                 content=sticky_spec.get("content", ""),
                 color=sticky_spec.get("color", "gray"),
-                x=int(sticky_spec.get("x", 0)),
-                y=int(sticky_spec.get("y", 0)),
+                x=sticky_x,
+                y=sticky_y,
                 frame_id=frame_id,
                 width=int(sticky_spec.get("width", 200)),
             )
