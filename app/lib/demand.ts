@@ -132,15 +132,38 @@ export async function listAnswered(limit = 12): Promise<DemandRow[]> {
 }
 
 /**
+ * Poison-query backoff (#162): a row that has failed this many times in a
+ * row gets flipped to 'rejected' and stops cycling through cron picks.
+ */
+export const POISON_ATTEMPT_LIMIT = 5;
+
+/**
+ * Cool-down (#162): even before hitting the hard limit, don't re-attempt
+ * a failing row within this many minutes — prevents a doom-loop where one
+ * stuck query monopolizes every cron tick.
+ */
+export const RETRY_COOLDOWN_MINUTES = 30;
+
+/**
  * The single highest-priority pending query with at least `minUpvotes`
  * votes — what the hourly cron runs. Returns null when nothing clears the
  * bar, so quiet hours don't spend.
+ *
+ * #162: skips rows that were attempted within RETRY_COOLDOWN_MINUTES
+ * (recently failed → let them rest) and rows over POISON_ATTEMPT_LIMIT
+ * (permanently failed → status='rejected' by markAttemptFailed).
  */
 export async function topPending(minUpvotes = 1): Promise<DemandRow | null> {
   return withDb<DemandRow | null>(async (sql) => {
     const rows = (await sql`
       SELECT * FROM query_demand
-        WHERE status = 'pending' AND upvotes >= ${minUpvotes}
+        WHERE status = 'pending'
+          AND upvotes >= ${minUpvotes}
+          AND attempts < ${POISON_ATTEMPT_LIMIT}
+          AND (
+            last_attempt_at IS NULL
+            OR last_attempt_at < now() - (${RETRY_COOLDOWN_MINUTES}::int * interval '1 minute')
+          )
         ORDER BY upvotes DESC, hit_count DESC, first_seen ASC
         LIMIT 1
     `) as DemandRow[];
@@ -158,6 +181,30 @@ export async function markAnswered(
     await sql`
       UPDATE query_demand
         SET status = 'answered', run_hash = ${runHash}, answered_at = now()
+        WHERE query_hash = ${hash}
+    `;
+    return null;
+  });
+}
+
+/**
+ * #162 — record a failed cron attempt on a demand row. Increments attempts,
+ * stamps last_attempt_at, and flips status='rejected' once the row crosses
+ * POISON_ATTEMPT_LIMIT so it stops getting picked up. Caller is the cron;
+ * pure-DB side effect, no return value needed.
+ */
+export async function markAttemptFailed(query: string): Promise<void> {
+  const hash = demandHash(query);
+  await withDb(async (sql) => {
+    await sql`
+      UPDATE query_demand
+        SET
+          attempts = attempts + 1,
+          last_attempt_at = now(),
+          status = CASE
+            WHEN attempts + 1 >= ${POISON_ATTEMPT_LIMIT} THEN 'rejected'
+            ELSE status
+          END
         WHERE query_hash = ${hash}
     `;
     return null;

@@ -7,12 +7,16 @@
 
 import { NextRequest } from "next/server";
 
-import { topPending, markAnswered } from "@/app/lib/demand";
+import { topPending, markAnswered, markAttemptFailed } from "@/app/lib/demand";
 import { hashQuery } from "@/app/lib/run-archive";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 120; // agent runs take ~30-60s
+// #162 — must match the inner /api/agent maxDuration (60s on Vercel Hobby).
+// The cron's outbound fetch to /api/agent inherits the inner cap, so
+// declaring 120 here was misleading — the inner request times out at 60.
+// Bump here in lockstep with /api/agent if/when we move to Pro.
+export const maxDuration = 60;
 
 function baseUrl(req: NextRequest): string {
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
@@ -62,10 +66,15 @@ export async function GET(req: NextRequest) {
   }
 
   if (errored) {
-    // Leave the row pending — it'll be retried next hour.
+    // #162 — record the failure so a permanently-broken row can't retry
+    // every cron tick forever. After POISON_ATTEMPT_LIMIT failures the row
+    // is auto-flipped to status='rejected' and stops getting picked up.
+    // Within RETRY_COOLDOWN_MINUTES, even a sub-limit row is skipped to
+    // prevent doom-looping on the same query.
+    await markAttemptFailed(top.query_text);
     return Response.json({
       ran: false,
-      reason: "agent run errored",
+      reason: "agent run errored — attempt counted, will back off",
       query: top.query_text,
     });
   }
