@@ -54,7 +54,11 @@ def _miro_color(name: str) -> str:
 
 
 def _token() -> str:
-    token = os.environ.get("MIRO_API_TOKEN")
+    # Defensive .strip() — tokens copy-pasted from the Miro dashboard or
+    # injected via .env files often pick up trailing newlines / surrounding
+    # whitespace. Letting that flow into the Authorization header produces a
+    # silent 401. Mirrors the same fix already applied in app/lib/agent.ts.
+    token = (os.environ.get("MIRO_API_TOKEN") or "").strip()
     if not token:
         raise RuntimeError(
             "MIRO_API_TOKEN missing from env. Get one from "
@@ -238,13 +242,22 @@ async def render_board_from_layout(layout: dict[str, Any]) -> dict[str, Any]:
         frame_id = frame_res["result"]["frame_id"]
         items_created += 1
 
+        # Frame-local coordinates: the Miro v2 API treats positions on
+        # parented items as offsets from the frame's top-left corner (not
+        # the board origin). Layouts in our codebase are authored around the
+        # frame's CENTER (negative x/y are valid). Translate by half-width /
+        # half-height so the stickies land inside the frame box. Without
+        # this, parented items get rejected with "outside parent boundaries".
+        # Mirrors the FRAME_W/2 + FRAME_H/2 translation in app/lib/agent.ts.
+        frame_w = int(frame_spec.get("width", 1500))
+        frame_h = int(frame_spec.get("height", 1000))
         for sticky_spec in frame_spec.get("stickies", []):
             sticky_res = await add_sticky(
                 board_id=board_id,
                 content=sticky_spec.get("content", ""),
                 color=sticky_spec.get("color", "gray"),
-                x=int(sticky_spec.get("x", 0)),
-                y=int(sticky_spec.get("y", 0)),
+                x=int(sticky_spec.get("x", 0)) + frame_w // 2,
+                y=int(sticky_spec.get("y", 0)) + frame_h // 2,
                 frame_id=frame_id,
                 width=int(sticky_spec.get("width", 200)),
             )
