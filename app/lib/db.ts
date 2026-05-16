@@ -55,6 +55,11 @@ async function ensureSchema(sql: NeonQueryFunction<false, false>): Promise<void>
       answered_at  TIMESTAMPTZ
     )
   `;
+  // #162 — poison-query backoff: track attempts so a permanently-failing
+  // row can't retry every cron tick forever. ALTER TABLE IF NOT EXISTS so
+  // existing deployments pick the new columns up on next ensureSchema().
+  await sql`ALTER TABLE query_demand ADD COLUMN IF NOT EXISTS attempts INTEGER NOT NULL DEFAULT 0`;
+  await sql`ALTER TABLE query_demand ADD COLUMN IF NOT EXISTS last_attempt_at TIMESTAMPTZ`;
   await sql`
     CREATE TABLE IF NOT EXISTS query_votes (
       query_hash         TEXT NOT NULL,
