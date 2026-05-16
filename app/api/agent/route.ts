@@ -57,7 +57,7 @@ type Event =
       agent?: string;
       // Issue #90 — origin of the data (cache hit / live fetch / fallback).
       // Only set on Socrata-touching tool steps.
-      tool_source?: "cache" | "live" | "cache-fallback";
+      tool_source?: "cache" | "live" | "cache-fallback" | "unknown";
       // Full structured result envelope, ONLY emitted for delegate_to steps
       // where the UI needs to render the specialist payload (chips,
       // findings, composed report). The 240-char `preview` field above is
@@ -132,7 +132,7 @@ type Event =
       // back to live after a cache miss.
       phase: "tool_source";
       step: number;
-      source: "cache" | "live" | "cache-fallback";
+      source: "cache" | "live" | "cache-fallback" | "unknown";
     }
   | { phase: "completing"; message: string }
   | {
@@ -711,12 +711,12 @@ async function handlePost(req: NextRequest): Promise<Response> {
           const duration_ms = Date.now() - stepStart;
           stepTrace.push({ tool: step.tool, status: r.status, duration_ms });
 
-          // Issue #90 + #97 — Socrata wrapper may flag the source on the
-          // result envelope (`_source: "cache" | "live" | "cache-fallback"`).
-          // The cache PR isn't necessarily landed yet, so this is best-effort:
-          // if absent, we stub a "live" tag for any tool that obviously hits
-          // Socrata so the DAG still has a source pill to render.
-          // TODO(#97): drop the stub once the cache layer is merged.
+          // Issue #90 + #97 — Socrata wrapper flags the source on the result
+          // envelope (`_source: "cache" | "live" | "cache-fallback" | "unknown"`). The
+          // cache layer landed in #97; every Socrata tool must declare its
+          // source. If a Socrata tool result is missing `_source`, that's a
+          // tool-side bug — surface it as `unknown` so the DAG renders an
+          // explicit "?" pill instead of silently masking the omission.
           const SOCRATA_TOOLS = new Set([
             "summarize_data",
             "fetch_data",
@@ -729,12 +729,17 @@ async function handlePost(req: NextRequest): Promise<Response> {
               "_source" in (r.result as Record<string, unknown>)
                 ? String((r.result as { _source: unknown })._source)
                 : null;
-            const source =
+            const source: "cache" | "live" | "cache-fallback" | "unknown" | "unknown" =
               declared === "cache" ||
               declared === "live" ||
               declared === "cache-fallback"
                 ? (declared as "cache" | "live" | "cache-fallback")
-                : "live";
+                : "unknown";
+            if (source === "unknown") {
+              console.warn(
+                `[agent] Socrata tool '${step.tool}' returned result without _source — should declare cache | live | cache-fallback`,
+              );
+            }
             send({ phase: "tool_source", step: i + 1, source });
           }
 

@@ -17,7 +17,7 @@ export type DemoStep = {
   error?: string;
   // Issue #90 — multi-agent attribution + cache-source pill the DAG reads.
   agent?: string;
-  tool_source?: "cache" | "live" | "cache-fallback";
+  tool_source?: "cache" | "live" | "cache-fallback" | "unknown";
   // Parallel fan-out: this step is a delegate_to_parallel and ships these
   // branches with parallel_dispatch + parallel_join events.
   parallel_branches?: Array<{
