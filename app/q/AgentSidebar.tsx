@@ -16,7 +16,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { ObsEvent } from "./AgentObservatory";
-import { AgentDAG, type DagEvent } from "./AgentDAG";
+import { AgentDAG, type DagEvent, type DagNodeSelection } from "./AgentDAG";
 
 type SidebarStep = {
   step: number;
@@ -167,6 +167,7 @@ export function AgentSidebar(props: Props) {
   // happening right now" view on first paint. DAG / Steps / Telemetry are
   // one click away.
   const [tab, setTab] = useState<Tab>("status");
+  const [selectedDagNode, setSelectedDagNode] = useState<DagNodeSelection | null>(null);
 
   return (
     <aside
@@ -212,9 +213,25 @@ export function AgentSidebar(props: Props) {
         {/* Tab content */}
         <div className="min-h-0 flex-1 overflow-y-auto">
           {tab === "status" && <StatusTab {...props} />}
-          {tab === "dag" && <AgentDAG events={props.dagEvents} />}
+          {tab === "dag" && (
+            <AgentDAG
+              events={props.dagEvents}
+              selectedTs={selectedDagNode?.ts ?? null}
+              onSelectNode={(node) => {
+                setSelectedDagNode(node);
+                setTab("telemetry");
+              }}
+            />
+          )}
           {tab === "steps" && <ExecutionTab steps={props.steps} replans={props.replans} />}
-          {tab === "telemetry" && <TelemetryTab events={props.events} startedAt={props.startedAt} />}
+          {tab === "telemetry" && (
+            <TelemetryTab
+              events={props.events}
+              startedAt={props.startedAt}
+              selectedDagNode={selectedDagNode}
+              onClearSelection={() => setSelectedDagNode(null)}
+            />
+          )}
         </div>
 
         {/* Floating "New Query" action — in-result search affordance per the
@@ -709,9 +726,13 @@ function ExecutionTab({
 function TelemetryTab({
   events,
   startedAt,
+  selectedDagNode,
+  onClearSelection,
 }: {
   events: ObsEvent[];
   startedAt: number | null;
+  selectedDagNode: DagNodeSelection | null;
+  onClearSelection: () => void;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState<"all" | "codex" | "socrata" | "errors">("all");
@@ -721,6 +742,16 @@ function TelemetryTab({
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [events.length]);
+
+  useEffect(() => {
+    if (!selectedDagNode) return;
+    setFilter("all");
+    window.setTimeout(() => {
+      document
+        .getElementById(`telemetry-event-${selectedDagNode.ts}`)
+        ?.scrollIntoView({ block: "center", behavior: "smooth" });
+    }, 60);
+  }, [selectedDagNode]);
 
   const filtered = events.filter((e) => {
     if (filter === "all") return true;
@@ -763,16 +794,43 @@ function TelemetryTab({
           );
         })}
         </div>
+        {selectedDagNode && (
+          <div className="mt-3 flex items-center justify-between gap-3 rounded-md border border-tx-gold/35 bg-tx-gold/10 px-3 py-2">
+            <p className="min-w-0 text-[11px] leading-snug text-tx-cream/80">
+              <span className="font-mono uppercase tracking-[0.12em] text-tx-gold">
+                From DAG
+              </span>{" "}
+              <span className="font-medium">{selectedDagNode.displayLabel}</span>
+              {selectedDagNode.phase && (
+                <span className="text-tx-cream/45"> · {selectedDagNode.phase}</span>
+              )}
+            </p>
+            <button
+              type="button"
+              onClick={onClearSelection}
+              className="shrink-0 font-mono text-[10px] uppercase tracking-[0.12em] text-tx-cream/45 transition-colors hover:text-tx-cream"
+            >
+              Clear
+            </button>
+          </div>
+        )}
       </div>
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 leading-relaxed">
         {filtered.length === 0 ? (
           <p className="py-8 text-center text-[12px] text-tx-cream/45">No events yet.</p>
         ) : (
           <ol className="space-y-3">
-            {filtered.map((e, i) => (
+            {filtered.map((e, i) => {
+              const selected = selectedDagNode?.ts === e.ts;
+              return (
               <li
                 key={i}
-                className="rounded-md border border-white/10 bg-white/[0.04] p-3"
+                id={`telemetry-event-${e.ts}`}
+                className={`rounded-md border p-3 transition-colors ${
+                  selected
+                    ? "border-tx-gold/70 bg-tx-gold/12 shadow-[0_0_0_1px_rgba(212,139,16,0.18)]"
+                    : "border-white/10 bg-white/[0.04]"
+                }`}
               >
                 <div className="flex items-baseline justify-between gap-3">
                   <span
@@ -799,7 +857,8 @@ function TelemetryTab({
                   </details>
                 )}
               </li>
-            ))}
+              );
+            })}
           </ol>
         )}
       </div>
