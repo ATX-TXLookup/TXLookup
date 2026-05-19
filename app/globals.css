@@ -8,21 +8,24 @@
    - `--tx-*` is Godwyn's brand BRAND.md §3 set, kept loaded so any page that
      hasn't migrated yet still renders correctly. */
 :root {
-  /* New design system (Undervolt-ATX recipe) */
-  --ds-bg:           #0E1014;
-  --ds-bg-elev:      #15171C;
-  --ds-bg-deep:      #0A0B0E;
-  --ds-border:       #23262E;
-  --ds-border-strong:#2E323C;
-  --ds-text:         #F5F5F7;
-  --ds-text-mute:    #A1A1AA;
-  --ds-text-dim:     #71717A;
-  --ds-accent:       #5B8DEF;
-  --ds-warm:         #F97316;
-  --ds-good:         #10B981;
-  --ds-warn:         #F59E0B;
-  --ds-bad:          #EF4444;
-  --ds-purple:       #7C6BA8;
+  /* Editorial light surface — warm off-white, near-black ink, editorial blue.
+     Reuses the curated --rep-* palette below so the whole site shares one
+     light system. (Previous dark Undervolt values kept in git history if we
+     want to bring back a theme toggle.) */
+  --ds-bg:           #F8F7F4;
+  --ds-bg-elev:      #FFFFFF;
+  --ds-bg-deep:      #F0EEE8;
+  --ds-border:       #E2E0D8;
+  --ds-border-strong:#CFC9BD;
+  --ds-text:         #15171C;
+  --ds-text-mute:    #4B4F57;
+  --ds-text-dim:     #6E6F77;
+  --ds-accent:       #1B4FBE;
+  --ds-warm:         #C44512;
+  --ds-good:         #0E8A5F;
+  --ds-warn:         #B8770D;
+  --ds-bad:          #C1382E;
+  --ds-purple:       #5E4F8E;
 
   /* Light report surface (USAFacts editorial) */
   --rep-bg:          #F8F7F4;
