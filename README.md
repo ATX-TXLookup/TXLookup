@@ -45,13 +45,13 @@ Seven specialist agents coordinate behind a single search box:
 
 | Agent | Role |
 |---|---|
-| **Planner** | Picks the dataset, drafts a structured plan with bounded tool calls. |
-| **Data analyst** | Writes SoQL, computes stats with quality flags (null rate, top concentration, sample factor). |
-| **Reporter** | Composes plain-English answer, grounded in the analyst's findings. |
-| **Critic** | Reviews plan + answer for groundedness and citation. Forces revision on reject. |
-| **Support** | Handles meta-questions and disambiguation. No SoQL fired. |
-| **Dataset scout** *(cron)* | Indexes new portal datasets every 6h. |
-| **Ingestor** *(cron)* | Refreshes the local-mirror cache so pages stay fast and survive throttling. |
+| [**Planner**](agent/planner.py) | Picks the dataset, drafts a structured plan with bounded tool calls. |
+| [**Data analyst**](docs/multi-agent-architecture.md#2-data-analysis-agent-agentspecialistsdata_analystpy) | Writes SoQL, computes stats with quality flags (null rate, top concentration, sample factor). |
+| [**Reporter**](docs/multi-agent-architecture.md#3-reporting-agent-agentspecialistsreporterpy) | Composes plain-English answer, grounded in the analyst's findings. |
+| [**Critic**](docs/multi-agent-architecture.md#orchestration-patterns) | Reviews plan + answer for groundedness and citation. Forces revision on reject. |
+| [**Support**](docs/multi-agent-architecture.md#4-support-agent-agentspecialistssupportpy) | Handles meta-questions and disambiguation. No SoQL fired. |
+| [**Dataset scout**](agent/specialists/dataset_scout.py) *(cron)* | Indexes new portal datasets every 6h. |
+| [**Ingestor**](agent/specialists/ingestor.py) *(cron)* | Refreshes the local-mirror cache so pages stay fast and survive throttling. |
 
 **The patentable bit:** a pattern-based **doom-loop guard** (identical-3x and `[A,B,A,B]` cycle predicates) plus an **intent-preserving replan path** that survives plan rewrites. See [`docs/deepinvent-submission.md`](docs/deepinvent-submission.md).
 
