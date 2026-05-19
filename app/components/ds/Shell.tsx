@@ -11,7 +11,7 @@ type NavGroup =
 // moved to the footer to cut header noise per user feedback 2026-05-13.
 const NAV: NavGroup[] = [
   { kind: "link", href: "/q", label: "Lookups" },
-  { kind: "link", href: "/wanted", label: "Wanted" },
+  { kind: "link", href: "/wanted", label: "Requested" },
   { kind: "link", href: "/datasets", label: "Datasets" },
   {
     kind: "group",
