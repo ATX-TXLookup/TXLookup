@@ -1,0 +1,43 @@
+name: Run top-pending query (hourly)
+
+# Hourly trigger that fires the most-upvoted pending demand-queue query
+# through the live agent at txlookup.xyz. Replaces the Vercel cron that
+# was removed in lockstep with this workflow (Vercel Hobby only allows
+# daily crons; we want hourly cadence, so the schedule lives here).
+#
+# Secret required: CRON_SECRET — must match the same env var on Vercel.
+# Add it via: Settings → Secrets and variables → Actions → New secret.
+
+on:
+  schedule:
+    - cron: "0 * * * *"        # every hour, on the hour
+  workflow_dispatch:           # allow manual trigger
+
+permissions:
+  contents: read
+
+jobs:
+  run-top-query:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fire the cron endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CRON_SECRET:-}" ]; then
+            echo "::error::CRON_SECRET secret not set on this repo. Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          response=$(curl -sS -w "\nHTTP_STATUS:%{http_code}" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "https://txlookup.xyz/api/cron/run-top-query")
+          status=$(printf '%s' "$response" | grep -oE 'HTTP_STATUS:[0-9]+' | cut -d: -f2)
+          body=$(printf '%s' "$response" | sed 's/HTTP_STATUS:.*//')
+          echo "status: $status"
+          echo "body: $body"
+          if [ "$status" != "200" ]; then
+            echo "::error::Cron endpoint returned non-200 ($status)"
+            exit 1
+          fi
