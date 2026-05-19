@@ -111,7 +111,7 @@ function ListView({
               <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
                 All lookups
               </p>
-              <h2 className="mt-2 text-[24px] font-bold leading-[1.1] tracking-[-0.02em] text-white md:text-[30px]">
+              <h2 className="mt-2 text-[24px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[30px]">
                 {isFiltering ? (
                   <>
                     {totalCount} match
@@ -133,18 +133,18 @@ function ListView({
                 type="search"
                 defaultValue={filter}
                 placeholder="Filter lookups..."
-                className="w-[260px] bg-transparent px-2.5 py-1.5 text-[13.5px] text-white placeholder:text-[var(--ds-text-dim)] focus:outline-none"
+                className="w-[260px] bg-transparent px-2.5 py-1.5 text-[13.5px] text-[var(--ds-text)] placeholder:text-[var(--ds-text-dim)] focus:outline-none"
               />
               <button
                 type="submit"
-                className="rounded-md bg-white px-3 py-1 text-[12px] font-semibold text-[var(--ds-bg)] hover:opacity-90"
+                className="rounded-md bg-[var(--ds-inverse-bg)] px-3 py-1 text-[12px] font-semibold text-[var(--ds-inverse-text)] hover:opacity-90"
               >
                 Filter
               </button>
               {isFiltering && (
                 <Link
                   href="/q"
-                  className="flex items-center px-2 font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-mute)] hover:text-white"
+                  className="flex items-center px-2 font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-mute)] hover:text-[var(--ds-text)]"
                 >
                   clear ×
                 </Link>
@@ -153,7 +153,7 @@ function ListView({
           </div>
           {totalCount > 0 && (
             <p className="mt-3 font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-dim)]">
-              Showing <span className="text-white">{start}&ndash;{end}</span> of {totalCount}
+              Showing <span className="text-[var(--ds-text)]">{start}&ndash;{end}</span> of {totalCount}
               {isFiltering && (
                 <> · filter: <span className="text-[var(--ds-accent)]">&ldquo;{filter}&rdquo;</span></>
               )}
@@ -168,7 +168,7 @@ function ListView({
             <div className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-10 text-center">
               {isFiltering ? (
                 <>
-                  <p className="text-[15px] text-white">No lookups match &ldquo;{filter}&rdquo;.</p>
+                  <p className="text-[15px] text-[var(--ds-text)]">No lookups match &ldquo;{filter}&rdquo;.</p>
                   <Link href="/q" className="mt-3 inline-flex text-[13px] text-[var(--ds-accent)] hover:underline">
                     Clear filter →
                   </Link>
@@ -206,7 +206,7 @@ function ListView({
                     return (
                       <tr key={r.hash} className="group border-b border-[var(--ds-border)] last:border-0 transition-colors hover:bg-[var(--ds-bg)]">
                         <td className="max-w-[520px] px-4 py-3 align-top">
-                          <Link href={`/q?q=${encodeURIComponent(r.query)}`} className="block text-[14px] font-medium leading-snug text-white group-hover:text-[var(--ds-accent)]">
+                          <Link href={`/q?q=${encodeURIComponent(r.query)}`} className="block text-[14px] font-medium leading-snug text-[var(--ds-text)] group-hover:text-[var(--ds-accent)]">
                             {r.query}
                           </Link>
                         </td>
@@ -272,7 +272,7 @@ function Pagination({ currentPage, totalPages, filter }: { currentPage: number; 
         className={`rounded-md border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider ${
           currentPage === 1
             ? "pointer-events-none border-[var(--ds-border)] text-[var(--ds-text-dim)]"
-            : "border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] text-white hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
+            : "border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] text-[var(--ds-text)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
         }`}
       >
         ← Prev
@@ -290,8 +290,8 @@ function Pagination({ currentPage, totalPages, filter }: { currentPage: number; 
                 aria-current={p === currentPage ? "page" : undefined}
                 className={`flex h-8 min-w-[2rem] items-center justify-center rounded-md px-2 font-mono text-[12px] tabular-nums ${
                   p === currentPage
-                    ? "bg-white text-[var(--ds-bg)]"
-                    : "border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] text-white hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
+                    ? "bg-[var(--ds-inverse-bg)] text-[var(--ds-inverse-text)]"
+                    : "border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] text-[var(--ds-text)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
                 }`}
               >
                 {p}
@@ -306,7 +306,7 @@ function Pagination({ currentPage, totalPages, filter }: { currentPage: number; 
         className={`rounded-md border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider ${
           currentPage === totalPages
             ? "pointer-events-none border-[var(--ds-border)] text-[var(--ds-text-dim)]"
-            : "border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] text-white hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
+            : "border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] text-[var(--ds-text)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
         }`}
       >
         Next →
@@ -347,6 +347,14 @@ function DetailView({ run }: { run: SavedRun }) {
   return (
     <Shell active="/q">
       <AgentRunner query={run.query} mode="fallback" />
+    </Shell>
+  );
+}
+
+function LiveView({ query }: { query: string }) {
+  return (
+    <Shell active="/q">
+      <AgentRunner query={query} />
     </Shell>
   );
 }
@@ -417,9 +425,9 @@ function GateView({ query, libraryCount }: { query: string; libraryCount: number
 export default async function QPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string; filter?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; filter?: string; fresh?: string }>;
 }) {
-  const { q, page, filter } = await searchParams;
+  const { q, page, filter, fresh } = await searchParams;
   const query = q?.trim() || "";
 
   if (!query) {
@@ -460,9 +468,14 @@ export default async function QPage({
     );
   }
 
-  const cached = await findRun(query);
+  const forceFresh = fresh === "1" || /\b(render|visualize)\b.*\bmiro\b|\bmiro\b.*\b(render|visualize)\b/i.test(query);
+  const cached = forceFresh ? null : await findRun(query);
   if (cached && cached.answer) {
     return <DetailView run={cached} />;
+  }
+
+  if (forceFresh) {
+    return <LiveView query={query} />;
   }
 
   // Uncached query — record the demand signal before showing the gate, so

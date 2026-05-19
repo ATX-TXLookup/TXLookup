@@ -2,37 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
-/* TXLookup design system (post-redesign). Two parallel token sets:
-   - `--ds-*` is the new dark Undervolt-ATX system used by all post-redesign
+/* TXLookup design system. Two parallel token sets:
+   - `--ds-*` is the current civic editorial system used by post-redesign
      pages (homepage, /q, /agents, /datasets, /use-as-agent, /reports).
    - `--tx-*` is Godwyn's brand BRAND.md §3 set, kept loaded so any page that
      hasn't migrated yet still renders correctly. */
 :root {
-  /* Editorial light surface — warm off-white, near-black ink, editorial blue.
-     Reuses the curated --rep-* palette below so the whole site shares one
-     light system. (Previous dark Undervolt values kept in git history if we
-     want to bring back a theme toggle.) */
-  --ds-bg:           #F8F7F4;
+  color-scheme: light;
+
+  /* Neutral editorial light surface: crisp, readable, restrained. */
+  --ds-bg:           #F7F8FA;
   --ds-bg-elev:      #FFFFFF;
-  --ds-bg-deep:      #F0EEE8;
-  --ds-border:       #E2E0D8;
-  --ds-border-strong:#CFC9BD;
-  --ds-text:         #15171C;
-  --ds-text-mute:    #4B4F57;
-  --ds-text-dim:     #6E6F77;
-  --ds-accent:       #1B4FBE;
-  --ds-warm:         #C44512;
-  --ds-good:         #0E8A5F;
-  --ds-warn:         #B8770D;
-  --ds-bad:          #C1382E;
-  --ds-purple:       #5E4F8E;
+  --ds-bg-deep:      #ECEFF3;
+  --ds-border:       #D7DCE3;
+  --ds-border-strong:#AEB7C3;
+  --ds-text:         #111827;
+  --ds-text-mute:    #4B5563;
+  --ds-text-dim:     #6B7280;
+  --ds-accent:       #2563EB;
+  --ds-warm:         #B45309;
+  --ds-good:         #047857;
+  --ds-warn:         #B45309;
+  --ds-bad:          #B91C1C;
+  --ds-purple:       #6D5BD0;
+  --ds-inverse-bg:   #111827;
+  --ds-inverse-text: #FFFFFF;
 
   /* Light report surface (USAFacts editorial) */
-  --rep-bg:          #F8F7F4;
-  --rep-text:        #15171C;
-  --rep-text-mute:   #4B4F57;
-  --rep-border:      #E2E0D8;
-  --rep-accent:      #1B4FBE;
+  --rep-bg:          #F7F8FA;
+  --rep-text:        #111827;
+  --rep-text-mute:   #4B5563;
+  --rep-border:      #D7DCE3;
+  --rep-accent:      #2563EB;
 
   /* Brand (Godwyn) — kept for legacy pages */
   --tx-navy:       #0D2340;
@@ -52,9 +53,33 @@
   --tx-border:     rgba(26, 21, 16, 0.10);
 }
 
-/* Default surface = the new dark DS. Pages that opt in (via wrapping their
-   <main> with `bg-[var(--ds-bg)]`) get the dark Undervolt look. The brand
-   pages (e.g. Godwyn's /q, /reports surfaces) override with their own bg. */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --ds-bg:           #0F172A;
+  --ds-bg-elev:      #111C31;
+  --ds-bg-deep:      #0B1120;
+  --ds-border:       #263449;
+  --ds-border-strong:#3F516C;
+  --ds-text:         #F8FAFC;
+  --ds-text-mute:    #CBD5E1;
+  --ds-text-dim:     #94A3B8;
+  --ds-accent:       #60A5FA;
+  --ds-warm:         #F59E0B;
+  --ds-good:         #34D399;
+  --ds-warn:         #FBBF24;
+  --ds-bad:          #F87171;
+  --ds-purple:       #A78BFA;
+  --ds-inverse-bg:   #F8FAFC;
+  --ds-inverse-text: #0F172A;
+
+  --rep-bg:          #0F172A;
+  --rep-text:        #F8FAFC;
+  --rep-text-mute:   #CBD5E1;
+  --rep-border:      #263449;
+  --rep-accent:      #60A5FA;
+}
+
 html,
 body {
   background-color: var(--ds-bg);

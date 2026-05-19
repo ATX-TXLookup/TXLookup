@@ -43,7 +43,7 @@ const LeafletMap = dynamic(() => import("./HeroTexasLeaflet"), {
   ),
 });
 
-export function HeroTexasMap() {
+export function HeroTexasMap({ compact = false }: { compact?: boolean }) {
   const totalDatasets = useMemo(
     () => PORTALS.reduce((s, p) => s + p.datasets, 0),
     [],
@@ -56,8 +56,8 @@ export function HeroTexasMap() {
   useEffect(() => setMounted(true), []);
 
   return (
-    <div className="relative">
-      {mounted && <LeafletMap portals={PORTALS} statusColor={STATUS_COLOR} />}
+    <div className={`relative h-full ${compact ? "[&_.leaflet-container]:!h-full" : ""}`}>
+      {mounted && <LeafletMap portals={PORTALS} statusColor={STATUS_COLOR} compact={compact} />}
       <div className="pointer-events-none absolute right-3 top-3 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)]/85 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ds-text-mute)] backdrop-blur">
         <div>
           Corpus · indexed

@@ -20,6 +20,7 @@ type Portal = {
 type Props = {
   portals: Portal[];
   statusColor: Record<Portal["status"], { ring: string; label: string }>;
+  compact?: boolean;
 };
 
 // Center on geographic Texas — pulled north (31.0 → 31.6) and zoom out
@@ -29,16 +30,16 @@ type Props = {
 const CENTER: [number, number] = [31.6, -99.5];
 const ZOOM = 5.2;
 
-export default function HeroTexasLeaflet({ portals, statusColor }: Props) {
+export default function HeroTexasLeaflet({ portals, statusColor, compact = false }: Props) {
   return (
     <div className="overflow-hidden rounded-md">
       <MapContainer
-        center={CENTER}
+        center={compact ? [31.2, -97.8] : CENTER}
         zoom={ZOOM}
         scrollWheelZoom={false}
         zoomControl={false}
         attributionControl={false}
-        style={{ height: "360px", width: "100%", background: "#0b0d12" }}
+        style={{ height: compact ? "100%" : "360px", width: "100%", background: "#0b0d12" }}
       >
         {/* Dark-themed CartoDB Positron tiles — free, no API key, attribution
             built into the layer below. */}

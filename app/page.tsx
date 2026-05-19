@@ -1,26 +1,14 @@
 // TXLookup homepage — tight + information-dense, per the Stitch reference
 // at projects/13098355225907638818?node-id=2e1b48b70ac6468187d90b4ade491a86.
-//
-// Sections (tightened):
-//   1. Hero — compact headline + search + topic-chip nav (5 topics)
-//   2. Topic icon grid — 6 categories, 1-line each
-//   3. Map + multi-city tickers (side-by-side, single row)
-//   4. Featured report inline (article + chart)
-//   5. Multi-agent topology (existing)
-//   6. Bring-your-own-portal universality (3-step, compact)
-//   7. Install (split: terminal + minimal copy)
 
 import Link from "next/link";
 import AgentTopologyShowcase from "@/app/components/AgentTopologyShowcase";
-import { HeroTexasMap } from "@/app/components/HeroTexasMap";
 import { Shell, TerminalBlock } from "@/app/components/ds";
 import { HomeHero } from "@/app/components/HomeHero";
 import { DataSourceBadge } from "@/app/components/ds/DataSourceBadge";
 import { loadDiscovery } from "@/app/lib/catalog-discovered";
 import { listRuns, type SavedRun } from "@/app/lib/run-archive";
 import { CATALOG } from "@/app/lib/catalog";
-
-const CATALOG_LENGTH = CATALOG.length;
 import {
   austin311Last30d,
   austinInspections30dByZip,
@@ -31,6 +19,8 @@ import {
   dallasPoliceActiveCalls,
   texasFranchisePermitsActive,
 } from "@/app/lib/homepage-data";
+
+const CATALOG_LENGTH = CATALOG.length;
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -202,23 +192,44 @@ export default async function HomePage() {
       {/* LIVE ACROSS TEXAS — multi-city pulse, real numbers right now.
           Dropped the SQLite/mirror jargon; section now reads as a "see it
           moving" snapshot of the major Texas cities + state. */}
-      <section className="border-b border-[var(--ds-border)]">
+      <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-deep)]">
         <div className="mx-auto max-w-[1100px] px-6 py-10 md:px-8 md:py-14">
-          <div className="grid gap-10 md:grid-cols-12 md:gap-12">
-            <div className="md:col-span-5">
+          <div>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
               <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-good)]">
                 Live across Texas
               </p>
-              <h2 className="mt-2 max-w-[20ch] text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-white md:text-[44px]">
-                Austin. Dallas. San Antonio. Houston. The state.
+              <h2 className="mt-2 text-[30px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[38px]">
+                Live signals from public portals.
               </h2>
-              <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
-                Live from 6 portals · refreshed on load
+              </div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+                {discovery.totalKnown.toLocaleString()} datasets · {discovery.portals.length} portals · refreshed on load
               </p>
-              <HeroTexasMap />
             </div>
 
-            <div className="md:col-span-7">
+            <div className="mt-6">
+              <div className="grid gap-3 md:grid-cols-3">
+                {[
+                  { label: "Corpus", value: discovery.totalKnown.toLocaleString(), sub: "indexed Texas datasets", tone: "var(--ds-accent)" },
+                  { label: "Portals", value: discovery.portals.length.toString(), sub: "Austin · Dallas · San Antonio · Houston · TX", tone: "var(--ds-good)" },
+                  { label: "Freshness", value: "Live", sub: "snapshots pulled on page load", tone: "var(--ds-warm)" },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4">
+                    <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+                      {item.label}
+                    </p>
+                    <p className="mt-1 text-[26px] font-semibold tabular-nums" style={{ color: item.tone }}>
+                      {item.value}
+                    </p>
+                    <p className="mt-1 text-[12.5px] leading-snug text-[var(--ds-text-mute)]">
+                      {item.sub}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
               <div className="grid gap-3 md:grid-cols-2">
                 {[
                   { label: "Austin · top inspection zip · 30d", value: inspectionsByZip[0]?.zip ?? "—", sub: inspectionsByZip[0] ? `${inspectionsByZip[0].count} inspections` : "ecmv-9xxi", tone: "warm" },
@@ -303,7 +314,7 @@ export default async function HomePage() {
                             className="w-full rounded-sm"
                             style={{
                               height: `${(d.count / max) * 38}px`,
-                              background: "linear-gradient(180deg, var(--ds-accent) 0%, rgba(91,141,239,0.3) 100%)",
+                              background: "linear-gradient(180deg, var(--ds-accent) 0%, color-mix(in srgb, var(--ds-accent) 26%, transparent) 100%)",
                             }}
                             title={`${d.day}: ${d.count}`}
                           />
@@ -316,6 +327,7 @@ export default async function HomePage() {
                 </div>
               </div>
             </div>
+            </div>
           </div>
         </div>
       </section>
@@ -324,7 +336,7 @@ export default async function HomePage() {
       <AgentTopologyShowcase />
 
       {/* INSTALL — split, compact */}
-      <section className="border-b border-[var(--ds-border)]">
+      <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
         <div className="mx-auto max-w-[1100px] px-6 py-10 md:px-8 md:py-14">
           <div className="grid gap-8 md:grid-cols-12">
             <div className="md:col-span-4">
@@ -340,7 +352,7 @@ export default async function HomePage() {
               <div className="mt-5 flex flex-wrap gap-2">
                 <Link
                   href="/use-as-agent"
-                  className="rounded-md bg-white px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-bg)] hover:opacity-90"
+                  className="rounded-md bg-[var(--ds-inverse-bg)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-inverse-text)] hover:opacity-90"
                 >
                   Install pitch →
                 </Link>

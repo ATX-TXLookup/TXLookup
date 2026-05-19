@@ -8,6 +8,7 @@
 // The /components dev showcase intentionally does NOT use this header.
 
 import Link from "next/link";
+import { ThemeToggle } from "@/app/components/ThemeToggle";
 
 export interface SiteHeaderProps {
   /** Active path used for the active-state logic (e.g. "/", "/reports"). */
@@ -50,7 +51,7 @@ export function SiteHeader({
   return (
     <>
       {/* Top utility bar */}
-      <div className="bg-[#0B2545] text-white">
+      <div className="bg-[var(--ds-inverse-bg)] text-[var(--ds-inverse-text)]">
         <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-6 py-2 text-[13px] md:px-10">
           <span>{utilityNote}</span>
           <span className="hidden font-mono text-[11px] uppercase tracking-wider text-white/70 md:inline">
@@ -60,15 +61,15 @@ export function SiteHeader({
       </div>
 
       {/* Header */}
-      <header className="border-b border-[#1A1F2A]/10 bg-white">
+      <header className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
         <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-6 px-6 py-5 md:px-10 md:py-6">
           <Link href="/" className="flex items-center gap-3">
-            <span aria-hidden="true" className="block h-8 w-8 rounded-sm bg-[#0B2545]" />
+            <span aria-hidden="true" className="block h-8 w-8 rounded-sm bg-[var(--ds-inverse-bg)]" />
             <div className="flex flex-col leading-tight">
-              <span className="font-display text-[22px] font-extrabold tracking-tight text-[#0B2545]">
+              <span className="font-display text-[22px] font-extrabold tracking-tight text-[var(--ds-text)]">
                 TXLookup
               </span>
-              <span className="text-[11px] font-medium uppercase tracking-wider text-[#1A1F2A]/55">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-[var(--ds-text-dim)]">
                 Texas open data · cited
               </span>
             </div>
@@ -80,10 +81,10 @@ export function SiteHeader({
             {NAV_LINKS.map((link) => {
               const active = isActive(link.href, activePath);
               const baseClass = link.external
-                ? "rounded-sm bg-[#0B2545] px-4 py-2 font-medium text-white hover:bg-[#0B5FFF]"
+                ? "rounded-sm bg-[var(--ds-inverse-bg)] px-4 py-2 font-medium text-[var(--ds-inverse-text)] hover:opacity-90"
                 : active
-                ? "text-[#0B5FFF]"
-                : "hover:text-[#0B5FFF]";
+                ? "text-[var(--ds-accent)]"
+                : "text-[var(--ds-text)] hover:text-[var(--ds-accent)]";
               if (link.external) {
                 return (
                   <a
@@ -108,6 +109,7 @@ export function SiteHeader({
               );
             })}
           </nav>
+          <ThemeToggle />
         </div>
       </header>
     </>

@@ -11,7 +11,7 @@ export const revalidate = 600;
 
 export const metadata = {
   title: "About — TXLookup",
-  description: "The team behind TXLookup. Built at the AITX × Codex Hackathon, May 2026.",
+  description: "The team behind TXLookup, an open-source agent for Texas public data.",
 };
 
 type Person = {
@@ -26,38 +26,38 @@ type Person = {
 const TEAM: Person[] = [
   {
     name: "Ravinder Jilkapally",
-    role: "Agent loop · Replanner · Observatory",
+    role: "Agent runtime",
     github: "jravinder",
     linkedin: "https://www.linkedin.com/in/jravinder",
     blurb:
-      "Built the multi-agent orchestrator, the doom-loop guard, and the /q observatory. Owns the agent runtime and the planner contracts.",
+      "Built the agent loop, planner contracts, result page, and run trace surfaces.",
     tone: "accent",
   },
   {
     name: "Kunal Vasavada",
-    role: "Dataset onboarding · Catalog correctness",
+    role: "Dataset catalog",
     github: "promptkv",
     linkedin: "https://www.linkedin.com/in/kunalvasavada",
     blurb:
-      "Curates the dataset catalog. Wrote the user-story corpus and the 90-question Claude harness. Filed the bugs that pinned the 311 dataset-id and the permits-column mismatch.",
+      "Curates source datasets, sample questions, and catalog checks so answers point to the right public portal.",
     tone: "good",
   },
   {
     name: "Godwyn James",
-    role: "Doom-loop wiring · Instrumentation",
+    role: "Runtime telemetry",
     github: "goodguygoddy",
     linkedin: "https://www.linkedin.com/in/goodguygoddy/",
     blurb:
-      "Wired the pattern-based doom-loop guard into the agent runtime. Owns the per-step duration_ms + token-usage telemetry that feeds the STATUS panel.",
+      "Added self-correction guards, per-step timing, token usage, and observability for agent runs.",
     tone: "warm",
   },
   {
     name: "Raj Akula",
-    role: "External-runtime validation · MCP integration",
+    role: "MCP integration",
     github: "rajakula1",
     linkedin: "https://www.linkedin.com/in/rajaakula/",
     blurb:
-      "Validates TXLookup as an MCP server in external runtimes (Claude Code, Cursor, Codex). Authored the MCP manifest + Smithery deploy spec.",
+      "Validated TXLookup as an MCP server for external agent runtimes and maintained the install path.",
     tone: "purple",
   },
 ];
@@ -70,9 +70,9 @@ const TONE_COLOR: Record<Person["tone"], string> = {
 };
 
 const PROJECT_FACTS = [
-  { label: "Hackathon", value: "AITX × Codex" },
-  { label: "Tracks", value: "Agents + Open Data (combined)" },
-  { label: "Dates", value: "May 8–10, 2026" },
+  { label: "Coverage", value: "Texas public data" },
+  { label: "Interface", value: "Plain-English lookups" },
+  { label: "Output", value: "Cited answers" },
   { label: "License", value: "MIT" },
   { label: "Repo", value: "github.com/ATX-TXLookup/TXLookup" },
 ];
@@ -85,13 +85,13 @@ export default async function AboutPage() {
       <section className="border-b border-[var(--ds-border)]">
         <div className="mx-auto max-w-[1200px] px-6 py-14 md:px-8 md:py-20">
           <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
-            About · The team
+            About TXLookup
           </p>
           <h1 className="mt-4 max-w-[28ch] text-[32px] font-semibold leading-[1.15] tracking-[-0.015em] text-[var(--ds-text)] md:text-[44px]">
-            Four people. Seven agents. {discovery.totalKnown.toLocaleString()} datasets.
+            Public data, made answerable.
           </h1>
           <p className="mt-6 max-w-[64ch] text-[16px] leading-relaxed text-[var(--ds-text-mute)] md:text-[17px]">
-            Built at the AITX × Codex Hackathon (May 8–10, 2026). A live layer over the source-of-truth Texas + Austin open-data portals. Plain-English in, sourced answer out, every claim citable back to the originating portal.
+            TXLookup is an open-source civic data agent for Texas. Ask a question in plain English; it finds the dataset, runs the query, checks the result, and cites the public source.
           </p>
 
           <div className="mt-8 grid gap-x-8 gap-y-3 font-mono text-[11px] uppercase tracking-[0.12em] md:grid-cols-3">
@@ -105,51 +105,71 @@ export default async function AboutPage() {
         </div>
       </section>
 
+      {/* PRODUCT */}
+      <section className="border-b border-[var(--ds-border)]">
+        <div className="mx-auto grid max-w-[1200px] gap-10 px-6 py-14 md:grid-cols-[0.9fr_1.1fr] md:px-8 md:py-16">
+          <div>
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-purple)]">
+              How it works
+            </p>
+            <h2 className="mt-3 max-w-[28ch] text-[24px] font-semibold leading-[1.2] tracking-[-0.01em] text-[var(--ds-text)] md:text-[30px]">
+              One question becomes a sourced result.
+            </h2>
+          </div>
+          <div className="grid gap-3">
+            {[
+              ["Find", "Ranks relevant Texas and city datasets from the catalog."],
+              ["Query", "Builds and runs a bounded API query against the public source."],
+              ["Check", "Reviews the result and attaches citations before showing the answer."],
+              ["Share", "Creates follow-up questions or a Miro board when the result needs to travel."],
+            ].map(([label, body]) => (
+              <div key={label} className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4">
+                <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
+                  {label}
+                </p>
+                <p className="mt-1 text-[14px] leading-relaxed text-[var(--ds-text-mute)]">{body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* TEAM */}
       <section className="border-b border-[var(--ds-border)]">
-        <div className="mx-auto max-w-[1200px] px-6 py-14 md:px-8 md:py-20">
+        <div className="mx-auto max-w-[1200px] px-6 py-12 md:px-8 md:py-16">
           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-purple)]">
-            The roster
+            Team
           </p>
-          <h2 className="mt-3 max-w-[36ch] text-[24px] font-semibold leading-[1.2] tracking-[-0.01em] text-[var(--ds-text)] md:text-[30px]">
-            Builders, not just demoers.
+          <h2 className="mt-3 max-w-[36ch] text-[22px] font-semibold leading-[1.2] tracking-[-0.01em] text-[var(--ds-text)] md:text-[26px]">
+            Built by a small Austin team.
           </h2>
-          <p className="mt-4 max-w-[60ch] text-[15px] leading-relaxed text-[var(--ds-text-mute)] md:text-[16px]">
-            Each person owns a distinct slice. Git history attributes every line.
+          <p className="mt-3 max-w-[62ch] text-[15px] leading-relaxed text-[var(--ds-text-mute)]">
+            The project combines agent runtime work, open-data cataloging, observability, and MCP integration.
           </p>
 
-          <ul className="mt-12 grid gap-5 md:grid-cols-2">
+          <ul className="mt-8 grid gap-3 md:grid-cols-2">
             {TEAM.map((p) => (
               <li
                 key={p.github}
-                className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-6 transition-colors hover:border-[var(--ds-text-dim)]"
+                className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4 transition-colors hover:border-[var(--ds-text-dim)]"
               >
-                <div className="flex items-baseline justify-between gap-4">
-                  <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
                     <div className="flex items-center gap-2">
-                      <span
-                        className="inline-block h-2 w-2 rounded-full"
-                        style={{ background: TONE_COLOR[p.tone] }}
-                        aria-hidden
-                      />
-                      <h3 className="text-[20px] font-bold tracking-tight text-[var(--ds-text)] md:text-[22px]">
-                        {p.name}
-                      </h3>
+                        <span
+                          className="inline-block h-2 w-2 rounded-full"
+                          style={{ background: TONE_COLOR[p.tone] }}
+                          aria-hidden
+                        />
+                        <h3 className="text-[17px] font-bold tracking-tight text-[var(--ds-text)]">
+                          {p.name}
+                        </h3>
+                      </div>
+                      <p className="mt-1 font-mono text-[10.5px] uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+                        {p.role}
+                      </p>
                     </div>
-                    <p
-                      className="mt-1.5 font-mono text-[11px] uppercase tracking-[0.14em]"
-                      style={{ color: TONE_COLOR[p.tone] }}
-                    >
-                      {p.role}
-                    </p>
-                  </div>
-                </div>
-
-                <p className="mt-4 text-[14.5px] leading-relaxed text-[var(--ds-text-mute)]">
-                  {p.blurb}
-                </p>
-
-                <div className="mt-5 flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                   <a
                     href={`https://github.com/${p.github}`}
                     target="_blank"
@@ -178,6 +198,7 @@ export default async function AboutPage() {
                       LinkedIn · soon
                     </span>
                   )}
+                  </div>
                 </div>
               </li>
             ))}
@@ -189,10 +210,10 @@ export default async function AboutPage() {
       <section className="border-b border-[var(--ds-border)]">
         <div className="mx-auto max-w-[1200px] px-6 py-14 md:px-8 md:py-20">
           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-good)]">
-            By the numbers
+            Coverage
           </p>
           <h2 className="mt-3 max-w-[36ch] text-[22px] font-semibold leading-[1.2] tracking-[-0.01em] text-[var(--ds-text)] md:text-[28px]">
-            What landed in 48 hours.
+            What the project covers.
           </h2>
 
           <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -234,15 +255,15 @@ export default async function AboutPage() {
             Acknowledgements
           </p>
           <h2 className="mt-3 max-w-[48ch] text-[20px] font-semibold leading-[1.25] tracking-[-0.005em] text-[var(--ds-text)] md:text-[26px]">
-            None of this exists without the open-data movement.
+            Built on public data and open tools.
           </h2>
           <p className="mt-4 max-w-[64ch] text-[15px] leading-relaxed text-[var(--ds-text-mute)]">
-            Thanks to the cities of Austin, Dallas, San Antonio, Houston, and the State of Texas for publishing the datasets behind this site openly. Thanks to AITX and Codex for hosting the hackathon, and to Miro and Smithery for the MCP tooling. The agent loop runs on OpenAI Codex / GPT-4o, with Featherless as an open-source fallback.
+            TXLookup uses datasets published by Austin, Dallas, San Antonio, Houston, and the State of Texas. The project also uses Miro for visual reports and MCP tooling for agent-runtime access.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
               href="/q"
-              className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2.5 text-[13px] font-semibold text-[var(--ds-bg)] hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-md bg-[color-mix(in_srgb,var(--ds-accent)_12%,var(--ds-bg))] px-4 py-2.5 text-[13px] font-semibold text-[var(--ds-accent)] hover:bg-[color-mix(in_srgb,var(--ds-accent)_16%,var(--ds-bg))]"
             >
               Try the agent →
             </Link>

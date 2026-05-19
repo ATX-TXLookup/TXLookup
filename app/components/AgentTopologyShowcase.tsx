@@ -11,11 +11,11 @@ import { useEffect, useMemo, useState } from "react";
 type LaneKey = "orchestrator" | "data_analyst" | "reporter" | "support" | "critic";
 
 const LANES: Record<LaneKey, { label: string; role: string; color: string; timing: string }> = {
-  orchestrator: { label: "Orchestrator", role: "router · decomposer", color: "#2563EB", timing: "~0.6s" },
-  data_analyst: { label: "Data Analyst", role: "SoQL · Socrata exec", color: "#10B981", timing: "~1.2s" },
-  critic:       { label: "Critic",       role: "verify · grounding",  color: "#F59E0B", timing: "~0.4s" },
-  reporter:     { label: "Reporter",     role: "prose · data viz",    color: "#A855F7", timing: "~0.9s" },
-  support:      { label: "Support",      role: "schema · disambig",   color: "#EC4899", timing: "as-needed" },
+  orchestrator: { label: "Orchestrator", role: "router · decomposer", color: "var(--ds-accent)", timing: "~0.6s" },
+  data_analyst: { label: "Data Analyst", role: "SoQL · Socrata exec", color: "var(--ds-good)", timing: "~1.2s" },
+  critic:       { label: "Critic",       role: "verify · grounding",  color: "var(--ds-warn)", timing: "~0.4s" },
+  reporter:     { label: "Reporter",     role: "prose · data viz",    color: "var(--ds-purple)", timing: "~0.9s" },
+  support:      { label: "Support",      role: "schema · disambig",   color: "var(--ds-warm)", timing: "as-needed" },
 };
 
 type Evt = {
@@ -113,7 +113,7 @@ function FlowPill({ kind }: { kind: "question" | "answer" }) {
         {isAnswer ? "✓" : "?"}
       </span>
       <span
-        className={`text-[13px] font-semibold ${isAnswer ? "text-[var(--ds-good)]" : "text-white"}`}
+        className={`text-[13px] font-semibold ${isAnswer ? "text-[var(--ds-good)]" : "text-[var(--ds-text)]"}`}
       >
         {isAnswer ? "Sourced answer" : "User question"}
       </span>
@@ -184,7 +184,7 @@ export default function AgentTopologyShowcase({ replayHash = "a8f3c19d2e7b" }: {
           <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
             Agentic flow
           </p>
-          <h2 className="mx-auto mt-3 max-w-[24ch] text-[28px] font-bold leading-[1.1] tracking-[-0.02em] text-white md:text-[36px]">
+          <h2 className="mx-auto mt-3 max-w-[24ch] text-[28px] font-bold leading-[1.1] tracking-[-0.02em] text-[var(--ds-text)] md:text-[36px]">
             How a question becomes a sourced answer.
           </h2>
         </div>
@@ -302,7 +302,7 @@ export default function AgentTopologyShowcase({ replayHash = "a8f3c19d2e7b" }: {
               {(active.t / 1000).toFixed(2)}s
             </span>
           </div>
-          <p className="mt-1.5 font-mono text-[12px] text-white">
+          <p className="mt-1.5 font-mono text-[12px] text-[var(--ds-text)]">
             <span className="text-[var(--ds-text-mute)]">{active.tool}:</span> {active.text}
           </p>
         </div>
@@ -310,7 +310,7 @@ export default function AgentTopologyShowcase({ replayHash = "a8f3c19d2e7b" }: {
         {/* Footer — cycle facts + quiet links. */}
         <div className="mx-auto mt-6 flex max-w-[640px] flex-wrap items-center justify-between gap-4 border-t border-[var(--ds-border)] pt-5 text-[12px] text-[var(--ds-text-mute)]">
           <p className="font-mono text-[10.5px] uppercase tracking-wider text-[var(--ds-text-dim)]">
-            Typical cycle · <span className="text-white">7.3s</span> · 0&ndash;3 re-plan loops
+            Typical cycle · <span className="text-[var(--ds-text)]">7.3s</span> · 0&ndash;3 re-plan loops
           </p>
           <div className="flex gap-5">
             <Link href={`/admin/replay/${replayHash}`} className="text-[var(--ds-accent)] hover:underline">

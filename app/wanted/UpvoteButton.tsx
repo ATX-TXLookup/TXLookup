@@ -78,7 +78,7 @@ export function UpvoteButton({
       className={`flex shrink-0 flex-col items-center justify-center rounded-md border px-3 py-2 transition-colors ${
         voted
           ? "border-[var(--ds-accent)] bg-[var(--ds-accent)]/10 text-[var(--ds-accent)]"
-          : "border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] text-white hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
+          : "border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] text-[var(--ds-text)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
       }`}
     >
       <span className="text-[13px] leading-none">{voted ? "▲" : "△"}</span>
