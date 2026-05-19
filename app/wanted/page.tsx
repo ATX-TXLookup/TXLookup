@@ -39,7 +39,7 @@ export default async function WantedPage() {
             Vote on what we look up next.
           </h1>
           <p className="mt-5 max-w-[58ch] text-[17px] leading-[1.55] text-white md:text-[19px]">
-            Every question people ask that isn&rsquo;t in the library yet shows up here. Upvote the ones you want answered. At the top of every hour, the most-wanted question runs and joins the library.
+            Every question people ask that isn&rsquo;t in the library yet shows up here. Upvote the ones you want answered. At the top of every hour, the most-requested question runs and joins the library.
           </p>
         </div>
       </section>
@@ -63,7 +63,7 @@ export default async function WantedPage() {
         <section className="bg-[var(--ds-bg)]">
           <div className="mx-auto max-w-[1000px] px-6 py-10 md:px-8">
             <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-accent)]">
-              Pending &middot; most-wanted first
+              Pending &middot; most-requested first
             </p>
             {pending.length === 0 ? (
               <p className="mt-4 text-[15px] text-[var(--ds-text-mute)]">
