@@ -39,6 +39,15 @@ export type DagEvent = {
 
 type AgentKey = "orchestrator" | "data_analyst" | "reporter" | "support" | "critic";
 
+export type DagNodeSelection = {
+  ts: number;
+  label: string;
+  displayLabel: string;
+  phase?: string;
+  step?: number;
+  agent: AgentKey;
+};
+
 const AGENT_COLOR: Record<AgentKey, string> = {
   orchestrator: "#5B8DEF",
   data_analyst: "#10B981",
@@ -94,6 +103,8 @@ type Node = {
   id: string;
   agent: AgentKey;
   label: string;
+  phase?: string;
+  step?: number;
   sub?: string;
   shape: NodeShape;
   status: "running" | "done" | "fail";
@@ -134,7 +145,7 @@ function buildGraph(events: DagEvent[]): { nodes: Node[]; edges: Edge[] } {
     switch (ev.phase) {
       case "reasoning": {
         const id = `reason-${ev.ts}`;
-        nodes.push({ id, agent: "orchestrator", label: "reason", shape: "pill", status: "running", ts: ev.ts });
+        nodes.push({ id, agent: "orchestrator", label: "reason", phase: ev.phase, shape: "pill", status: "running", ts: ev.ts });
         link(prevId, id);
         prevId = id;
         break;
@@ -143,7 +154,7 @@ function buildGraph(events: DagEvent[]): { nodes: Node[]; edges: Edge[] } {
         const last = nodes.findLast?.((n) => n.label === "reason");
         if (last && last.status === "running") last.status = "done";
         const id = `plan-${ev.ts}`;
-        nodes.push({ id, agent: "orchestrator", label: "plan", shape: "pill", status: "done", ts: ev.ts });
+        nodes.push({ id, agent: "orchestrator", label: "plan", phase: ev.phase, shape: "pill", status: "done", ts: ev.ts });
         link(prevId, id);
         prevId = id;
         break;
@@ -151,7 +162,7 @@ function buildGraph(events: DagEvent[]): { nodes: Node[]; edges: Edge[] } {
       case "executing": {
         const a = agentFor(ev);
         const id = `step-${ev.step ?? 0}-${ev.ts}`;
-        nodes.push({ id, agent: a, label: ev.tool ?? "tool", shape: "rect", status: "running", ts: ev.ts });
+        nodes.push({ id, agent: a, label: ev.tool ?? "tool", phase: ev.phase, step: ev.step, shape: "rect", status: "running", ts: ev.ts });
         if (typeof ev.step === "number") stepNodeId.set(ev.step, id);
         if (inParallel) {
           parallelChildIds.push(id);
@@ -195,6 +206,7 @@ function buildGraph(events: DagEvent[]): { nodes: Node[]; edges: Edge[] } {
               id,
               agent: "data_analyst",
               label: b.tool,
+              phase: ev.phase,
               shape: "rect",
               status: "running",
               ts: ev.ts,
@@ -208,7 +220,7 @@ function buildGraph(events: DagEvent[]): { nodes: Node[]; edges: Edge[] } {
       }
       case "parallel_join": {
         const joinId = `join-${ev.ts}`;
-        nodes.push({ id: joinId, agent: "orchestrator", label: "join", shape: "round", status: "done", ts: ev.ts });
+        nodes.push({ id: joinId, agent: "orchestrator", label: "join", phase: ev.phase, shape: "round", status: "done", ts: ev.ts });
         for (const id of [...parallelChildIds]) link(id, joinId, "join");
         for (const childId of parallelChildIds) {
           const c = nodes.find((n) => n.id === childId);
@@ -227,6 +239,8 @@ function buildGraph(events: DagEvent[]): { nodes: Node[]; edges: Edge[] } {
           id,
           agent: a,
           label: ev.input_summary?.slice(0, 28) ?? ev.agent ?? "delegate",
+          phase: ev.phase,
+          step: ev.step,
           shape: "rect",
           status: "running",
           ts: ev.ts,
@@ -251,6 +265,7 @@ function buildGraph(events: DagEvent[]): { nodes: Node[]; edges: Edge[] } {
           id,
           agent: "critic",
           label: ev.target === "plan" ? "critic · plan" : "critic · answer",
+          phase: ev.phase,
           sub: typeof ev.score === "number" ? `${ev.score.toFixed(2)} ${passed ? "✓" : "✗"}` : passed ? "✓" : "✗",
           shape: "diamond",
           status: passed ? "done" : "fail",
@@ -266,6 +281,7 @@ function buildGraph(events: DagEvent[]): { nodes: Node[]; edges: Edge[] } {
           id,
           agent: "orchestrator",
           label: ev.target === "answer" ? "revise · answer" : "revise · plan",
+          phase: ev.phase,
           shape: "pill",
           status: "running",
           ts: ev.ts,
@@ -278,21 +294,21 @@ function buildGraph(events: DagEvent[]): { nodes: Node[]; edges: Edge[] } {
       }
       case "replanning": {
         const id = `replan-${ev.ts}`;
-        nodes.push({ id, agent: "orchestrator", label: "replan", shape: "pill", status: "running", ts: ev.ts });
+        nodes.push({ id, agent: "orchestrator", label: "replan", phase: ev.phase, shape: "pill", status: "running", ts: ev.ts });
         link(prevId, id, "loopback");
         prevId = id;
         break;
       }
       case "doom_loop": {
         const id = `dl-${ev.ts}`;
-        nodes.push({ id, agent: "orchestrator", label: "doom-loop catch", shape: "pill", status: "fail", ts: ev.ts });
+        nodes.push({ id, agent: "orchestrator", label: "doom-loop catch", phase: ev.phase, shape: "pill", status: "fail", ts: ev.ts });
         link(prevId, id);
         prevId = id;
         break;
       }
       case "done": {
         const id = `done-${ev.ts}`;
-        nodes.push({ id, agent: "orchestrator", label: "done", shape: "round", status: "done", ts: ev.ts });
+        nodes.push({ id, agent: "orchestrator", label: "done", phase: ev.phase, shape: "round", status: "done", ts: ev.ts });
         link(prevId, id);
         prevId = id;
         break;
@@ -378,7 +394,15 @@ function displayLabel(label: string): string {
   return labels[label] ?? labels[bare] ?? label.replace(/_/g, " ");
 }
 
-export function AgentDAG({ events }: { events: DagEvent[] }) {
+export function AgentDAG({
+  events,
+  selectedTs,
+  onSelectNode,
+}: {
+  events: DagEvent[];
+  selectedTs?: number | null;
+  onSelectNode?: (node: DagNodeSelection) => void;
+}) {
   const built = useMemo(() => buildGraph(events), [events]);
   const { positioned, rows } = useMemo(() => layoutNodes(built.nodes), [built.nodes]);
 
@@ -509,6 +533,16 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
           const ring = STATUS_RING[n.status];
           const fill = STATUS_FILL[n.status];
           const agentTone = AGENT_COLOR[n.agent];
+          const selected = selectedTs === n.ts;
+          const nodeClick = () =>
+            onSelectNode?.({
+              ts: n.ts,
+              label: n.label,
+              displayLabel: displayLabel(n.label),
+              phase: n.phase,
+              step: n.step,
+              agent: n.agent,
+            });
 
           const tip = docsForNode(n.label, n.agent);
           if (n.shape === "diamond") {
@@ -523,13 +557,13 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
                 ? display.slice(0, maxDiamondChars - 1) + "…"
                 : display;
             return (
-              <g key={n.id} style={{ cursor: "help" }}>
+              <g key={n.id} onClick={nodeClick} style={{ cursor: onSelectNode ? "pointer" : "help" }}>
                 <title>{`${n.label} — ${tip}`}</title>
                 <polygon
                   points={`${x},${y - r} ${x + n.w / 2},${y} ${x},${y + r} ${x - n.w / 2},${y}`}
                   fill={fill}
                   stroke={ring}
-                  strokeWidth={1.5}
+                  strokeWidth={selected ? 2.6 : 1.5}
                 />
                 <text x={x} y={y - 2} textAnchor="middle" fontSize={9} fontFamily="JetBrains Mono, monospace" fill={agentTone} fontWeight={500}>
                   {diamondLabel}
@@ -557,9 +591,9 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
                 ? display.slice(0, maxPillChars - 1) + "…"
                 : display;
             return (
-              <g key={n.id} style={{ cursor: "help" }}>
+              <g key={n.id} onClick={nodeClick} style={{ cursor: onSelectNode ? "pointer" : "help" }}>
                 <title>{`${n.label} — ${tip}`}</title>
-                <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={h / 2} fill={fill} stroke={ring} strokeWidth={1.5} />
+                <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={h / 2} fill={fill} stroke={ring} strokeWidth={selected ? 2.6 : 1.5} />
                 <circle cx={x - w / 2 + 11} cy={y} r={3} fill={agentTone} />
                 <text x={x - w / 2 + 18} y={y + 3.5} fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#F8FAFC" fontWeight={500}>
                   {pillLabel}
@@ -586,9 +620,9 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
               ? subDisplay.slice(0, maxSubChars - 1) + "…"
               : subDisplay;
           return (
-            <g key={n.id} style={{ cursor: "help" }}>
+            <g key={n.id} onClick={nodeClick} style={{ cursor: onSelectNode ? "pointer" : "help" }}>
               <title>{`${n.label} — ${tip}`}</title>
-              <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={6} fill={fill} stroke={ring} strokeWidth={1.5} />
+              <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={6} fill={fill} stroke={ring} strokeWidth={selected ? 2.6 : 1.5} />
               <rect x={x - w / 2} y={y - h / 2} width={3} height={h} fill={agentTone} rx={1.5} />
               <text x={x - w / 2 + 9} y={y - 3} fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#F8FAFC" fontWeight={500}>
                 {labelDisplay}
@@ -626,7 +660,7 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
           ))}
         </div>
         <p className="mt-2 font-mono text-[10px] leading-relaxed text-tx-cream/45">
-          Hover any node for what it does.
+          Click a node to inspect its telemetry event.
         </p>
       </div>
     </div>
