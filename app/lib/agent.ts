@@ -671,16 +671,44 @@ export async function executeStep(
             viewLink =
               board.viewLink ?? `https://miro.com/app/board/${boardId}/`;
           }
-          // Each query gets its own Frame on the shared board — the frame is
-          // a labeled container Miro renders with a header strip, which gives
-          // judges a clean visual divider between runs. Stack frames vertically
-          // by Date.now() so consecutive runs never overlap (frames are 2800px
-          // tall and we use ms-resolution offset).
-          const FRAME_W = 1700;
-          const FRAME_H = 2800;
-          const frameY = existingBoardId
-            ? (Date.now() % 10_000_000) // ~115 day window, plenty
-            : 0;
+          const FRAME_W = 1200;
+          const FRAME_H = 1900;
+          const FRAME_GAP = 420;
+
+          async function nextFrameY(): Promise<number> {
+            if (!existingBoardId || !boardId) return 0;
+            try {
+              const r = await fetch(
+                `https://api.miro.com/v2/boards/${boardId}/items?type=frame&limit=50`,
+                { headers: miroHeaders },
+              );
+              if (!r.ok) throw new Error(`HTTP ${r.status}`);
+              const body = (await r.json()) as {
+                data?: Array<{
+                  position?: { y?: number };
+                  geometry?: { height?: number };
+                }>;
+              };
+              const frames = body.data ?? [];
+              if (frames.length === 0) return 0;
+              const lowestBottom = frames.reduce((max, f) => {
+                const y = Number(f.position?.y ?? 0);
+                const h = Number(f.geometry?.height ?? FRAME_H);
+                return Math.max(max, y + h / 2);
+              }, -Infinity);
+              return lowestBottom + FRAME_GAP + FRAME_H / 2;
+            } catch {
+              // Fallback still spaces by whole frame heights. The old
+              // Date.now() % range could place consecutive renders only a few
+              // pixels apart; this cannot overlap even without list access.
+              return (Date.now() % 10_000) * (FRAME_H + FRAME_GAP);
+            }
+          }
+
+          // Each query gets its own Frame on the shared board. Place it below
+          // existing frames so repeated "render to Miro" clicks don't stack on
+          // top of the same board space.
+          const frameY = await nextFrameY();
 
           // 2. Create a Frame for this query and parent every item to it.
           //    Items inside a frame use board-relative coordinates, but the

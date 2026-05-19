@@ -704,15 +704,16 @@ export function AgentRunner({
     state.events.length > 0 ? state.events[state.events.length - 1] : null;
 
   return (
-    <div className="mx-auto grid max-w-[1240px] gap-0 px-0 md:grid-cols-[1fr_420px]">
-      {/* Left column — answer-first body, dark surface */}
-      <div className="min-w-0 bg-[var(--ds-bg)]">
+    <div className="bg-[var(--ds-bg-deep)] px-3 py-4 md:px-5 md:py-6">
+      <div className="mx-auto grid max-w-[1340px] gap-5 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_388px]">
+      {/* Left column — answer-first report body */}
+      <div className="min-w-0 overflow-hidden rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg)] shadow-sm">
         {/* Question recap with live status pill */}
-        <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
-          <div className="px-6 py-7 md:px-10">
+        <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
+          <div className="px-5 py-5 md:px-8 md:py-6">
             <div className="flex items-baseline justify-between gap-4">
               <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
-                {state.phase === "done" ? "Answered" : "Asked"}
+                User question
               </p>
               <div className="flex items-center gap-2">
                 <span
@@ -726,7 +727,7 @@ export function AgentRunner({
                 </span>
               </div>
             </div>
-            <h2 className="mt-3 max-w-[58ch] text-2xl font-normal leading-tight tracking-tight text-[var(--ds-text)] md:text-[28px]">
+            <h2 className="mt-3 max-w-[58ch] text-[24px] font-normal leading-tight tracking-tight text-[var(--ds-text)] md:text-[28px]">
               {query}
             </h2>
           </div>
@@ -735,12 +736,55 @@ export function AgentRunner({
         {/* ── Answer card — citation aside, white-on-dark CTA ── */}
         {state.phase === "done" && state.answer ? (
           <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
-            <div className="px-6 py-10 md:px-10 md:py-12">
-              <div className="grid gap-8 md:grid-cols-12 md:gap-10">
-                <div className={state.citation ? "md:col-span-8" : "md:col-span-12"}>
-                  <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
-                    Insight
-                  </p>
+            <div className="px-5 py-7 md:px-8 md:py-8">
+              <div className="grid gap-6 lg:grid-cols-12 lg:gap-8">
+                <div className="lg:col-span-12">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
+                      Insight
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        aria-label="Copy insight"
+                        title="Copy insight"
+                        onClick={() => {
+                          if (typeof navigator !== "undefined" && navigator.clipboard) {
+                            navigator.clipboard.writeText(state.answer ?? "");
+                          }
+                        }}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] text-[var(--ds-text-mute)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
+                      >
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                          <rect x="9" y="9" width="11" height="11" rx="2" />
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="Share link"
+                        title="Share link"
+                        onClick={() => {
+                          if (
+                            typeof navigator !== "undefined" &&
+                            navigator.clipboard &&
+                            typeof window !== "undefined"
+                          ) {
+                            navigator.clipboard.writeText(window.location.href);
+                          }
+                        }}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] text-[var(--ds-text-mute)] hover:border-[var(--ds-accent)] hover:text-[var(--ds-accent)]"
+                      >
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                          <circle cx="18" cy="5" r="3" />
+                          <circle cx="6" cy="12" r="3" />
+                          <circle cx="18" cy="19" r="3" />
+                          <path d="m8.6 13.5 6.8 4" />
+                          <path d="m15.4 6.5-6.8 4" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
                   {/* When the reporter specialist composed a structured
                       article, render that in place of the plain synthesizer
                       paragraph (PR #68). */}
@@ -749,68 +793,79 @@ export function AgentRunner({
                       <ReporterComposition result={reporterPayload} />
                     </div>
                   ) : (
-                    <p className="mt-3 max-w-[60ch] text-[20px] font-normal leading-[1.5] tracking-normal text-[var(--ds-text)] md:text-[24px]">
+                    <p className="mt-3 max-w-[76ch] text-[16px] font-normal leading-[1.62] tracking-normal text-[var(--ds-text)] md:text-[18px]">
                       {state.answer}
                     </p>
                   )}
 
-                  {/* Action row — quiet, equal-weight secondary actions. No
-                      filled/primary button here; the one primary action on
-                      this view is "Open dataset" in the Primary Source aside.
-                      Keeps the answer itself the focal point. */}
-                  <div className="mt-7 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px]">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (typeof navigator !== "undefined" && navigator.clipboard) {
-                          navigator.clipboard.writeText(state.answer ?? "");
-                        }
-                      }}
-                      className="text-[var(--ds-text-mute)] hover:text-[var(--ds-accent)]"
-                    >
-                      Copy insight
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (
-                          typeof navigator !== "undefined" &&
-                          navigator.clipboard &&
-                          typeof window !== "undefined"
-                        ) {
-                          navigator.clipboard.writeText(window.location.href);
-                        }
-                      }}
-                      className="text-[var(--ds-text-mute)] hover:text-[var(--ds-accent)]"
-                    >
-                      Share link
-                    </button>
-                    {!miroLink && state.phase === "done" && (
-                      <Link
-                        href={`/q?q=${encodeURIComponent(query + " render this to a Miro board")}`}
-                        className="text-[var(--ds-text-mute)] hover:text-[var(--ds-accent)]"
-                      >
-                        Render to Miro ↗
-                      </Link>
-                    )}
-                  </div>
+                  {state.citation && (
+                    <div className="mt-5 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
+                          Next actions
+                        </p>
+                        <div className="flex flex-wrap justify-end gap-2">
+                          {!miroLink && state.phase === "done" && (
+                            <Link
+                              href={`/q?q=${encodeURIComponent(query + " render this to a Miro board")}&fresh=1`}
+                              className="inline-flex items-center rounded-md border border-[var(--ds-border)] bg-[color-mix(in_srgb,var(--ds-accent)_8%,var(--ds-bg))] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--ds-accent)] hover:border-[var(--ds-accent)] hover:bg-[color-mix(in_srgb,var(--ds-accent)_12%,var(--ds-bg))]"
+                            >
+                              Visualize in Miro ↗
+                            </Link>
+                          )}
+                          <Link
+                            href={`/q?q=${encodeURIComponent("Ask a follow-up about: " + query)}`}
+                            className="inline-flex items-center rounded-md border border-[color-mix(in_srgb,var(--ds-accent)_28%,var(--ds-border))] bg-[color-mix(in_srgb,var(--ds-accent)_12%,var(--ds-bg))] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--ds-accent)] hover:bg-[color-mix(in_srgb,var(--ds-accent)_16%,var(--ds-bg))]"
+                          >
+                            Ask follow-up →
+                          </Link>
+                        </div>
+                      </div>
+                      <p className="mt-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-text-dim)]">
+                        Go deeper
+                      </p>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {[
+                          { label: "Compare to next zip", q: `Compare ${state.citation.dataset_name.toLowerCase()} between this zip and the next-most-active zip` },
+                          { label: "Historical trend", q: `Show ${state.citation.dataset_name.toLowerCase()} trend over the last 24 months by quarter` },
+                          { label: "Cross-dataset join", q: `Join ${state.citation.dataset_name.toLowerCase()} with code violations by zip for the same period` },
+                          { label: "Top outliers", q: `Top 5 outliers in ${state.citation.dataset_name.toLowerCase()} this year` },
+                        ].map((a) => (
+                          <Link
+                            key={a.label}
+                            href={`/q?q=${encodeURIComponent(a.q)}&dataset=${state.citation!.dataset_id}`}
+                            className="group flex min-h-11 items-center justify-between gap-3 rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg)] px-3 py-2 text-[13px] font-medium text-[var(--ds-text-mute)] hover:border-[color-mix(in_srgb,var(--ds-accent)_35%,var(--ds-border))] hover:bg-[color-mix(in_srgb,var(--ds-accent)_6%,var(--ds-bg))] hover:text-[var(--ds-accent)]"
+                          >
+                            <span>{a.label}</span>
+                            <span className="font-mono text-[12px] text-[var(--ds-accent)] opacity-60 group-hover:opacity-100">→</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Meta strip — gold insight badges per BRAND §7 */}
-                  <div className="mt-6 flex flex-wrap items-center gap-2">
+                  <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
                     <MetaChip
-                      label="Verified"
+                      icon="check"
+                      label="Took"
                       value={
                         state.durationMs !== null
                           ? `${(state.durationMs / 1000).toFixed(1)}s`
-                          : "—"
+                          : "complete"
                       }
                     />
                     {state.usageTotal && (
-                      <MetaChip label="Tokens" value={state.usageTotal.total.toLocaleString()} />
+                      <MetaChip
+                        icon="activity"
+                        label="Tokens"
+                        value={state.usageTotal.total.toLocaleString()}
+                      />
                     )}
-                    <MetaChip label="Sources" value={`${sourcesCount} cited`} />
+                    <MetaChip icon="link" label="Sources" value={`${sourcesCount} cited`} />
                     {state.replans.length > 0 && (
                       <MetaChip
+                        icon="refresh"
                         label="Self-corrections"
                         value={state.replans.length.toString()}
                       />
@@ -822,17 +877,20 @@ export function AgentRunner({
                       a lone figure (often a date or duration) looks like a
                       garbage extraction. */}
                   {numbers.length >= 2 && (
-                    <div className="mt-8 border-t border-[var(--ds-border)] pt-5">
+                    <div className="mt-7">
                       <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
                         By the numbers
                       </p>
-                      <ul className="mt-3 flex flex-wrap items-baseline gap-x-6 gap-y-2">
+                      <ul className="mt-3 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
                         {numbers.slice(0, 3).map((n, i) => (
-                          <li key={i} className="flex items-baseline gap-2">
-                            <span className="text-[22px] font-semibold leading-none tabular-nums text-[var(--ds-text)]">
+                          <li
+                            key={i}
+                            className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-4 py-3"
+                          >
+                            <span className="block text-[22px] font-semibold leading-none tabular-nums text-[var(--ds-text)]">
                               {n.value}
                             </span>
-                            <span className="text-[13px] leading-none text-[var(--ds-text-mute)]">
+                            <span className="mt-1 block text-[13px] leading-snug text-[var(--ds-text-mute)]">
                               {n.label}
                             </span>
                           </li>
@@ -846,91 +904,68 @@ export function AgentRunner({
                     dataset id + 3 mini text buttons (VIEW SCHEMA / RAW JSON /
                     DOCS) + a primary OPEN DATASET button. */}
                 {state.citation && (
-                <aside className="md:col-span-4">
-                    <div className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-5">
-                      <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
-                        Primary source
-                      </p>
-                      <p className="mt-3 text-[18px] font-bold leading-tight text-[var(--ds-text)]">
-                        {state.citation.dataset_name}
-                      </p>
-                      <p className="mt-1 text-[13px] text-[var(--ds-text-mute)]">
-                        {state.citation.portal}
-                      </p>
-                      <p className="mt-2 font-mono text-[11px] text-[var(--ds-text-dim)]">
-                        {state.citation.dataset_id}
-                      </p>
+                <aside className="lg:col-span-12">
+                  <div className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4">
+                    <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px] md:items-center">
+                      <div>
+                        <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
+                          Primary source
+                        </p>
+                        <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                          <p className="text-[18px] font-bold leading-tight text-[var(--ds-text)]">
+                            {state.citation.dataset_name}
+                          </p>
+                          <p className="text-[13px] text-[var(--ds-text-mute)]">
+                            {state.citation.portal}
+                          </p>
+                          <p className="font-mono text-[11px] text-[var(--ds-text-dim)]">
+                            {state.citation.dataset_id}
+                          </p>
+                        </div>
+                        <div className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[10.5px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+                          <Link
+                            href={`/datasets/${state.citation.dataset_id}#schema`}
+                            className="hover:text-[var(--ds-text)]"
+                          >
+                            Schema
+                          </Link>
+                          {state.citation.api_url && (
+                            <>
+                              <span aria-hidden>·</span>
+                              <a
+                                href={state.citation.api_url}
+                                target="_blank"
+                                rel="noopener"
+                                className="hover:text-[var(--ds-text)]"
+                              >
+                                Raw JSON
+                              </a>
+                            </>
+                          )}
+                          <span aria-hidden>·</span>
+                          <a
+                            href={`https://${state.citation.portal_host}/d/${state.citation.dataset_id}`}
+                            target="_blank"
+                            rel="noopener"
+                            className="hover:text-[var(--ds-text)]"
+                          >
+                            Docs
+                          </a>
+                        </div>
+                      </div>
 
                       <Link
                         href={`/datasets/${state.citation.dataset_id}`}
-                        className="mt-5 inline-flex w-full items-center justify-center rounded-md bg-white px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-bg)] hover:opacity-90"
+                        className="inline-flex w-full items-center justify-center rounded-md bg-[var(--ds-inverse-bg)] px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-inverse-text)] hover:opacity-90"
                       >
                         Open dataset →
                       </Link>
-
-                      {/* Developer-detail links — quiet dotted text row, not
-                          three competing bordered boxes. "Open dataset" above
-                          is the single primary action in this aside. */}
-                      <div className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1 border-t border-[var(--ds-border)] pt-3 font-mono text-[10.5px] uppercase tracking-wider text-[var(--ds-text-dim)]">
-                        <Link
-                          href={`/datasets/${state.citation.dataset_id}#schema`}
-                          className="hover:text-[var(--ds-text)]"
-                        >
-                          Schema
-                        </Link>
-                        {state.citation.api_url && (
-                          <>
-                            <span aria-hidden>·</span>
-                            <a
-                              href={state.citation.api_url}
-                              target="_blank"
-                              rel="noopener"
-                              className="hover:text-[var(--ds-text)]"
-                            >
-                              Raw JSON
-                            </a>
-                          </>
-                        )}
-                        <span aria-hidden>·</span>
-                        <a
-                          href={`https://${state.citation.portal_host}/d/${state.citation.dataset_id}`}
-                          target="_blank"
-                          rel="noopener"
-                          className="hover:text-[var(--ds-text)]"
-                        >
-                          Docs
-                        </a>
-                      </div>
                     </div>
+                  </div>
                 </aside>
                 )}
               </div>
 
-              {/* DEEPER ANALYSIS row — Stitch screen 2 pattern. Comparative
-                  follow-ups derived from the citation's dataset.            */}
-              {state.citation && (
-                <div className="mt-10 border-t border-[var(--ds-border)] pt-7">
-                  <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-text-dim)]">
-                    Deeper analysis
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {[
-                      { label: "Compare to next zip", q: `Compare ${state.citation.dataset_name.toLowerCase()} between this zip and the next-most-active zip` },
-                      { label: "Historical trend", q: `Show ${state.citation.dataset_name.toLowerCase()} trend over the last 24 months by quarter` },
-                      { label: "Cross-dataset join", q: `Join ${state.citation.dataset_name.toLowerCase()} with code violations by zip for the same period` },
-                      { label: "Top outliers", q: `Top 5 outliers in ${state.citation.dataset_name.toLowerCase()} this year` },
-                    ].map((a) => (
-                      <Link
-                        key={a.label}
-                        href={`/q?q=${encodeURIComponent(a.q)}&dataset=${state.citation!.dataset_id}`}
-                        className="inline-flex items-center rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--ds-text)] hover:border-[var(--ds-accent)]/50 hover:text-[var(--ds-accent)]"
-                      >
-                        {a.label} →
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </section>
         ) : null}
@@ -941,7 +976,7 @@ export function AgentRunner({
 
         {/* Live Miro board — only when render_to_miro produced a board link. */}
         {state.phase === "done" && miroLink && (
-          <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
+          <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
             <div className="px-6 py-6 md:px-10 md:py-8">
               <div className="flex items-baseline justify-between gap-3">
                 <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-purple)]">
@@ -972,7 +1007,7 @@ export function AgentRunner({
 
         {/* Related angles — only after a successful answer */}
         {state.phase === "done" && state.answer && relatedAngles.length > 0 && (
-          <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
+          <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
             <div className="px-6 py-8 md:px-10 md:py-10">
               <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-warm)]">
                 Related angles
@@ -1028,7 +1063,7 @@ export function AgentRunner({
                 </p>
                 <Link
                   href="/"
-                  className="mt-5 inline-flex items-center rounded-md bg-white px-5 py-2 text-[13px] font-semibold text-[var(--ds-bg)] hover:opacity-90"
+                  className="mt-5 inline-flex items-center rounded-md bg-[var(--ds-inverse-bg)] px-5 py-2 text-[13px] font-semibold text-[var(--ds-inverse-text)] hover:opacity-90"
                 >
                   ← Home
                 </Link>
@@ -1106,21 +1141,24 @@ export function AgentRunner({
       </div>
 
       {/* Right column — 5-tab agent sidebar (DAG added in #90) */}
-      <AgentSidebar
-        events={state.events}
-        dagEvents={state.dagEvents}
-        steps={state.steps}
-        replans={state.replans}
-        status={obsStatus}
-        phase={state.phase}
-        currentStep={state.currentStep}
-        totalSteps={state.totalSteps}
-        currentTool={currentTool}
-        durationMs={state.durationMs}
-        usageTotal={state.usageTotal}
-        citationCount={sourcesCount}
-        startedAt={state.startedAt}
-      />
+      <div className="min-w-0 lg:sticky lg:top-[76px] lg:max-h-[calc(100vh-92px)]">
+        <AgentSidebar
+          events={state.events}
+          dagEvents={state.dagEvents}
+          steps={state.steps}
+          replans={state.replans}
+          status={obsStatus}
+          phase={state.phase}
+          currentStep={state.currentStep}
+          totalSteps={state.totalSteps}
+          currentTool={currentTool}
+          durationMs={state.durationMs}
+          usageTotal={state.usageTotal}
+          citationCount={sourcesCount}
+          startedAt={state.startedAt}
+        />
+      </div>
+      </div>
     </div>
   );
 }
@@ -1137,13 +1175,58 @@ function isReporterResult(v: unknown): v is ReporterResult {
 }
 
 // Insight badge / meta-chip — dark-system version (elev bg, warn accent).
-function MetaChip({ label, value }: { label: string; value: string }) {
+function MetaChip({
+  icon,
+  label,
+  value,
+}: {
+  icon: "check" | "activity" | "link" | "refresh";
+  label: string;
+  value: string;
+}) {
+  const path = (() => {
+    switch (icon) {
+      case "activity":
+        return <path d="M22 12h-4l-3 7L9 5l-3 7H2" />;
+      case "link":
+        return (
+          <>
+            <path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1" />
+            <path d="M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20.1l1.1-1.1" />
+          </>
+        );
+      case "refresh":
+        return (
+          <>
+            <path d="M21 12a9 9 0 0 1-15.4 6.4L3 16" />
+            <path d="M3 21v-5h5" />
+            <path d="M3 12a9 9 0 0 1 15.4-6.4L21 8" />
+            <path d="M21 3v5h-5" />
+          </>
+        );
+      default:
+        return <path d="m5 12 4 4L19 6" />;
+    }
+  })();
+
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] bg-[var(--ds-bg-elev)] border border-[var(--ds-border)]"
+      className="inline-flex items-center gap-1 font-mono text-[9.5px] font-semibold uppercase tracking-[0.08em] text-[var(--ds-text-dim)]"
     >
-      <span className="text-[var(--ds-text-mute)]">{label}</span>
-      <span className="tabular-nums text-[var(--ds-text)]">{value}</span>
+      <svg
+        viewBox="0 0 24 24"
+        className="h-3 w-3 text-[var(--ds-text-dim)]"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        aria-hidden
+      >
+        {path}
+      </svg>
+      <span>{label}</span>
+      <span className="tabular-nums text-[var(--ds-text-mute)]">{value}</span>
     </span>
   );
 }

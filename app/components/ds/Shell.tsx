@@ -2,6 +2,7 @@
 // Single source of truth for the wordmark, nav, GitHub CTA, and footer.
 
 import Link from "next/link";
+import { ThemeToggle } from "@/app/components/ThemeToggle";
 
 type NavGroup =
   | { kind: "link"; href: string; label: string }
@@ -17,11 +18,9 @@ const NAV: NavGroup[] = [
     kind: "group",
     label: "Developers",
     items: [
-      { href: "/use-as-agent", label: "Install MCP", blurb: "Add the MCP server to Claude Code, Cursor, Codex." },
-      { href: "/architecture", label: "Architecture", blurb: "Dataset → Ingest → Cache → Agent → UI. The whole system." },
-      { href: "/docs", label: "Docs", blurb: "Tools, skill, integration. Long-form reference." },
-      { href: "/developer", label: "API + replay", blurb: "API reference + replay console." },
-      { href: "/agents", label: "Agents", blurb: "The 7 specialists that make up the runtime." },
+      { href: "/use-as-agent", label: "Install MCP", blurb: "Use TXLookup from Claude Code, Cursor, or Codex." },
+      { href: "/docs", label: "Docs", blurb: "Setup, tools, and integration reference." },
+      { href: "/developer", label: "API", blurb: "Endpoints, replay, and run details." },
     ],
   },
   { kind: "link", href: "/about", label: "About" },
@@ -30,6 +29,8 @@ const NAV: NavGroup[] = [
 // Footer-only links — secondary surfaces still reachable, just not in header
 const FOOTER_EXTRA: { href: string; label: string }[] = [
   { href: "/reports", label: "Reports" },
+  { href: "/architecture", label: "Architecture" },
+  { href: "/agents", label: "Agents" },
   { href: "/byok", label: "Ask your own" },
   { href: "/sources", label: "Sources" },
 ];
@@ -98,7 +99,7 @@ export function ShellHeader({ active }: { active?: string }) {
                 {/* Dropdown — opens on hover or focus-within */}
                 <div
                   role="menu"
-                  className="invisible absolute right-0 top-full z-50 mt-2 w-[300px] -translate-y-1 rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] p-2 opacity-0 shadow-2xl transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100"
+                  className="invisible absolute right-0 top-full z-50 mt-2 w-[240px] -translate-y-1 rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] p-1.5 opacity-0 shadow-2xl transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100"
                 >
                   {n.items.map((i) => {
                     const a = isActive(i.href, active);
@@ -115,9 +116,6 @@ export function ShellHeader({ active }: { active?: string }) {
                       >
                         <div className="flex items-baseline justify-between gap-3">
                           <span className="font-semibold">{i.label}</span>
-                          <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
-                            {i.href}
-                          </span>
                         </div>
                         {i.blurb && (
                           <p className="mt-0.5 text-[11.5px] leading-snug text-[var(--ds-text-mute)]">
@@ -132,12 +130,15 @@ export function ShellHeader({ active }: { active?: string }) {
             );
           })}
         </nav>
-        <a
-          href="https://github.com/ATX-TXLookup/TXLookup"
-          className="inline-flex items-center gap-2 rounded-md bg-[var(--ds-text)] px-3.5 py-1.5 text-[12px] font-semibold text-[var(--ds-bg)] hover:bg-[var(--ds-text-mute)]"
-        >
-          GitHub ↗
-        </a>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <a
+            href="https://github.com/ATX-TXLookup/TXLookup"
+            className="inline-flex items-center gap-2 rounded-md bg-[var(--ds-inverse-bg)] px-3.5 py-1.5 text-[12px] font-semibold text-[var(--ds-inverse-text)] hover:opacity-90"
+          >
+            GitHub ↗
+          </a>
+        </div>
       </div>
     </header>
   );
@@ -145,7 +146,7 @@ export function ShellHeader({ active }: { active?: string }) {
 
 export function ShellFooter() {
   return (
-    <footer className="border-t border-[var(--ds-border)]">
+    <footer className="border-t border-[var(--ds-border)] bg-[var(--ds-bg-deep)]">
       <div className="mx-auto max-w-[1240px] px-6 py-10 md:px-8">
         <div className="flex flex-wrap items-baseline justify-between gap-4">
           <p className="text-[13px] font-semibold text-[var(--ds-text)]">TXLookup</p>

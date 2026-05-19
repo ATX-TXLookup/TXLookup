@@ -302,10 +302,18 @@ function buildGraph(events: DagEvent[]): { nodes: Node[]; edges: Edge[] } {
   return { nodes, edges };
 }
 
-type Positioned = Node & { x: number; y: number };
+type Positioned = Node & { x: number; y: number; w: number };
+
+function nodeWidth(label: string, shape: NodeShape): number {
+  const display = displayLabel(label);
+  const base = shape === "diamond" ? 108 : 104;
+  const estimated = 24 + display.length * 5.6;
+  return Math.max(base, Math.min(144, estimated));
+}
+
 function layoutNodes(nodes: Node[]): { positioned: Positioned[]; rows: number } {
   const positioned: Positioned[] = [];
-  const center = 1;
+  const center = 0;
   let row = 0;
   let i = 0;
   while (i < nodes.length) {
@@ -318,11 +326,11 @@ function layoutNodes(nodes: Node[]): { positioned: Positioned[]; rows: number } 
       }
       group.forEach((g, idx) => {
         const offset = idx - (group.length - 1) / 2;
-        positioned.push({ ...g, x: center + offset, y: row });
+        positioned.push({ ...g, x: center + offset, y: row, w: nodeWidth(g.label, g.shape) });
       });
       row += 1;
     } else {
-      positioned.push({ ...n, x: center, y: row });
+      positioned.push({ ...n, x: center, y: row, w: nodeWidth(n.label, n.shape) });
       row += 1;
       i += 1;
     }
@@ -347,6 +355,29 @@ const SOURCE_COLOR: Record<NonNullable<Node["source"]>, { bg: string; fg: string
   "cache-fallback": { bg: "#F59E0B22", fg: "#F59E0B", label: "cache→live" },
 };
 
+function displayLabel(label: string): string {
+  const bare = label.replace(/\(.*\)$/, "");
+  const labels: Record<string, string> = {
+    reason: "Parse question",
+    plan: "Build plan",
+    delegate_to: "Run specialist",
+    delegate_to_parallel: "Parallel run",
+    cite_dataset: "Attach source",
+    discover_datasets: "Find dataset",
+    get_dataset_schema: "Read schema",
+    fetch_data: "Fetch data",
+    summarize_data: "Summarize",
+    render_to_miro: "Miro board",
+    done: "Publish answer",
+    join: "Merge branches",
+    "critic · plan": "Check plan",
+    "critic · answer": "Check answer",
+    replan: "Repair plan",
+    "doom-loop catch": "Stop loop",
+  };
+  return labels[label] ?? labels[bare] ?? label.replace(/_/g, " ");
+}
+
 export function AgentDAG({ events }: { events: DagEvent[] }) {
   const built = useMemo(() => buildGraph(events), [events]);
   const { positioned, rows } = useMemo(() => layoutNodes(built.nodes), [built.nodes]);
@@ -362,54 +393,60 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
     );
   }
 
-  // Geometry tuned to fit the right-column sidebar (~380-420px). The SVG
-  // renders w-full, so effective text size = fontSize x (renderWidth /
-  // viewBoxW). Earlier the viewBox was 550 wide -> ~0.7x downscale -> sub-8px
-  // text, unreadable. COL_W tightened so viewBox W ~= sidebar width (near
-  // 1:1 render), and every fontSize bumped (see node rendering below).
-  const NODE_W = 150;
-  const NODE_H = 54;
-  const COL_W = 156;
-  const ROW_H = 82;
+  // Compact enough for the right rail while keeping labels readable.
+  const NODE_H = 36;
+  const COL_W = 152;
+  const ROW_H = 54;
   const PAD_X = 14;
   const PAD_Y = 20;
-  const cols = 3;
+  const minX = Math.min(...positioned.map((n) => n.x));
+  const maxX = Math.max(...positioned.map((n) => n.x));
+  const cols = Math.max(1, maxX - minX + 1);
   const innerW = cols * COL_W;
   const W = PAD_X * 2 + innerW;
   const H = PAD_Y * 2 + rows * ROW_H;
 
   const idToPos = new Map(positioned.map((n) => [n.id, n] as const));
-  const cx = (n: Positioned) => PAD_X + n.x * COL_W + COL_W / 2;
+  const cx = (n: Positioned) => PAD_X + (n.x - minX) * COL_W + COL_W / 2;
   const cy = (n: Positioned) => PAD_Y + n.y * ROW_H + NODE_H / 2;
 
   return (
-    <div className="bg-[var(--ds-bg)]">
-      <div className="border-b border-[var(--ds-border)] px-4 py-2">
+    <div className="bg-transparent">
+      <div className="border-b border-white/10 px-4 py-3">
         <div className="flex items-baseline justify-between">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-text-dim)]">
-            Live DAG
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-tx-gold">
+            Run graph
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-dim)]">
+          <p className="font-mono text-[10px] uppercase tracking-wider text-tx-cream/45">
             {positioned.length} node{positioned.length === 1 ? "" : "s"} · {built.edges.length} edge{built.edges.length === 1 ? "" : "s"}
           </p>
         </div>
+        <p className="mt-1 text-[12px] leading-relaxed text-tx-cream/65">
+          Plan, specialist work, verification, and final answer in execution order.
+        </p>
       </div>
 
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" aria-hidden>
+      <div className="overflow-x-auto">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="mx-auto"
+        style={{ width: W, minWidth: W }}
+        aria-hidden
+      >
         <defs>
-          <marker id="dag-arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <marker id="dag-arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill="#3F3F46" />
           </marker>
-          <marker id="dag-arrow-done" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <marker id="dag-arrow-done" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill="#10B981" />
           </marker>
-          <marker id="dag-arrow-fail" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <marker id="dag-arrow-fail" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill="#EF4444" />
           </marker>
-          <marker id="dag-arrow-run" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <marker id="dag-arrow-run" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill="#5B8DEF" />
           </marker>
-          <marker id="dag-arrow-warn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <marker id="dag-arrow-warn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill="#F59E0B" />
           </marker>
           <style>{`
@@ -431,7 +468,7 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
             const arcX = Math.max(x1, x2) + COL_W * 0.8;
             const path = `M ${x1} ${y1} L ${x1} ${y1 - 8} L ${arcX} ${y1 - 8} L ${arcX} ${y2 + 8} L ${x2} ${y2 + 8} L ${x2} ${y2}`;
             return (
-              <path key={i} d={path} fill="none" stroke="#F59E0B" strokeWidth={1.5} strokeDasharray="4 4" markerEnd="url(#dag-arrow-warn)" />
+              <path key={i} d={path} fill="none" stroke="#F59E0B" strokeWidth={1.8} strokeDasharray="4 4" markerEnd="url(#dag-arrow-warn)" />
             );
           }
 
@@ -458,7 +495,7 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
               d={path}
               fill="none"
               stroke={tone.stroke}
-              strokeWidth={1.5}
+              strokeWidth={1.8}
               strokeOpacity={to.status === "running" ? 1 : 0.85}
               markerEnd={tone.marker}
               className={to.status === "running" ? "dag-flow-active" : undefined}
@@ -478,70 +515,72 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
             // Diamond widened so "critic · answer" (15 chars) and the score
             // line both fit without truncation. Kept the rhombus shape so it
             // stays visually distinct from the rectangular tool nodes.
-            const r = 34;
-            const maxDiamondChars = 20;
+            const r = 21;
+            const maxDiamondChars = Math.floor((n.w - 26) / 5.6);
+            const display = displayLabel(n.label);
             const diamondLabel =
-              n.label.length > maxDiamondChars
-                ? n.label.slice(0, maxDiamondChars - 1) + "…"
-                : n.label;
+              display.length > maxDiamondChars
+                ? display.slice(0, maxDiamondChars - 1) + "…"
+                : display;
             return (
               <g key={n.id} style={{ cursor: "help" }}>
                 <title>{`${n.label} — ${tip}`}</title>
                 <polygon
-                  points={`${x},${y - r} ${x + r * 1.4},${y} ${x},${y + r} ${x - r * 1.4},${y}`}
+                  points={`${x},${y - r} ${x + n.w / 2},${y} ${x},${y + r} ${x - n.w / 2},${y}`}
                   fill={fill}
                   stroke={ring}
                   strokeWidth={1.5}
                 />
-                <text x={x} y={y - 2} textAnchor="middle" fontSize={13} fontFamily="JetBrains Mono, monospace" fill={agentTone} fontWeight={700}>
+                <text x={x} y={y - 2} textAnchor="middle" fontSize={9} fontFamily="JetBrains Mono, monospace" fill={agentTone} fontWeight={500}>
                   {diamondLabel}
                 </text>
                 {n.sub && (
-                  <text x={x} y={y + 11} textAnchor="middle" fontSize={11} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA">
+                  <text x={x} y={y + 8} textAnchor="middle" fontSize={8} fontFamily="JetBrains Mono, monospace" fill="#D4D4D8">
                     {n.sub}
                   </text>
                 )}
                 {/* (i) icon — top-right corner of the diamond's bbox */}
-                <circle cx={x + r * 1.4 - 5} cy={y - r + 5} r={4} fill="#15171C" stroke="#71717A" strokeWidth={0.75} />
-                <text x={x + r * 1.4 - 5} y={y - r + 7.5} textAnchor="middle" fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={700}>i</text>
+                <circle cx={x + n.w / 2 - 7} cy={y - r + 6} r={4} fill="#15171C" stroke="#71717A" strokeWidth={0.75} />
+                <text x={x + n.w / 2 - 7} y={y - r + 8.5} textAnchor="middle" fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={500}>i</text>
               </g>
             );
           }
           if (n.shape === "pill" || n.shape === "round") {
             // Pill widened to match rectangle nodes so "revise · answer" and
             // similar two-word labels stop truncating.
-            const w = NODE_W;
+            const w = n.w;
             const h = NODE_H;
-            const maxPillChars = Math.floor((w - 30) / 6.3);
+            const maxPillChars = Math.floor((w - 26) / 5.6);
+            const display = displayLabel(n.label);
             const pillLabel =
-              n.label.length > maxPillChars
-                ? n.label.slice(0, maxPillChars - 1) + "…"
-                : n.label;
+              display.length > maxPillChars
+                ? display.slice(0, maxPillChars - 1) + "…"
+                : display;
             return (
               <g key={n.id} style={{ cursor: "help" }}>
                 <title>{`${n.label} — ${tip}`}</title>
                 <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={h / 2} fill={fill} stroke={ring} strokeWidth={1.5} />
                 <circle cx={x - w / 2 + 11} cy={y} r={3} fill={agentTone} />
-                <text x={x - w / 2 + 20} y={y + 4} fontSize={13.5} fontFamily="JetBrains Mono, monospace" fill="#F5F5F7" fontWeight={500}>
+                <text x={x - w / 2 + 18} y={y + 3.5} fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#F8FAFC" fontWeight={500}>
                   {pillLabel}
                 </text>
                 {/* (i) icon — top-right of the pill */}
                 <circle cx={x + w / 2 - 7} cy={y - h / 2 + 7} r={4} fill="#15171C" stroke="#71717A" strokeWidth={0.75} />
-                <text x={x + w / 2 - 7} y={y - h / 2 + 9.5} textAnchor="middle" fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={700}>i</text>
+                <text x={x + w / 2 - 7} y={y - h / 2 + 9.5} textAnchor="middle" fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={500}>i</text>
               </g>
             );
           }
-          const w = NODE_W;
+          const w = n.w;
           const h = NODE_H;
-          // Truncate strictly to width. Char width ≈ 6.3px at 10.5px JetBrains
-          // Mono. Subtract 20px for left padding + (i) icon + source pill.
-          const maxLabelChars = Math.floor((w - 24) / 6.3);
+          // Truncate strictly to width. Subtract padding + icon + source pill.
+          const maxLabelChars = Math.floor((w - 24) / 5.6);
+          const display = displayLabel(n.label);
           const labelDisplay =
-            n.label.length > maxLabelChars
-              ? n.label.slice(0, maxLabelChars - 1) + "…"
-              : n.label;
+            display.length > maxLabelChars
+              ? display.slice(0, maxLabelChars - 1) + "…"
+              : display;
           const subDisplay = n.sub ?? n.agent;
-          const maxSubChars = Math.floor((w - 14) / 5.0);
+          const maxSubChars = Math.floor((w - 16) / 5.2);
           const subDisplayClipped =
             subDisplay && subDisplay.length > maxSubChars
               ? subDisplay.slice(0, maxSubChars - 1) + "…"
@@ -551,21 +590,21 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
               <title>{`${n.label} — ${tip}`}</title>
               <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={6} fill={fill} stroke={ring} strokeWidth={1.5} />
               <rect x={x - w / 2} y={y - h / 2} width={3} height={h} fill={agentTone} rx={1.5} />
-              <text x={x - w / 2 + 10} y={y - 3} fontSize={13.5} fontFamily="JetBrains Mono, monospace" fill="#F5F5F7" fontWeight={600}>
+              <text x={x - w / 2 + 9} y={y - 3} fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#F8FAFC" fontWeight={500}>
                 {labelDisplay}
               </text>
-              <text x={x - w / 2 + 10} y={y + 10} fontSize={11} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA">
+              <text x={x - w / 2 + 9} y={y + 7.5} fontSize={8} fontFamily="JetBrains Mono, monospace" fill="#CBD5E1">
                 {subDisplayClipped}
               </text>
               {/* (i) icon — bottom-right corner. Don't overlap the source pill which is top-right. */}
               <circle cx={x + w / 2 - 6} cy={y + h / 2 - 6} r={4} fill="#15171C" stroke="#71717A" strokeWidth={0.75} />
-              <text x={x + w / 2 - 6} y={y + h / 2 - 3.5} textAnchor="middle" fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={700}>i</text>
+              <text x={x + w / 2 - 6} y={y + h / 2 - 3.5} textAnchor="middle" fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#A1A1AA" fontWeight={500}>i</text>
               {n.source && (() => {
                 const p = SOURCE_COLOR[n.source];
                 return (
                   <g>
                     <rect x={x + w / 2 - 32} y={y - h / 2 + 4} width={28} height={11} rx={2} fill={p.bg} />
-                    <text x={x + w / 2 - 18} y={y - h / 2 + 12.5} textAnchor="middle" fontSize={9.5} fontFamily="JetBrains Mono, monospace" fill={p.fg} fontWeight={700}>
+                    <text x={x + w / 2 - 18} y={y - h / 2 + 12.5} textAnchor="middle" fontSize={9} fontFamily="JetBrains Mono, monospace" fill={p.fg} fontWeight={500}>
                       {p.label.slice(0, 5)}
                     </text>
                   </g>
@@ -575,9 +614,10 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
           );
         })}
       </svg>
+      </div>
 
-      <div className="border-t border-[var(--ds-border)] px-4 py-3">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ds-text-dim)]">
+      <div className="border-t border-white/10 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-[0.14em] text-tx-cream/55">
           {(["orchestrator", "data_analyst", "critic", "reporter", "support"] as AgentKey[]).map((a) => (
             <div key={a} className="inline-flex items-center gap-1.5" title={AGENT_DOCS[a]} style={{ cursor: "help" }}>
               <span className="block h-2 w-2 rounded-full" style={{ background: AGENT_COLOR[a] }} />
@@ -585,7 +625,7 @@ export function AgentDAG({ events }: { events: DagEvent[] }) {
             </div>
           ))}
         </div>
-        <p className="mt-2 font-mono text-[10px] leading-relaxed text-[var(--ds-text-dim)]/70">
+        <p className="mt-2 font-mono text-[10px] leading-relaxed text-tx-cream/45">
           Hover any node for what it does.
         </p>
       </div>

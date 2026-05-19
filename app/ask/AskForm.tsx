@@ -93,7 +93,7 @@ export function AskForm() {
         <button
           type="submit"
           disabled={running || !query.trim()}
-          className="mt-4 rounded-sm bg-white px-6 py-2.5 text-[14px] font-semibold text-[var(--ds-bg)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="mt-4 rounded-sm bg-[var(--ds-inverse-bg)] px-6 py-2.5 text-[14px] font-semibold text-[var(--ds-inverse-text)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {running ? "Running…" : "Ask →"}
         </button>

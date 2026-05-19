@@ -170,14 +170,23 @@ export function AgentSidebar(props: Props) {
 
   return (
     <aside
-      className="border-l border-white/10 text-tx-cream"
+      className="flex h-[min(760px,calc(100vh-96px))] min-h-[520px] flex-col overflow-hidden rounded-md border border-white/10 text-tx-cream shadow-sm"
       style={{
         background: "var(--tx-navy-dark)",
         backgroundImage:
           "radial-gradient(circle at 80% 10%, rgba(58,127,190,0.14) 0%, transparent 55%), radial-gradient(circle at 10% 90%, rgba(196,66,10,0.10) 0%, transparent 50%)",
       }}
     >
-      <div className="flex h-full flex-col">
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="border-b border-white/10 px-4 py-3">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
+            How TXLookup answered
+          </p>
+          <p className="mt-1 text-[12px] leading-relaxed text-tx-cream/70">
+            Follow the plan, data calls, checks, and source citations behind the result.
+          </p>
+        </div>
+
         {/* Tab bar — gold underline on active, mono labels */}
         <div role="tablist" className="flex border-b border-white/10">
           {TABS.map((t) => {
@@ -201,7 +210,7 @@ export function AgentSidebar(props: Props) {
         </div>
 
         {/* Tab content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto">
           {tab === "status" && <StatusTab {...props} />}
           {tab === "dag" && <AgentDAG events={props.dagEvents} />}
           {tab === "steps" && <ExecutionTab steps={props.steps} replans={props.replans} />}
@@ -371,7 +380,7 @@ function StatusTab({
         />
         <p className="text-base font-medium text-tx-cream">{phaseLabel}</p>
       </div>
-      <p className="mt-1 text-[12px] leading-relaxed text-[var(--ds-text)]">{phaseLine}</p>
+      <p className="mt-1 text-[12px] leading-relaxed text-tx-cream/70">{phaseLine}</p>
       {status === "running" && totalSteps > 0 && (
         <div
           className="mt-3 h-1 w-full overflow-hidden rounded-full"
@@ -413,10 +422,10 @@ function StatusTab({
           border: "0.5px solid rgba(250,247,242,0.12)",
         }}
       >
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-text-mute)]">
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-tx-cream/45">
           Reachability
         </p>
-        <ul className="mt-2 space-y-1 font-mono text-[12px] text-[var(--ds-text)]">
+        <ul className="mt-2 space-y-1 font-mono text-[12px] text-tx-cream/70">
           <li>
             <span className="text-tx-sage">●</span> Codex reachable
           </li>
@@ -442,7 +451,7 @@ function Tile({ label, value }: { label: string; value: string }) {
         border: "0.5px solid rgba(250,247,242,0.12)",
       }}
     >
-      <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-mute)]">
+      <p className="font-mono text-[10px] uppercase tracking-wider text-tx-cream/45">
         {label}
       </p>
       <p className="mt-1 text-lg font-semibold tabular-nums text-tx-cream">
@@ -727,7 +736,16 @@ function TelemetryTab({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-2.5">
+      <div className="border-b border-white/10 px-4 py-3">
+        <div className="flex items-baseline justify-between gap-3">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-tx-gold">
+            Event log
+          </p>
+          <span className="font-mono text-[10px] text-tx-cream/45">
+            {filtered.length} / {events.length}
+          </span>
+        </div>
+        <div className="mt-3 flex items-center gap-1.5">
         {(["all", "codex", "socrata", "errors"] as const).map((f) => {
           const active = filter === f;
           return (
@@ -736,27 +754,25 @@ function TelemetryTab({
               onClick={() => setFilter(f)}
               className={`rounded-md px-2.5 py-1 text-[11px] font-medium capitalize transition-colors ${
                 active
-                  ? "bg-white/10 text-[var(--ds-bg)]"
-                  : "text-[var(--ds-text-mute)] hover:text-white"
+                  ? "bg-white/12 text-tx-cream"
+                  : "text-tx-cream/45 hover:text-tx-cream"
               }`}
             >
               {f}
             </button>
           );
         })}
-        <span className="ml-auto font-mono text-[10px] text-[var(--ds-text-mute)]">
-          {filtered.length} / {events.length}
-        </span>
+        </div>
       </div>
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 leading-relaxed">
         {filtered.length === 0 ? (
-          <p className="py-8 text-center text-[12px] text-[var(--ds-text-mute)]">No events yet.</p>
+          <p className="py-8 text-center text-[12px] text-tx-cream/45">No events yet.</p>
         ) : (
           <ol className="space-y-3">
             {filtered.map((e, i) => (
               <li
                 key={i}
-                className="rounded-md border border-white/8 bg-black/20 p-3"
+                className="rounded-md border border-white/10 bg-white/[0.04] p-3"
               >
                 <div className="flex items-baseline justify-between gap-3">
                   <span
@@ -765,17 +781,22 @@ function TelemetryTab({
                   >
                     {e.phase.replace(/_/g, " ")}
                   </span>
-                  <span className="font-mono text-[10px] tabular-nums text-[var(--ds-text-mute)]">
+                  <span className="font-mono text-[10px] tabular-nums text-tx-cream/45">
                     {fmtClock(e.ts, start)}
                   </span>
                 </div>
-                <p className="mt-1.5 text-[12.5px] leading-snug text-[var(--ds-text)]">
+                <p className="mt-1.5 text-[13px] leading-snug text-tx-cream">
                   {e.message}
                 </p>
                 {e.detail && (
-                  <pre className="mt-2 max-h-28 overflow-x-auto whitespace-pre-wrap break-all rounded bg-black/30 px-2.5 py-1.5 font-mono text-[10.5px] leading-relaxed text-[var(--ds-text)]">
-                    {e.detail}
-                  </pre>
+                  <details className="mt-2 group">
+                    <summary className="cursor-pointer font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-tx-cream/45 transition-colors hover:text-tx-cream">
+                      Details
+                    </summary>
+                    <pre className="mt-2 max-h-32 overflow-x-auto whitespace-pre-wrap break-words rounded bg-black/35 px-2.5 py-2 font-mono text-[10.5px] leading-relaxed text-tx-cream/70">
+                      {e.detail}
+                    </pre>
+                  </details>
                 )}
               </li>
             ))}

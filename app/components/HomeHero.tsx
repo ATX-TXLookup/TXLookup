@@ -8,6 +8,7 @@
 // six were verified against the corpus on 2026-05-14.
 
 import Link from "next/link";
+import { HeroTexasMap } from "@/app/components/HeroTexasMap";
 
 const TOPIC_TILES: {
   key: string;
@@ -23,7 +24,7 @@ const TOPIC_TILES: {
     label: "Permits & Housing",
     blurb: "Where is Austin building, and where isn't it?",
     count: "2.3M permits",
-    color: "#F97316",
+    color: "var(--ds-warm)",
     seedQuery: "Where do permits and code violations both spike together this year by zip?",
     icon: (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
@@ -36,7 +37,7 @@ const TOPIC_TILES: {
     label: "Restaurant inspections",
     blurb: "Which kitchens failed, and is it getting worse.",
     count: "120K inspections",
-    color: "#10B981",
+    color: "var(--ds-good)",
     seedQuery: "How do food inspection failures this year compare to last year?",
     icon: (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
@@ -49,7 +50,7 @@ const TOPIC_TILES: {
     label: "State spending",
     blurb: "Where Texas agency dollars actually go.",
     count: "$100B+ tracked",
-    color: "#A855F7",
+    color: "var(--ds-purple)",
     seedQuery: "Top 10 state agencies by total 2024 expenditures",
     icon: (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
@@ -63,7 +64,7 @@ const TOPIC_TILES: {
     label: "311 & code violations",
     blurb: "Potholes, noise, dumping. What got reported.",
     count: "1.5M requests",
-    color: "#5B8DEF",
+    color: "var(--ds-accent)",
     seedQuery: "How does 311 volume in flood-prone zips compare to the last year?",
     icon: (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
@@ -76,7 +77,7 @@ const TOPIC_TILES: {
     label: "Roads & traffic",
     blurb: "Crash trends across the last two years.",
     count: "1K+ fatal crashes",
-    color: "#F59E0B",
+    color: "var(--ds-warn)",
     seedQuery: "Show austin crash report data trend over the last 24 months by quarter",
     icon: (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
@@ -89,7 +90,7 @@ const TOPIC_TILES: {
     label: "Crime reports",
     blurb: "What's getting reported, and the outliers.",
     count: "2M+ incidents",
-    color: "#EF4444",
+    color: "var(--ds-bad)",
     seedQuery: "Top 5 outliers in crime reports this year",
     icon: (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
@@ -115,43 +116,74 @@ export function HomeHero({
       ? "py-10 md:py-14"
       : "py-16 md:py-24";
   return (
-    <section className="relative overflow-hidden border-b border-[var(--ds-border)]">
+    <section className="relative overflow-hidden border-b border-[var(--ds-border)] bg-[var(--ds-bg)]">
+      {!searchOnly && (
+        <div className="absolute inset-y-0 right-0 hidden w-[58%] lg:block">
+          <HeroTexasMap compact />
+        </div>
+      )}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(90deg, var(--ds-bg) 0%, color-mix(in srgb, var(--ds-bg) 92%, transparent) 44%, color-mix(in srgb, var(--ds-bg) 35%, transparent) 72%, transparent 100%), linear-gradient(180deg, color-mix(in srgb, var(--ds-bg-deep) 62%, transparent) 0%, transparent 58%)",
+        }}
+      />
       <div className={`relative mx-auto max-w-[1100px] px-6 md:px-8 ${padY}`}>
         {!searchOnly && (
           <>
             <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
               For curious Texans, journalists, and city staff
             </p>
-            <h1 className={`mt-5 max-w-[14ch] font-bold leading-[1.02] tracking-[-0.03em] text-white ${compact ? "text-[40px] md:text-[64px]" : "text-[52px] md:text-[96px]"}`}>
-              Look up Texas.
-            </h1>
-            <p className={`mt-7 max-w-[58ch] text-white ${compact ? "text-[17px] leading-[1.5] md:text-[19px]" : "text-[20px] leading-[1.55] md:text-[23px] md:leading-[1.5]"}`}>
-              Texas publishes <span className="font-semibold">{datasetCount.toLocaleString()} open datasets</span>. Permits, inspections, salaries, 311 calls. Technically public, practically unusable: getting an answer means writing SoQL queries against an API. TXLookup makes them <span className="font-semibold">askable in plain English</span>. AI agents pick the dataset, write the query, check the result, and cite the source.
-            </p>
+            <div className="mt-5 max-w-[680px]">
+              <div>
+                <h1 className={`max-w-[14ch] font-bold leading-[1.02] tracking-[-0.03em] text-[var(--ds-text)] ${compact ? "text-[40px] md:text-[64px]" : "text-[52px] md:text-[88px]"}`}>
+                  Look up Texas.
+                </h1>
+                <div className={`mt-7 max-w-[62ch] ${compact ? "text-[17px] md:text-[19px]" : "text-[20px] md:text-[22px]"}`}>
+                  <p className="leading-[1.5] text-[var(--ds-text-mute)]">
+                    Texas publishes <span className="font-semibold text-[var(--ds-text)]">{datasetCount.toLocaleString()} open datasets</span>.
+                    TXLookup makes them askable in plain English.
+                  </p>
+                  <ul className="mt-5 grid gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--ds-text-dim)] sm:grid-cols-3">
+                    <li className="border-l border-[var(--ds-border-strong)] pl-3">
+                      Finds the dataset
+                    </li>
+                    <li className="border-l border-[var(--ds-border-strong)] pl-3">
+                      Writes the query
+                    </li>
+                    <li className="border-l border-[var(--ds-border-strong)] pl-3">
+                      Checks + cites
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </>
         )}
 
         {/* Search unit */}
         <form action="/q" method="GET" className={searchOnly ? "" : compact ? "mt-8" : "mt-10"}>
-          <div className="rounded-xl border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] p-2.5 transition-colors focus-within:border-[var(--ds-accent)]">
+          <div className="rounded-xl border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)] p-2.5 shadow-[0_18px_50px_color-mix(in_srgb,var(--ds-text)_10%,transparent)] transition-colors focus-within:border-[var(--ds-accent)]">
             <div className="flex items-stretch gap-2">
               <input
                 name="q"
                 type="text"
                 required
                 placeholder="Ask anything about Texas..."
-                className="flex-1 bg-transparent px-3 py-3 text-[17px] leading-tight text-white placeholder:text-[#9ca3af] focus:outline-none"
+                className="flex-1 bg-transparent px-3 py-3 text-[17px] leading-tight text-[var(--ds-text)] placeholder:text-[var(--ds-text-dim)] focus:outline-none"
               />
               <button
                 type="submit"
-                className="rounded-md bg-white px-7 text-[16px] font-semibold text-[var(--ds-bg)] hover:opacity-90"
+                className="rounded-md bg-[var(--ds-inverse-bg)] px-7 text-[16px] font-semibold text-[var(--ds-inverse-text)] hover:opacity-90"
               >
                 Ask
               </button>
             </div>
             <div className="mt-1.5 flex items-center gap-2.5 border-t border-[var(--ds-border)] px-3 pb-1 pt-2.5 text-[13.5px] text-[var(--ds-text-mute)]">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ds-good)]" />
-              <span>Live across <span className="font-semibold text-white">{datasetCount.toLocaleString()}</span> Texas datasets</span>
+              <span>Live across <span className="font-semibold text-[var(--ds-text)]">{datasetCount.toLocaleString()}</span> Texas datasets</span>
               <span className="ml-auto text-[var(--ds-text-dim)]">Free. No login.</span>
             </div>
           </div>
@@ -163,7 +195,7 @@ export function HomeHero({
             <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-text-dim)]">
               Browse by topic
             </p>
-            <Link href="/datasets" className="text-[13px] text-white hover:text-[var(--ds-accent)]">
+            <Link href="/datasets" className="text-[13px] text-[var(--ds-text)] hover:text-[var(--ds-accent)]">
               9 curated datasets →
             </Link>
           </div>
@@ -172,7 +204,7 @@ export function HomeHero({
               <li key={t.key}>
                 <Link
                   href={`/q?q=${encodeURIComponent(t.seedQuery)}`}
-                  className="group flex h-full items-start gap-3 rounded-lg border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4 transition-colors hover:border-[var(--ds-accent)]"
+                  className="group flex h-full items-start gap-3 rounded-lg border border-[var(--ds-border)] bg-[color-mix(in_srgb,var(--ds-bg-elev)_86%,var(--ds-bg-deep))] p-4 transition-colors hover:border-[var(--ds-accent)] hover:bg-[var(--ds-bg-elev)]"
                 >
                   <span
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[var(--ds-bg-deep)] group-hover:bg-[var(--ds-bg)]"
@@ -181,7 +213,7 @@ export function HomeHero({
                     {t.icon}
                   </span>
                   <div className="flex-1">
-                    <p className="text-[15px] font-semibold text-white">{t.label}</p>
+                    <p className="text-[15px] font-semibold text-[var(--ds-text)]">{t.label}</p>
                     <p className="mt-0.5 text-[12.5px] leading-snug text-[var(--ds-text-mute)]">{t.blurb}</p>
                     <p className="mt-1.5 font-mono text-[10.5px] uppercase tracking-wider text-[var(--ds-text-dim)]">{t.count}</p>
                   </div>

@@ -35,10 +35,10 @@ export default async function WantedPage() {
           <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
             The demand queue
           </p>
-          <h1 className="mt-4 max-w-[20ch] text-[40px] font-bold leading-[1.05] tracking-[-0.03em] text-white md:text-[60px]">
+          <h1 className="mt-4 max-w-[20ch] text-[40px] font-bold leading-[1.05] tracking-[-0.03em] text-[var(--ds-text)] md:text-[60px]">
             Vote on what we look up next.
           </h1>
-          <p className="mt-5 max-w-[58ch] text-[17px] leading-[1.55] text-white md:text-[19px]">
+          <p className="mt-5 max-w-[58ch] text-[17px] leading-[1.55] text-[var(--ds-text-mute)] md:text-[19px]">
             Every question people ask that isn&rsquo;t in the library yet shows up here. Upvote the ones you want answered. At the top of every hour, the most-requested question runs and joins the library.
           </p>
         </div>
@@ -52,7 +52,7 @@ export default async function WantedPage() {
                 Queue not yet live
               </p>
               <p className="mt-2 text-[15px] leading-relaxed text-[var(--ds-text-mute)]">
-                The demand queue needs a database. Set <span className="font-mono text-white">DATABASE_URL</span> (Neon Postgres) in the environment and the queue activates automatically &mdash; the schema is created on first use, no migration step.
+                The demand queue needs a database. Set <span className="font-mono text-[var(--ds-text)]">DATABASE_URL</span> (Neon Postgres) in the environment and the queue activates automatically &mdash; the schema is created on first use, no migration step.
               </p>
             </div>
           </div>
@@ -75,7 +75,7 @@ export default async function WantedPage() {
                   <li key={row.query_hash} className="flex items-center gap-4 py-4">
                     <UpvoteButton query={row.query_text} initialCount={row.upvotes} />
                     <div className="min-w-0 flex-1">
-                      <p className="text-[15.5px] font-medium leading-snug text-white">
+                      <p className="text-[15.5px] font-medium leading-snug text-[var(--ds-text)]">
                         {row.query_text}
                       </p>
                       <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-dim)]">
@@ -104,7 +104,7 @@ export default async function WantedPage() {
                     className="group flex items-center gap-4 py-4 transition-colors hover:bg-[var(--ds-bg)]"
                   >
                     <span className="font-mono text-[12px] text-[var(--ds-good)]">&#10003;</span>
-                    <span className="min-w-0 flex-1 text-[15px] leading-snug text-white group-hover:text-[var(--ds-accent)]">
+                    <span className="min-w-0 flex-1 text-[15px] leading-snug text-[var(--ds-text)] group-hover:text-[var(--ds-accent)]">
                       {row.query_text}
                     </span>
                     <span className="shrink-0 font-mono text-[11px] uppercase tracking-wider text-[var(--ds-text-dim)]">

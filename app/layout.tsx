@@ -67,6 +67,14 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${jetbrainsMono.variable} ${instrumentSerif.variable} ${dmSerifDisplay.variable} ${syne.variable} ${ibmPlexMono.variable}`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(()=>{const m=document.cookie.match(/(?:^|; )txlookup-theme=(dark|light)/);document.documentElement.dataset.theme=m?m[1]:'light';})()",
+          }}
+        />
+      </head>
       <body>
         <Analytics />
         {children}
