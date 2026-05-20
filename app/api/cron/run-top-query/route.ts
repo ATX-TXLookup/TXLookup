@@ -53,7 +53,12 @@ export async function GET(req: NextRequest) {
   try {
     const res = await fetch(`${baseUrl(req)}/api/agent`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(process.env.CRON_SECRET
+          ? { Authorization: `Bearer ${process.env.CRON_SECRET}` }
+          : {}),
+      },
       body: JSON.stringify({ query: top.query_text }),
     });
     // Consume the SSE stream to completion — the run is saveRun'd by the
