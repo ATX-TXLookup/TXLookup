@@ -1047,10 +1047,14 @@ async function handlePost(req: NextRequest): Promise<Response> {
   });
 }
 
-// Public entry point. If the request carries a txl_byok cookie, we run the
-// agent inside an AsyncLocalStorage scope so all downstream OpenAI calls
-// pick up the user's key (see runWithKey in app/lib/agent.ts). Otherwise
-// we fall through to the server's OPENAI_API_KEY (owner-funded balance).
+function hasInternalCronAuth(req: NextRequest): boolean {
+  const secret = process.env.CRON_SECRET?.trim();
+  if (!secret) return process.env.NODE_ENV !== "production";
+  return req.headers.get("authorization") === `Bearer ${secret}`;
+}
+
+// Public entry point. Cached fallback replay is public. Fresh user-triggered
+// runs must bring their own OpenAI key; owner-funded runs are cron-only.
 export async function POST(req: NextRequest): Promise<Response> {
   const body = (await req.clone().json().catch(() => ({}))) as {
     query?: string;
@@ -1087,5 +1091,15 @@ export async function POST(req: NextRequest): Promise<Response> {
   if (byok && byok.startsWith("sk-")) {
     return runWithKey(byok, () => handlePost(req));
   }
-  return handlePost(req);
+  if (hasInternalCronAuth(req)) {
+    return handlePost(req);
+  }
+  return Response.json(
+    {
+      error: "BYOK required",
+      message: "Fresh agent runs require your own OpenAI API key. Cached public lookups remain available.",
+      byok_url: "/byok",
+    },
+    { status: 402 },
+  );
 }
