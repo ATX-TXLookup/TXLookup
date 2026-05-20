@@ -985,7 +985,7 @@ export function AgentRunner({
         {/* Live Miro board — only when render_to_miro produced a board link. */}
         {state.phase === "done" && miroLink && (
           <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
-            <div className="px-6 py-6 md:px-10 md:py-8">
+            <div className="min-w-0 px-5 py-6 md:px-8 md:py-8">
               <div className="flex items-baseline justify-between gap-3">
                 <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ds-purple)]">
                   Miro board
@@ -999,14 +999,14 @@ export function AgentRunner({
                   Open ↗
                 </a>
               </div>
-              <div className="mt-3 overflow-hidden rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)]">
+              <div className="mt-3 w-full max-w-full overflow-hidden rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)]">
                 <iframe
                   src={miroLink.replace("/app/board/", "/app/live-embed/") + (miroLink.includes("?") ? "&" : "?") + "embedMode=view_only_without_ui&moveToViewport=&embedId=txlookup-q"}
                   title="TXLookup Miro board"
                   loading="lazy"
                   allow="fullscreen; clipboard-read; clipboard-write"
                   allowFullScreen
-                  className="block h-[480px] w-full border-0"
+                  className="block aspect-[16/9] h-auto min-h-[300px] w-full max-w-full border-0 md:min-h-[420px]"
                 />
               </div>
             </div>
