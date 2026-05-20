@@ -52,7 +52,7 @@ export function SiteHeader({
     <>
       {/* Top utility bar */}
       <div className="bg-[var(--ds-inverse-bg)] text-[var(--ds-inverse-text)]">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-6 py-2 text-[13px] md:px-10">
+        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-6 py-2 text-[14px] md:px-10">
           <span>{utilityNote}</span>
           <span className="hidden font-mono text-[11px] uppercase tracking-wider text-white/70 md:inline">
             v0.1 · alpha
@@ -75,7 +75,7 @@ export function SiteHeader({
             </div>
           </Link>
           <nav
-            className="flex items-center gap-7 font-display text-sm font-semibold"
+            className="flex items-center gap-7 font-display text-[15px] font-semibold"
             data-testid="site-nav"
           >
             {NAV_LINKS.map((link) => {

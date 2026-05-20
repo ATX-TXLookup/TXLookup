@@ -366,6 +366,7 @@ export function AgentRunner({
   mode?: "live" | "fallback" | "demo";
 }) {
   const [state, setState] = useState<AgentState>(initial);
+  const [showTrace, setShowTrace] = useState(true);
   const cancelled = useRef(false);
 
   useEffect(() => {
@@ -705,7 +706,13 @@ export function AgentRunner({
 
   return (
     <div className="bg-[var(--ds-bg-deep)] px-3 py-4 md:px-5 md:py-6">
-      <div className="mx-auto grid max-w-[1340px] gap-5 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_388px]">
+      <div
+        className={`mx-auto grid max-w-[1340px] gap-5 ${
+          showTrace
+            ? "lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_388px]"
+            : "lg:grid-cols-1"
+        }`}
+      >
       {/* Left column — answer-first report body */}
       <div className="min-w-0 overflow-hidden rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg)] shadow-sm">
         {/* Question recap with live status pill */}
@@ -716,6 +723,13 @@ export function AgentRunner({
                 User question
               </p>
               <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowTrace((v) => !v)}
+                  className="hidden rounded-md border border-[var(--ds-border)] px-2.5 py-1 font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--ds-text-mute)] transition-colors hover:border-[var(--ds-accent)] hover:text-[var(--ds-text)] lg:inline-flex"
+                >
+                  {showTrace ? "Hide trace" : "Show trace"}
+                </button>
                 <span
                   className={`inline-block h-2 w-2 rounded-full ${
                     obsStatus === "running" ? "animate-pulse" : ""
@@ -1141,6 +1155,7 @@ export function AgentRunner({
       </div>
 
       {/* Right column — 5-tab agent sidebar (DAG added in #90) */}
+      {showTrace && (
       <div className="min-w-0 lg:sticky lg:top-[76px] lg:max-h-[calc(100vh-92px)]">
         <AgentSidebar
           events={state.events}
@@ -1158,6 +1173,7 @@ export function AgentRunner({
           startedAt={state.startedAt}
         />
       </div>
+      )}
       </div>
     </div>
   );

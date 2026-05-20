@@ -5,6 +5,7 @@
 //   q is uncached → gate view (BYOK / suggest — no public fresh runs)
 
 import Link from "next/link";
+import { cookies } from "next/headers";
 
 import { Shell } from "@/app/components/ds";
 import { HomeHero } from "@/app/components/HomeHero";
@@ -474,7 +475,10 @@ export default async function QPage({
     return <DetailView run={cached} />;
   }
 
-  if (forceFresh) {
+  const jar = await cookies();
+  const hasByok = jar.get("txl_byok")?.value?.startsWith("sk-") === true;
+
+  if (forceFresh && hasByok) {
     return <LiveView query={query} />;
   }
 

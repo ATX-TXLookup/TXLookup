@@ -64,7 +64,7 @@ export function ShellHeader({ active }: { active?: string }) {
             v0.1
           </span>
         </Link>
-        <nav className="hidden items-center gap-6 text-[13.5px] md:flex">
+        <nav className="hidden items-center gap-6 text-[14.5px] md:flex">
           {NAV.map((n) => {
             if (n.kind === "link") {
               const a = isActive(n.href, active);
@@ -108,7 +108,7 @@ export function ShellHeader({ active }: { active?: string }) {
                         key={i.href}
                         href={i.href}
                         role="menuitem"
-                        className={`block rounded px-3 py-2 text-[13px] transition-colors ${
+                        className={`block rounded px-3 py-2 text-[14px] transition-colors ${
                           a
                             ? "bg-[var(--ds-bg)] text-[var(--ds-accent)]"
                             : "text-[var(--ds-text)] hover:bg-[var(--ds-bg)] hover:text-[var(--ds-accent)]"
@@ -118,7 +118,7 @@ export function ShellHeader({ active }: { active?: string }) {
                           <span className="font-semibold">{i.label}</span>
                         </div>
                         {i.blurb && (
-                          <p className="mt-0.5 text-[11.5px] leading-snug text-[var(--ds-text-mute)]">
+                          <p className="mt-0.5 text-[12.5px] leading-snug text-[var(--ds-text-mute)]">
                             {i.blurb}
                           </p>
                         )}
@@ -134,7 +134,7 @@ export function ShellHeader({ active }: { active?: string }) {
           <ThemeToggle />
           <a
             href="https://github.com/ATX-TXLookup/TXLookup"
-            className="inline-flex items-center gap-2 rounded-md bg-[var(--ds-inverse-bg)] px-3.5 py-1.5 text-[12px] font-semibold text-[var(--ds-inverse-text)] hover:opacity-90"
+            className="inline-flex items-center gap-2 rounded-md bg-[var(--ds-inverse-bg)] px-3.5 py-1.5 text-[13px] font-semibold text-[var(--ds-inverse-text)] hover:opacity-90"
           >
             GitHub ↗
           </a>
@@ -149,8 +149,8 @@ export function ShellFooter() {
     <footer className="border-t border-[var(--ds-border)] bg-[var(--ds-bg-deep)]">
       <div className="mx-auto max-w-[1240px] px-6 py-10 md:px-8">
         <div className="flex flex-wrap items-baseline justify-between gap-4">
-          <p className="text-[13px] font-semibold text-[var(--ds-text)]">TXLookup</p>
-          <nav className="flex flex-wrap items-center gap-5 text-[12px]">
+          <p className="text-[14px] font-semibold text-[var(--ds-text)]">TXLookup</p>
+          <nav className="flex flex-wrap items-center gap-5 text-[13.5px]">
             {FLAT_NAV.map((n) => (
               <Link key={n.href} href={n.href} className="text-[var(--ds-text-mute)] hover:text-[var(--ds-text)]">
                 {n.label}
@@ -161,7 +161,7 @@ export function ShellFooter() {
             </a>
           </nav>
         </div>
-        <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--ds-text-dim)]">
+        <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--ds-text-dim)]">
           MIT · 2026 · Sourced from public Texas open-data portals · Attribution enforced
         </p>
       </div>
