@@ -5,6 +5,8 @@
 import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 
+import { alertByokEnabled } from "@/app/lib/alerts";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -45,6 +47,7 @@ export async function POST(req: NextRequest) {
     path: "/",
     maxAge: SEVEN_DAYS,
   });
+  await alertByokEnabled();
   return Response.json({ ok: true });
 }
 

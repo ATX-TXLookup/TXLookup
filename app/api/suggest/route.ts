@@ -1,12 +1,13 @@
 // POST /api/suggest { email, question } — capture suggested lookups.
-// Stores to data/suggestions/{timestamp}-{hash}.json for admin review.
-// No email sent today (no transactional provider wired) — admin polls /admin.
+// Stores to data/suggestions/{timestamp}-{hash}.json for admin review and
+// optionally posts an owner alert via TXLOOKUP_ALERT_WEBHOOK_URL.
 
 import { NextRequest } from "next/server";
 import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
+import { alertSuggestion } from "@/app/lib/alerts";
 import { recordSuggestion } from "@/app/lib/demand";
 
 export const runtime = "nodejs";
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest) {
   // file write above is the legacy admin-review path; it's a no-op in prod
   // anyway since Vercel's FS is ephemeral. The queue is the real home.)
   await recordSuggestion(question);
+  await alertSuggestion({ email, question });
 
   return Response.json({ ok: true });
 }
