@@ -683,6 +683,7 @@ export function AgentRunner({
 
   // Miro view link — surfaces only when render_to_miro produced an artifact.
   const miroLink = state.artifacts.find((a) => a.includes("miro.com")) ?? null;
+  const miroOpenLink = miroLink ? buildMiroBoardUrl(miroLink) : null;
   const miroEmbedLink = miroLink ? buildMiroEmbedUrl(miroLink) : null;
 
   // PR #68 / issue #67 — multi-agent surfaces. Pull the reporter composition
@@ -992,7 +993,7 @@ export function AgentRunner({
                   Miro board
                 </p>
                 <a
-                  href={miroLink}
+                  href={miroOpenLink ?? miroLink}
                   target="_blank"
                   rel="noopener"
                   className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--ds-purple)] hover:underline"
@@ -1217,17 +1218,35 @@ function buildMiroEmbedUrl(link: string): string {
   try {
     const url = new URL(link);
     url.pathname = url.pathname.replace("/app/board/", "/app/live-embed/");
+    // Cached runs may point at a specific Miro frame/widget. If that item is
+    // later cleaned up in Miro, the embed opens to "item moved". The board
+    // itself is the stable artifact, so use that for embeds.
+    url.searchParams.delete("moveToWidget");
+    url.searchParams.delete("moveToViewport");
     url.searchParams.set("embedMode", "view_only_without_ui");
     url.searchParams.set("embedId", "txlookup-q");
-    // Do not add an empty moveToViewport param: it overrides moveToWidget
-    // and makes shared boards open zoomed way out around the full board.
     return url.toString();
   } catch {
     const [base, query = ""] = link.split("?");
     const params = new URLSearchParams(query);
+    params.delete("moveToWidget");
+    params.delete("moveToViewport");
     params.set("embedMode", "view_only_without_ui");
     params.set("embedId", "txlookup-q");
     return `${base.replace("/app/board/", "/app/live-embed/")}?${params.toString()}`;
+  }
+}
+
+function buildMiroBoardUrl(link: string): string {
+  try {
+    const url = new URL(link);
+    url.searchParams.delete("moveToWidget");
+    url.searchParams.delete("moveToViewport");
+    url.searchParams.delete("embedMode");
+    url.searchParams.delete("embedId");
+    return url.toString();
+  } catch {
+    return link.split("?")[0] ?? link;
   }
 }
 
