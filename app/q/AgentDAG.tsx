@@ -417,21 +417,24 @@ export function AgentDAG({
     );
   }
 
-  // Compact enough for the right rail while keeping labels readable.
-  const NODE_H = 36;
-  const COL_W = 152;
-  const ROW_H = 54;
-  const PAD_X = 14;
-  const PAD_Y = 20;
+  // Compact enough for the right rail while keeping labels readable. The
+  // canvas is wider than a single node so loopback arrows stay inside the
+  // viewBox instead of getting clipped by the sidebar.
+  const NODE_H = 34;
+  const COL_W = 140;
+  const ROW_H = 58;
+  const PAD_X = 22;
+  const PAD_Y = 24;
   const minX = Math.min(...positioned.map((n) => n.x));
   const maxX = Math.max(...positioned.map((n) => n.x));
   const cols = Math.max(1, maxX - minX + 1);
   const innerW = cols * COL_W;
-  const W = PAD_X * 2 + innerW;
+  const W = Math.max(320, PAD_X * 2 + innerW);
   const H = PAD_Y * 2 + rows * ROW_H;
 
   const idToPos = new Map(positioned.map((n) => [n.id, n] as const));
-  const cx = (n: Positioned) => PAD_X + (n.x - minX) * COL_W + COL_W / 2;
+  const graphLeft = (W - innerW) / 2;
+  const cx = (n: Positioned) => graphLeft + (n.x - minX) * COL_W + COL_W / 2;
   const cy = (n: Positioned) => PAD_Y + n.y * ROW_H + NODE_H / 2;
 
   return (
@@ -450,27 +453,27 @@ export function AgentDAG({
         </p>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-hidden px-2">
       <svg
         viewBox={`0 0 ${W} ${H}`}
-        className="mx-auto"
-        style={{ width: W, minWidth: W }}
+        className="mx-auto block w-full max-w-full"
+        preserveAspectRatio="xMidYMin meet"
         aria-hidden
       >
         <defs>
-          <marker id="dag-arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+          <marker id="dag-arrow-gray" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill="#3F3F46" />
           </marker>
-          <marker id="dag-arrow-done" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+          <marker id="dag-arrow-done" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill="#10B981" />
           </marker>
-          <marker id="dag-arrow-fail" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+          <marker id="dag-arrow-fail" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill="#EF4444" />
           </marker>
-          <marker id="dag-arrow-run" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+          <marker id="dag-arrow-run" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill="#5B8DEF" />
           </marker>
-          <marker id="dag-arrow-warn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+          <marker id="dag-arrow-warn" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill="#F59E0B" />
           </marker>
           <style>{`
@@ -489,10 +492,14 @@ export function AgentDAG({
           const y2 = cy(to) - NODE_H / 2;
 
           if (e.kind === "loopback") {
-            const arcX = Math.max(x1, x2) + COL_W * 0.8;
-            const path = `M ${x1} ${y1} L ${x1} ${y1 - 8} L ${arcX} ${y1 - 8} L ${arcX} ${y2 + 8} L ${x2} ${y2 + 8} L ${x2} ${y2}`;
+            const routeX = W - PAD_X;
+            const fromEdgeX = x1 + from.w / 2 + 4;
+            const toEdgeX = x2 + to.w / 2 + 4;
+            const startY = cy(from);
+            const endY = cy(to);
+            const path = `M ${fromEdgeX} ${startY} L ${routeX} ${startY} L ${routeX} ${endY} L ${toEdgeX} ${endY}`;
             return (
-              <path key={i} d={path} fill="none" stroke="#F59E0B" strokeWidth={1.8} strokeDasharray="4 4" markerEnd="url(#dag-arrow-warn)" />
+              <path key={i} d={path} fill="none" stroke="#F59E0B" strokeWidth={2.2} strokeDasharray="4 4" markerEnd="url(#dag-arrow-warn)" />
             );
           }
 
@@ -519,7 +526,7 @@ export function AgentDAG({
               d={path}
               fill="none"
               stroke={tone.stroke}
-              strokeWidth={1.8}
+              strokeWidth={2.2}
               strokeOpacity={to.status === "running" ? 1 : 0.85}
               markerEnd={tone.marker}
               className={to.status === "running" ? "dag-flow-active" : undefined}
