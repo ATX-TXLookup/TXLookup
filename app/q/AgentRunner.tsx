@@ -706,13 +706,7 @@ export function AgentRunner({
 
   return (
     <div className="bg-[var(--ds-bg-deep)] px-3 py-4 md:px-5 md:py-6">
-      <div
-        className={`mx-auto grid max-w-[1340px] gap-5 ${
-          showTrace
-            ? "lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_388px]"
-            : "lg:grid-cols-1"
-        }`}
-      >
+      <div className="mx-auto grid max-w-[1340px] gap-5 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_388px]">
       {/* Left column — answer-first report body */}
       <div className="min-w-0 overflow-hidden rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg)] shadow-sm">
         {/* Question recap with live status pill */}
@@ -1154,26 +1148,54 @@ export function AgentRunner({
           )}
       </div>
 
-      {/* Right column — 5-tab agent sidebar (DAG added in #90) */}
-      {showTrace && (
+      {/* Right column — fixed partition. Hide/show collapses the rail content,
+          but never lets the answer body expand to full width. */}
       <div className="min-w-0 lg:sticky lg:top-[76px] lg:max-h-[calc(100vh-92px)]">
-        <AgentSidebar
-          events={state.events}
-          dagEvents={state.dagEvents}
-          steps={state.steps}
-          replans={state.replans}
-          status={obsStatus}
-          phase={state.phase}
-          currentStep={state.currentStep}
-          totalSteps={state.totalSteps}
-          currentTool={currentTool}
-          durationMs={state.durationMs}
-          usageTotal={state.usageTotal}
-          citationCount={sourcesCount}
-          startedAt={state.startedAt}
-        />
+        {showTrace ? (
+          <AgentSidebar
+            events={state.events}
+            dagEvents={state.dagEvents}
+            steps={state.steps}
+            replans={state.replans}
+            status={obsStatus}
+            phase={state.phase}
+            currentStep={state.currentStep}
+            totalSteps={state.totalSteps}
+            currentTool={currentTool}
+            durationMs={state.durationMs}
+            usageTotal={state.usageTotal}
+            citationCount={sourcesCount}
+            startedAt={state.startedAt}
+          />
+        ) : (
+          <aside
+            className="overflow-hidden rounded-md border border-white/10 text-tx-cream shadow-sm"
+            style={{
+              background: "var(--tx-navy-dark)",
+              backgroundImage:
+                "radial-gradient(circle at 80% 10%, rgba(58,127,190,0.14) 0%, transparent 55%), radial-gradient(circle at 10% 90%, rgba(196,66,10,0.10) 0%, transparent 50%)",
+            }}
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+              <div>
+                <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
+                  Agent trace
+                </p>
+                <p className="mt-1 text-[13px] leading-relaxed text-tx-cream/70">
+                  Hidden. The answer layout stays fixed.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowTrace(true)}
+                className="shrink-0 rounded-md border border-white/15 bg-white/5 px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-tx-cream transition-colors hover:border-tx-gold hover:text-tx-gold"
+              >
+                Show
+              </button>
+            </div>
+          </aside>
+        )}
       </div>
-      )}
       </div>
     </div>
   );
