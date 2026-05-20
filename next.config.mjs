@@ -6,9 +6,10 @@ const nextConfig = {
   // — without this, the files are dropped during the Next build and every
   // page falls through to live Socrata.
   outputFileTracingIncludes: {
-    "/": ["./data/cache/**", "./data/catalog/**"],
+    "/": ["./data/cache/**", "./data/catalog/**", "./data/runs/**"],
+    "/q/**": ["./data/cache/**", "./data/catalog/**", "./data/runs/**"],
     "/datasets/**": ["./data/cache/**", "./data/catalog/**"],
-    "/api/**": ["./data/cache/**", "./data/catalog/**"],
+    "/api/**": ["./data/cache/**", "./data/catalog/**", "./data/runs/**"],
     "/reports/**": ["./data/cache/**", "./data/catalog/**"],
     "/chat": ["./data/catalog/**"],
   },

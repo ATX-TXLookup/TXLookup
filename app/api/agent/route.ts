@@ -1052,6 +1052,37 @@ async function handlePost(req: NextRequest): Promise<Response> {
 // pick up the user's key (see runWithKey in app/lib/agent.ts). Otherwise
 // we fall through to the server's OPENAI_API_KEY (owner-funded balance).
 export async function POST(req: NextRequest): Promise<Response> {
+  const body = (await req.clone().json().catch(() => ({}))) as {
+    query?: string;
+    fallback?: boolean;
+  };
+  const url = new URL(req.url);
+  const fallbackMode =
+    body.fallback === true || url.searchParams.get("fallback") === "1";
+
+  if (fallbackMode) {
+    const query = (body.query ?? "").trim();
+    const saved = query ? await findRun(query) : null;
+    if (saved) {
+      return new Response(replaySavedRun(saved), {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+          "X-Accel-Buffering": "no",
+          "X-TXLookup-Mode": "fallback",
+          Connection: "keep-alive",
+        },
+      });
+    }
+    return Response.json(
+      {
+        error: "Cached run not found",
+        message: "This replay is not in the public cache yet.",
+      },
+      { status: 404 },
+    );
+  }
+
   const byok = req.cookies.get("txl_byok")?.value;
   if (byok && byok.startsWith("sk-")) {
     return runWithKey(byok, () => handlePost(req));

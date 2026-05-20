@@ -821,7 +821,7 @@ export function AgentRunner({
                         <div className="flex flex-wrap justify-end gap-2">
                           {!miroLink && state.phase === "done" && (
                             <Link
-                              href={`/q?q=${encodeURIComponent(query + " render this to a Miro board")}&fresh=1`}
+                              href={`/q?q=${encodeURIComponent(query + " render this to a Miro board")}`}
                               className="inline-flex items-center rounded-md border border-[var(--ds-border)] bg-[color-mix(in_srgb,var(--ds-accent)_8%,var(--ds-bg))] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--ds-accent)] hover:border-[var(--ds-accent)] hover:bg-[color-mix(in_srgb,var(--ds-accent)_12%,var(--ds-bg))]"
                             >
                               Visualize in Miro ↗
