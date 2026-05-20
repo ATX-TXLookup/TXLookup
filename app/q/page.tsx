@@ -468,8 +468,8 @@ export default async function QPage({
     );
   }
 
-  const forceFresh = fresh === "1" || /\b(render|visualize)\b.*\bmiro\b|\bmiro\b.*\b(render|visualize)\b/i.test(query);
-  const cached = forceFresh ? null : await findRun(query);
+  const forceFresh = fresh === "1";
+  const cached = await findRun(query);
   if (cached && cached.answer) {
     return <DetailView run={cached} />;
   }
