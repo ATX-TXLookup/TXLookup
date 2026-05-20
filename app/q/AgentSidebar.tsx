@@ -180,10 +180,10 @@ export function AgentSidebar(props: Props) {
     >
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="border-b border-white/10 px-4 py-3">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
+          <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
             How TXLookup answered
           </p>
-          <p className="mt-1 text-[12px] leading-relaxed text-tx-cream/70">
+          <p className="mt-1 text-[13px] leading-relaxed text-tx-cream/70">
             Follow the plan, data calls, checks, and source citations behind the result.
           </p>
         </div>
@@ -198,7 +198,7 @@ export function AgentSidebar(props: Props) {
                 role="tab"
                 aria-selected={active}
                 onClick={() => setTab(t.id)}
-                className={`flex-1 border-b-2 px-3 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors ${
+                className={`flex-1 border-b-2 px-3 py-3 font-mono text-[13px] font-semibold uppercase tracking-[0.16em] transition-colors ${
                   active
                     ? "border-tx-gold text-tx-cream"
                     : "border-transparent text-[var(--ds-text-mute)] hover:text-tx-cream"
@@ -233,99 +233,8 @@ export function AgentSidebar(props: Props) {
             />
           )}
         </div>
-
-        {/* Floating "New Query" action — in-result search affordance per the
-            Stitch Query-Pro design. Stays on screen so the user can fire a
-            follow-up without bouncing back to /q. */}
-        <NewQueryFooter />
       </div>
     </aside>
-  );
-}
-
-function NewQueryFooter() {
-  const [open, setOpen] = useState(false);
-  const [q, setQ] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (open) {
-      // Defer focus so the transition has rendered.
-      setTimeout(() => inputRef.current?.focus(), 50);
-    }
-  }, [open]);
-
-  const STARTERS = [
-    "Where do permits cluster in 78702 last 30 days?",
-    "Top 311 complaint types in Austin",
-    "Failing inspections by zip this year",
-    "Active code violations in 78745",
-  ];
-
-  function fire(question: string) {
-    const url = `/q?q=${encodeURIComponent(question)}`;
-    window.location.assign(url);
-  }
-
-  return (
-    <div className="border-t border-white/10 bg-black/20 p-4">
-      {!open ? (
-        <button
-          onClick={() => setOpen(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-md border border-white/15 bg-white/[0.04] px-4 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-tx-cream transition-colors hover:border-tx-gold/60 hover:bg-white/[0.08]"
-        >
-          <span aria-hidden className="text-base leading-none">+</span>
-          <span>NEW QUERY</span>
-        </button>
-      ) : (
-        <div className="space-y-3">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (q.trim()) fire(q.trim());
-            }}
-          >
-            <div className="flex items-center gap-2 rounded-md border border-white/15 bg-black/30 p-1.5 transition-colors focus-within:border-tx-gold/70">
-              <input
-                ref={inputRef}
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Ask another question…"
-                className="flex-1 bg-transparent px-2 py-1.5 text-[13px] text-tx-cream placeholder:text-[var(--ds-text-dim)] focus:outline-none"
-              />
-              <button
-                type="submit"
-                disabled={!q.trim()}
-                className="rounded bg-tx-gold/90 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-tx-navy-dark transition-opacity disabled:opacity-30"
-              >
-                Ask →
-              </button>
-            </div>
-          </form>
-          <div className="flex flex-wrap gap-1.5">
-            {STARTERS.map((s) => (
-              <button
-                key={s}
-                onClick={() => fire(s)}
-                className="rounded-full border border-white/12 bg-white/[0.03] px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-mute)] transition-colors hover:border-tx-gold/60 hover:bg-white/[0.08] hover:text-tx-cream"
-                title={s}
-              >
-                {s.length > 28 ? s.slice(0, 26) + "…" : s}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() => {
-              setOpen(false);
-              setQ("");
-            }}
-            className="font-mono text-[10px] uppercase tracking-wider text-[var(--ds-text-mute)] hover:text-tx-cream"
-          >
-            ← Close
-          </button>
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -385,7 +294,7 @@ function StatusTab({
 
   return (
     <div className="px-5 py-5">
-      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
+      <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
         Agent status
       </p>
       <div className="mt-2 flex items-center gap-2">
@@ -397,7 +306,7 @@ function StatusTab({
         />
         <p className="text-base font-medium text-tx-cream">{phaseLabel}</p>
       </div>
-      <p className="mt-1 text-[12px] leading-relaxed text-tx-cream/70">{phaseLine}</p>
+      <p className="mt-1 text-[13px] leading-relaxed text-tx-cream/70">{phaseLine}</p>
       {status === "running" && totalSteps > 0 && (
         <div
           className="mt-3 h-1 w-full overflow-hidden rounded-full"
@@ -439,10 +348,10 @@ function StatusTab({
           border: "0.5px solid rgba(250,247,242,0.12)",
         }}
       >
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-tx-cream/45">
+        <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.18em] text-tx-cream/45">
           Reachability
         </p>
-        <ul className="mt-2 space-y-1 font-mono text-[12px] text-tx-cream/70">
+        <ul className="mt-2 space-y-1 font-mono text-[13px] text-tx-cream/70">
           <li>
             <span className="text-tx-sage">●</span> Codex reachable
           </li>
@@ -468,7 +377,7 @@ function Tile({ label, value }: { label: string; value: string }) {
         border: "0.5px solid rgba(250,247,242,0.12)",
       }}
     >
-      <p className="font-mono text-[10px] uppercase tracking-wider text-tx-cream/45">
+      <p className="font-mono text-[13px] uppercase tracking-wider text-tx-cream/45">
         {label}
       </p>
       <p className="mt-1 text-lg font-semibold tabular-nums text-tx-cream">
@@ -487,7 +396,7 @@ function FlowTab({
 }) {
   if (steps.length === 0) {
     return (
-      <div className="px-5 py-12 text-center font-mono text-[12px] text-[var(--ds-text-mute)]">
+      <div className="px-5 py-12 text-center font-mono text-[13px] text-[var(--ds-text-mute)]">
         Waiting for plan…
       </div>
     );
@@ -495,7 +404,7 @@ function FlowTab({
   const replanIndex = new Set(replans.map((r) => r.failedStep));
   return (
     <div className="px-5 py-5">
-      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
+      <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
         Reasoning trace
       </p>
 
@@ -512,7 +421,7 @@ function FlowTab({
                 className="inline-block h-1.5 w-1.5 rounded-full"
                 style={{ background: tone.dot }}
               />
-              <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-tx-muted">
+              <span className="font-mono text-[13px] uppercase tracking-[0.12em] text-tx-muted">
                 {tone.label}
               </span>
             </span>
@@ -558,22 +467,22 @@ function FlowTab({
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex min-w-0 items-center gap-2">
-                    <span className="font-mono text-[10px] tabular-nums text-[var(--ds-text-mute)]">
+                    <span className="font-mono text-[13px] tabular-nums text-[var(--ds-text-mute)]">
                       {String(s.step).padStart(2, "0")}
                     </span>
                     {/* Agent badge — colored mono tag attributing this step
                         to its responsible agent (orchestrator default). */}
                     <span
-                      className={`font-mono text-[10px] uppercase tracking-[0.12em] ${tone.badge}`}
+                      className={`font-mono text-[13px] uppercase tracking-[0.12em] ${tone.badge}`}
                     >
                       {tone.label}
                     </span>
-                    <span className="truncate font-mono text-[12px] font-semibold text-tx-cream">
+                    <span className="truncate font-mono text-[13px] font-semibold text-tx-cream">
                       {s.tool}
                     </span>
                   </div>
                   <span
-                    className="font-mono text-[10px] uppercase tracking-wider"
+                    className="font-mono text-[13px] uppercase tracking-wider"
                     style={{ color: colors.fg }}
                   >
                     {s.status}
@@ -587,7 +496,7 @@ function FlowTab({
               </div>
               {replan && (
                 <div
-                  className="mt-1 ml-2 rounded-sm px-2 py-1 font-mono text-[10px]"
+                  className="mt-1 ml-2 rounded-sm px-2 py-1 font-mono text-[13px]"
                   style={{
                     borderLeft: "2px solid var(--tx-gold)",
                     background: "rgba(212,139,16,0.12)",
@@ -614,7 +523,7 @@ function ExecutionTab({
 }) {
   if (steps.length === 0) {
     return (
-      <div className="px-5 py-12 text-center font-mono text-[12px] text-[var(--ds-text-mute)]">
+      <div className="px-5 py-12 text-center font-mono text-[13px] text-[var(--ds-text-mute)]">
         No steps yet.
       </div>
     );
@@ -622,7 +531,7 @@ function ExecutionTab({
   const replanByStep = new Map(replans.map((r) => [r.failedStep, r]));
   return (
     <div className="px-5 py-5 space-y-2">
-      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
+      <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.18em] text-tx-gold">
         Execution
       </p>
       <ol className="space-y-2">
@@ -647,10 +556,10 @@ function ExecutionTab({
                 }}
               >
                 <div className="flex items-baseline gap-2 flex-wrap">
-                  <span className="font-mono text-[10px] tabular-nums text-[var(--ds-text-mute)]">
+                  <span className="font-mono text-[13px] tabular-nums text-[var(--ds-text-mute)]">
                     {String(s.step).padStart(2, "0")}
                   </span>
-                  <span className="font-mono text-[12px] font-semibold text-tx-cream">
+                  <span className="font-mono text-[13px] font-semibold text-tx-cream">
                     {s.tool}
                   </span>
                   {s.fromReplan && (
@@ -676,12 +585,12 @@ function ExecutionTab({
                   </span>
                 </div>
                 {typeof s.durationMs === "number" && s.status !== "pending" && (
-                  <p className="mt-1 font-mono text-[10px] text-[var(--ds-text-mute)]">
+                  <p className="mt-1 font-mono text-[13px] text-[var(--ds-text-mute)]">
                     {s.durationMs}ms
                   </p>
                 )}
                 {s.error && (
-                  <p className="mt-1 font-mono text-[10px] text-tx-rust-light">↳ {s.error}</p>
+                  <p className="mt-1 font-mono text-[13px] text-tx-rust-light">↳ {s.error}</p>
                 )}
               </div>
               {rp && rp.diagnosis && (
@@ -706,7 +615,7 @@ function ExecutionTab({
                     {isDoomLoop && " · doom-loop"}
                   </p>
                   <p
-                    className="mt-0.5 text-[11px]"
+                    className="mt-0.5 text-[13px]"
                     style={{
                       color: isDoomLoop ? "var(--tx-rust-light)" : "var(--tx-cream)",
                     }}
@@ -769,10 +678,10 @@ function TelemetryTab({
     <div className="flex h-full flex-col">
       <div className="border-b border-white/10 px-4 py-3">
         <div className="flex items-baseline justify-between gap-3">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-tx-gold">
+          <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-tx-gold">
             Event log
           </p>
-          <span className="font-mono text-[10px] text-tx-cream/45">
+          <span className="font-mono text-[13px] text-tx-cream/45">
             {filtered.length} / {events.length}
           </span>
         </div>
@@ -783,7 +692,7 @@ function TelemetryTab({
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`rounded-md px-2.5 py-1 text-[11px] font-medium capitalize transition-colors ${
+              className={`rounded-md px-2.5 py-1 text-[13px] font-medium capitalize transition-colors ${
                 active
                   ? "bg-white/12 text-tx-cream"
                   : "text-tx-cream/45 hover:text-tx-cream"
@@ -796,7 +705,7 @@ function TelemetryTab({
         </div>
         {selectedDagNode && (
           <div className="mt-3 flex items-center justify-between gap-3 rounded-md border border-tx-gold/35 bg-tx-gold/10 px-3 py-2">
-            <p className="min-w-0 text-[11px] leading-snug text-tx-cream/80">
+            <p className="min-w-0 text-[13px] leading-snug text-tx-cream/80">
               <span className="font-mono uppercase tracking-[0.12em] text-tx-gold">
                 From DAG
               </span>{" "}
@@ -808,7 +717,7 @@ function TelemetryTab({
             <button
               type="button"
               onClick={onClearSelection}
-              className="shrink-0 font-mono text-[10px] uppercase tracking-[0.12em] text-tx-cream/45 transition-colors hover:text-tx-cream"
+              className="shrink-0 font-mono text-[13px] uppercase tracking-[0.12em] text-tx-cream/45 transition-colors hover:text-tx-cream"
             >
               Clear
             </button>
@@ -817,7 +726,7 @@ function TelemetryTab({
       </div>
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 leading-relaxed">
         {filtered.length === 0 ? (
-          <p className="py-8 text-center text-[12px] text-tx-cream/45">No events yet.</p>
+          <p className="py-8 text-center text-[13px] text-tx-cream/45">No events yet.</p>
         ) : (
           <ol className="space-y-3">
             {filtered.map((e, i) => {
@@ -834,12 +743,12 @@ function TelemetryTab({
               >
                 <div className="flex items-baseline justify-between gap-3">
                   <span
-                    className="text-[10px] font-semibold uppercase tracking-[0.16em]"
+                    className="text-[13px] font-semibold uppercase tracking-[0.16em]"
                     style={{ color: levelColor(e.level) }}
                   >
                     {e.phase.replace(/_/g, " ")}
                   </span>
-                  <span className="font-mono text-[10px] tabular-nums text-tx-cream/45">
+                  <span className="font-mono text-[13px] tabular-nums text-tx-cream/45">
                     {fmtClock(e.ts, start)}
                   </span>
                 </div>
@@ -848,10 +757,10 @@ function TelemetryTab({
                 </p>
                 {e.detail && (
                   <details className="mt-2 group">
-                    <summary className="cursor-pointer font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-tx-cream/45 transition-colors hover:text-tx-cream">
+                    <summary className="cursor-pointer font-mono text-[13px] font-semibold uppercase tracking-[0.14em] text-tx-cream/45 transition-colors hover:text-tx-cream">
                       Details
                     </summary>
-                    <pre className="mt-2 max-h-32 overflow-x-auto whitespace-pre-wrap break-words rounded bg-black/35 px-2.5 py-2 font-mono text-[10.5px] leading-relaxed text-tx-cream/70">
+                    <pre className="mt-2 max-h-32 overflow-x-auto whitespace-pre-wrap break-words rounded bg-black/35 px-2.5 py-2 font-mono text-[11.5px] leading-relaxed text-tx-cream/70">
                       {e.detail}
                     </pre>
                   </details>

@@ -69,14 +69,6 @@ const TONE_COLOR: Record<Person["tone"], string> = {
   purple: "var(--ds-purple)",
 };
 
-const PROJECT_FACTS = [
-  { label: "Coverage", value: "Texas public data" },
-  { label: "Interface", value: "Plain-English lookups" },
-  { label: "Output", value: "Cited answers" },
-  { label: "License", value: "MIT" },
-  { label: "Repo", value: "github.com/ATX-TXLookup/TXLookup" },
-];
-
 export default async function AboutPage() {
   const discovery = await loadDiscovery();
   return (
@@ -94,42 +86,38 @@ export default async function AboutPage() {
             TXLookup is an open-source civic data agent for Texas. Ask a question in plain English; it finds the dataset, runs the query, checks the result, and cites the public source.
           </p>
 
-          <div className="mt-8 grid gap-x-8 gap-y-3 font-mono text-[11px] uppercase tracking-[0.12em] md:grid-cols-3">
-            {PROJECT_FACTS.map((f) => (
-              <div key={f.label} className="flex items-baseline gap-2">
-                <span className="text-[var(--ds-text-dim)]">{f.label}</span>
-                <span className="text-[var(--ds-text)]">{f.value}</span>
-              </div>
-            ))}
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <Link
+              href="/q"
+              className="inline-flex items-center rounded-md bg-[var(--ds-inverse-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--ds-inverse-text)] hover:opacity-90"
+            >
+              Browse lookups →
+            </Link>
+            <a
+              href="https://github.com/ATX-TXLookup/TXLookup"
+              className="inline-flex items-center rounded-md border border-[var(--ds-border-strong)] px-4 py-2 text-[13px] font-semibold text-[var(--ds-text)] hover:border-[var(--ds-accent)]"
+            >
+              GitHub ↗
+            </a>
           </div>
         </div>
       </section>
 
       {/* PRODUCT */}
       <section className="border-b border-[var(--ds-border)]">
-        <div className="mx-auto grid max-w-[1200px] gap-10 px-6 py-14 md:grid-cols-[0.9fr_1.1fr] md:px-8 md:py-16">
-          <div>
+        <div className="mx-auto max-w-[1200px] px-6 py-14 md:px-8 md:py-16">
+          <div className="max-w-[760px]">
             <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-purple)]">
-              How it works
+              What we built
             </p>
-            <h2 className="mt-3 max-w-[28ch] text-[24px] font-semibold leading-[1.2] tracking-[-0.01em] text-[var(--ds-text)] md:text-[30px]">
-              One question becomes a sourced result.
+            <h2 className="mt-3 max-w-[34ch] text-[24px] font-semibold leading-[1.2] tracking-[-0.01em] text-[var(--ds-text)] md:text-[30px]">
+              A traceable agent layer over Texas public data.
             </h2>
-          </div>
-          <div className="grid gap-3">
-            {[
-              ["Find", "Ranks relevant Texas and city datasets from the catalog."],
-              ["Query", "Builds and runs a bounded API query against the public source."],
-              ["Check", "Reviews the result and attaches citations before showing the answer."],
-              ["Share", "Creates follow-up questions or a Miro board when the result needs to travel."],
-            ].map(([label, body]) => (
-              <div key={label} className="rounded-md border border-[var(--ds-border)] bg-[var(--ds-bg-elev)] p-4">
-                <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-[var(--ds-warm)]">
-                  {label}
-                </p>
-                <p className="mt-1 text-[14px] leading-relaxed text-[var(--ds-text-mute)]">{body}</p>
-              </div>
-            ))}
+            <p className="mt-4 text-[16px] leading-relaxed text-[var(--ds-text-mute)]">
+              TXLookup lets an agent inspect public dataset structure, choose the relevant source,
+              build a bounded query, recover from failures, and publish an answer with citations.
+              The run trace stays visible so people can inspect how the answer was produced.
+            </p>
           </div>
         </div>
       </section>

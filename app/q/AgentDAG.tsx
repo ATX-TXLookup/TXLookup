@@ -565,11 +565,11 @@ export function AgentDAG({
                   stroke={ring}
                   strokeWidth={selected ? 2.6 : 1.5}
                 />
-                <text x={x} y={y - 2} textAnchor="middle" fontSize={9} fontFamily="JetBrains Mono, monospace" fill={agentTone} fontWeight={500}>
+                <text x={x} y={y - 2} textAnchor="middle" fontSize={10} fontFamily="JetBrains Mono, monospace" fill={agentTone} fontWeight={500}>
                   {diamondLabel}
                 </text>
                 {n.sub && (
-                  <text x={x} y={y + 8} textAnchor="middle" fontSize={8} fontFamily="JetBrains Mono, monospace" fill="#D4D4D8">
+                  <text x={x} y={y + 8} textAnchor="middle" fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#D4D4D8">
                     {n.sub}
                   </text>
                 )}
@@ -595,7 +595,7 @@ export function AgentDAG({
                 <title>{`${n.label} — ${tip}`}</title>
                 <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={h / 2} fill={fill} stroke={ring} strokeWidth={selected ? 2.6 : 1.5} />
                 <circle cx={x - w / 2 + 11} cy={y} r={3} fill={agentTone} />
-                <text x={x - w / 2 + 18} y={y + 3.5} fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#F8FAFC" fontWeight={500}>
+                <text x={x - w / 2 + 18} y={y + 3.5} fontSize={10} fontFamily="JetBrains Mono, monospace" fill="#F8FAFC" fontWeight={500}>
                   {pillLabel}
                 </text>
                 {/* (i) icon — top-right of the pill */}
@@ -624,10 +624,10 @@ export function AgentDAG({
               <title>{`${n.label} — ${tip}`}</title>
               <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={6} fill={fill} stroke={ring} strokeWidth={selected ? 2.6 : 1.5} />
               <rect x={x - w / 2} y={y - h / 2} width={3} height={h} fill={agentTone} rx={1.5} />
-              <text x={x - w / 2 + 9} y={y - 3} fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#F8FAFC" fontWeight={500}>
+              <text x={x - w / 2 + 9} y={y - 3} fontSize={10} fontFamily="JetBrains Mono, monospace" fill="#F8FAFC" fontWeight={500}>
                 {labelDisplay}
               </text>
-              <text x={x - w / 2 + 9} y={y + 7.5} fontSize={8} fontFamily="JetBrains Mono, monospace" fill="#CBD5E1">
+              <text x={x - w / 2 + 9} y={y + 8} fontSize={9} fontFamily="JetBrains Mono, monospace" fill="#CBD5E1">
                 {subDisplayClipped}
               </text>
               {/* (i) icon — bottom-right corner. Don't overlap the source pill which is top-right. */}

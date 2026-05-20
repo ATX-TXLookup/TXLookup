@@ -14,15 +14,15 @@
 // hover tooltips only.
 
 const C = {
-  bg: "#15171C",
-  border: "#23262E",
-  text: "#F5F5F7",
-  textMute: "#A1A1AA",
-  textDim: "#71717A",
-  accent: "#5B8DEF",
-  good: "#10B981",
-  warm: "#F97316",
-  purple: "#A855F7",
+  bg: "var(--ds-bg-elev)",
+  border: "var(--ds-border-strong)",
+  text: "var(--ds-text)",
+  textMute: "var(--ds-text-mute)",
+  textDim: "var(--ds-text-dim)",
+  accent: "var(--ds-accent)",
+  good: "var(--ds-good)",
+  warm: "var(--ds-warm)",
+  purple: "var(--ds-purple)",
 };
 
 // Austin metro zip centroids → viewBox 0..720 × 0..540.
