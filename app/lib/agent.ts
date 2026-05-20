@@ -671,9 +671,9 @@ export async function executeStep(
             viewLink =
               board.viewLink ?? `https://miro.com/app/board/${boardId}/`;
           }
-          const FRAME_W = 1200;
-          const FRAME_H = 1900;
-          const FRAME_GAP = 420;
+          const FRAME_W = 1900;
+          const FRAME_H = 1200;
+          const FRAME_GAP = 360;
 
           async function nextFrameY(): Promise<number> {
             if (!existingBoardId || !boardId) return 0;
@@ -875,16 +875,16 @@ export async function executeStep(
           // The add* helpers translate to board coords by adding frameY.
           const work: Array<Promise<void>> = [];
 
-          // ── ROW 0 — title sticky (yellow, full width) ──────────────────
-          work.push(addSticky(title, "yellow", 0, -1300, 720));
+          // ── ROW 0 — title sticky (landscape, full width) ───────────────
+          work.push(addSticky(title, "yellow", 0, -500, 920));
 
           // ── ROW 1 — multi-agent topology (mirrors /q DAG tab) ──────────
           work.push(
             addSticky(
               "Multi-agent topology",
               "gray",
-              -700,
-              -1100,
+              -820,
+              -345,
               260,
             ),
           );
@@ -895,8 +895,8 @@ export async function executeStep(
             { label: "Critic", fill: "#ffe4e6", border: "#e11d48" },
             { label: "Support", fill: "#fef3c7", border: "#d97706" },
           ];
-          const topoSpacing = 280;
-          const topoY = -950;
+          const topoSpacing = 300;
+          const topoY = -330;
           topology.forEach((node, i) => {
             const x = -((topology.length - 1) * topoSpacing) / 2 + i * topoSpacing;
             work.push(
@@ -934,14 +934,14 @@ export async function executeStep(
               addSticky(
                 "Plan execution — this query",
                 "gray",
-                -700,
-                -750,
+                -820,
+                -145,
                 340,
               ),
             );
             const steps = priorSteps.slice(0, 8);
-            const stepSpacing = Math.min(280, 1400 / Math.max(steps.length, 1));
-            const stepY = -600;
+            const stepSpacing = Math.min(240, 1550 / Math.max(steps.length, 1));
+            const stepY = 15;
             steps.forEach((s, i) => {
               const x =
                 -((steps.length - 1) * stepSpacing) / 2 + i * stepSpacing;
@@ -981,21 +981,21 @@ export async function executeStep(
             });
           }
 
-          // ── ROW 3 — answer summary ────────────────────────────────────
+          // ── ROW 3 — answer summary, left column ───────────────────────
           if (summary) {
             work.push(
               addSticky(
                 "Answer",
                 "gray",
-                -700,
-                -380,
+                -820,
+                240,
                 160,
               ),
             );
-            work.push(addSticky(summary, "light_yellow", 0, -230, 720));
+            work.push(addSticky(summary, "light_yellow", -420, 285, 560));
           }
 
-          // ── ROW 4 — horizontal bar chart of records ───────────────────
+          // ── ROW 4 — horizontal bar chart of records, right column ──────
           // Prefer the planner's explicit records arg; fall back to the most
           // recent successful data step's rows so the chart still fills when
           // the planner forgets the arg.
@@ -1010,8 +1010,8 @@ export async function executeStep(
                   ? "By the numbers"
                   : "By the numbers (auto-derived from last data step)",
                 "gray",
-                -700,
-                40,
+                130,
+                190,
                 340,
               ),
             );
@@ -1035,8 +1035,8 @@ export async function executeStep(
               Number(numericKey ? r[numericKey] : 0) || 0,
             );
             const maxVal = Math.max(...values, 1);
-            const maxBarPx = 700;
-            const rowH = 60;
+            const maxBarPx = 520;
+            const rowH = 50;
             const palette = [
               "#3b82f6",
               "#16a34a",
@@ -1046,7 +1046,7 @@ export async function executeStep(
             ];
 
             records.forEach((rec, i) => {
-              const y = 180 + i * rowH;
+              const y = 300 + i * rowH;
               const labelText = String(rec[labelKey] ?? `Row ${i + 1}`);
               const valNum = Number(numericKey ? rec[numericKey] : 0) || 0;
               const barPx = Math.max(40, Math.round((valNum / maxVal) * maxBarPx));
@@ -1059,9 +1059,9 @@ export async function executeStep(
                     numericKey ? `\n${valNum.toLocaleString()}` : ""
                   }`,
                   "light_blue",
-                  -640,
+                  160,
                   y,
-                  180,
+                  160,
                 ),
               );
               // Bar shape on the right — width proportional to value.
@@ -1069,10 +1069,10 @@ export async function executeStep(
                 addShape(
                   "rectangle",
                   numericKey ? valNum.toLocaleString() : "",
-                  -440 + barPx / 2,
+                  300 + barPx / 2,
                   y,
                   barPx,
-                  44,
+                  36,
                   color,
                   color,
                   "#ffffff",
@@ -1082,7 +1082,7 @@ export async function executeStep(
           }
 
           // ── Attribution card ──────────────────────────────────────────
-          const citationY = 180 + records.length * 60 + 120;
+          const citationY = Math.min(540, 300 + records.length * 50 + 80);
           work.push(
             addCard(
               "Generated by TXLookup",
