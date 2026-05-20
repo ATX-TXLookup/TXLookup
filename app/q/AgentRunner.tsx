@@ -683,6 +683,7 @@ export function AgentRunner({
 
   // Miro view link — surfaces only when render_to_miro produced an artifact.
   const miroLink = state.artifacts.find((a) => a.includes("miro.com")) ?? null;
+  const miroEmbedLink = miroLink ? buildMiroEmbedUrl(miroLink) : null;
 
   // PR #68 / issue #67 — multi-agent surfaces. Pull the reporter composition
   // out of the latest reporter step so the answer card can render the
@@ -983,7 +984,7 @@ export function AgentRunner({
             ReporterComposition render inline above where applicable. */}
 
         {/* Live Miro board — only when render_to_miro produced a board link. */}
-        {state.phase === "done" && miroLink && (
+        {state.phase === "done" && miroLink && miroEmbedLink && (
           <section className="border-b border-[var(--ds-border)] bg-[var(--ds-bg-elev)]">
             <div className="min-w-0 px-5 py-6 md:px-8 md:py-8">
               <div className="flex items-baseline justify-between gap-3">
@@ -1001,7 +1002,7 @@ export function AgentRunner({
               </div>
               <div className="mt-3 w-full max-w-full overflow-hidden rounded-md border border-[var(--ds-border-strong)] bg-[var(--ds-bg-elev)]">
                 <iframe
-                  src={miroLink.replace("/app/board/", "/app/live-embed/") + (miroLink.includes("?") ? "&" : "?") + "embedMode=view_only_without_ui&moveToViewport=&embedId=txlookup-q"}
+                  src={miroEmbedLink}
                   title="TXLookup Miro board"
                   loading="lazy"
                   allow="fullscreen; clipboard-read; clipboard-write"
@@ -1210,6 +1211,24 @@ function isReporterResult(v: unknown): v is ReporterResult {
     v !== null &&
     (v as { agent?: unknown }).agent === "reporter"
   );
+}
+
+function buildMiroEmbedUrl(link: string): string {
+  try {
+    const url = new URL(link);
+    url.pathname = url.pathname.replace("/app/board/", "/app/live-embed/");
+    url.searchParams.set("embedMode", "view_only_without_ui");
+    url.searchParams.set("embedId", "txlookup-q");
+    // Do not add an empty moveToViewport param: it overrides moveToWidget
+    // and makes shared boards open zoomed way out around the full board.
+    return url.toString();
+  } catch {
+    const [base, query = ""] = link.split("?");
+    const params = new URLSearchParams(query);
+    params.set("embedMode", "view_only_without_ui");
+    params.set("embedId", "txlookup-q");
+    return `${base.replace("/app/board/", "/app/live-embed/")}?${params.toString()}`;
+  }
 }
 
 // Insight badge / meta-chip — dark-system version (elev bg, warn accent).
