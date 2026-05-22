@@ -1058,6 +1058,7 @@ function hasInternalCronAuth(req: NextRequest): boolean {
 export async function POST(req: NextRequest): Promise<Response> {
   const body = (await req.clone().json().catch(() => ({}))) as {
     query?: string;
+    demo?: boolean;
     fallback?: boolean;
   };
   const url = new URL(req.url);
@@ -1085,6 +1086,15 @@ export async function POST(req: NextRequest): Promise<Response> {
       },
       { status: 404 },
     );
+  }
+
+  const query = (body.query ?? "").trim();
+  const demoMode =
+    body.demo === true ||
+    url.searchParams.get("demo") === "1" ||
+    req.headers.get("x-txlookup-demo") === "1";
+  if (demoMode && query && findFixture(query)) {
+    return handlePost(req);
   }
 
   const byok = req.cookies.get("txl_byok")?.value;
