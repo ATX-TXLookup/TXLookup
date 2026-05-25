@@ -10,7 +10,7 @@ name: Run top-pending query (hourly)
 
 on:
   schedule:
-    - cron: "0 * * * *"        # every hour, on the hour
+    - cron: "0 */4 * * *"      # every 4 hours, on the hour (was hourly — cut to reduce Actions noise)
   workflow_dispatch:           # allow manual trigger
 
 permissions:
