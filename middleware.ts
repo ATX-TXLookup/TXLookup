@@ -21,10 +21,22 @@ import { NextRequest, NextResponse } from "next/server";
 const REALM = 'Basic realm="TXLookup", charset="UTF-8"';
 
 export function middleware(req: NextRequest) {
-  const expected = process.env.TXLOOKUP_BASIC_AUTH;
-  if (!expected) return NextResponse.next();
-
   const { pathname } = req.nextUrl;
+  const accept = req.headers.get("accept") || "";
+
+  // Markdown for Agents: serve clean Markdown on public home when Accept: text/markdown is sent.
+  const expected = process.env.TXLOOKUP_BASIC_AUTH;
+  if (!expected) {
+    if (pathname === "/" && /text\/markdown/i.test(accept)) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/ai/index.md";
+      const res = NextResponse.rewrite(url);
+      res.headers.set("Vary", "Accept");
+      return res;
+    }
+    return NextResponse.next();
+  }
+
   const isAdminApi = pathname.startsWith("/api/admin/") || pathname === "/api/admin";
   if (
     !isAdminApi &&
@@ -32,7 +44,9 @@ export function middleware(req: NextRequest) {
       pathname.startsWith("/_next/") ||
       pathname === "/favicon.ico" ||
       pathname === "/robots.txt" ||
-      pathname === "/sitemap.xml")
+      pathname === "/sitemap.xml" ||
+      pathname === "/llms.txt" ||
+      pathname === "/.well-known/api-catalog")
   ) {
     return NextResponse.next();
   }

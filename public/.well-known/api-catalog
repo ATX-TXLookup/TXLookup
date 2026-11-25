@@ -1,0 +1,19 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://txlookup.xyz/",
+      "describedby": [
+        {
+          "href": "https://txlookup.xyz/llms.txt",
+          "type": "text/markdown"
+        }
+      ],
+      "item": [
+        {
+          "href": "https://txlookup.xyz/ai/index.md",
+          "type": "text/markdown"
+        }
+      ]
+    }
+  ]
+}
