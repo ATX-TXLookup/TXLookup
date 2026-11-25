@@ -1,0 +1,16 @@
+# TXLookup
+
+> Ask Texas anything. Public civic intelligence over Texas and Austin public datasets with sourced, cited answers. Built by AISOFT.
+
+## Public Pages
+- [Home](https://txlookup.xyz/): Ask questions across Texas public datasets.
+- [Datasets](https://txlookup.xyz/datasets): Indexed public data sources and freshness.
+- [Reports](https://txlookup.xyz/reports): Curated public civic reports.
+
+## Markdown for AI Agents
+Request `/` with `Accept: text/markdown` or fetch `/ai/index.md` directly.
+
+## APIs & Privacy
+- Public read endpoints live under `/api/*` (excluding `/api/admin/*`).
+- Admin routes (`/admin`, `/api/admin`) are private and disallowed for crawlers.
+- Contact: hello@aisoft.us
